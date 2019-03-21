@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="app/assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="app/assets/css/app.min.css">
+<title>{app}</title>
+<noscript><meta http-equiv="refresh" content="5" id="preventHistoryBackStop"></noscript>
+</head>
+
+<body class="start">
+
+<div class="container">
+  <div class="vcontent-centered-outer">
+    <div class="vcontent-centered-inner">
+      <div class="loader">
+        <div id="loader-open" class="loader-open" style="visibility: hidden;">
+          <p class="lead">Apri l'ultimo salvataggio</p>
+          <input id="start-action-open-file" type="file" accept="application/x-javascript" style="display: none;" hidden>
+          <button id="start-action-open" class="btn btn-lg btn-big btn-info start-action-open" data-open-input="#start-action-open-file">Apri</button>
+        </div>
+        <div id="loader-wait" class="loader-wait" style="visibility: visible;">
+          <p class="lead">caricamento . . .</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript" src="app/assets/js/file-saver/FileSaver.min.js"></script>
+<script type="text/javascript" src="app/assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="app/config.js"></script>
+
+
+<script type="text/javascript">
+var start = {};
+
+start.loader = function(phase) {
+  var lw = document.getElementById('loader-wait');
+  var lo = document.getElementById('loader-open');
+
+  switch (phase) {
+    case 2:
+      lo.setAttribute('style', 'visibility: visible;');
+      lw.setAttribute('style', 'visibility: visible;');
+    break;
+    case 1:
+      lo.setAttribute('style', 'visibility: visible;');
+      lw.setAttribute('style', 'visibility: hidden;');
+    break;
+    default:
+      lw.setAttribute('style', 'visibility: visible;');
+      lo.setAttribute('style', 'visibility: hidden;');
+  }
+}
+
+start.loadAttempt = function(callback, fn, file, schema, memo) {
+  if (! callback || ! fn || ! file || ! schema) {
+    return app.error(null, [ 'index', 'start.loadAttemp' ]);
+  }
+
+  if (typeof callback !== 'function' || typeof fn !== 'string' || typeof file !== 'string' || typeof schema !== 'object') {
+    return app.error(null, [ 'index', 'start.loadAttemp' ]);
+  }
+
+  var loaded = false;
+  var max_attempts = config.openAttempts;
+
+  app.os.scriptOpen(function() {
+    if (! window[fn]) {
+      //return app.error(null, [ 'index', 'start.loadAttemp' ]);
+    }
+
+    for (var i = 0; i < schema.length; i++) {
+      if (! memo) {
+        loaded = true;
+        continue;
+      }
+
+      if (schema[i] in window[fn] === false) {
+        return app.error(null, [ 'index', 'start.loadAttemp' ]);
+      }
+
+      loaded = app.store.set(fn + '_' + schema[i], window[fn][schema[i]]);
+    }
+
+    callback(loaded);
+  }, file, fn, max_attempts);
+}
+
+start.openFile = function() {
+  var _open = function() {
+    document.cookie = 'last_opened_file=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    //app.store.reset(); //TODO FIX
+    //app.memory.reset(); //TODO FIX
+
+    app.os.fileOpen.call(this, config, _complete);
+  }
+
+  var _complete = function(filename) {
+    start.loader(0);
+
+    if (filename) {
+      var _filename = window.btoa(filename.replace('.js', ''));
+
+      document.cookie = 'last_opened_file=' + _filename + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+      app.store.set('last_opened_file', _filename);
+      app.memory.set('last_opened_file', _filename);
+
+      app.memory.set('last_opened_time', new Date().toISOString());
+
+      start.redirection();
+    }
+  }
+
+  var open_input = null;
+  var open_input__std = this.getAttribute('data-open');
+
+  if (! open_input__std) {
+    this.setAttribute('data-open', '');
+
+    var open_input_ref = this.getAttribute('data-open-input');
+    var open_input = this.parentNode.querySelector(open_input_ref);
+
+    app.utils.addEvent('change', open_input, _open);
+  }
+
+  if (open_input) {
+    start.loader(2);
+    open_input.click();
+  }
+}
+
+start.loadComplete = function(session_resume) {
+  if (! session_resume) {
+    return start.loader(1);
+  }
+
+  session_resume = config.savePath + '/' + session_resume; 
+
+  start.loadAttempt(function(loaded) {
+    if (loaded) {
+      start.redirection();
+    } else {
+      start.loader(1);
+    }
+  }, config.app, session_resume, config.schema);
+
+  start.loader(1);
+}
+
+start.redirection = function() {
+  var _wait = function() {
+    start.loader(false);
+    app.redirection(config);
+    this.clearTimeout();
+  }
+
+  setTimeout(_wait, 1000);
+}
+
+start.alternative = function() {
+  var alt_electron = [
+    'Purtroppo non è possibile eseguire l\'applicazione per via di restrizioni nel programma {browser}.',
+    'VAI NELLA CARTELLA "{electron_exec_folder}" E APRI "{electron_exec_platform}" OPPURE ',
+    'SCARICA E INSTALLA CHROME / CHROMIUM.'
+  ];
+
+  var system = app.utils.system();
+  var navigators = {
+    'chrome': 'Chrome',
+    'safari': 'Safari',
+    'firefox': 'Firefox',
+    'edge': 'Edge',
+    'ie': 'Explorer',
+    'iemobile': 'Explorer'
+  };
+
+  var browser = navigators[system.navigator];
+  var exec_platform = (system.platform in config.altElectronExecPlatform ? system.platform : null);
+
+  if (exec_platform && config.altElectronExecFolder && config.altElectronExecFolder) {
+    var electron_exec_folder = config.altElectronExecFolder;
+    var electron_exec_platform = config.altElectronExecPlatform[exec_platform];
+
+    alt_electron = alt_electron[0] + '\n\n' + alt_electron[1] + alt_electron[2];
+    alt_electron = alt_electron.replace('{electron_exec_folder}', electron_exec_folder).replace('{electron_exec_platform}', electron_exec_platform);
+  } else {
+    alt_electron = alt_electron[0] + '\n\n' + alt_electron[2];
+  }
+
+  alt_electron = alt_electron.replace('{browser}', browser);
+
+  start.loader(1);
+  return app.error(alt_electron);
+}
+
+
+app.load(function() {
+  var exec = true;
+
+  if (
+    'history' in window === false ||
+    'atob' in window === false ||
+    'btoa' in window === false
+  ) {
+    exec = false;
+  }
+
+  if (
+    window.sessionStorage === undefined ||
+    'replaceState' in window.history === false ||
+    'checkValidity' in document.createElement('form') === false
+  ) {
+    exec = false;
+  }
+
+  if (! exec) {
+    start.alternative();
+    setTimeout(function() {
+      app.stop();
+      this.clearTimeout();
+    }, 0);
+    return;
+  }
+
+  var session_resume = app.resume(config, true);
+
+  var title = config.title;
+  app.controller.setTitle(title);
+
+  var open_action = document.querySelector('#start-action-open');
+  app.utils.addEvent('click', open_action, start.openFile);
+
+  var auxs_loaded = true;
+
+  for (var i = 0; i < config.auxs.length; i++) {
+    start.loadAttempt(function(aux_loaded) {
+      if (! aux_loaded) {
+        auxs_loaded = false;
+      }
+    }, config.auxs[i].fn, config.auxs[i].file, config.auxs[i].schema, config.auxs[i].memo);
+  }
+
+  if (auxs_loaded) {
+    start.loadComplete(session_resume);
+  } else {
+    return app.error(null, [ 'index' ]);
+  }
+});
+</script>
+</body>
+</html>

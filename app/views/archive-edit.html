@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="../assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
+</head>
+
+<body class="view view_edit">
+<h1 id="view-title" class="page-header">Archive</h1>
+<h2 id="section-title" class="sub-header">{section}</h2>
+
+
+<div id="section-actions-top" class="section-actions section-actions-top">
+  <div>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?archive" target="_parent">&laquo; torna indietro</a>
+  </div>
+</div>
+
+<form id="form-data" class="form form-data" autocomplete="off" validate>
+<fieldset>
+<legend>Entry</legend>
+
+<div class="row">
+<div class="form-group col-12 col-lg-6">
+  <label for="archive_title">Title</label>
+  <input type="text" id="archive_title" name="title" class="form-control" required>
+</div>
+</div>
+</fieldset>
+
+
+<fieldset>
+<legend>Select items</legend>
+
+<div class="table-responsive">
+<table id="table-data" class="table table-auto table-drag table-data">
+  <tbody>
+    <tr class="tpl" draggable="true">
+      <td>{name}</td>
+      <td class="text-right"><button type="button" class="btn btn-danger btn-sm" onclick="control.sub(this, 'remove')">Remove</button></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"><span class="help-block">Puoi spostare items per ordinarli, clicca su uno di essi e trascinalo per cambiare ordine.</span></td>
+    </tr>
+    <tr>
+      <td>
+        <select id="items" class="form-control"></select>
+      </td>
+      <td class="text-right"><button type="button" class="btn btn-secondary btn-sm" onclick="control.sub(this, 'add')">Add</button></td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+<input type="hidden" id="archive_items" name="items" data-transform="json" data-sanitize="array" required>
+</fieldset>
+
+
+<fieldset>
+<legend>Custom fields example</legend>
+
+<div class="row">
+<div class="form-group col-12 col-lg-4">
+  <label for="archive_custom_1">Custom field 1</label>
+  <input type="text" id="archive_custom_1" name="custom_1" class="form-control" required>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="form-group col-12 col-lg-4">
+  <label for="archive_custom_2">Custom field 2</label>
+  <input type="text" id="archive_custom_2" name="custom_2" class="form-control" required>
+</div>
+</div>
+
+<span class="help-block">Custom description text example.</span>
+</fieldset>
+
+
+<fieldset>
+<div class="form-group">
+  <div class="checkbox">
+    <label for="archive_status"><input type="checkbox" id="archive_status" name="status"> opened</label>
+  </div>
+</div>
+</fieldset>
+
+
+<fieldset class="form-submit">
+  <input type="hidden" name="graduatoria_tmp" value="0" data-transform="integer">
+  <input type="hidden" name="assegnazioni_tmp" value="0" data-transform="integer">
+
+  <input type="hidden" id="index" name="id" value="{id}" data-transform="integer">
+  <input type="submit" id="real-submit" hidden class="hide">
+  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, '{event}')">Update Archive</button>
+</fieldset>
+</form>
+
+
+<script type="text/javascript" src="../assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="../config.js"></script>
+
+
+<script type="text/javascript">
+var control = {};
+
+control.openView = function() {
+  var archive_id = app.memory.get('archive_id'), category_id = app.memory.get('category_id');
+  var data_items = window.store[config.app]['items'];
+  var data_archive = window.store[config.app]['archive'];
+
+  if (! data_items || ! data_archive) {
+    return app.error(null, [ 'archive-edit', 'control.openView' ]);
+  }
+
+  var view = 'archive';
+  var event = null;
+  var id = 0;
+
+  var routes = config.routes;
+  var actions = {};
+
+  Array.prototype.forEach.call(Object.keys(config.events), function(event) {
+    actions[config.events[event]] = event;
+  });
+
+  var loc = app.view.spoof();
+
+  var default_event = config.defaultEvent;  
+  var pass = true;
+
+  if (loc && typeof loc === 'object') {
+    if (loc.action) {
+      if (routes[view][loc.action]) {
+        event = actions[loc.action];
+      } else {
+        pass = false;
+      }
+
+      if (loc.index) {
+        id = parseInt(loc.index);
+      }
+    } else {
+      event = default_event;
+    }
+  } else {
+    pass = false;
+  }
+
+  if (! pass) {
+    return app.error();
+  }
+
+  var view_title = document.getElementById('view-title');
+  var section_title = document.getElementById('section-title');
+
+  var form = document.getElementById('form-data');
+  var action_handler = document.getElementById('submit');
+  var action_index = document.getElementById('index');
+
+  if (event === 'add') {
+    var last_id = Object.keys(data_archive).pop();
+    id = last_id ? (parseInt(last_id) + 1) : 1;
+  }
+
+  var action_handler_event = action_handler.getAttribute('onclick');
+  action_handler_event = action_handler_event.replace('{event}', event);
+  action_handler.setAttribute('onclick', action_handler_event);
+  action_index.setAttribute('value', id);
+
+  if (! id) {
+    return app.error(null, [ 'archive-edit', 'control.openView', 1 ]);
+  }
+
+  control.temp = {};
+  control.temp.archive_id = id;
+  control.temp.category_id = category_id;
+
+  if (event === 'edit') {
+    section_title.innerHTML = 'Edit Archive "' + data_archive[id][category_id].title + '"';
+
+    action_handler.innerHTML = 'Update Archive';
+
+    var items = {};
+
+    Array.prototype.forEach.call(Object.keys(data_archive[id][category_id].items), function(_id) {
+      items[_id] = data_items[_id];
+    });
+
+    control.fillForm([ data_archive[id][category_id], items ]);
+  }
+
+  if (event === 'add') {
+    section_title.innerHTML = 'Add New Archive';
+
+    action_handler.innerHTML = 'Add Archive';
+
+    var items = [];
+
+    Array.prototype.forEach.call(Object.keys(data_items), function(_id) {
+      if (! data_items[_id].status) {
+        return;
+      }
+      items[_id] = data_items[_id];
+    });
+
+    control.sub(items, 'fill');
+  }
+
+  var select_items = document.getElementById('items');
+  select_items.innerHTML = app.view.renderSelect('items', items);
+
+  app.view.resizeView(false);
+
+  control.temp.form_submit = false;
+  control.temp.form_elements = form.elements;
+  control.temp.form_changes = JSON.stringify(app.utils.getFormData(control.temp.form_elements));
+}
+
+control.fillForm = function(obj) {
+  if (! obj || ! control.temp) {
+    return app.error(null, [ 'archive-edit', 'control.fillForm' ]);
+  }
+
+  var tbody = document.querySelector('#table-data > tbody');
+  var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
+  trow_tpl.classList.remove('tpl');
+
+  var src_el = null;
+  var next_index = null;
+
+  var _dragStart = function(e) {
+    src_el = this;
+    next_index = this.getAttribute('data-index');
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+
+    this.classList.add('move');
+  }
+
+  var _dragOver = function(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+
+  var _dragEnter = function(e) {
+    this.classList.add('over');
+  }
+
+  var _dragLeave = function(e) {
+    this.classList.remove('over');
+  }
+
+  var _dragEnd = function(e) {
+    var trows = tbody.querySelectorAll('tr.draggable');
+
+    var items = [];
+
+    Array.prototype.forEach.call(trows, function (trow) {
+      items.push(trow.getAttribute('data-index'))
+      trow.classList.remove('move');
+      trow.classList.remove('over');
+    });
+
+    try {
+      items = JSON.stringify(items);
+      items = encodeURIComponent(items);
+
+      document.getElementById('archive_items').setAttribute('value', items);
+    } catch (err) {
+      return app.error(null, [ 'archive-edit', 'control.sub' ], err);
+    }
+  }
+
+  var _drop = function(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+
+    if (src_el != this) {
+      control.temp.moved = true;
+
+      var prev_index = this.getAttribute('data-index');
+      src_el.innerHTML = this.innerHTML;
+      src_el.setAttribute('data-index', prev_index);
+
+      this.setAttribute('data-index', next_index);
+      this.innerHTML = e.dataTransfer.getData('text/html');
+      this.querySelector('meta').remove();
+    } else {
+      next_index = null;
+    }
+
+    return false;
+  }
+
+  Array.prototype.forEach.call(Object.keys(obj[1]), function(id) {
+    var index = parseInt(id);
+    var value = obj[1][index];
+    var row = control.renderRow(trow_tpl, [ value, index ]);
+
+    row.classList.add('draggable');
+
+    app.utils.addEvent('dragstart', row, _dragStart);
+    app.utils.addEvent('dragenter', row, _dragEnter);
+    app.utils.addEvent('dragover', row, _dragOver);
+    app.utils.addEvent('dragleave', row, _dragLeave);
+    app.utils.addEvent('dragend', row, _dragEnd);
+    app.utils.addEvent('drop', row, _drop);
+
+    tbody.appendChild(row);
+  });
+
+  var items = obj[0].items || {};
+  items = Object.keys(items);
+  items = JSON.stringify(items);
+  document.getElementById('archive_items').setAttribute('value', encodeURIComponent(items));
+
+
+  /*document.getElementById('archive_titolo').setAttribute('value', obj[0].titolo);
+  document.getElementById('archive_distretto').setAttribute('value', obj[0].distretto);
+  document.getElementById('archive_comune').setAttribute('value', obj[0].comune);
+  document.getElementById('archive_anno').setAttribute('value', obj[0].anno);
+
+
+  var status = obj[0].status ? true : false;
+
+  if (status) {
+    document.getElementById('archive_status').setAttribute('checked', '');
+  }*/
+}
+
+control.renderRow = function(tpl, obj) {
+  if (! obj || ! control.temp) {
+    return app.error(null, [ 'archive-edit', 'control.renderRow' ]);
+  }
+
+  var row = tpl.cloneNode(true);
+
+  row.setAttribute('data-index', obj[1]);
+
+  var name = '';
+  var td = row.querySelectorAll('td');
+
+  if (typeof obj[0] === 'object') {
+    name = obj[0].name;
+  }
+
+  td[0].innerHTML = name;
+
+  return row;
+}
+
+control.sub = function(element, event) {
+  var data_items = window.store[config.app]['items'];
+
+  if (! event || ! data_items || ! control.temp) {
+    return app.error(null, [ 'archive-edit', 'control.sub' ]);
+  }
+
+  var step = false;
+  var items = document.getElementById('archive_items').getAttribute('value');
+
+  try {
+    items = decodeURIComponent(items);
+    items = JSON.parse(items);
+
+    if (! items) {
+      items = [];
+    }
+  } catch (err) {
+    return app.error(null, [ 'archive-edit', 'control.sub' ], err);
+  }
+
+  if (event === 'remove') {
+    var trow = element.parentNode.parentNode;
+    var nome_index = trow.getAttribute('data-index');
+    nome_index = parseInt(nome_index);
+
+    if (nome_index === undefined) {
+      return app.error(null, [ 'archive-edit', 'control.sub' ]);
+    }
+
+    delete items[nome_index];
+
+    trow.remove();
+
+    step = true;
+  }
+
+  if (event === 'add') {
+    var select_items = document.getElementById('items');
+    var nome_id = null;
+    var nome = null;
+
+    if (select_items.value in data_items) {
+      nome_id = select_items.value;
+    }
+
+    nome = data_items[nome_id];
+
+    if (! nome_id) {
+      return app.error(null, [ 'archive-edit', 'control.sub' ]);
+    }
+
+    if (nome_id in items) {
+      window.alert('Il itemsnativo risulta in lista.');
+      return;
+    }
+
+    items.push(nome_id);
+
+    var tbody = document.querySelector('#table-data > tbody');
+    var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
+    trow_tpl.classList.remove('tpl');
+
+    var last_index = Object.keys(items).pop();
+    last_index = parseInt(last_index) + 1;
+
+    var trow = control.renderRow(trow_tpl, [ nome, last_index ]);
+    tbody.innerHTML += trow.outerHTML;
+
+    step = true;
+  }
+
+  if (event === 'fill') {
+    if (typeof element !== 'object') {
+      return app.error(null, [ 'archive-edit', 'control.sub' ]);
+    }
+
+    items = Object.keys(element);
+
+    var tbody = document.querySelector('#table-data > tbody');
+    var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
+    trow_tpl.classList.remove('tpl');
+
+    var last_index = Object.keys(items).pop();
+    last_index = parseInt(last_index) + 1;
+
+    var blob = '';
+
+    Array.prototype.forEach.call(items, function(id) {
+      var name = data_items[id];
+      var trow = control.renderRow(trow_tpl, [ name, last_index ]);
+      blob += trow.outerHTML;
+    });
+
+    tbody.innerHTML += blob;
+
+    step = true;
+  }
+
+  if (step) {
+    if (event !== 'fill') {
+      app.view.resizeView(false);
+    }
+
+    try {
+      items = JSON.stringify(items);
+      items = encodeURIComponent(items);
+
+      document.getElementById('archive_items').setAttribute('value', items);
+    } catch (err) {
+      return app.error(null, [ 'archive-edit', 'control.sub' ], err);
+    }
+  }
+}
+
+control.action = function(element, event) {
+  var data_archive = window.store[config.app]['archive'];
+
+  if (! data_archive || ! control.temp) {
+    return app.error(null, [ 'archive-edit', 'control.action' ]);
+  }
+
+  if (! element || typeof event !== 'string') {
+    return app.error(null, [ 'archive-edit', 'control.action' ]);
+  }
+
+  var ctl = false;
+  var submitted_data = {};
+
+  var form = document.getElementById('form-data');
+  var action_submit = document.getElementById('real-submit');
+  var action_index = document.getElementById('index');
+  var id = action_index.getAttribute('value');
+  id = parseInt(id);
+
+  if (! form.checkValidity()) {
+    Array.prototype.forEach.call(form.elements, function(field) {
+      var closest_group = null;
+      if (field.parentNode.className.indexOf('form-group') != -1) {
+        closest_group = field.parentNode;
+      } else if (field.parentNode.parentNode.className.indexOf('form-group') != -1) {
+        closest_group = field.parentNode.parentNode;
+      }
+      if (closest_group && closest_group.classList) {
+        if (closest_group.querySelector(':invalid')) {
+          closest_group.classList.remove('has-success');
+          closest_group.classList.add('has-error');
+        } else {
+          closest_group.classList.remove('has-error');
+          closest_group.classList.add('has-success');
+        }
+      }
+    });
+    action_submit.click();
+    return false;
+  }
+
+  if (event === 'add' || event === 'edit') {
+    if (event === 'add') {
+      var last_id = Object.keys(data_archive).pop();
+      id = last_id ? (parseInt(last_id) + 1) : 1;
+    }
+
+    var category_id = control.temp.category_id;
+
+    submitted_data['archive'] = data_archive;
+
+    if (event === 'add' && ! submitted_data['archive'][id]) {
+      submitted_data['archive'][id] = {};
+      submitted_data['archive'][id][category_id] = {};
+      submitted_data['archive'][id][category_id].items = {};
+    }
+
+    var form_data = app.utils.getFormData(form.elements);
+    var items = submitted_data['archive'][id][category_id].items;
+    var ext_data_id = app.utils.extendObject(data_archive[id][category_id], form_data);
+
+    submitted_data['archive'][id][category_id] = ext_data_id;
+
+    Array.prototype.forEach.call(form_data.items, function(nome_id, i) {
+      if (nome_id in items) {
+        items[nome_id] = items[nome_id];
+      } else {
+        items[nome_id] = {};
+      }
+    });
+
+    submitted_data['archive'][id][category_id].items = items;
+
+    submitted_data = JSON.stringify(submitted_data);
+
+    if (submitted_data) {
+      ctl = { view: 'archive', action: event, index: id, submit: true, data: submitted_data };
+    }
+  }
+
+  if (ctl) {
+    control.temp.form_submit = true;
+    ctl = JSON.stringify(ctl);
+    window.parent.postMessage(ctl, '*');
+    return true;
+  }
+}
+
+
+window.store = {};
+
+app.load(app.view.load);
+app.unload(app.view.unload);
+app.utils.addEvent('resize', window, app.view.resizeView);
+app.utils.addEvent('orientationchange', window, app.view.resizeView);
+</script>
+</body>
+</html>

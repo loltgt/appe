@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="../assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
+</head>
+
+<body class="view">
+<h1 class="page-header">Sample</h1>
+<h2 class="sub-header">Vehicle List</h2>
+
+
+<div id="section-actions-top" class="section-actions section-actions-top clearfix">
+  <div class="pull-right">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')">Export <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;">Export CSV</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;">Copy to clipboard</a></li>
+      </ul>
+    </div>
+    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
+  </div>
+  <div class="clearfix"></div>
+  <div>
+    <a class="btn btn-gray" href="../index.html?sample&add" target="_parent">Add Item &raquo;</a>
+  </div>
+</div>
+
+<form id="form-data" class="form form-data" autocomplete="off" validate>
+<div class="table-responsive">
+  <table id="table-data" class="table table-data">
+    <thead>
+      <tr>
+        <th class="hidden-print">Actions</th>
+        <th>ID</th>
+        <th class="text-nowrap">Vehicle Name</th>
+        <th class="text-nowrap">Vehicle Type</th>
+        <th class="text-nowrap">Manufactured</th>
+        <th class="text-nowrap">Value Price</th>
+        <th>Buy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="tpl">
+        <td class="hidden-print">
+          <a class="action btn btn-secondary" href="../index.html?sample&edit={id}" onclick="control.action(this, 'edit'); return false;" target="_parent">Edit</a>
+          <a class="action btn btn-danger" href="../index.html?sample&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent">Delete</a>
+        </td>
+        <td>{id}</td>
+        <td>{name}</td>
+        <td>{type}</td>
+        <td class="text-nowrap">{date}</td>
+        <td class="text-nowrap">{amount}</td>
+        <td class="hidden-print">
+          <a class="action btn btn-link btn-sm" href="../index.html?sample" onclick="control.action(this, 'example'); return false;" target="_parent">BUY</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</form>
+
+
+<script type="text/javascript" src="../assets/js/app.min.js"></script>
+<script type="text/javascript" src="../assets/js/file-saver/FileSaver.min.js"></script>
+
+<script type="text/javascript" src="../config.js"></script>
+
+
+<script type="text/javascript">
+var control = {};
+
+control.openView = function() {
+  var data_sample = window.store[config.app]['sample'];
+
+  if (! data_sample) {
+    return app.error(null, [ 'sample', 'control.openView' ]);
+  }
+
+  var view_title = document.getElementById('view-title');
+  var section_title = document.getElementById('section-title');
+
+  var tbody = document.querySelector('#table-data > tbody');
+  var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
+  trow_tpl.classList.remove('tpl');
+
+  control.temp = {};
+
+  var blob = '';
+
+  Array.prototype.forEach.call(Object.keys(data_sample), function(id) {
+    var row = control.renderRow(trow_tpl, data_sample[id]);
+    blob += row.outerHTML;
+  });
+
+  tbody.innerHTML = blob;
+
+  app.view.resizeView(false);
+}
+
+control.renderRow = function(tpl, obj) {
+  if (! obj || ! control.temp) {
+    return app.error(null, [ 'sample', 'control.renderRow' ]);
+  }
+
+  var row = tpl.cloneNode(true);
+
+  row.setAttribute('data-index', obj.id);
+
+  var name = obj.vendor + ' ' + obj.name;
+  var date = obj.date;
+  date = new Date(date);
+  date = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '/' + (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '/' + date.getFullYear();
+  var amount = obj.amount;
+
+  row.innerHTML = row.innerHTML
+    .replace(/{id}/g, obj.id)
+    .replace('{name}', name)
+    .replace('{type}', obj.type)
+    .replace('{date}', date)
+    .replace('{amount}', amount)
+    .replace('{status}', status)
+
+  return row;
+}
+
+control.convertTableCSV = function() {
+  var table = document.querySelector('#table-data');
+  var thead_th = table.querySelectorAll('thead th');
+  var tbody_trow = table.querySelectorAll('tbody tr');
+
+  var csv = [ [] ];
+
+  Array.prototype.forEach.call(thead_th, function(node) {
+    if (node.classList.contains('hidden-print')) { return; }
+    csv[0].push(node.textContent);
+  });
+
+  var csv_cursor = 0;
+
+  Array.prototype.forEach.call(tbody_trow, function(node) {
+    if (node.classList.contains('tpl')) { return; }
+    var tbody_td = node.querySelectorAll('td');
+
+    csv_cursor++;
+    csv[csv_cursor] = [];
+
+    Array.prototype.forEach.call(tbody_td, function(node) {
+      if (node.classList.contains('hidden-print')) { return; }
+      var _input = node.querySelector('.form-control');
+      if (_input) {
+        csv[csv_cursor].push(_input.value);
+      } else {
+        csv[csv_cursor].push(node.textContent);
+      }
+    });
+  });
+
+  return csv;
+}
+
+control.action = function(element, event) {
+  var data_sample = window.store[config.app]['sample'];
+
+  if (! data_sample || ! control.temp) {
+    return app.error(null, [ 'sample', 'control.action' ]);
+  }
+
+  if (! element || typeof event !== 'string') {
+    return app.error(null, [ 'sample', 'control.action' ]);
+  }
+
+  var ctl = false;
+  var submitted_data = {};
+
+  var trow = element.parentNode.parentNode;
+  var id = trow.getAttribute('data-index');
+  id = parseInt(id);
+
+  if (id && (event === 'edit' || event === 'delete')) {
+    ctl = { view: 'sample', action: event, index: id };
+
+    if (event === 'delete') {
+      ctl.msg = 'Sei sicuro di voler deletere il samplenativo #' + id + ' ?';
+
+      submitted_data['sample'] = data_sample;
+
+      delete submitted_data['sample'][id];
+
+      ctl.submit = true;
+      ctl.data = JSON.stringify(submitted_data);
+    }
+  }
+
+  if (event === 'export' && arguments.length === 3) {
+    var sub_cmd = arguments[2].toString();
+
+    if (! sub_cmd) {
+      return;
+    }
+
+    var _table = document.querySelector('#table-data');
+    var _dropdown = element.parentNode.parentNode.parentNode;
+
+    if (sub_cmd === 'csv') {
+      var source = app.view.convertToCSV(_table);
+      var filename = 'csv_export';
+      var date = new Date();
+
+      filename += '_' + (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '-' + (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-' + date.getFullYear();
+      filename += '_' + (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + '-' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
+
+      var file = new File(
+        [ source ],
+        filename + '.csv',
+        { type: 'text/csv;charset=utf-8' }
+      );
+
+      saveAs(file);
+    }
+
+    if (sub_cmd === 'clipboard') {
+      app.view.copyToClipboard(_table);
+
+      var _dropdown_btn = _dropdown.querySelector('.dropdown-toggle');
+      _dropdown_btn.classList.add('btn-gray-lighter');
+
+      setTimeout(function() {
+        _dropdown_btn.classList.remove('btn-gray-lighter');
+        this.clearTimeout();
+      }, 1000);
+    }
+
+    if (! ('jQuery' in window && 'dropdown' in jQuery.fn)) {
+      if (sub_cmd === 'toggler') {
+        app.utils.dropdown('toggle', element, _dropdown)();
+      }
+
+      app.utils.addEvent('click', document.body, app.utils.dropdown('close', element, _dropdown));
+    }
+  }
+
+  if (event === 'print') {
+    return window.print();
+  }
+
+
+  // Action example
+  if (event === 'example') {
+    window.parent.alert('Action example');
+    return;
+  }
+
+
+
+  if (ctl) {
+    ctl = JSON.stringify(ctl);
+    window.parent.postMessage(ctl, '*');
+    return;
+  }
+}
+
+
+window.store = {};
+
+app.load(app.view.load);
+app.utils.addEvent('resize', window, app.view.resizeView);
+app.utils.addEvent('orientationchange', window, app.view.resizeView);
+</script>
+
+</body>
+</html>

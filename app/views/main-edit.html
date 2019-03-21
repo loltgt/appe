@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="../assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
+</head>
+
+<body class="view view_edit">
+<h1 id="view-title" class="page-header">Main</h1>
+<h2 id="section-title" class="sub-header">{section}</h2>
+
+
+<div id="section-actions-top" class="section-actions section-actions-top">
+  <div>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?main" target="_parent">&laquo; torna indietro</a>
+  </div>
+</div>
+
+
+<form id="form-data" class="form form-data" autocomplete="off" validate>
+<fieldset>
+<legend>Popularity</legend>
+
+<table id="table-2" class="table table-bordered table-auto">
+  <thead>
+    <tr>
+      <th>AVG</th>
+      <th>Movies</th>
+      <th>Toyes</th>
+      <th>Books</th>
+      <th><strong>TOTAL</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{archive_item_pop_avg}</td>
+      <td>{archive_item_pop_movies}</td>
+      <td>{archive_item_pop_toyes}</td>
+      <td>{archive_item_pop_books}</td>
+      <td><strong>{archive_item_pop_total}</strong></td>
+    </tr>
+  </tbody>
+</table>
+</fieldset>
+
+
+<fieldset>
+<legend>Awards</legend>
+
+<div class="row">
+<div class="form-group col-12 col-lg-2">
+  <label for="main_item_awards">Awards</label>
+  <input type="number" id="main_item_awards" name="awards" class="form-control input-lg" data-transform="integer" onchange="control.action(this, 'edit')">
+</div>
+</fieldset>
+
+
+<fieldset class="form-submit">
+  <input type="hidden" id="index" name="id" value="{id}" data-transform="integer">
+  <input type="submit" id="real-submit" hidden class="hide">
+  <p class="help-block">Auto-save on change.</p>
+</fieldset>
+</form>
+
+
+<script type="text/javascript" src="../assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="../config.js"></script>
+
+
+<script type="text/javascript">
+var control = {};
+
+control.openView = function() {
+  var archive_id = app.memory.get('archive_id'), category_id = app.memory.get('category_id');
+  var data_items = window.store[config.app]['items'];
+  var data_archive = window.store[config.app]['archive'];
+
+  if (! data_items || ! data_archive) {
+    return app.error(null, [ 'main-edit', 'control.openView' ]);
+  }
+
+  var view = 'main';
+  var event = null;
+  var id = 0;
+
+  var routes = config.routes;
+  var actions = {};
+
+  Array.prototype.forEach.call(Object.keys(config.events), function(event) {
+    actions[config.events[event]] = event;
+  });
+
+  var loc = app.view.spoof();
+
+  var default_event = config.defaultEvent;  
+  var pass = true;
+
+  if (loc && typeof loc === 'object') {
+    if (loc.action) {
+      if (routes[view][loc.action]) {
+        event = actions[loc.action];
+      } else {
+        pass = false;
+      }
+
+      if (loc.index) {
+        id = parseInt(loc.index);
+      }
+    } else {
+      event = default_event;
+    }
+  } else {
+    pass = false;
+  }
+
+  if (! pass) {
+    return app.error();
+  }
+
+  var view_title = document.getElementById('view-title');
+  var section_title = document.getElementById('section-title');
+
+  var form = document.getElementById('form-data');
+  var action_handler = document.getElementById('submit');
+  var action_index = document.getElementById('index');
+
+  action_index.setAttribute('value', id);
+
+  var archive_data = data_archive[archive_id][category_id];
+  var archive_items = data_archive[archive_id][category_id].items;
+
+  if (! id || ! archive_items || ! archive_data) {
+    return app.error(null, [ 'main-edit', 'control.openView', 1 ]);
+  }
+
+  control.temp = {};
+  control.temp.archive_id = archive_id;
+  control.temp.category_id = category_id;
+  control.temp.archive_data = archive_data;
+
+  var title = data_items[id].title;
+  section_title.innerHTML = 'Item "' + title.toUpperCase() + '"';
+  section_title.innerHTML += ' – ' + data_archive[archive_id][category_id].title;
+
+
+  var t2body = document.querySelector('#table-2 > tbody');
+  var t2head = document.querySelector('#table-2 > thead');
+  var t2row = t2body.querySelector('tr');
+
+  var archive_subtotals = { 'avg': 0, 'movies': 0, 'toyes': 0, 'books': 0, 'total': 0 };
+
+  Array.prototype.forEach.call(Object.keys(archive_items), function(id) {
+    if (! archive_items[id].pop) {
+      archive_items[id].pop = { 'avg': 0, 'movies': 0, 'toyes': 0, 'books': 0, 'total': 0 };
+    }
+
+    archive_items[id].pop.total = archive_items[id].pop['avg'] + archive_items[id].pop['movies'] + archive_items[id].pop['toyes'] + archive_items[id].pop['books'];
+  });
+
+  Array.prototype.forEach.call([ 'avg', 'movies', 'toyes', 'books', 'total' ], function(key) {
+    t2row.innerHTML = t2row.innerHTML.replace('{archive_item_pop_' + key + '}', archive_items[id].pop[key]);
+  });
+
+
+  control.fillForm([ data_archive[archive_id][category_id].status, archive_items[id], data_items[id] ]);
+
+  app.view.resizeView(false);
+
+  control.temp.form_submit = false;
+  control.temp.form_elements = form.elements;
+  control.temp.form_changes = JSON.stringify(app.utils.getFormData(control.temp.form_elements));
+}
+
+control.fillForm = function(obj) {
+  if (! obj || ! control.temp) {
+    return app.error(null, [ 'main-edit', 'control.fillForm' ]);
+  }
+
+  var status = obj[0] ? true : false;
+
+  if (! status) {
+    document.getElementById('main_item_awards').setAttribute('readonly', '');
+    document.getElementById('main_item_awards').setAttribute('disabled', '');
+  }
+
+  document.getElementById('main_item_awards').setAttribute('value', (obj[1].awards || 0));
+}
+
+control.action = function(element, event) {
+  var data_items = window.store[config.app]['items'];
+  var data_archive = window.store[config.app]['archive'];
+
+  if (! data_items || ! data_archive || ! control.temp) {
+    return app.error(null, [ 'main-edit', 'control.action' ]);
+  }
+
+  if (! element || typeof event !== 'string') {
+    return app.error(null, [ 'main-edit', 'control.action' ]);
+  }
+
+  var ctl = false;
+  var submitted_data = {};
+
+  var form = document.getElementById('form-data');
+  var action_submit = document.getElementById('real-submit');
+  var action_index = document.getElementById('index');
+  var id = action_index.getAttribute('value');
+  id = parseInt(id);
+
+  if (! form.checkValidity()) {
+    Array.prototype.forEach.call(form.elements, function(field) {
+      var closest_group = null;
+      if (field.parentNode.className.indexOf('form-group') != -1) {
+        closest_group = field.parentNode;
+      } else if (field.parentNode.parentNode.className.indexOf('form-group') != -1) {
+        closest_group = field.parentNode.parentNode;
+      }
+      if (closest_group && closest_group.classList) {
+        if (closest_group.querySelector(':invalid')) {
+          closest_group.classList.remove('has-success');
+          closest_group.classList.add('has-error');
+        } else {
+          closest_group.classList.remove('has-error');
+          closest_group.classList.add('has-success');
+        }
+      }
+    });
+    action_submit.click();
+    return false;
+  }
+
+  var archive_id = control.temp.archive_id;
+  var category_id = control.temp.category_id;
+  var regolamento_id = data_archive[archive_id][category_id].regolamento_id;
+  var archive_items = data_archive[archive_id][category_id].items;
+
+  if (id && event === 'edit') {
+    submitted_data['archive'] = data_archive;
+
+    var ext_data_id = app.utils.extendObject(archive_items[id], app.utils.getFormData(form.elements));
+
+    submitted_data['archive'][archive_id][category_id]['items'][id] = ext_data_id;
+
+    submitted_data = JSON.stringify(submitted_data);
+
+    if (submitted_data) {
+      ctl = { view: 'graduatoria', action: event, index: id, submit: true, data: submitted_data };
+    }
+  }
+
+  if (ctl) {
+    control.temp.form_submit = true;
+    ctl = JSON.stringify(ctl);
+    window.parent.postMessage(ctl, '*');
+    return true;
+  }
+}
+
+
+window.store = {};
+
+app.load(app.view.load);
+app.unload(app.view.unload);
+app.utils.addEvent('resize', window, app.view.resizeView);
+app.utils.addEvent('orientationchange', window, app.view.resizeView);
+</script>
+</body>
+</html>

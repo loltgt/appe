@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="assets/css/app.min.css">
+<title>{appe}</title>
+</head>
+
+<body class="main">
+<nav id="master-header" class="master-header navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#master-navigation" aria-expanded="true" aria-controls="master-navigation" onclick="main.action(this, 'menu')">
+      <span class="sr-only">Menu</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <span id="brand" class="navbar-brand hidden-xs">{appe}</span>
+    <div class="navbar-form navbar-right">
+      <div class="form-group">
+        <input id="main-action-open-file-header" type="file" accept="application/x-javascript" style="display: none;" hidden>
+        <button type="button" id="main-action-open-header" class="btn main-action-open" data-open-input="#main-action-open-file-header">Open</button>
+        <button type="button" id="main-action-save-header" class="btn btn-success main-action-save">Save</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="master-main container-fluid">
+  <div class="row">
+    <nav id="master-navigation" class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar">
+        <li><a href="index.html?main" data-view="main">Main</a></li>
+        <li><a href="index.html?archive" data-view="archive">Archive</a></li>
+        <li><a href="index.html?average" data-view="average">Average</a></li>
+        <li><a href="index.html?items" data-view="items">Items</a></li>
+        <li class="nav-divider"></li>
+        <li><a href="index.html?sample" data-view="sample">Sample</a></li>
+      </ul>
+      <ul class="nav nav-sidebar">
+        <li><a href="index.html?about" data-view="about">About</a></li>
+      </ul>
+    </nav>
+    <div id="master-content" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 content">
+      <iframe id="view" class="content-view" scrolling="yes" frameborder="no" onload="window.parent.parent.scrollTo(0, 0)"></iframe>
+    </div>
+  </div>
+</main>
+
+<footer id="master-footer" class="master-footer footer">
+  <div class="container-fluid text-center">
+    <p class="visible-md-inline-block visible-lg-inline-block">Ricordati di salvare prima di chiudere l'applicazione!</p>
+    <button type="button" id="main-action-save-footer" class="btn btn-lg btn-big btn-success main-action-save">Save</a>
+  </div>
+</footer>
+
+
+<script type="text/javascript" src="assets/js/file-saver/FileSaver.min.js"></script>
+<script type="text/javascript" src="assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript">
+var main = {};
+
+main.loadView = function(loc) {
+  var view = document.getElementById('view');
+
+  var routes = config.routes;
+  var actions = {};
+
+  Array.prototype.forEach.call(Object.keys(config.events), function(event) {
+    actions[config.events[event]] = event;
+  });
+
+  if (! loc) {
+    loc = app.controller.spoof();
+  }
+
+  var default_route = config.defaultRoute;
+  var route = default_route + '.html';
+  var pass = true;
+
+  if (loc && typeof loc === 'object') {
+    if (loc.view) {
+      if (routes[loc.view]) {
+        route = loc.view + '.html';
+      } else {
+        pass = false;
+      }
+
+      if (loc.action) {
+        if (routes[loc.view][loc.action]) {
+          route = routes[loc.view][loc.action] + '.html';
+          route += '?' + loc.action;
+        } else {
+          pass = false;
+        }
+
+        //TODO index <int>|<string>
+        if (loc.index) {
+          route += '&id=' + loc.index;
+        }
+      }
+    } else {
+      loc = { view: default_route };
+    }
+  } else {
+    pass = false;
+  }
+
+  if (pass && typeof route === 'string') {
+    app.controller.cursor(loc);
+    view.removeAttribute('height');
+    view.setAttribute('src', 'views/' + route);
+
+    if (actions[loc.action] === 'list') {
+      document.body.classList.add('full-width');
+    } else {
+      document.body.classList.remove('full-width');
+    }
+
+    var nav = document.getElementById('master-navigation');
+    var nav_selector_active = nav.querySelector('li.active');
+    var nav_selector_current = nav.querySelector('a[data-view="' + loc.view + '"]');
+
+    if (nav_selector_active) {
+      nav_selector_active.classList.remove('active');
+    }
+    if (nav_selector_current) {
+      nav_selector_current.parentNode.classList.add('active');
+    }
+  } else {
+    return app.error();
+  }
+}
+
+main.openFile = function() {
+  var _open = function() {
+    app.os.fileOpen.call(this, config, _complete);
+  }
+
+  var _complete = function(filename) {
+    if (filename) {
+      document.cookie = 'last_opened_file=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      //app.controller.clear(config.app, config.schema);
+
+      var _filename = window.btoa(filename.replace('.js', ''));
+
+      document.cookie = 'last_opened_file=' + _filename + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+      app.store.set('last_opened_file', _filename);
+      app.memory.set('last_opened_file', _filename);
+
+      _refresh();
+    }
+  }
+
+  var _refresh = function() {
+    location.reload();
+  }
+
+  var open_input = null;
+  var open_input__std = this.getAttribute('data-open');
+
+  if (! open_input__std) {
+    this.setAttribute('data-open', '');
+
+    var open_input_ref = this.getAttribute('data-open-input');
+    var open_input = this.parentNode.querySelector(open_input_ref);
+
+    app.utils.addEvent('change', open_input, _open);
+  }
+
+  if (open_input) {
+    open_input.click();
+  }
+}
+
+main.saveFile = function() {
+  var source = {};
+
+  Array.prototype.forEach.call(config.schema, function(key) {
+    source[key] = window.store[config.app][key];
+  });
+
+  var filename = config.app + '_save';
+  var filedate = '';
+  var date = new Date();
+
+  filedate += (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '-' + (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-' + date.getFullYear() + ' ';
+  filedate += (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':' + (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
+
+  source.file = app.os.generateFileHeading(date);
+
+  source = JSON.stringify(source).replace(/\"/g, '"');
+
+  source = 'window.' + config.app + ' = ' + source;
+  filename += '_' + (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '-' + (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-' + date.getFullYear();
+  filename += '_' + (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + '-' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
+  filename += '_' + (app._runtime.save++ < 10 ? '0' + app._runtime.save : app._runtime.save);
+
+  var file = new File(
+    [ source ],
+    filename + '.js',
+    { type: 'application/x-javascript;charset=utf-8' }
+  );
+
+  saveAs(file);
+}
+
+main.action = function(element, event) {
+  if (! element || typeof event !== 'string') {
+    return app.error(null, [ 'main.action' ]);
+  }
+
+  if (event === 'menu') {
+    if (! ('jQuery' in window && 'collapse' in jQuery.fn)) {
+      var _menu = document.querySelector(element.getAttribute('data-target'));
+
+      if (! element.getAttribute('data-is-visible')) {
+        element.setAttribute('data-is-visible', true);
+        element.setAttribute('aria-expanded', false);
+        _menu.setAttribute('aria-expanded', false);
+      }
+
+      app.utils.collapse('toggle', element, _menu)();
+
+      app.utils.addEvent('click', document.body, app.utils.collapse('close', element, _menu));
+    }
+  }
+}
+
+main.controlView = function(event) {
+  if (! event.data) {
+    return app.error(null, [ 'main.controlView' ]);
+  }
+
+  var events = config.events;
+
+  var id = null;
+  var ctl = JSON.parse(event.data);
+
+  var msgs = {
+    'delete': 'Sei sicuro di voler eliminare {id}?'
+  };
+
+  if (! ctl.action) {
+    return app.error(null, [ 'main.controlView' ]);
+  }
+
+  if (ctl.action === 'resize') {
+    var height = parseInt(ctl.height);
+    var view = document.getElementById('view');
+    view.height = height;
+    view.scrolling = 'no';
+    return;
+  }
+
+  if (ctl.action in config.events === false) {
+    return app.error(null, [ 'main.controlView' ]);
+  }
+
+  id = parseInt(ctl.index) || null;
+
+  var loc = Object.assign({}, ctl);
+
+  var title = '';
+  var url = 'index.html';
+
+  if (! id && ! (ctl.action == 'selection' || ctl.action == 'update')) {
+    return;
+  }
+
+  if (ctl.action === 'selection') {
+    if (ctl.data) {
+      app.memory.set('archive_id', parseInt(ctl.data));
+    }
+
+    location.href = url += '?' + ctl.view;
+    return;
+  }
+
+  if (ctl.action === 'edit' || ctl.action === 'open') {
+    title = 'Edit #' + id;
+  }
+  if (ctl.action === 'add') {
+    title += 'Add';
+  }
+
+  if (ctl.action === 'open' || ctl.action === 'add' || ctl.action === 'edit' || ctl.action === 'update') {
+    url += '?' + ctl.view + (ctl.submit ? '' : '&' + events[ctl.action] + '=' + id);
+    loc.action = events[loc.action];
+  }
+
+  if (ctl.action === 'delete' || ctl.action === 'close') {
+    var msg = msgs[ctl.action];
+
+    if (ctl.msg) {
+      msg = ctl.msg;
+    } else {
+      msg = msg.replace('{id}', id);
+    }
+
+    if (! window.confirm(msg)) {
+      location.reload();
+      return;
+    }
+  }
+
+  if (! ctl.submit) {
+    main.loadView(loc);
+  }
+
+  if (ctl.action !== 'update') {
+    app.controller.history(title, url);
+  }
+
+  if (ctl.submit && ctl.data) {
+    try {
+      var data = JSON.parse(ctl.data);
+
+      app.controller.store(function() {
+        var loc = app.controller.spoof();
+        loc.action = null;
+        loc.index = null;
+
+        if (ctl.action === 'update') {
+          if (ctl.view === 'average') {
+            location.reload();
+          }
+        } else {
+          main.loadView(loc);
+        }
+      }, config.app, config.schema, data);
+    } catch (err) {
+      return app.error(null, [ 'main.controlView' ], err);
+    }
+  }
+}
+
+main.setupData = function(loc) {
+  if (! app.memory.get('archive_id')) {
+    app.memory.set('archive_id', 1);
+  }
+  if (! app.memory.get('category_id')) {
+    app.memory.set('category_id', 1);
+  }
+
+  main.loadView(loc);
+}
+
+main.load = function() {
+  app.resume(config);
+
+
+  var title = config.title;
+  var routine = config.auxs;
+  routine.push({ file: '', fn: config.app, schema: config.schema });
+
+  app.controller.retrieve(main.setupData, routine);
+  app.controller.setTitle(title);
+
+
+  var navbar_brand = document.getElementById('brand');
+  brand.innerHTML = title;
+
+
+  var open_actions = document.querySelectorAll('.main-action-open');
+  if (open_actions.length) {
+    Array.prototype.forEach.call(open_actions, function(el) {
+      app.utils.addEvent('click', el, main.openFile);
+    });
+  }
+
+  var save_actions = document.querySelectorAll('.main-action-save');
+  if (save_actions.length) {
+    Array.prototype.forEach.call(save_actions, function(el) {
+      app.utils.addEvent('click', el, main.saveFile);
+    });
+  }
+}
+
+main.unload = function() {
+  if (! app.memory.has('save_reminded') && app.memory.get('last_opened_file') !== app.memory.get('last_stored')) {
+    return;
+  }
+
+  app.memory.set('save_reminded', true);
+
+  return 'Ricordati di salvare prima di chiudere l\'applicazione!';
+}
+
+
+window.store = {};
+
+app.load(main.load);
+app.unload(main.unload);
+app.utils.addEvent('message', window, main.controlView);
+</script>
