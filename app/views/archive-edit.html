@@ -67,14 +67,14 @@
 <div class="row">
 <div class="form-group col-12 col-lg-4">
   <label for="archive_custom_1">Custom field 1</label>
-  <input type="text" id="archive_custom_1" name="custom_1" class="form-control" required>
+  <input type="text" id="archive_custom_1" name="custom_1" class="form-control">
 </div>
 
 <div class="clearfix"></div>
 
 <div class="form-group col-12 col-lg-4">
   <label for="archive_custom_2">Custom field 2</label>
-  <input type="text" id="archive_custom_2" name="custom_2" class="form-control" required>
+  <input type="text" id="archive_custom_2" name="custom_2" class="form-control">
 </div>
 </div>
 
@@ -92,9 +92,6 @@
 
 
 <fieldset class="form-submit">
-  <input type="hidden" name="graduatoria_tmp" value="0" data-transform="integer">
-  <input type="hidden" name="assegnazioni_tmp" value="0" data-transform="integer">
-
   <input type="hidden" id="index" name="id" value="{id}" data-transform="integer">
   <input type="submit" id="real-submit" hidden class="hide">
   <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, '{event}')">Update Archive</button>
@@ -184,7 +181,6 @@ control.openView = function() {
 
   if (event === 'edit') {
     section_title.innerHTML = 'Edit Archive "' + data_archive[id][category_id].title + '"';
-
     action_handler.innerHTML = 'Update Archive';
 
     var items = {};
@@ -198,7 +194,6 @@ control.openView = function() {
 
   if (event === 'add') {
     section_title.innerHTML = 'Add New Archive';
-
     action_handler.innerHTML = 'Add Archive';
 
     var items = [];
@@ -214,13 +209,13 @@ control.openView = function() {
   }
 
   var select_items = document.getElementById('items');
-  select_items.innerHTML = app.view.renderSelect('items', items);
+  select_items.innerHTML = app.layout.renderSelectOptions('items', items);
 
   app.view.resizeView(false);
 
   control.temp.form_submit = false;
   control.temp.form_elements = form.elements;
-  control.temp.form_changes = JSON.stringify(app.utils.getFormData(control.temp.form_elements));
+  control.temp.form_changes = JSON.stringify(app.view.getFormData(control.temp.form_elements));
 }
 
 control.fillForm = function(obj) {
@@ -232,79 +227,6 @@ control.fillForm = function(obj) {
   var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
   trow_tpl.classList.remove('tpl');
 
-  var src_el = null;
-  var next_index = null;
-
-  var _dragStart = function(e) {
-    src_el = this;
-    next_index = this.getAttribute('data-index');
-
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.innerHTML);
-
-    this.classList.add('move');
-  }
-
-  var _dragOver = function(e) {
-    if (e.preventDefault) {
-      e.preventDefault();
-    }
-
-    e.dataTransfer.dropEffect = 'move';
-    return false;
-  }
-
-  var _dragEnter = function(e) {
-    this.classList.add('over');
-  }
-
-  var _dragLeave = function(e) {
-    this.classList.remove('over');
-  }
-
-  var _dragEnd = function(e) {
-    var trows = tbody.querySelectorAll('tr.draggable');
-
-    var items = [];
-
-    Array.prototype.forEach.call(trows, function (trow) {
-      items.push(trow.getAttribute('data-index'))
-      trow.classList.remove('move');
-      trow.classList.remove('over');
-    });
-
-    try {
-      items = JSON.stringify(items);
-      items = encodeURIComponent(items);
-
-      document.getElementById('archive_items').setAttribute('value', items);
-    } catch (err) {
-      return app.error(null, [ 'archive-edit', 'control.sub' ], err);
-    }
-  }
-
-  var _drop = function(e) {
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    }
-
-    if (src_el != this) {
-      control.temp.moved = true;
-
-      var prev_index = this.getAttribute('data-index');
-      src_el.innerHTML = this.innerHTML;
-      src_el.setAttribute('data-index', prev_index);
-
-      this.setAttribute('data-index', next_index);
-      this.innerHTML = e.dataTransfer.getData('text/html');
-      this.querySelector('meta').remove();
-    } else {
-      next_index = null;
-    }
-
-    return false;
-  }
-
   Array.prototype.forEach.call(Object.keys(obj[1]), function(id) {
     var index = parseInt(id);
     var value = obj[1][index];
@@ -312,12 +234,12 @@ control.fillForm = function(obj) {
 
     row.classList.add('draggable');
 
-    app.utils.addEvent('dragstart', row, _dragStart);
-    app.utils.addEvent('dragenter', row, _dragEnter);
-    app.utils.addEvent('dragover', row, _dragOver);
-    app.utils.addEvent('dragleave', row, _dragLeave);
-    app.utils.addEvent('dragend', row, _dragEnd);
-    app.utils.addEvent('drop', row, _drop);
+    app.utils.addEvent('dragstart', row, app.view.draggable('start', 'archive_items'));
+    app.utils.addEvent('dragenter', row, app.view.draggable('enter', 'archive_items'));
+    app.utils.addEvent('dragover', row, app.view.draggable('over', 'archive_items'));
+    app.utils.addEvent('dragleave', row, app.view.draggable('leave', 'archive_items'));
+    app.utils.addEvent('dragend', row, app.view.draggable('end', 'archive_items'));
+    app.utils.addEvent('drop', row, app.view.draggable('drop', 'archive_items'));
 
     tbody.appendChild(row);
   });
@@ -326,19 +248,6 @@ control.fillForm = function(obj) {
   items = Object.keys(items);
   items = JSON.stringify(items);
   document.getElementById('archive_items').setAttribute('value', encodeURIComponent(items));
-
-
-  /*document.getElementById('archive_titolo').setAttribute('value', obj[0].titolo);
-  document.getElementById('archive_distretto').setAttribute('value', obj[0].distretto);
-  document.getElementById('archive_comune').setAttribute('value', obj[0].comune);
-  document.getElementById('archive_anno').setAttribute('value', obj[0].anno);
-
-
-  var status = obj[0].status ? true : false;
-
-  if (status) {
-    document.getElementById('archive_status').setAttribute('checked', '');
-  }*/
 }
 
 control.renderRow = function(tpl, obj) {
@@ -535,7 +444,7 @@ control.action = function(element, event) {
       submitted_data['archive'][id][category_id].items = {};
     }
 
-    var form_data = app.utils.getFormData(form.elements);
+    var form_data = app.view.getFormData(form.elements);
     var items = submitted_data['archive'][id][category_id].items;
     var ext_data_id = app.utils.extendObject(data_archive[id][category_id], form_data);
 

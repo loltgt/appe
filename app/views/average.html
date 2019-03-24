@@ -16,7 +16,7 @@
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
   <div class="pull-left">
-    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block">Select Archive</label>
+    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block">Select archive</label>
     <select id="selection" onchange="control.action(this, 'selection')"></select>
   </div>
   <div class="pull-right">
@@ -88,11 +88,11 @@ control.openView = function() {
 
   var archive_items = data_archive[archive_id][category_id].items;
 
-  var archive_selection = {};
+  var archive_selection = [];
   Array.prototype.forEach.call(Object.keys(data_archive), function(id) {
-    archive_selection[id] = {};
-    archive_selection[id].name = data_archive[id][category_id].title;
-    archive_selection[id].selected = (parseInt(id) === archive_id) ? true : false;
+    var obj = {};
+    obj[id] = data_archive[id][category_id].title;
+    archive_selection.push(obj);
   });
 
   if (! archive_items || ! archive_selection) {
@@ -102,13 +102,11 @@ control.openView = function() {
   control.temp = {};
   control.temp.archive_id = archive_id;
   control.temp.category_id = category_id;
-  control.temp.selection = archive_selection;
-  control.temp.archive_select = archive_selection;
 
   section_title.innerHTML = data_archive[archive_id][category_id].title;
 
   var select_archive = document.getElementById('selection');
-  select_archive.innerHTML = app.view.renderSelect('selection', archive_selection);
+  select_archive.innerHTML = app.layout.renderSelectOptions('selection', archive_selection, archive_id);
   select_archive.value = archive_id;
 
   var blob = '';
@@ -126,7 +124,7 @@ control.openView = function() {
 
   control.temp.submit = false;
   control.temp.form_elements = form.elements;
-  control.temp.form_changes = JSON.stringify(app.utils.getFormData(control.temp.form_elements));
+  control.temp.form_changes = JSON.stringify(app.view.getFormData(control.temp.form_elements));
 }
 
 control.renderRow = function(tpl, obj) {
@@ -141,7 +139,7 @@ control.renderRow = function(tpl, obj) {
   var status = obj[0] ? true : false;
 
   row.innerHTML = row.innerHTML
-    .replace(/{id}/g, obj[2].id)
+    .replace(/\{id\}/g, obj[2].id)
     .replace('{name}', obj[2].name)
     .replace('{avg}', (obj[1].avg || 0))
     .replace('{readonly}', status ? '' : 'readonly')
@@ -201,7 +199,7 @@ control.action = function(element, event) {
 
     submitted_data['archive'] = data_archive;
 
-    var ext_data_id = app.utils.extendObject(true, archive_items, app.utils.getFormData(form.elements).items);
+    var ext_data_id = app.utils.extendObject(true, archive_items, app.view.getFormData(form.elements).items);
 
     submitted_data['archive'][archive_id][category_id]['items'] = ext_data_id;
 

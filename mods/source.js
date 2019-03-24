@@ -11,8 +11,8 @@ window.demo = {
         "title": "2019",
         "status": 1,
         "custom": {
-          "custom-1": "",
-          "custom-2": ""
+          "1": "",
+          "2": ""
         },
         "items": {
           "1": {
@@ -22,7 +22,11 @@ window.demo = {
               "toyes": 0,
               "books": 0,
               "total": 0
-            }
+            },
+            "custom": {
+              "1": false,
+              "2": false
+            },
           }
         }
       }

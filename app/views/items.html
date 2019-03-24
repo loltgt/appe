@@ -235,6 +235,7 @@ control.action = function(element, event) {
   }
 
   if (ctl) {
+    console.log(ctl);
     ctl = JSON.stringify(ctl);
     window.parent.postMessage(ctl, '*');
     return;

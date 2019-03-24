@@ -1,0 +1,16 @@
+{
+  "name": "appe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Leonardo Laureti",
+  "license": "LGPL-3.0-or-later",
+  "dependencies": {
+    "bootstrap": "^3.4.1",
+    "file-saver": "^2.0.1",
+    "xlsx": "^0.14.1"
+  }
+}

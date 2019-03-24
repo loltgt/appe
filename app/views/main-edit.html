@@ -173,7 +173,7 @@ control.openView = function() {
 
   control.temp.form_submit = false;
   control.temp.form_elements = form.elements;
-  control.temp.form_changes = JSON.stringify(app.utils.getFormData(control.temp.form_elements));
+  control.temp.form_changes = JSON.stringify(app.view.getFormData(control.temp.form_elements));
 }
 
 control.fillForm = function(obj) {
@@ -236,20 +236,19 @@ control.action = function(element, event) {
 
   var archive_id = control.temp.archive_id;
   var category_id = control.temp.category_id;
-  var regolamento_id = data_archive[archive_id][category_id].regolamento_id;
   var archive_items = data_archive[archive_id][category_id].items;
 
   if (id && event === 'edit') {
     submitted_data['archive'] = data_archive;
 
-    var ext_data_id = app.utils.extendObject(archive_items[id], app.utils.getFormData(form.elements));
+    var ext_data_id = app.utils.extendObject(archive_items[id], app.view.getFormData(form.elements));
 
     submitted_data['archive'][archive_id][category_id]['items'][id] = ext_data_id;
 
     submitted_data = JSON.stringify(submitted_data);
 
     if (submitted_data) {
-      ctl = { view: 'graduatoria', action: event, index: id, submit: true, data: submitted_data };
+      ctl = { view: 'archive', action: event, index: id, submit: true, data: submitted_data };
     }
   }
 

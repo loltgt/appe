@@ -16,7 +16,7 @@
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
   <div class="pull-left">
-    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block">Select Archive</label>
+    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block">Select archive</label>
     <select id="selection" onchange="control.action(this, 'selection')"></select>
   </div>
   <div class="pull-right">
@@ -48,18 +48,22 @@
         <th>Actions</th>
         <th>ID</th>
         <th class="text-nowrap">Name</th>
+        <th>New samples</th>
+        <th>New finds</th>
         <th colspan="4" class="text-center">Popularity</th>
       </tr>
       <tr class="visible-csv hidden">
         <th>ID</th>
         <th>Name</th>
+        <th class="text-center">New samples</th>
+        <th class="text-center">New finds</th>
         <th>Movies</th>
         <th>Toyes</th>
         <th>Books</th>
         <th><strong>SUBTOTAL</strong></th>
       </tr>
       <tr class="hidden-csv">
-        <td colspan="3"></th>
+        <td colspan="5"></th>
         <td class="text-center text-nowrap">Movies</td>
         <td class="text-center text-nowrap">Toyes</td>
         <td class="text-center text-nowrap">Books</td>
@@ -73,6 +77,8 @@
         </td>
         <td>{id}</td>
         <td class="text-uppercase text-nowrap">{name}</td>
+        <td class="text-nowrap">{custom_1}</td>
+        <td class="text-nowrap">{custom_2}</td>
         <td class="text-center">{pop_movies}</td>
         <td class="text-center">{pop_toyes}</td>
         <td class="text-center">{pop_books}</td>
@@ -144,14 +150,14 @@ control.openView = function() {
   var archive_data = data_archive[archive_id][category_id];
   var archive_items = data_archive[archive_id][category_id].items;
 
-  var archive_selection = {};
+  var archive_selection = [];
   Array.prototype.forEach.call(Object.keys(data_archive), function(id) {
-    archive_selection[id] = {};
-    archive_selection[id].name = data_archive[id][category_id].title;
-    archive_selection[id].selected = (parseInt(id) === archive_id) ? true : false;
+    var obj = {};
+    obj[id] = data_archive[id][category_id].title;
+    archive_selection.push(obj);
   });
 
-  if (! archive_items || ! archive_data || ! archive_selection) {
+  if (! archive_items || ! archive_data) {
     return app.error(null, [ 'archive', 'control.openView' ]);
   }
 
@@ -159,13 +165,11 @@ control.openView = function() {
   control.temp.archive_id = archive_id;
   control.temp.category_id = category_id;
   control.temp.archive_data = archive_data;
-  control.temp.selection = archive_selection;
-  control.temp.archive_select = archive_selection;
 
   section_title.innerHTML = data_archive[archive_id][category_id].title;
 
   var select_archive = document.getElementById('selection');
-  select_archive.innerHTML = app.view.renderSelect('selection', archive_selection);
+  select_archive.innerHTML = app.layout.renderSelectOptions('selection', archive_selection, archive_id);
   select_archive.value = archive_id;
 
   var section_actions_top = document.getElementById('section-actions-top');
@@ -243,11 +247,17 @@ control.renderRow = function(tpl, obj) {
 
   row.setAttribute('data-index', obj[1].id);
 
-  var status = obj[0] ? true : false;
+  var archive_data = control.temp.archive_data;
+  var status = archive_data.status ? true : false;
+
+  var custom_1 = archive_data.custom['1'] ? 'yes' : 'none';
+  var custom_2 = archive_data.custom['2'] ? 'yes' : 'none';
 
   row.innerHTML = row.innerHTML
-    .replace(/{id}/g, obj[1].id)
+    .replace(/\{id\}/g, obj[1].id)
     .replace('{name}', obj[1].name)
+    .replace('{custom_1}', custom_1)
+    .replace('{custom_2}', custom_2)
     .replace('{pop_movies}', obj[0].pop['movies'])
     .replace('{pop_toyes}', obj[0].pop['toyes'])
     .replace('{pop_books}', obj[0].pop['books'])
@@ -291,7 +301,7 @@ control.action = function(element, event) {
 
   if (event === 'edit' || event === 'delete' || event === 'close') {
     var archive_id = parseInt(control.temp.archive_id);
-    var archive_title = control.temp.archive_data.titolo
+    var archive_title = control.temp.archive_data.title;
 
     if (archive_id) {
       ctl = { view: 'archive', action: event, index: archive_id };

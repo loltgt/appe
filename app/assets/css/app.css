@@ -22,6 +22,17 @@ body {
   padding: 0 15px;
 }
 
+.vcontent-centered-outer {
+  display: table;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.vcontent-centered-inner {
+  display: table-cell;
+  vertical-align: middle;
+}
+
 .btn {
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -313,17 +324,6 @@ fieldset[disabled] .btn-secondary.focus {
 .table-collapse-vborder > thead > tr > td,
 .table-collapse-vborder > thead > tr > th {
   border-width: 1px 0;
-}
-
-.vcontent-centered-outer {
-  display: table;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-.vcontent-centered-inner {
-  display: table-cell;
-  vertical-align: middle;
 }
 
 .table > thead > tr > th.thrv, .table > thead > tr > td.tdrv, .table > tbody > tr > td.tdrv { min-width: 60px; }

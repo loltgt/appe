@@ -46,12 +46,13 @@ window.config = {
   "defaultEvent": "add",
   "verifyFileChecksum": true,
   "basePath": "app",
-  "savePath": "saves",
+  "savePath": "save",
   "openAttempts": 10,
   "auxs": [],
-  "altElectronExecFolder": "alt",
-  "altElectronExecPlatform": {
+  "altExecFolder": "alt",
+  "altExecPlatform": {
     "win": "LAUNCH.win.exe",
-    "mac": "LAUNCH.mac.app"
+    "mac": "LAUNCH.mac.app",
+    "hta": "LAUNCH.hta"
   }
 }

@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="stylesheet" type="text/css" href="app/assets/css/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="app/assets/css/app.min.css">
-<title>{app}</title>
+<title>{appe}</title>
 <noscript><meta http-equiv="refresh" content="5" id="preventHistoryBackStop"></noscript>
 </head>
 
@@ -18,12 +18,12 @@
     <div class="vcontent-centered-inner">
       <div class="loader">
         <div id="loader-open" class="loader-open" style="visibility: hidden;">
-          <p class="lead">Apri l'ultimo salvataggio</p>
+          <p class="lead">Open the last save</p>
           <input id="start-action-open-file" type="file" accept="application/x-javascript" style="display: none;" hidden>
-          <button id="start-action-open" class="btn btn-lg btn-big btn-info start-action-open" data-open-input="#start-action-open-file">Apri</button>
+          <button id="start-action-open" class="btn btn-lg btn-big btn-info start-action-open" data-open-input="#start-action-open-file">Open</button>
         </div>
         <div id="loader-wait" class="loader-wait" style="visibility: visible;">
-          <p class="lead">caricamento . . .</p>
+          <p class="lead">loading . . .</p>
         </div>
       </div>
     </div>
@@ -165,10 +165,9 @@ start.redirection = function() {
 }
 
 start.alternative = function() {
-  var alt_electron = [
+  var alt = [
     'Purtroppo non è possibile eseguire l\'applicazione per via di restrizioni nel programma {browser}.',
-    'VAI NELLA CARTELLA "{electron_exec_folder}" E APRI "{electron_exec_platform}" OPPURE ',
-    'SCARICA E INSTALLA CHROME / CHROMIUM.'
+    'VAI NELLA CARTELLA "{alt_exec_folder}" E APRI "{alt_exec_platform}".'
   ];
 
   var system = app.utils.system();
@@ -182,21 +181,22 @@ start.alternative = function() {
   };
 
   var browser = navigators[system.navigator];
-  var exec_platform = (system.platform in config.altElectronExecPlatform ? system.platform : null);
+  var exec_platform = (system.platform in config.altExecPlatform ? system.platform : null);
 
-  if (exec_platform && config.altElectronExecFolder && config.altElectronExecFolder) {
-    var electron_exec_folder = config.altElectronExecFolder;
-    var electron_exec_platform = config.altElectronExecPlatform[exec_platform];
+  if (exec_platform && config.altExecFolder && config.altExecFolder) {
+    var alt_exec_folder = config.altExecFolder;
+    var alt_exec_platform = config.altExecPlatform[exec_platform];
 
-    alt_electron = alt_electron[0] + '\n\n' + alt_electron[1] + alt_electron[2];
-    alt_electron = alt_electron.replace('{electron_exec_folder}', electron_exec_folder).replace('{electron_exec_platform}', electron_exec_platform);
+    alt = alt[0] + '\n\n' + alt[1];
+    alt = alt.replace('{alt_exec_folder}', alt_exec_folder).replace('{alt_exec_platform}', alt_exec_platform);
   } else {
-    alt_electron = alt_electron[0] + '\n\n' + alt_electron[2];
+    alt = alt[0];
   }
 
-  alt_electron = alt_electron.replace('{browser}', browser);
+  alt_electron = alt.replace('{browser}', browser);
 
   start.loader(1);
+
   return app.error(alt_electron);
 }
 
@@ -205,6 +205,7 @@ app.load(function() {
   var exec = true;
 
   if (
+    ('sessionStorage' in window === false && 'localStorage' in window === false) ||
     'history' in window === false ||
     'atob' in window === false ||
     'btoa' in window === false

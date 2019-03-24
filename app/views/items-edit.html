@@ -177,28 +177,28 @@ control.openView = function() {
 
   if (event === 'edit') {
     section_title.innerHTML = 'Edit Item # ' + id;
-
     action_handler.innerHTML = 'Update Item';
+
     control.fillForm(data_items[id]);
   }
 
   if (event === 'add') {
     section_title.innerHTML = 'Add New Item';
-
     action_handler.innerHTML = 'Add Item';
   }
 
   if (event === 'edit' || event === 'add') {
+    var type_selection = [];
     var type_selected = (event === 'edit' ? data_items[id].type : '');
-    var type_selection = {};
+
     Array.prototype.forEach.call(Object.keys(categories_data.types), function(id) {
-      type_selection[id] = {};
-      type_selection[id].name = categories_data.types[id];
-      type_selection[id].selected = (parseInt(id) === type_selected) ? true : false;
+      var obj = {};
+      obj[id] = categories_data.types[id];
+      type_selection.push(obj);
     });
 
     var select_type = document.getElementById('items_type');
-    select_type.innerHTML = app.view.renderSelect('items_type', type_selection);
+    select_type.innerHTML = app.layout.renderSelectOptions('items_type', type_selection, type_selected);
     select_type.value = type_selected;
   }
 
@@ -206,7 +206,7 @@ control.openView = function() {
 
   control.temp.form_submit = false;
   control.temp.form_elements = form.elements;
-  control.temp.form_changes = JSON.stringify(app.utils.getFormData(control.temp.form_elements));
+  control.temp.form_changes = JSON.stringify(app.view.getFormData(control.temp.form_elements));
 }
 
 control.fillForm = function(obj) {
@@ -287,7 +287,7 @@ control.action = function(element, event) {
 
     submitted_data['items'] = data_items;
 
-    var ext_data_id = app.utils.extendObject(data_items[id], app.utils.getFormData(form.elements));
+    var ext_data_id = app.utils.extendObject(data_items[id], app.view.getFormData(form.elements));
 
     submitted_data['items'][id] = ext_data_id;
 
@@ -301,6 +301,7 @@ control.action = function(element, event) {
   if (ctl) {
     control.temp.form_submit = true;
     ctl = JSON.stringify(ctl);
+    console.log(ctl);
     window.parent.postMessage(ctl, '*');
     return true;
   }

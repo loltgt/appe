@@ -26,15 +26,8 @@
 
 <div class="row">
 <div class="form-group col-6 col-lg-4">
-  <label for="sample_vendor">Vendor</label>
-  <select id="sample_vendor" name="vendor" class="form-control" required><option value="Vendor">Nome inventato</option></select>
-</div>
-
-<div class="clearfix visible-lg-block"></div>
-
-<div class="form-group col-6 col-lg-4">
-  <label for="sample_nome">Name</label>
-  <select id="sample_name" name="name" class="form-control" required><option value="Vehicle">Nome inventato</option></select>
+  <label for="sample_title">Model</label>
+  <select id="sample_title" name="title" class="form-control" required></select>
 </div>
 
 <div class="clearfix visible-lg-block"></div>
@@ -58,9 +51,14 @@
 <legend>Details</legend>
 
 <div class="row">
-<div class="form-group col-12 col-lg-6">
+<div class="form-group col-12 col-lg-2">
   <label for="sample_amount">Value Price</label>
-  <input type="text" id="sample_amount" name="amount" class="form-control" required>
+  <div class="input-group">
+    <input type="text" id="sample_amount" name="amount" class="form-control" value="0.00" data-transform="numeric" required>
+    <div class="input-group-addon">
+      <span class="input-group-text">coin</span>
+    </div>
+  </div>
 </div>
 </div>
 </fieldset>
@@ -74,7 +72,6 @@
 </form>
 
 
-<script type="text/javascript" src="../assets/js/jquery/jquery.slim.min.js"></script>
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
@@ -84,112 +81,72 @@
 var control = {};
 
 control.openView = function() {
-  var data_sample = window.store[config.app]['sample'];
-
-  if (! data_sample) {
-    return app.error(null, [ 'sample-edit', 'control.openView' ]);
-  }
-
-  var view = 'sample';
-  var event = null;
-  var id = 0;
-
-  var routes = config.routes;
-  var actions = {};
-
-  Array.prototype.forEach.call(Object.keys(config.events), function(event) {
-    actions[config.events[event]] = event;
-  });
-
-  var loc = app.view.spoof();
-
-  var default_event = config.defaultEvent;  
-  var pass = true;
-
-  if (loc && typeof loc === 'object') {
-    if (loc.action) {
-      if (routes[view][loc.action]) {
-        event = actions[loc.action];
-      } else {
-        pass = false;
-      }
-
-      if (loc.index) {
-        id = parseInt(loc.index);
-      }
-    } else {
-      event = default_event;
-    }
-  } else {
-    pass = false;
-  }
-
-  if (! pass) {
-    return app.error();
-  }
-
-  var view_title = document.getElementById('view-title');
-  var section_title = document.getElementById('section-title');
+  var data = window.store[config.app]['sample'];
 
   var form = document.getElementById('form-data');
-  var action_handler = document.getElementById('submit');
-  var action_index = document.getElementById('index');
 
-  if (event === 'add') {
-    var last_id = Object.keys(data_sample).pop();
-    id = last_id ? (parseInt(last_id) + 1) : 1;
-  }
-
-  var action_handler_event = action_handler.getAttribute('onclick');
-  action_handler_event = action_handler_event.replace('{event}', event);
-  action_handler.setAttribute('onclick', action_handler_event);
-  action_index.setAttribute('value', id);
-
-  control.temp = {};
-
-  if (! id) {
+  if (! data) {
     return app.error(null, [ 'sample-edit', 'control.openView' ]);
   }
 
-  if (event === 'edit') {
-    section_title.innerHTML = 'Edit Vehicle # ' + id;
+  var _open = app.view.open([ 'add', 'edit' ], data, form);
 
-    action_handler.innerHTML = 'Update Vehicle';
-    control.fillForm(data_sample[id]);
+  _open.begin();
+
+  
+  var event = _open.getEvent();
+  var id = _open.getID();
+
+
+  var _events = {};
+
+  _events.add = function() {
+    _open.setTitle('add', 'Add New Vehicle');
+    _open.setActionHandler('add', 'Add Vehicle');
   }
 
-  if (event === 'add') {
-    section_title.innerHTML = 'Add New Vehicle';
+  _events.edit = function() {
+    _open.setTitle('edit', 'Edit Vehicle');
+    _open.setActionHandler('edit', 'Update Vehicle');
 
-    action_handler.innerHTML = 'Add Vehicle';
+    control.fillForm(data[id]);
   }
 
-  app.view.resizeView(false);
 
-  control.temp.form_submit = false;
-  control.temp.form_elements = form.elements;
-  control.temp.form_changes = JSON.stringify(app.utils.getFormData(control.temp.form_elements));
+  var model_selection = [
+    {'FAN': [ 'Fan Sushi 1.2 hybrid' ]},
+    {'SOUPE': [ 'Soupe Chapelure 1.9 gasoline', 'Soupe Bouillie 1.9 gasoline', 'Soupe Crème 1.2 gasoline' ]},
+    {'PFEIL': [ 'Pfeil Bach 1.6 hybrid', 'Pfeil Beethoven VAN 1.6 diesel' ]},
+    {'GALA': [ 'Gala Rook 1.0 electric', 'Gala Rook Sport 2.0 gasoline' ]},
+    {'OTTO': [ 'Otto Gogh VAN 2.0 diesel' ]},
+  ];
+  var model_selected = (event === 'edit' ? data[id].title : '');
+
+  var select_model = document.getElementById('sample_title');
+  select_model.innerHTML = app.layout.renderSelectOptions('sample_title', model_selection, model_selected);
+  select_model.value = model_selected;
+
+
+  _events[event]();
+
+  _open.end();
 }
 
-control.fillForm = function(obj) {
-  if (! obj || ! control.temp) {
+control.fillForm = function(data_field) {
+  if (! data_field) {
     return app.error(null, [ 'sample-edit', 'control.fillForm' ]);
   }
 
-  var date = obj.date;
-  var amount = obj.amount;
-
-  document.querySelector('#sample_vendor > option[value="' + obj.vendor + '"]').setAttribute('selected', '');
-  document.querySelector('#sample_name > option[value="' + obj.name + '"]').setAttribute('selected', '');
-  document.querySelector('#sample_type > option[value="' + obj.type + '"]').setAttribute('selected', '');
-  document.getElementById('sample_date').setAttribute('value', date);
-  document.getElementById('sample_amount').setAttribute('value', amount);
+  document.querySelector('#sample_type > option[value="' + data_field.type + '"]').setAttribute('selected', '');
+  document.getElementById('sample_date').setAttribute('value', data_field.date);
+  document.getElementById('sample_amount').setAttribute('value', data_field.amount);
 }
 
-control.action = function(element, event) {
-  var data_sample = window.store[config.app]['sample'];
+control.action = function(element, event, sub) {
+  var data = window.store[config.app]['sample'];
+  var form = document.getElementById('form-data');
 
-  if (! data_sample || ! control.temp) {
+  if (! data) {
     return app.error(null, [ 'sample-edit', 'control.action' ]);
   }
 
@@ -197,71 +154,60 @@ control.action = function(element, event) {
     return app.error(null, [ 'sample-edit', 'control.action' ]);
   }
 
-  var ctl = false;
-  var submitted_data = {};
+  var _action = app.view.action([ 'add', 'edit' ], event, element, data, form);
 
-  var form = document.getElementById('form-data');
-  var action_submit = document.getElementById('real-submit');
-  var action_index = document.getElementById('index');
-  var id = action_index.getAttribute('value');
-  id = parseInt(id);
+  _action.begin();
 
-  if (! form.checkValidity()) {
-    Array.prototype.forEach.call(form.elements, function(field) {
-      var closest_group = null;
-      if (field.parentNode.className.indexOf('form-group') != -1) {
-        closest_group = field.parentNode;
-      } else if (field.parentNode.parentNode.className.indexOf('form-group') != -1) {
-        closest_group = field.parentNode.parentNode;
-      }
-      if (closest_group && closest_group.classList) {
-        if (closest_group.querySelector(':invalid')) {
-          closest_group.classList.remove('has-success');
-          closest_group.classList.add('has-error');
-        } else {
-          closest_group.classList.remove('has-error');
-          closest_group.classList.add('has-success');
-        }
-      }
-    });
-    action_submit.click();
-    return false;
+  if (_action.validateForm()) {
+    return;
   }
 
-  if (event === 'add' || event === 'edit') {
-    if (event === 'add') {
-      var last_id = Object.keys(data_sample).pop();
-      id = last_id ? (parseInt(last_id) + 1) : 1;
-    }
 
-    submitted_data['sample'] = data_sample;
+  var id = _action.getID();
 
-    var ext_data_id = app.utils.extendObject(data_sample[id], app.utils.getFormData(form.elements));
+  var _data_updated = { 'sample': data };
+  var _ext_data = app.utils.extendObject(data[id], app.view.getFormData(form.elements));
 
-    submitted_data['sample'][id] = ext_data_id;
 
-    submitted_data = JSON.stringify(submitted_data);
+  var _events = {};
 
-    if (id && submitted_data) {
-      ctl = { view: 'sample', action: event, index: id, submit: true, data: submitted_data };
-    }
+  _events.update = function() {
+    _data_updated['sample'][id] = _ext_data;
   }
 
-  if (ctl) {
-    control.temp.form_submit = true;
-    ctl = JSON.stringify(ctl);
-    window.parent.postMessage(ctl, '*');
-    return true;
+  _events.remove = function() {
+    delete _data_updated['sample'][id];
   }
+
+  _events.add = function() {
+    _events.update();
+
+    return _action.add(_data_updated, true);
+  }
+
+  _events.edit = function() {
+    _events.update();
+
+    return _action.edit(_data_updated, true);
+  }
+
+  _events.delete = function() {
+    _events.remove();
+
+    return _action.delete(_data_updated, true, 'item', id);
+  }
+
+
+  var ctl = _events[event](sub);
+
+  app.view.submit(ctl);
+
+  _action.end();
 }
 
 
-window.store = {};
-
 app.load(app.view.load);
 app.unload(app.view.unload);
-app.utils.addEvent('resize', window, app.view.resizeView);
-app.utils.addEvent('orientationchange', window, app.view.resizeView);
 </script>
 </body>
 </html>

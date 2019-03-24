@@ -42,7 +42,7 @@
         <th class="text-nowrap">Vehicle Type</th>
         <th class="text-nowrap">Manufactured</th>
         <th class="text-nowrap">Value Price</th>
-        <th>Buy</th>
+        <th class="hidden-print">Buy</th>
       </tr>
     </thead>
     <tbody>
@@ -52,7 +52,7 @@
           <a class="action btn btn-danger" href="../index.html?sample&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent">Delete</a>
         </td>
         <td>{id}</td>
-        <td>{name}</td>
+        <td>{title}</td>
         <td>{type}</td>
         <td class="text-nowrap">{date}</td>
         <td class="text-nowrap">{amount}</td>
@@ -76,98 +76,48 @@
 var control = {};
 
 control.openView = function() {
-  var data_sample = window.store[config.app]['sample'];
+  var data = window.store[config.app]['sample'];
 
-  if (! data_sample) {
+  var table = document.getElementById('table-data');
+
+  if (! data) {
     return app.error(null, [ 'sample', 'control.openView' ]);
   }
 
-  var view_title = document.getElementById('view-title');
-  var section_title = document.getElementById('section-title');
+  var _open = app.view.open(null, data);
 
-  var tbody = document.querySelector('#table-data > tbody');
-  var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
-  trow_tpl.classList.remove('tpl');
+  _open.begin();
 
-  control.temp = {};
+  _open.fillTable(table);
 
-  var blob = '';
-
-  Array.prototype.forEach.call(Object.keys(data_sample), function(id) {
-    var row = control.renderRow(trow_tpl, data_sample[id]);
-    blob += row.outerHTML;
-  });
-
-  tbody.innerHTML = blob;
-
-  app.view.resizeView(false);
+  _open.end();
 }
 
-control.renderRow = function(tpl, obj) {
-  if (! obj || ! control.temp) {
+control.renderRow = function(tpl_row, id_row, data_row) {
+  if (! tpl_row || ! data_row) {
     return app.error(null, [ 'sample', 'control.renderRow' ]);
   }
 
-  var row = tpl.cloneNode(true);
+  var row = tpl_row.cloneNode(true);
 
-  row.setAttribute('data-index', obj.id);
-
-  var name = obj.vendor + ' ' + obj.name;
-  var date = obj.date;
-  date = new Date(date);
-  date = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '/' + (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '/' + date.getFullYear();
-  var amount = obj.amount;
+  row.setAttribute('data-index', id_row);
 
   row.innerHTML = row.innerHTML
-    .replace(/{id}/g, obj.id)
-    .replace('{name}', name)
-    .replace('{type}', obj.type)
-    .replace('{date}', date)
-    .replace('{amount}', amount)
-    .replace('{status}', status)
+    .replace(/\{id\}/g, data_row.id)
+    .replace('{title}', data_row.title)
+    .replace('{type}', data_row.type)
+    .replace('{date}', app.utils.dateFormat(data_row.date))
+    .replace('{amount}', data_row.amount)
+    .replace('{status}', data_row.status)
 
   return row;
 }
 
-control.convertTableCSV = function() {
-  var table = document.querySelector('#table-data');
-  var thead_th = table.querySelectorAll('thead th');
-  var tbody_trow = table.querySelectorAll('tbody tr');
+control.action = function(element, event, sub) {
+  var data = window.store[config.app]['sample'];
+  var table = document.getElementById('table-data');
 
-  var csv = [ [] ];
-
-  Array.prototype.forEach.call(thead_th, function(node) {
-    if (node.classList.contains('hidden-print')) { return; }
-    csv[0].push(node.textContent);
-  });
-
-  var csv_cursor = 0;
-
-  Array.prototype.forEach.call(tbody_trow, function(node) {
-    if (node.classList.contains('tpl')) { return; }
-    var tbody_td = node.querySelectorAll('td');
-
-    csv_cursor++;
-    csv[csv_cursor] = [];
-
-    Array.prototype.forEach.call(tbody_td, function(node) {
-      if (node.classList.contains('hidden-print')) { return; }
-      var _input = node.querySelector('.form-control');
-      if (_input) {
-        csv[csv_cursor].push(_input.value);
-      } else {
-        csv[csv_cursor].push(node.textContent);
-      }
-    });
-  });
-
-  return csv;
-}
-
-control.action = function(element, event) {
-  var data_sample = window.store[config.app]['sample'];
-
-  if (! data_sample || ! control.temp) {
+  if (! data) {
     return app.error(null, [ 'sample', 'control.action' ]);
   }
 
@@ -175,102 +125,66 @@ control.action = function(element, event) {
     return app.error(null, [ 'sample', 'control.action' ]);
   }
 
-  var ctl = false;
-  var submitted_data = {};
+  var _action = app.view.action([ 'edit', 'delete', 'export', 'print', 'example' ], event, element, data);
 
-  var trow = element.parentNode.parentNode;
-  var id = trow.getAttribute('data-index');
-  id = parseInt(id);
+  _action.begin();
 
-  if (id && (event === 'edit' || event === 'delete')) {
-    ctl = { view: 'sample', action: event, index: id };
 
-    if (event === 'delete') {
-      ctl.msg = 'Sei sicuro di voler deletere il samplenativo #' + id + ' ?';
+  var id = _action.getID();
 
-      submitted_data['sample'] = data_sample;
+  var _data_updated = {};
 
-      delete submitted_data['sample'][id];
 
-      ctl.submit = true;
-      ctl.data = JSON.stringify(submitted_data);
-    }
+  var _events = {};
+
+  _events.update = function() {
+    _data_updated['sample'] = data;
   }
 
-  if (event === 'export' && arguments.length === 3) {
-    var sub_cmd = arguments[2].toString();
+  _events.remove = function() {
+    delete _data_updated['sample'][id];
+  }
 
-    if (! sub_cmd) {
-      return;
-    }
+  _events.edit = function() {
+    return _action.edit(_data_updated);
+  }
 
-    var _table = document.querySelector('#table-data');
+  _events.delete = function() {
+    return _action.delete(_data_updated, true, 'Vehicle', id);
+  }
+
+  _events.export = function(subControl) {
     var _dropdown = element.parentNode.parentNode.parentNode;
 
-    if (sub_cmd === 'csv') {
-      var source = app.view.convertToCSV(_table);
-      var filename = 'csv_export';
-      var date = new Date();
+    app.view.sub(subControl, element, table)();
 
-      filename += '_' + (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '-' + (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-' + date.getFullYear();
-      filename += '_' + (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + '-' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
-
-      var file = new File(
-        [ source ],
-        filename + '.csv',
-        { type: 'text/csv;charset=utf-8' }
-      );
-
-      saveAs(file);
-    }
-
-    if (sub_cmd === 'clipboard') {
-      app.view.copyToClipboard(_table);
-
-      var _dropdown_btn = _dropdown.querySelector('.dropdown-toggle');
-      _dropdown_btn.classList.add('btn-gray-lighter');
-
-      setTimeout(function() {
-        _dropdown_btn.classList.remove('btn-gray-lighter');
-        this.clearTimeout();
-      }, 1000);
-    }
-
-    if (! ('jQuery' in window && 'dropdown' in jQuery.fn)) {
-      if (sub_cmd === 'toggler') {
-        app.utils.dropdown('toggle', element, _dropdown)();
-      }
-
-      app.utils.addEvent('click', document.body, app.utils.dropdown('close', element, _dropdown));
-    }
+    return;
   }
 
-  if (event === 'print') {
-    return window.print();
+  _events.print = function() {
+    return _action.print();
   }
 
 
-  // Action example
-  if (event === 'example') {
-    window.parent.alert('Action example');
+
+  // Custom action example
+  _events.example = function() {
+    window.alert('Custom action example');
+
     return;
   }
 
 
 
-  if (ctl) {
-    ctl = JSON.stringify(ctl);
-    window.parent.postMessage(ctl, '*');
-    return;
-  }
+  var ctl = _events[event](sub);
+
+  app.view.submit(ctl);
+
+  _action.end();
 }
 
 
-window.store = {};
-
 app.load(app.view.load);
-app.utils.addEvent('resize', window, app.view.resizeView);
-app.utils.addEvent('orientationchange', window, app.view.resizeView);
 </script>
 
 </body>

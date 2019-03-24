@@ -353,6 +353,9 @@ main.setupData = function(loc) {
 }
 
 main.load = function() {
+  window.store = {};
+
+
   app.resume(config);
 
 
@@ -393,8 +396,6 @@ main.unload = function() {
   return 'Ricordati di salvare prima di chiudere l\'applicazione!';
 }
 
-
-window.store = {};
 
 app.load(main.load);
 app.unload(main.unload);

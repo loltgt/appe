@@ -16,7 +16,7 @@
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
   <div class="pull-left">
-    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block">Select Archive</label>
+    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block">Select archive</label>
     <select id="selection" onchange="control.action(this, 'selection')"></select>
   </div>
   <div class="pull-right">
@@ -36,11 +36,10 @@
 </div>
 
 
-<form id="form-data" class="form form-data" autocomplete="off" validate>
 <div class="table-responsive">
   <table id="table-data" class="table table-data">
     <thead>
-      <tr class="hidden-csv">
+      <tr class="hidden-csv hidden-print">
         <th class="hidden-print">Actions</th>
         <th>ID</th>
         <th class="text-nowrap">Name</th>
@@ -72,6 +71,7 @@
         <td class="text-center text-nowrap">Toyes</td>
         <td class="text-center text-nowrap">Books</td>
         <td class="text-center text-nowrap">TOTAL</td>
+        <td></td>
       </tr>
     </thead>
     <tbody>
@@ -82,7 +82,7 @@
         <td>{id}</td>
         <td class="text-nowrap text-uppercase">{name}</td>
         <td>{title}</td>
-        <td class="text-nowrap">{type}</td>
+        <td class="text-nowrap"><em>{type}</em></td>
         <td class="text-center">{date}</td>
         <td class="text-center">{checked}</td>
         <td class="text-center">{pop_avg}</td>
@@ -95,7 +95,6 @@
     </tbody>
   </table>
 </div>
-</form>
 
 
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
@@ -107,55 +106,54 @@
 var control = {};
 
 control.openView = function() {
-  var archive_id = app.memory.get('archive_id'), category_id = app.memory.get('category_id');
   var data_items = window.store[config.app]['items'];
   var data_archive = window.store[config.app]['archive'];
   var data_categories = window.store[config.app]['categories'];
+
+  var table = document.getElementById('table-data');
+  var selection = document.getElementById('selection');
 
   if (! data_items || ! data_archive || ! data_categories) {
     return app.error(null, [ 'main', 'control.openView' ]);
   }
 
-  var view_title = document.getElementById('view-title');
-  var section_title = document.getElementById('section-title');
 
-  var form = document.getElementById('form-data');
+  var archive_id = app.memory.get('archive_id');
+  var category_id = app.memory.get('category_id');
 
   var archive_data = data_archive[archive_id][category_id];
   var archive_items = data_archive[archive_id][category_id].items;
   var categories_data = data_categories[archive_id][category_id];
 
-  var archive_selection = {};
+  var archive_selection = [];
   Array.prototype.forEach.call(Object.keys(data_archive), function(id) {
-    archive_selection[id] = {};
-    archive_selection[id].name = data_archive[id][category_id].title;
-    archive_selection[id].selected = (parseInt(id) === archive_id) ? true : false;
+    var obj = {};
+    obj[id] = data_archive[id][category_id].title;
+    archive_selection.push(obj);
   });
 
-  if (! archive_items || ! archive_data || ! categories_data || ! archive_selection) {
-    return app.error(null, [ 'main', 'control.openView' ]);
+
+  var _open = app.view.open(null, archive_data);
+
+  _open.begin();
+
+  var event = _open.getEvent();
+  var id = _open.setID(archive_id);
+
+  _open.setTitle('handle', archive_data.title);
+
+  _open.fillSelection(selection, archive_selection, id);
+
+
+  var _events = {};
+
+  _events.update = function() {
+    control.action(form, 'update');
   }
 
-  control.temp = {};
-  control.temp.archive_id = archive_id;
-  control.temp.category_id = category_id;
-  control.temp.selection = archive_selection;
-  control.temp.archive_select = archive_selection;
-  control.temp.archive_data = archive_data;
-  control.temp.categories_data = categories_data;
-
-  section_title.innerHTML = data_archive[archive_id][category_id].title;
-
-  var select_archive = document.getElementById('selection');
-  select_archive.innerHTML = app.view.renderSelect('selection', archive_selection);
-  select_archive.value = archive_id;
-
-  var tbody = document.querySelector('#table-data > tbody');
-  var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
-  trow_tpl.classList.remove('tpl');
 
   var archive_items_keys = Object.keys(archive_items);
-  var update = false;
+  var _update = false;
   var closed = archive_data.status;
 
   var archive_items_keys_order = [];
@@ -168,11 +166,12 @@ control.openView = function() {
     }
 
     if (! archive_items[id].pop.total) {
-      update = true;
+      _update = true;
+
+      archive_items[id].pop.total = archive_items[id].pop['avg'] + archive_items[id].pop['movies'] + archive_items[id].pop['toyes'] + archive_items[id].pop['books'];
     }
   });
 
-  var blob = '';
 
   archive_items_keys_order.sort(function(a, b) { return a[1] - b[1]; });
   archive_items_keys_order = Object.values(archive_items_keys_order);
@@ -183,54 +182,53 @@ control.openView = function() {
     archive_items_keys.push(value[0]);
   });
 
-  Array.prototype.forEach.call(archive_items_keys, function(id) {
-    if (! archive_items[id].pop.total) {
-      archive_items[id].pop.total = archive_items[id].pop['avg'] + archive_items[id].pop['movies'] + archive_items[id].pop['toyes'] + archive_items[id].pop['books'];
-    }
 
-    var row = control.renderRow(trow_tpl, [ archive_items[id], data_items[id] ]);
-    blob += row.outerHTML;
-  });
 
-  tbody.innerHTML += blob;
 
-  if (update) {
-    control.action(form, 'update');
+
+
+
+  _open.fillTable(table, archive_items, archive_items_keys, data_items, archive_data, categories_data);
+
+
+  //TODO cycle
+  if (_update) {
+    //_events.update();
   }
 
-  app.view.resizeView(false);
+  _open.end();
 }
 
-control.renderRow = function(tpl, obj) {
-  if (! obj || ! control.temp) {
+control.renderRow = function(tpl_row, id_row, data_row, data_extra) {
+  if (! tpl_row || ! data_row) {
     return app.error(null, [ 'main', 'control.renderRow' ]);
   }
 
-  var row = tpl.cloneNode(true);
 
-  row.setAttribute('data-index', obj[1].id);
+  var data_items = data_extra[0];
+  var archive_data = data_extra[1];
+  var categories_data = data_extra[2];
 
-  var archive_data = control.temp.archive_data;
-  var category = control.temp.categories_data;
-  var type = category.types[obj[1].type];
-  var date = obj[1].date;
-  date = new Date(date);
-  date = date.getFullYear();
-  var checked = archive_data.checked ? 'yes' : 'none';
+  var data_item = data_items[id_row];
+
+
+  var row = tpl_row.cloneNode(true);
+
+  row.setAttribute('data-index', id_row);
 
   row.innerHTML = row.innerHTML
-    .replace(/{id}/g, obj[1].id)
-    .replace('{name}', obj[1].name)
-    .replace('{title}', obj[1].title)
-    .replace('{type}', type)
-    .replace('{date}', date)
-    .replace('{checked}', checked)
-    .replace('{pop_avg}', obj[0].pop['avg'])
-    .replace('{pop_movies}', obj[0].pop['movies'])
-    .replace('{pop_toyes}', obj[0].pop['toyes'])
-    .replace('{pop_books}', obj[0].pop['books'])
-    .replace('{pop_total}', obj[0].pop['total'])
-    .replace('{awards}', (obj[0].awards || 0));
+    .replace(/\{id\}/g, data_item.id)
+    .replace('{name}', data_item.name)
+    .replace('{title}', data_item.title)
+    .replace('{type}', categories_data.types[data_item.type])
+    .replace('{date}', app.utils.dateFormat(data_item.date, 'Y'))
+    .replace('{checked}', (data_item.checked ? 'yes' : 'none'))
+    .replace('{pop_avg}', data_row.pop['avg'])
+    .replace('{pop_movies}', data_row.pop['movies'])
+    .replace('{pop_toyes}', data_row.pop['toyes'])
+    .replace('{pop_books}', data_row.pop['books'])
+    .replace('{pop_total}', data_row.pop['total'])
+    .replace('{awards}', (data_row.awards || 0));
 
   return row;
 }
@@ -315,10 +313,10 @@ control.action = function(element, event) {
 
     if (! ('jQuery' in window && 'dropdown' in jQuery.fn)) {
       if (sub_cmd === 'toggler') {
-        app.utils.dropdown('toggle', element, _dropdown)();
+        app.layout.dropdown('toggle', element, _dropdown)();
       }
 
-      app.utils.addEvent('click', document.body, app.utils.dropdown('close', element, _dropdown));
+      app.utils.addEvent('click', document.body, app.layout.dropdown('close', element, _dropdown));
     }
   }
 
@@ -334,11 +332,7 @@ control.action = function(element, event) {
 }
 
 
-window.store = {};
-
 app.load(app.view.load);
-app.utils.addEvent('resize', window, app.view.resizeView);
-app.utils.addEvent('orientationchange', window, app.view.resizeView);
 </script>
 </body>
 </html>
