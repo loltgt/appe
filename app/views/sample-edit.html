@@ -86,8 +86,9 @@ control.openView = function() {
   var form = document.getElementById('form-data');
 
   if (! data) {
-    return app.error(null, [ 'sample-edit', 'control.openView' ]);
+    return app.error('control.openView', arguments, 'data*');
   }
+
 
   var _open = app.view.open([ 'add', 'edit' ], data, form);
 
@@ -134,7 +135,7 @@ control.openView = function() {
 
 control.fillForm = function(data_field) {
   if (! data_field) {
-    return app.error(null, [ 'sample-edit', 'control.fillForm' ]);
+    return app.error('control.fillForm', arguments);
   }
 
   document.querySelector('#sample_type > option[value="' + data_field.type + '"]').setAttribute('selected', '');
@@ -142,21 +143,24 @@ control.fillForm = function(data_field) {
   document.getElementById('sample_amount').setAttribute('value', data_field.amount);
 }
 
-control.action = function(element, event, sub) {
+control.action = function(element, event, data_extra) {
   var data = window.store[config.app]['sample'];
+
   var form = document.getElementById('form-data');
 
   if (! data) {
-    return app.error(null, [ 'sample-edit', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   if (! element || typeof event !== 'string') {
-    return app.error(null, [ 'sample-edit', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
+
 
   var _action = app.view.action([ 'add', 'edit' ], event, element, data, form);
 
   _action.begin();
+
 
   if (_action.validateForm()) {
     return;
@@ -165,13 +169,14 @@ control.action = function(element, event, sub) {
 
   var id = _action.getID();
 
+
   var _data_updated = { 'sample': data };
   var _ext_data = app.utils.extendObject(data[id], app.view.getFormData(form.elements));
 
 
   var _events = {};
 
-  _events.update = function() {
+  _events._update = function() {
     _data_updated['sample'][id] = _ext_data;
   }
 
@@ -180,13 +185,13 @@ control.action = function(element, event, sub) {
   }
 
   _events.add = function() {
-    _events.update();
+    _events._update();
 
     return _action.add(_data_updated, true);
   }
 
   _events.edit = function() {
-    _events.update();
+    _events._update();
 
     return _action.edit(_data_updated, true);
   }
@@ -198,7 +203,7 @@ control.action = function(element, event, sub) {
   }
 
 
-  var ctl = _events[event](sub);
+  var ctl = _events[event](data_extra);
 
   app.view.submit(ctl);
 

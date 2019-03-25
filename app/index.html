@@ -213,7 +213,7 @@ main.saveFile = function() {
 
 main.action = function(element, event) {
   if (! element || typeof event !== 'string') {
-    return app.error(null, [ 'main.action' ]);
+    return app.error('main.action', arguments);
   }
 
   if (event === 'menu') {
@@ -226,16 +226,16 @@ main.action = function(element, event) {
         _menu.setAttribute('aria-expanded', false);
       }
 
-      app.utils.collapse('toggle', element, _menu)();
+      app.layout.collapse('toggle', element, _menu)();
 
-      app.utils.addEvent('click', document.body, app.utils.collapse('close', element, _menu));
+      app.utils.addEvent('click', document.body, app.layout.collapse('close', element, _menu));
     }
   }
 }
 
 main.controlView = function(event) {
   if (! event.data) {
-    return app.error(null, [ 'main.controlView' ]);
+    return app.error('main.controlView', arguments);
   }
 
   var events = config.events;
@@ -248,7 +248,7 @@ main.controlView = function(event) {
   };
 
   if (! ctl.action) {
-    return app.error(null, [ 'main.controlView' ]);
+    return app.error('main.controlView', arguments);
   }
 
   if (ctl.action === 'resize') {
@@ -260,11 +260,12 @@ main.controlView = function(event) {
   }
 
   if (ctl.action in config.events === false) {
-    return app.error(null, [ 'main.controlView' ]);
+    return app.error('main.controlView', arguments);
   }
 
   id = parseInt(ctl.index) || null;
 
+  //TODO Object.assign method ?
   var loc = Object.assign({}, ctl);
 
   var title = '';
@@ -305,7 +306,7 @@ main.controlView = function(event) {
     }
 
     if (! window.confirm(msg)) {
-      location.reload();
+      //location.reload();
       return;
     }
   }
@@ -328,9 +329,10 @@ main.controlView = function(event) {
         loc.index = null;
 
         if (ctl.action === 'update') {
-          if (ctl.view === 'average') {
-            location.reload();
-          }
+          console.log(ctl);
+          //if (ctl.view === 'average') {
+            //location.reload();
+          //}
         } else {
           main.loadView(loc);
         }

@@ -9,7 +9,7 @@
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
-<body class="view">
+<body class="view view_handle">
 <h1 id="view-title" class="page-header">Main</h1>
 <h2 id="section-title" class="sub-header">{section}</h2>
 
@@ -114,7 +114,7 @@ control.openView = function() {
   var selection = document.getElementById('selection');
 
   if (! data_items || ! data_archive || ! data_categories) {
-    return app.error(null, [ 'main', 'control.openView' ]);
+    return app.error('control.openView', arguments, 'data*');
   }
 
 
@@ -126,6 +126,7 @@ control.openView = function() {
   var categories_data = data_categories[archive_id][category_id];
 
   var archive_selection = [];
+
   Array.prototype.forEach.call(Object.keys(data_archive), function(id) {
     var obj = {};
     obj[id] = data_archive[id][category_id].title;
@@ -137,8 +138,10 @@ control.openView = function() {
 
   _open.begin();
 
+
   var event = _open.getEvent();
   var id = _open.setID(archive_id);
+
 
   _open.setTitle('handle', archive_data.title);
 
@@ -147,82 +150,90 @@ control.openView = function() {
 
   var _events = {};
 
-  _events.update = function() {
-    control.action(form, 'update');
+  _events.update = function(data_updated) {
+    control.action(true, 'update', data_updated);
   }
 
 
-  var archive_items_keys = Object.keys(archive_items);
-  var _update = false;
-  var closed = archive_data.status;
 
-  var archive_items_keys_order = [];
+  // join (items) + order (archive.items[id].awards) + update
 
-  Array.prototype.forEach.call(archive_items_keys, function(id) {
-    archive_items_keys_order.push([ id, (archive_items[id].order != undefined ? archive_items[id].order : id) ]);
+  var _archive_items_join = app.utils.extendObject(true, data_items, archive_items);
 
-    if (! archive_items[id].pop) {
-      archive_items[id].pop = { 'avg': 0, 'movies': 0, 'toyes': 0, 'books': 0, 'total': 0 };
+
+//TODO check extend
+//console.log(_archive_items_join, data_items, archive_items);
+
+
+  var _order = [];
+  var _ordered_keys = [];
+
+  var _data_updated = {};
+
+  Array.prototype.forEach.call(Object.keys(_archive_items_join), function(id) {
+    _order.push([ id, (_archive_items_join[id].awards != undefined ? _archive_items_join[id].awards : id) ]);
+
+    if (! _archive_items_join[id].pop) {
+      _archive_items_join[id].pop = {};
     }
 
-    if (! archive_items[id].pop.total) {
-      _update = true;
+    _archive_items_join[id].pop['avg'] = parseInt(_archive_items_join[id].pop['avg'] || 0);
+    _archive_items_join[id].pop['movies'] = parseInt(_archive_items_join[id].pop['movies'] || 0);
+    _archive_items_join[id].pop['toyes'] = parseInt(_archive_items_join[id].pop['toyes'] || 0);
+    _archive_items_join[id].pop['books'] = parseInt(_archive_items_join[id].pop['books'] || 0);
 
-      archive_items[id].pop.total = archive_items[id].pop['avg'] + archive_items[id].pop['movies'] + archive_items[id].pop['toyes'] + archive_items[id].pop['books'];
+    if (! _archive_items_join[id].pop.total) {
+      _archive_items_join[id].pop.total  = 0;
+      _archive_items_join[id].pop.total += _archive_items_join[id].pop['avg'];
+      _archive_items_join[id].pop.total += _archive_items_join[id].pop['movies'];
+      _archive_items_join[id].pop.total += _archive_items_join[id].pop['toyes'];
+      _archive_items_join[id].pop.total += _archive_items_join[id].pop['books'];
+
+      _data_updated['archive'] = data_archive;
+      _data_updated['archive'][archive_id][category_id]['items'][id].pop = _archive_items_join[id].pop;
     }
   });
 
+  _order.sort(function(a, b) { return a[1] - b[1]; });
+  _order = Object.values(_order);
 
-  archive_items_keys_order.sort(function(a, b) { return a[1] - b[1]; });
-  archive_items_keys_order = Object.values(archive_items_keys_order);
-
-  archive_items_keys = [];
-
-  Array.prototype.forEach.call(archive_items_keys_order, function(value) {
-    archive_items_keys.push(value[0]);
+  Array.prototype.forEach.call(_order, function(value) {
+    _ordered_keys.push(value[0]);
   });
 
 
 
+  _open.fillTable(table, _archive_items_join, _ordered_keys, categories_data);
 
 
-
-
-  _open.fillTable(table, archive_items, archive_items_keys, data_items, archive_data, categories_data);
-
-
-  //TODO cycle
-  if (_update) {
-    //_events.update();
+  if (_data_updated && Object.keys(_data_updated).length) {
+    _events.update(_data_updated);
   }
+
 
   _open.end();
 }
 
 control.renderRow = function(tpl_row, id_row, data_row, data_extra) {
   if (! tpl_row || ! data_row) {
-    return app.error(null, [ 'main', 'control.renderRow' ]);
+    return app.error('control.renderRow', arguments);
   }
 
 
-  var data_items = data_extra[0];
-  var archive_data = data_extra[1];
-  var categories_data = data_extra[2];
-
-  var data_item = data_items[id_row];
+  var categories_data_extra = data_extra[0];
 
 
   var row = tpl_row.cloneNode(true);
 
-  row.setAttribute('data-index', id_row);
+  row.setAttribute('data-index', data_row.id);
 
   row.innerHTML = row.innerHTML
-    .replace(/\{id\}/g, data_item.id)
-    .replace('{name}', data_item.name)
-    .replace('{title}', data_item.title)
-    .replace('{type}', categories_data.types[data_item.type])
-    .replace('{date}', app.utils.dateFormat(data_item.date, 'Y'))
-    .replace('{checked}', (data_item.checked ? 'yes' : 'none'))
+    .replace(/\{id\}/g, data_row.id)
+    .replace('{name}', data_row.name)
+    .replace('{title}', data_row.title)
+    .replace('{type}', categories_data_extra.types[data_row.type])
+    .replace('{date}', app.utils.dateFormat(data_row.date, 'Y'))
+    .replace('{checked}', (data_row.checked ? 'yes' : 'none'))
     .replace('{pop_avg}', data_row.pop['avg'])
     .replace('{pop_movies}', data_row.pop['movies'])
     .replace('{pop_toyes}', data_row.pop['toyes'])
@@ -233,102 +244,65 @@ control.renderRow = function(tpl_row, id_row, data_row, data_extra) {
   return row;
 }
 
-control.action = function(element, event) {
+control.action = function(element, event, data_extra) {
   var data_archive = window.store[config.app]['archive'];
 
-  if (! data_archive || ! control.temp) {
-    return app.error(null, [ 'main', 'control.action' ]);
+  var table = document.getElementById('table-data');
+
+  if (! data_archive) {
+    return app.error('control.action', arguments);
   }
 
   if (! element || typeof event !== 'string') {
-    return app.error(null, [ 'main', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
-  var ctl = false;
-  var updated_data = {};
 
-  var trow = element.parentNode.parentNode;
-  var id = trow.getAttribute('data-index');
-  id = parseInt(id);
+  var _action = app.view.action([ 'selection', 'open', 'update', 'export', 'print' ], event, element, data_archive);
 
-  if (event === 'selection') {
-    var selection = element.value.toString();
-    ctl = { view: 'main', action: 'selection', submit: true, data: selection };
+  _action.begin();
+
+
+  var id = _action.getID();
+
+
+  var _data_updated = {};
+
+
+  var _events = {};
+
+  _events.selection = function() {
+    return _action.selection(null, true);
   }
 
-  if (id && event === 'open') {
-    ctl = { view: 'main', action: 'open', index: id };
+  _events.open = function() {
+    return _action.open(null);
   }
 
-  if (event === 'update') {
-    var archive_id = control.temp.archive_id;
-    var category_id = control.temp.category_id;
-    var archive_items = data_archive[archive_id][category_id].items;
+  _events.update = function() {
+    _data_updated = data_extra;
 
-    updated_data['archive'] = data_archive;
-    updated_data['archive'][archive_id][category_id]['items'] = archive_items;
-    updated_data = JSON.stringify(updated_data);
-
-    ctl = { view: 'main', action: 'update', submit: true, data: updated_data };
+    return _action.update(_data_updated, true);
   }
 
-  if (event === 'export' && arguments.length === 3) {
-    var sub_cmd = arguments[2].toString();
-
-    if (! sub_cmd) {
-      return;
-    }
-
-    var _table = document.querySelector('#table-data');
+  _events.export = function(subControl) {
     var _dropdown = element.parentNode.parentNode.parentNode;
 
-    if (sub_cmd === 'csv') {
-      var source = app.view.convertToCSV(_table);
-      var filename = 'csv_export';
-      var date = new Date();
+    app.view.sub(subControl, element, table)();
 
-      filename += '_' + (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '-' + (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-' + date.getFullYear();
-      filename += '_' + (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + '-' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
-
-      var file = new File(
-        [ source ],
-        filename + '.csv',
-        { type: 'text/csv;charset=utf-8' }
-      );
-
-      saveAs(file);
-    }
-
-    if (sub_cmd === 'clipboard') {
-      app.view.copyToClipboard(_table);
-
-      var _dropdown_btn = _dropdown.querySelector('.dropdown-toggle');
-      _dropdown_btn.classList.add('btn-gray-lighter');
-
-      setTimeout(function() {
-        _dropdown_btn.classList.remove('btn-gray-lighter');
-        this.clearTimeout();
-      }, 1000);
-    }
-
-    if (! ('jQuery' in window && 'dropdown' in jQuery.fn)) {
-      if (sub_cmd === 'toggler') {
-        app.layout.dropdown('toggle', element, _dropdown)();
-      }
-
-      app.utils.addEvent('click', document.body, app.layout.dropdown('close', element, _dropdown));
-    }
-  }
-
-  if (event === 'print') {
-    return window.print();
-  }
-
-  if (ctl) {
-    ctl = JSON.stringify(ctl);
-    window.parent.postMessage(ctl, '*');
     return;
   }
+
+  _events.print = function() {
+    return _action.print();
+  }
+
+
+  var ctl = _events[event](data_extra);
+
+  app.view.submit(ctl);
+
+  _action.end();
 }
 
 

@@ -76,7 +76,7 @@ control.openView = function() {
   var appe = app.getVersion();
 
   if (! data_file || ! appe) {
-    return app.error(null, [ 'informazioni', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   var view_title = document.getElementById('view-title');

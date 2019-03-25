@@ -113,7 +113,7 @@ control.openView = function() {
   var data_archive = window.store[config.app]['archive'];
 
   if (! data_items || ! data_archive) {
-    return app.error(null, [ 'archive-edit', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   var view = 'archive';
@@ -172,7 +172,7 @@ control.openView = function() {
   action_index.setAttribute('value', id);
 
   if (! id) {
-    return app.error(null, [ 'archive-edit', 'control.openView', 1 ]);
+    return app.error(1, arguments);
   }
 
   control.temp = {};
@@ -220,7 +220,7 @@ control.openView = function() {
 
 control.fillForm = function(obj) {
   if (! obj || ! control.temp) {
-    return app.error(null, [ 'archive-edit', 'control.fillForm' ]);
+    return app.error('control.fillForm', arguments);
   }
 
   var tbody = document.querySelector('#table-data > tbody');
@@ -234,12 +234,12 @@ control.fillForm = function(obj) {
 
     row.classList.add('draggable');
 
-    app.utils.addEvent('dragstart', row, app.view.draggable('start', 'archive_items'));
-    app.utils.addEvent('dragenter', row, app.view.draggable('enter', 'archive_items'));
-    app.utils.addEvent('dragover', row, app.view.draggable('over', 'archive_items'));
-    app.utils.addEvent('dragleave', row, app.view.draggable('leave', 'archive_items'));
-    app.utils.addEvent('dragend', row, app.view.draggable('end', 'archive_items'));
-    app.utils.addEvent('drop', row, app.view.draggable('drop', 'archive_items'));
+    app.utils.addEvent('dragstart', row, app.layout.draggable('start', 'archive_items'));
+    app.utils.addEvent('dragenter', row, app.layout.draggable('enter', 'archive_items'));
+    app.utils.addEvent('dragover', row, app.layout.draggable('over', 'archive_items'));
+    app.utils.addEvent('dragleave', row, app.layout.draggable('leave', 'archive_items'));
+    app.utils.addEvent('dragend', row, app.layout.draggable('end', 'archive_items'));
+    app.utils.addEvent('drop', row, app.layout.draggable('drop', 'archive_items'));
 
     tbody.appendChild(row);
   });
@@ -252,7 +252,7 @@ control.fillForm = function(obj) {
 
 control.renderRow = function(tpl, obj) {
   if (! obj || ! control.temp) {
-    return app.error(null, [ 'archive-edit', 'control.renderRow' ]);
+    return app.error('control.renderRow', arguments);
   }
 
   var row = tpl.cloneNode(true);
@@ -275,7 +275,7 @@ control.sub = function(element, event) {
   var data_items = window.store[config.app]['items'];
 
   if (! event || ! data_items || ! control.temp) {
-    return app.error(null, [ 'archive-edit', 'control.sub' ]);
+    return app.error('control.sub', arguments);
   }
 
   var step = false;
@@ -298,7 +298,7 @@ control.sub = function(element, event) {
     nome_index = parseInt(nome_index);
 
     if (nome_index === undefined) {
-      return app.error(null, [ 'archive-edit', 'control.sub' ]);
+      return app.error('control.sub', arguments);
     }
 
     delete items[nome_index];
@@ -320,7 +320,7 @@ control.sub = function(element, event) {
     nome = data_items[nome_id];
 
     if (! nome_id) {
-      return app.error(null, [ 'archive-edit', 'control.sub' ]);
+      return app.error('control.sub', arguments);
     }
 
     if (nome_id in items) {
@@ -345,7 +345,7 @@ control.sub = function(element, event) {
 
   if (event === 'fill') {
     if (typeof element !== 'object') {
-      return app.error(null, [ 'archive-edit', 'control.sub' ]);
+      return app.error('control.sub', arguments);
     }
 
     items = Object.keys(element);
@@ -390,11 +390,11 @@ control.action = function(element, event) {
   var data_archive = window.store[config.app]['archive'];
 
   if (! data_archive || ! control.temp) {
-    return app.error(null, [ 'archive-edit', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   if (! element || typeof event !== 'string') {
-    return app.error(null, [ 'archive-edit', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   var ctl = false;

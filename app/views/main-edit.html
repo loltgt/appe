@@ -76,76 +76,47 @@
 var control = {};
 
 control.openView = function() {
-  var archive_id = app.memory.get('archive_id'), category_id = app.memory.get('category_id');
   var data_items = window.store[config.app]['items'];
   var data_archive = window.store[config.app]['archive'];
-
-  if (! data_items || ! data_archive) {
-    return app.error(null, [ 'main-edit', 'control.openView' ]);
-  }
-
-  var view = 'main';
-  var event = null;
-  var id = 0;
-
-  var routes = config.routes;
-  var actions = {};
-
-  Array.prototype.forEach.call(Object.keys(config.events), function(event) {
-    actions[config.events[event]] = event;
-  });
-
-  var loc = app.view.spoof();
-
-  var default_event = config.defaultEvent;  
-  var pass = true;
-
-  if (loc && typeof loc === 'object') {
-    if (loc.action) {
-      if (routes[view][loc.action]) {
-        event = actions[loc.action];
-      } else {
-        pass = false;
-      }
-
-      if (loc.index) {
-        id = parseInt(loc.index);
-      }
-    } else {
-      event = default_event;
-    }
-  } else {
-    pass = false;
-  }
-
-  if (! pass) {
-    return app.error();
-  }
-
-  var view_title = document.getElementById('view-title');
-  var section_title = document.getElementById('section-title');
+  var data_categories = window.store[config.app]['categories'];
 
   var form = document.getElementById('form-data');
-  var action_handler = document.getElementById('submit');
-  var action_index = document.getElementById('index');
 
-  action_index.setAttribute('value', id);
+  if (! data_items || ! data_archive || ! data_categories) {
+    return app.error('control.openView', arguments);
+  }
+
+
+  var archive_id = app.memory.get('archive_id');
+  var category_id = app.memory.get('category_id');
 
   var archive_data = data_archive[archive_id][category_id];
   var archive_items = data_archive[archive_id][category_id].items;
+  var categories_data = data_categories[archive_id][category_id];
 
-  if (! id || ! archive_items || ! archive_data) {
-    return app.error(null, [ 'main-edit', 'control.openView', 1 ]);
-  }
+
+  var _open = app.view.open([ 'open' ], archive_data, form);
+
+  _open.begin();
+
+  
+  var event = _open.getEvent();
+  var id = _open.getID();
+
+
+  var title = 'Item "' + data_items[id].title.toUpperCase() + '"';
+  title += ' – ' + data_archive[archive_id][category_id].title;
+
+  _open.setTitle(title);
+
+
+
+
 
   control.temp = {};
   control.temp.archive_id = archive_id;
   control.temp.category_id = category_id;
   control.temp.archive_data = archive_data;
-
-  var title = data_items[id].title;
-  section_title.innerHTML = 'Item "' + title.toUpperCase() + '"';
-  section_title.innerHTML += ' – ' + data_archive[archive_id][category_id].title;
 
 
   var t2body = document.querySelector('#table-2 > tbody');
@@ -167,18 +138,19 @@ control.openView = function() {
   });
 
 
+
+
+
   control.fillForm([ data_archive[archive_id][category_id].status, archive_items[id], data_items[id] ]);
 
-  app.view.resizeView(false);
 
-  control.temp.form_submit = false;
-  control.temp.form_elements = form.elements;
-  control.temp.form_changes = JSON.stringify(app.view.getFormData(control.temp.form_elements));
+
+  _open.end();
 }
 
 control.fillForm = function(obj) {
-  if (! obj || ! control.temp) {
-    return app.error(null, [ 'main-edit', 'control.fillForm' ]);
+  if (! obj) {
+    return app.error('control.fillForm', arguments);
   }
 
   var status = obj[0] ? true : false;
@@ -191,16 +163,16 @@ control.fillForm = function(obj) {
   document.getElementById('main_item_awards').setAttribute('value', (obj[1].awards || 0));
 }
 
-control.action = function(element, event) {
+/*control.action = function(element, event) {
   var data_items = window.store[config.app]['items'];
   var data_archive = window.store[config.app]['archive'];
 
   if (! data_items || ! data_archive || ! control.temp) {
-    return app.error(null, [ 'main-edit', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   if (! element || typeof event !== 'string') {
-    return app.error(null, [ 'main-edit', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   var ctl = false;
@@ -258,15 +230,72 @@ control.action = function(element, event) {
     window.parent.postMessage(ctl, '*');
     return true;
   }
+}*/
+
+control.action = function(element, event, data_extra) {
+  var data_items = window.store[config.app]['items'];
+  var data_archive = window.store[config.app]['archive'];
+  var data_categories = window.store[config.app]['categories'];
+
+  var form = document.getElementById('form-data');
+
+  if (! data_items || ! data_archive || ! data_categories) {
+    return app.error('control.action', arguments);
+  }
+
+  if (! element || typeof event !== 'string') {
+    return app.error('control.action', arguments);
+  }
+
+
+  var _action = app.view.action([ 'edit' ], event, element, data_archive, form);
+
+  _action.begin();
+
+
+  if (_action.validateForm()) {
+    return;
+  }
+
+
+  var id = _action.getID();
+
+
+  var _data_updated = {};
+
+
+  var _events = {};
+
+  _events._update = function() {
+    var archive_id = app.memory.get('archive_id');
+    var category_id = app.memory.get('category_id');
+
+    _data_updated['archive'] = data_archive;
+
+    var _ext_data = app.utils.extendObject(data_archive[archive_id][category_id]['items'][id], app.view.getFormData(form.elements));
+
+    _data_updated['archive'][archive_id][category_id]['items'][id] = _ext_data;
+  }
+
+  _events.edit = function() {
+    _events._update();
+
+    return _action.edit(_data_updated, true);
+  }
+
+
+  var ctl = _events[event](data_extra);
+
+  console.log(ctl);
+
+  //app.view.submit(ctl);
+
+  _action.end();
 }
 
 
-window.store = {};
-
 app.load(app.view.load);
 app.unload(app.view.unload);
-app.utils.addEvent('resize', window, app.view.resizeView);
-app.utils.addEvent('orientationchange', window, app.view.resizeView);
 </script>
 </body>
 </html>

@@ -141,7 +141,7 @@ control.openView = function() {
   var data_archive = window.store[config.app]['archive'];
 
   if (! data_items || ! data_archive) {
-    return app.error(null, [ 'archive', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   var view_title = document.getElementById('view-title');
@@ -158,7 +158,7 @@ control.openView = function() {
   });
 
   if (! archive_items || ! archive_data) {
-    return app.error(null, [ 'archive', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   control.temp = {};
@@ -190,11 +190,11 @@ control.openView = function() {
       archive_items[id].pop = { 'movies': 0, 'toyes': 0, 'books': 0, 'subtotal': 0 };
     }
 
-    archive_items[id].pop.subtotal = archive_items[id].pop['movies'] + archive_items[id].pop['toyes'] + archive_items[id].pop['books']
+    archive_items[id].pop.subtotal = parseInt(archive_items[id].pop['movies']) + parseInt(archive_items[id].pop['toyes']) + parseInt(archive_items[id].pop['books']);
 
-    archive_subtotals['movies'] += archive_items[id].pop['movies'];
-    archive_subtotals['toyes'] += archive_items[id].pop['toyes'];
-    archive_subtotals['books'] += archive_items[id].pop['movies'];
+    archive_subtotals['movies'] += parseInt(archive_items[id].pop['movies']);
+    archive_subtotals['toyes'] += parseInt(archive_items[id].pop['toyes']);
+    archive_subtotals['books'] += parseInt(archive_items[id].pop['movies']);
 
     archive_subtotals.subtotal += archive_items[id].pop.subtotal;
   });
@@ -240,7 +240,7 @@ control.openView = function() {
 
 control.renderRow = function(tpl, obj) {
   if (! obj) {
-    return app.error(null, [ 'archive', 'control.renderRow' ]);
+    return app.error('control.renderRow', arguments);
   }
 
   var row = tpl.cloneNode(true);
@@ -271,11 +271,11 @@ control.action = function(element, event) {
   var data_archive = window.store[config.app]['archive'];
 
   if (! data_items || ! data_archive || ! control.temp) {
-    return app.error(null, [ 'archive', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   if (! element || typeof event !== 'string') {
-    return app.error(null, [ 'archive', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   var ctl = false;

@@ -80,7 +80,7 @@ control.openView = function() {
   var data_categories = window.store[config.app]['categories'];
 
   if (! data_items || ! data_archive || ! data_categories) {
-    return app.error(null, [ 'items', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   var view_title = document.getElementById('view-title');
@@ -91,7 +91,7 @@ control.openView = function() {
   var categories_data = data_categories[archive_id][category_id];
 
   if (! archive_items || ! archive_data || ! categories_data) {
-    return app.error(null, [ 'items', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   var tbody = document.querySelector('#table-data > tbody');
@@ -118,7 +118,7 @@ control.openView = function() {
 
 control.renderRow = function(tpl, obj) {
   if (! obj || ! control.temp) {
-    return app.error(null, [ 'items', 'control.renderRow' ]);
+    return app.error('control.renderRow', arguments);
   }
 
   var row = tpl.cloneNode(true);
@@ -148,11 +148,11 @@ control.action = function(element, event) {
   var data_archive = window.store[config.app]['archive'];
 
   if (! data_items || ! data_archive || ! control.temp) {
-    return app.error(null, [ 'items', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   if (! element || typeof event !== 'string') {
-    return app.error(null, [ 'items', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   var ctl = false;

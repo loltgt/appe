@@ -61,11 +61,11 @@ start.loader = function(phase) {
 
 start.loadAttempt = function(callback, fn, file, schema, memo) {
   if (! callback || ! fn || ! file || ! schema) {
-    return app.error(null, [ 'index', 'start.loadAttemp' ]);
+    return app.error('start.loadAttemp', arguments);
   }
 
   if (typeof callback !== 'function' || typeof fn !== 'string' || typeof file !== 'string' || typeof schema !== 'object') {
-    return app.error(null, [ 'index', 'start.loadAttemp' ]);
+    return app.error('start.loadAttemp', arguments);
   }
 
   var loaded = false;
@@ -73,7 +73,7 @@ start.loadAttempt = function(callback, fn, file, schema, memo) {
 
   app.os.scriptOpen(function() {
     if (! window[fn]) {
-      //return app.error(null, [ 'index', 'start.loadAttemp' ]);
+      //return app.error('start.loadAttemp', arguments);
     }
 
     for (var i = 0; i < schema.length; i++) {
@@ -83,7 +83,7 @@ start.loadAttempt = function(callback, fn, file, schema, memo) {
       }
 
       if (schema[i] in window[fn] === false) {
-        return app.error(null, [ 'index', 'start.loadAttemp' ]);
+        return app.error('start.loadAttemp', arguments);
       }
 
       loaded = app.store.set(fn + '_' + schema[i], window[fn][schema[i]]);
@@ -251,7 +251,7 @@ app.load(function() {
   if (auxs_loaded) {
     start.loadComplete(session_resume);
   } else {
-    return app.error(null, [ 'index' ]);
+    return app.error('start.alternative', arguments);
   }
 });
 </script>

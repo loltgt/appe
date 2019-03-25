@@ -47,7 +47,7 @@
         <td>{id}</td>
         <td>{name}</td>
         <td>
-          <input type="text" name="items[{id}][avg]" class="form-control form-control-editable input-lg" value="{avg}" data-transform="integer" {readonly} {disabled}>
+          <input type="number" name="items[{id}][pop][avg]" class="form-control form-control-editable input-lg" value="{avg}" data-transform="integer" {readonly} {disabled}>
         </td>
       </tr>
     </tbody>
@@ -74,7 +74,7 @@ control.openView = function() {
   var data_archive = window.store[config.app]['archive'];
 
   if (! data_items || ! data_archive) {
-    return app.error(null, [ 'average', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   var view_title = document.getElementById('view-title');
@@ -96,7 +96,7 @@ control.openView = function() {
   });
 
   if (! archive_items || ! archive_selection) {
-    return app.error(null, [ 'average', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   control.temp = {};
@@ -129,7 +129,7 @@ control.openView = function() {
 
 control.renderRow = function(tpl, obj) {
   if (! obj) {
-    return app.error(null, [ 'average', 'control.renderRow' ]);
+    return app.error('control.renderRow', arguments);
   }
 
   var row = tpl.cloneNode(true);
@@ -152,11 +152,11 @@ control.action = function(element, event) {
   var data_archive = window.store[config.app]['archive'];
 
   if (! data_archive) {
-    return app.error(null, [ 'average', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   if (! element || typeof event !== 'string') {
-    return app.error(null, [ 'average', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   var ctl = false;
@@ -200,7 +200,7 @@ control.action = function(element, event) {
     submitted_data['archive'] = data_archive;
 
     var ext_data_id = app.utils.extendObject(true, archive_items, app.view.getFormData(form.elements).items);
-
+console.log(ext_data_id, app.view.getFormData(form.elements));
     submitted_data['archive'][archive_id][category_id]['items'] = ext_data_id;
 
     submitted_data = JSON.stringify(submitted_data);

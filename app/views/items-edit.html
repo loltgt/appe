@@ -99,7 +99,7 @@ control.openView = function() {
   var data_categories = window.store[config.app]['categories'];
 
   if (! data_items || ! data_archive || ! data_categories) {
-    return app.error(null, [ 'items', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   var view = 'items';
@@ -148,7 +148,7 @@ control.openView = function() {
   var categories_data = data_categories[archive_id][category_id];
 
   if (! archive_items || ! archive_data || ! categories_data) {
-    return app.error(null, [ 'items', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   var form = document.getElementById('form-data');
@@ -172,7 +172,7 @@ control.openView = function() {
   control.temp.categories_data = categories_data;
 
   if (! id) {
-    return app.error(null, [ 'items', 'control.openView' ]);
+    return app.error('control.openView', arguments);
   }
 
   if (event === 'edit') {
@@ -211,7 +211,7 @@ control.openView = function() {
 
 control.fillForm = function(obj) {
   if (! obj || ! control.temp) {
-    return app.error(null, [ 'items', 'control.fillForm' ]);
+    return app.error('control.fillForm', arguments);
   }
 
   var checked = obj.checked ? true : false;
@@ -238,11 +238,11 @@ control.action = function(element, event) {
   var data_items = window.store[config.app]['items'];
 
   if (! data_items || ! control.temp) {
-    return app.error(null, [ 'items', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   if (! element || typeof event !== 'string') {
-    return app.error(null, [ 'items', 'control.action' ]);
+    return app.error('control.action', arguments);
   }
 
   var ctl = false;

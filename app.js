@@ -16,8 +16,7 @@ app._runtime = {
   exec: true,
   title: '',
   storage: false,
-  save: 0,
-  debug: true
+  save: 0
 };
 
 
@@ -25,7 +24,7 @@ app.os = {};
 
 app.os.fileOpen = function(config, callback) {
   if (typeof config !== 'object' || typeof callback !== 'function') {
-    return app.error('app.os.fileOpen', arguments);
+    return app.error(null, [ 'app.os.fileOpen' ]);
   }
 
   if (! this.files.length) {
@@ -35,7 +34,7 @@ app.os.fileOpen = function(config, callback) {
   var file = this.files[0];
 
   if (file.type.indexOf('javascript') === -1) {
-    return app.error('app.os.fileOpen', 'Il formato di file non è corretto.', arguments);
+    return app.error('Il formato di file non è corretto.', [ 'app.os.fileOpen' ]);
   }
 
   var schema = config.schema;
@@ -51,7 +50,7 @@ app.os.fileOpen = function(config, callback) {
 
     for (var i = 0; i < schema.length; i++) {
       if (schema[i] in source === false) {
-        return app.error('app.os.fileOpen', null, 'schema[i]');
+        return app.error(null, [ 'app.os.fileOpen' ]);
       }
 
       app.store.set(config.app + '_' + schema[i], source[schema[i]]);
@@ -67,7 +66,7 @@ app.os.fileOpen = function(config, callback) {
 
 app.os.scriptOpen = function(callback, file, fn, max_attempts) {
   if (typeof callback !== 'function' || typeof file !== 'string' || (fn && typeof fn !== 'string')) {
-    return app.error('app.os.scriptOpen', arguments);
+    return app.error(null, [ 'app.os.scriptOpen' ]);
   }
 
   var _load = function(file) {
@@ -107,13 +106,12 @@ app.os.scriptOpen = function(callback, file, fn, max_attempts) {
 app.os.generateFileHeading = function(_date) {
   var _checksum = '';
   var _date = _date || new Date();
-
   return { 'checksum': _checksum, 'date': _date, 'version': app._runtime.version, 'release': app._runtime.release };
 }
 
 app.os.getLastFileName = function(config) {
   if (! config) {
-    return app.error('app.os.getLastFileName', arguments);
+    return app.error(null, [ 'app.os.getLastFileName' ]);
   }
 
   var file_name = null;
@@ -135,13 +133,13 @@ app.os.getLastFileName = function(config) {
 
 app.os.getLastFileVersion = function(config) {
   if (! config) {
-    return app.error('app.os.getLastFileVersion', arguments);
+    return app.error(null, [ 'app.os.getLastFileVersion' ]);
   }
 
   var data_file = window.store[config.app]['file'];
 
   if (! data_file) {
-    return app.error('app.os.getLastFileVersion', null, 'window.store[config.app][\'file\']');
+    return app.error(null, [ 'app.os.getLastFileVersion' ]);
   }
 
   var file_version = null;
@@ -156,14 +154,14 @@ app.os.getLastFileVersion = function(config) {
 }
 
 app.os.getLastFileChecksum = function(config) {
-  if (! config) {
-    return app.error('app.os.getLastFileChecksum', arguments);
+  if (! config || ! data_file) {
+    return app.error(null, [ 'app.os.getLastFileChecksum' ]);
   }
 
   var data_file = window.store[config.app]['file'];
 
   if (! data_file) {
-    return app.error('app.os.getLastFileChecksum', null, 'window.store[config.app][\'file\']');
+    return app.error(null, [ 'app.os.getLastFileChecksum' ]);
   }
 
   var file_checksum = null;
@@ -177,7 +175,7 @@ app.os.getLastFileChecksum = function(config) {
 
 app.os.getLastFileHeading = function(config) {
   if (! config) {
-    return app.error('app.os.getLastFileHeadings', arguments);
+    return app.error(null, [ 'app.os.getLastFileHeadings' ]);
   }
 
   return {
@@ -191,24 +189,16 @@ app.os.getLastFileHeading = function(config) {
 app.layout = {};
 
 app.layout.renderSelectOption = function(value, name, selected) {
-  if (! value || ! name) {
-    return app.error('app.layout.renderSelectOption', arguments);
-  }
-
   return '<option value="' + value + '"' + (selected ? ' selected' : '') + '>' + name + '<\/option>';
 }
 
 app.layout.renderSelectOptionGroup = function(label, options) {
-  if (! label || ! options) {
-    return app.error('app.layout.renderSelectOptionGroup', arguments);
-  }
-
   return '<optgroup label="' + label + '">' + options + '<\/optgroup>';
 }
 
 app.layout.renderSelectOptions = function(select_id, data, selected) {
   if (! select_id || typeof data !== 'object') {
-    return app.error('app.layout.renderSelectOptions', arguments);
+    return app.error(null, [ app.position(), 'app.view.renderSelect' ]);
   }
 
   var select_opts = '';
@@ -241,11 +231,6 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
 }
 
 app.layout.draggable = function(event, field) {
-  if (! event) {
-    return app.error('app.view.draggable', arguments);
-  }
-
-
   var _draggable = {};
 
   var src_el = null;
@@ -302,7 +287,7 @@ app.layout.draggable = function(event, field) {
         document.querySelector(field).setAttribute('value', items);
       }
     } catch (err) {
-      return app.error('app.view.draggable.end', null, err);
+      return app.error(null, [ app.position(), 'app.view.draggable' ], err);
     }
   }
 
@@ -558,7 +543,7 @@ app.controller.setTitle = function(title) {
 app.controller.cursor = function(loc) {
   if (loc) {
     if (typeof loc !== 'object') {
-      return app.error('app.controller.cursor', arguments);
+      return app.error(null, [ app.position(), 'app.controller.cursor' ]);
     }
 
     app.memory.set('cursor', loc);
@@ -611,12 +596,12 @@ app.controller.spoof = function() {
 
 app.controller.retrieve = function(callback, routine) {
   if (typeof callback !== 'function' || typeof routine !== 'object') {
-    return app.error('app.controller.retrieve', arguments);
+    return app.error(null, [ app.position(), 'app.controller.retrieve' ]);
   }
 
   var _retrieve = function(fn, schema) {
     if (typeof fn !== 'string' || typeof schema !== 'object') {
-      return app.error('app.controller.retrieve() > _retrieve', arguments);
+      return app.error(null, [ app.position(), 'app.controller.retrieve', '_retrieve' ]);
     }
 
     var _data = window.store;
@@ -631,7 +616,7 @@ app.controller.retrieve = function(callback, routine) {
       var obj = app.store.get(fn + '_' + schema[i]);
 
       if (! obj) {
-        return app.error('app.controller.retrieve() > _retrieve', arguments);
+        return app.error(null, [ app.position(), 'app.controller.retrieve', '_retrieve' ]);
       }
 
       _data[schema[i]] = obj;
@@ -652,29 +637,29 @@ app.controller.retrieve = function(callback, routine) {
 
 app.controller.store = function(callback, fn, schema, data) {
   if (typeof callback !== 'function' || typeof fn !== 'string' || typeof schema !== 'object' || typeof data !== 'object') {
-    return app.error('app.controller.store', arguments);
+    return app.error(null, [ app.position(), 'app.controller.store' ]);
   }
 
   var source = window.store[fn];
 
   if (! source) {
-    return app.error('app.controller.store', arguments);
+    return app.error(null, [ app.position(), 'app.controller.store' ]);
   }
 
   var _store = function(key, values) {
     if (typeof key !== 'string' || typeof values !== 'object') {
-      return app.error('app.controller.store() > _store', arguments);
+      return app.error(null, [ app.position(), 'app.controller.store', '_store' ]);
     }
 
     if (! source[key]) {
-      return app.error('_store', arguments);
+      return app.error(null, [ app.position(), 'app.controller.store', '_store' ]);
     }
 
     var _data = values;
     var obj = app.store.set(fn + '_' + key, _data);
 
     if (! obj) {
-      return app.error('_store', arguments);
+      return app.error(null, [ app.position(), 'app.controller.store', '_store' ]);
     }
 
     return _data;
@@ -687,7 +672,7 @@ app.controller.store = function(callback, fn, schema, data) {
     var values = data[key];
 
     if (schema.indexOf(key) === -1 || ! Object.keys(values).length) {
-      return app.error('app.controller.store() > _store', arguments);
+      return app.error(null, [ app.position(), 'app.controller.store' ]);
     }
 
     window.store[fn][key] = _store(key, values);
@@ -700,7 +685,7 @@ app.controller.store = function(callback, fn, schema, data) {
 
 app.controller.clear = function(fn, schema) {
   if (typeof fn !== 'string' || typeof schema !== 'object') {
-    return app.error('app.controller.clear', arguments);
+    return app.error(null, [ app.position(), 'app.controller.clear' ]);
   }
 
   if (fn in window.store) {
@@ -742,7 +727,7 @@ app.view.open = function(events, data, form) {
   var control = window.control;
 
   if (! control || (events && events instanceof Array === false) || typeof data !== 'object') {
-    return app.error('app.view.open', arguments);
+    return app.error(null, [ app.position(), 'app.view.open' ]);
   }
 
   var _initialized = false;
@@ -753,8 +738,8 @@ app.view.open = function(events, data, form) {
 
   var _open = {};
 
-  _open.uninitialized = function(fnName) {
-    return app.error('app.view.open().uninitialized', null, fnName);
+  _open.uninitialized = function() {
+    return app.error(null, [ app.position(), 'app.view.open' ]);
   }
 
   _open.begin = function() {
@@ -821,7 +806,7 @@ app.view.open = function(events, data, form) {
   }
 
   _open.end = function() {
-    _initialized || _open.uninitialized('end');
+    _initialized || _open.uninitialized();
 
     app.view.resizeView(false);
 
@@ -841,7 +826,7 @@ app.view.open = function(events, data, form) {
   }
 
   _open.setID = function(id) {
-    _initialized || _open.uninitialized('setID');
+    _initialized || _open.uninitialized();
 
     control.temp.id = parseInt(id);
 
@@ -849,7 +834,7 @@ app.view.open = function(events, data, form) {
   }
 
   _open.getID = function() {
-    _initialized || _open.uninitialized('getID');
+    _initialized || _open.uninitialized();
 
     if (control.temp.id) {
       return control.temp.id;
@@ -859,10 +844,10 @@ app.view.open = function(events, data, form) {
   }
 
   _open.setEvent = function(event) {
-    _initialized || _open.uninitialized('setEvent');
+    _initialized || _open.uninitialized();
 
     if ((events && events.indexOf(event) === -1)) {
-      return app.error('app.view.open().setEvent', arguments);
+      return app.error(null, [ app.position(), 'app.view.open' ]);
     }
 
     control.temp.event = event;
@@ -871,16 +856,16 @@ app.view.open = function(events, data, form) {
   }
 
   _open.getEvent = function() {
-    _initialized || _open.uninitialized('getEvent');
+    _initialized || _open.uninitialized();
 
     return control.temp.event;
   }
 
   _open.setTitle = function(event, sectionTitle, viewTitle, id) {
-    _initialized || _uninitialized('setTitle');
+    _initialized || _uninitialized();
 
     if (typeof event !== 'string') {
-      return app.error('app.view.open().setTitle', arguments);
+      return app.error(null, [ app.position(), 'app.view.open' ]);
     }
 
     if (arguments.length === 1) {
@@ -906,10 +891,10 @@ app.view.open = function(events, data, form) {
   }
 
   _open.setActionHandler = function(event, label, id) {
-    _initialized || _open.uninitialized('setActionHandler');
+    _initialized || _open.uninitialized();
 
     if (! event || ! id) {
-      return app.error('app.view.open().setActionHandler', arguments);
+      return app.error(null, [ app.position(), 'app.view.open' ]);
     }
 
     id = id || _open.getID();
@@ -928,10 +913,10 @@ app.view.open = function(events, data, form) {
   }
 
   _open.fillTable = function(table, _data, _order) {
-    _initialized || _open.uninitialized('fillTable');
+    _initialized || _open.uninitialized();
 
     if (! table) {
-      return app.error('app.view.open().fillTable', arguments);
+      return app.error(null, [ app.position(), 'app.view.open' ]);
     }
 
     var order = ((_order && _order instanceof Array) && _order) || Object.keys(data);
@@ -959,10 +944,10 @@ app.view.open = function(events, data, form) {
   }
 
   _open.fillSelection = function(select, _data, id) {
-    _initialized || _open.uninitialized('fillSelection');
+    _initialized || _open.uninitialized();
 
     if (! select || ! (_data && typeof _data === 'object')) {
-      return app.error('app.view.open().fillSelection', arguments);
+      return app.error(null, [ app.position(), 'app.view.open' ]);
     }
 
     id = id || '';
@@ -978,7 +963,7 @@ app.view.action = function(events, event, element, data, form) {
   var control = window.control;
 
   if (! control && (events && (events instanceof Array === false)) || ! event || ! element) {
-    return app.error('app.view.action', arguments);
+    return app.error(null, [ app.position(), 'app.view.action' ]);
   }
 
   var _initialized = false;
@@ -989,8 +974,8 @@ app.view.action = function(events, event, element, data, form) {
 
   var _action = {};
 
-  _action.uninitialized = function(fnName) {
-    return app.error('app.view.action().uninitialized', null, fnName);
+  _action.uninitialized = function() {
+    return app.error(null, [ app.position(), 'app.view.action' ]);
   }
 
   _action.begin = function() {
@@ -1002,16 +987,16 @@ app.view.action = function(events, event, element, data, form) {
   }
 
   _action.end = function() {
-    _initialized || _action.uninitialized('end');
+    _initialized || _action.uninitialized();
 
     _initialized = false;
   }
 
   _action.prepare = function(_data, _submit) {
-    _initialized || _action.uninitialized(event);
+    _initialized || _action.uninitialized();
 
     if (typeof _data !== 'object') {
-      return app.error('app.view.action().' + event, arguments);
+      return app.error(null, [ app.position(), 'app.view.action' ]);
     }
 
     var index = _action.getID();
@@ -1030,7 +1015,7 @@ app.view.action = function(events, event, element, data, form) {
 
       return ctl;
     } catch (err) {
-      return app.error('app.view.action().' + event, ctl, err);
+      return app.error(null, [ app.position(), 'app.view.action' ]);
     }
   }
 
@@ -1043,10 +1028,10 @@ app.view.action = function(events, event, element, data, form) {
   _action.update = _action.prepare;
 
   _action.delete = function(_data, _submit, title, name) {
-    _initialized || _action.uninitialized('delete');
+    _initialized || _action.uninitialized();
 
     if (typeof title !== 'string') {
-      return app.error('app.view.action().delete', arguments);
+      return app.error(null, [ app.position(), 'app.view.action' ]);
     }
 
     if (title && (typeof name === 'number' || typeof name === 'string')) {
@@ -1061,7 +1046,7 @@ app.view.action = function(events, event, element, data, form) {
   }
 
   _action.selection = function(_data, _submit) {
-    _initialized || _action.uninitialized('selection');
+    _initialized || _action.uninitialized();
 
     _data = _data || element.value.toString();
 
@@ -1069,13 +1054,13 @@ app.view.action = function(events, event, element, data, form) {
   }
 
   _action.print = function() {
-    _initialized || _action.uninitialized('print');
+    _initialized || _action.uninitialized();
 
     window.print();
   }
 
   _action.getID = function() {
-    _initialized || _action.uninitialized('getID');
+    _initialized || _action.uninitialized();
 
     if (event === 'add') {
       return control.temp.id;
@@ -1091,7 +1076,7 @@ app.view.action = function(events, event, element, data, form) {
   }
 
   _action.validateForm = function() {
-    _initialized || _action.uninitialized('validateForm');
+    _initialized || _action.uninitialized();
 
     var action_submit = document.getElementById('real-submit');
     var action_index = document.getElementById('index');
@@ -1134,14 +1119,14 @@ app.view.action = function(events, event, element, data, form) {
 
 app.view.sub = function(method, element, table) {
   if (! method || ! element) {
-    return app.error('app.view.sub', arguments);
+    return app.error(null, [ app.position(), 'app.view.sub' ]);
   }
 
   var _sub = {};
 
   _sub.csv = function(filename_prefix, filename_date_format, filename_separator) {
     if (! table) {
-      return app.error('app.view.sub.csv', arguments);
+      return app.error(null, [ app.position(), 'app.view.sub' ]);
     }
 
     var source = '';
@@ -1168,7 +1153,7 @@ app.view.sub = function(method, element, table) {
 
   _sub.clipboard = function() {
     if (! table) {
-      return app.error('app.view.sub.clipboard', arguments);
+      return app.error(null, [ app.position(), 'app.view.sub' ]);
     }
 
     var source = '';
@@ -1208,7 +1193,7 @@ app.view.openView = function() {
   var control = window.control;
 
   if (! control) {
-    return app.error('app.view.openView', null);
+    return app.error(null, [ app.position(), 'app.view.openView' ]);
   }
 
   control.openView();
@@ -1241,7 +1226,7 @@ app.view.resizeView = function(check_time) {
 
 app.view.getLastID = function(data) {
   if (typeof data !== 'object') {
-    return app.error('app.view.getLastID', arguments);
+    return app.error(null, [ app.position(), 'app.view.getLastID' ]);
   }
 
   var last_id = Object.keys(data).pop();
@@ -1251,11 +1236,11 @@ app.view.getLastID = function(data) {
 
 app.view.getFormData = function(elements, key) {
   if (! (elements && elements.length)) {
-    return app.error('app.view.getFormData', arguments);
+    return app.error(null, [ 'app.view.getFormData' ]);
   }
 
   if (key && typeof key !== 'string') {
-    return app.error('app.view.getFormData', arguments);
+    return app.error(null, [ 'app.view.getFormData' ]);
   }
 
   var data = {};
@@ -1318,7 +1303,7 @@ app.view.getFormData = function(elements, key) {
 
 app.view.convertTableCSV = function(table) {
   if (! table) {
-    return app.error('app.view.convertTableCSV', arguments);
+    return app.error(null, [ app.position(), 'app.view.convertTableCSV' ]);
   }
 
   var thead_th = table.querySelectorAll('thead th');
@@ -1328,7 +1313,6 @@ app.view.convertTableCSV = function(table) {
 
   Array.prototype.forEach.call(thead_th, function(node) {
     if (node.classList.contains('hidden-print')) { return; }
-
     csv[0].push(node.textContent);
   });
 
@@ -1336,7 +1320,6 @@ app.view.convertTableCSV = function(table) {
 
   Array.prototype.forEach.call(tbody_trow, function(node) {
     if (node.classList.contains('tpl')) { return; }
-
     var tbody_td = node.querySelectorAll('td');
 
     csv_cursor++;
@@ -1344,9 +1327,7 @@ app.view.convertTableCSV = function(table) {
 
     Array.prototype.forEach.call(tbody_td, function(node) {
       if (node.classList.contains('hidden-print')) { return; }
-
       var _input = node.querySelector('.form-control');
-
       if (_input) {
         csv[csv_cursor].push(_input.value);
       } else {
@@ -1360,7 +1341,7 @@ app.view.convertTableCSV = function(table) {
 
 app.view.copyToClipboard = function(source) {
   if (! source) {
-    return app.error('app.view.copyToClipboard', arguments);
+    return app.error(null, [ app.position(), 'app.view.copyToClipboard' ]);
   }
 
   var _clipboard = document.createElement('TEXTAREA');
@@ -1379,7 +1360,7 @@ app.view.submit = function(ctl) {
   }
 
   if (typeof ctl !== 'object') {
-    return app.error('app.view.submit', arguments);
+    return app.error(null, [ app.position(), 'app.view.submit' ]);
   }
 
   if ('view' in ctl === false) {
@@ -1400,20 +1381,10 @@ app.view.submit = function(ctl) {
     }
 
     ctl = JSON.stringify(ctl);
-
-
-
-
-
 console.log(ctl);
-
-
-
-
-
     window.parent.postMessage(ctl, '*');
   } catch (err) {
-    return app.error('app.view.submit', ctl, err);
+    return app.error(null, [ app.position(), 'app.view.submit' ]);
   }
 }
 
@@ -1421,7 +1392,7 @@ app.view.load = function() {
   var config = window.config;
 
   if (! config) {
-    return app.error('app.view.load', null);
+    return app.error(null, [ 'app.view.load' ]);
   }
 
   window.store = {};
@@ -1438,7 +1409,7 @@ app.view.unload = function() {
   var control = window.control;
 
   if (! control) {
-    return app.error('app.view.unload', null);
+    return app.error(null, [ 'app.view.unload' ]);
   }
 
   if (control.temp.form_submit) {
@@ -1568,7 +1539,7 @@ app.utils.extendObject = function() {
 
 app.utils.addEvent = function(event, element, callback) {
   if (typeof event !== 'string' || ! element || typeof callback !== 'function') {
-    return app.error('app.utils.addEvent', arguments);
+    return app.error(null, [ app.position(), 'app.utils.addEvent' ]);
   }
 
   if (element.addEventListener) {
@@ -1580,7 +1551,7 @@ app.utils.addEvent = function(event, element, callback) {
 
 app.utils.removeEvent = function(event, element, callback) {
   if (! event || ! element || typeof callback !== 'function') {
-    return app.error('app.utils.removeEvent', arguments);
+    return app.error(null, [ app.position(), 'app.utils.removeEvent' ]);
   }
 
   if (element.addEventListener) {
@@ -1592,7 +1563,7 @@ app.utils.removeEvent = function(event, element, callback) {
 
 app.utils.transform = function(method, value) {
   if (! method) {
-    return app.error('app.utils.transform', arguments);
+    return app.error(null, [ app.position(), 'app.utils.transform' ]);
   }
 
   switch (method) {
@@ -1611,7 +1582,7 @@ app.utils.transform = function(method, value) {
 
 app.utils.sanitize = function(method, value) {
   if (! method) {
-    return app.error('app.utils.sanitize', arguments);
+    return app.error(null, [ app.position(), 'app.utils.sanitize' ]);
   }
 
   switch (method) {
@@ -1732,13 +1703,13 @@ app.utils.system = function() {
 
 app.utils.storage = function(type, method, key, value) {
   if (type === undefined || method === undefined) {
-    return app.error('app.utils.storage', arguments);
+    return app.error(null, [ app.position(), 'app.utils.storage' ]);
   }
 
   var _fn = type ? 'sessionStorage' : app._runtime.storage;
 
   if (_fn in window === false) {
-    return app.error('app.utils.storage', _fn);
+    return app.error(null, [ app.position(), 'app.utils.storage' ]);
   }
 
 
@@ -1746,7 +1717,7 @@ app.utils.storage = function(type, method, key, value) {
 
   _storage.set = function(key, value) {
     if (key === undefined || value === undefined) {
-      return app.error('app.utils.storage', arguments);
+      return app.error(null, [ app.position(), 'app.utils.storage' ]);
     }
 
     if (typeof value === 'object') {
@@ -1762,7 +1733,7 @@ app.utils.storage = function(type, method, key, value) {
 
   _storage.get = function(key) {
     if (key === undefined) {
-      return app.error('app.utils.storage', arguments);
+      return app.error(null, [ app.position(), 'app.utils.storage' ]);
     }
 
     var obj = window[_fn].getItem(key);
@@ -1779,7 +1750,7 @@ app.utils.storage = function(type, method, key, value) {
 
   _storage.has = function(key, value) {
     if (key === undefined) {
-      return app.error('app.utils.storage', arguments);
+      return app.error(null, [ app.position(), 'app.utils.storage' ]);
     }
 
     if (value) {
@@ -1795,7 +1766,7 @@ app.utils.storage = function(type, method, key, value) {
 
   _storage.del = function(key) {
     if (key === undefined) {
-      return app.error('app.utils.storage', arguments);
+      return app.error(null, [ app.position(), 'app.utils.storage' ]);
     }
 
     return window[_fn].removeItem(key);
@@ -1952,44 +1923,31 @@ app.stop = function() {
   app._runtime.exec = false;
 }
 
-app.error = function() {
-  var fnn = null;
-  var msg = null;
-  var dbg = null;
-
-  if (arguments.length == 3) {
-    fnn = arguments[0];
-    msg = arguments[1];
-    dbg = arguments[2];
-  } else if (arguments.length == 2) {
-    fnn = arguments[0];
-    dbg = arguments[1];
-  } else if (arguments.length == 1) {
-    msg = arguments[0];
+//TODO improve
+app.error = function(msg, info, attachs) {
+  if (info) {
+    console.info(info);
   }
 
-  if (app._runtime.debug) {
-    if (! app._runtime.exec) {
-      console.warn(msg || 'WARN', fnn, app.position());
-    }
-
-    console.error(msg || 'ERR', fnn, app.position());
-
-    if (dbg && dbg.length) {
-      console.log(dbg);
-    }
+  //debug utility
+  if (attachs) {
+    console.log(attachs);
   }
+
+  if (! app._runtime.exec) {
+    console.warn(msg || 'WARN');
+    return;
+  }
+
+  console.error(msg || 'ERR');
 
   if (! msg) {
     msg = 'Si è verificato un errore, impossibile proseguire.';
   }
 
-  if (app._runtime.notify === undefined || ! app._runtime.notify) {
-    var _alert = top.alert || parent.alert || window.alert;
-    _alert(msg);
-  }
-
-  return app._runtime.exec;
+  var alert = top.alert || parent.alert || window.alert;
+  //alert(msg);
+  return false;
 }
 
 app.getVersion = function(info) {
