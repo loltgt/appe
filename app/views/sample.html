@@ -142,15 +142,20 @@ control.action = function(element, event, data_extra) {
 
   var _events = {};
 
-  _events.remove = function() {
+  //TODO rename
+  _events._remove = function() {
+    _data_updated['sample'] = data;
+
     delete _data_updated['sample'][id];
   }
 
   _events.edit = function() {
-    return _action.edit(_data_updated);
+    return _action.edit(_data_updated, false);
   }
 
   _events.delete = function() {
+    _events._remove();
+
     return _action.delete(_data_updated, true, 'Vehicle', id);
   }
 
@@ -187,6 +192,5 @@ control.action = function(element, event, data_extra) {
 
 app.load(app.view.load);
 </script>
-
 </body>
 </html>

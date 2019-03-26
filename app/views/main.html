@@ -39,7 +39,7 @@
 <div class="table-responsive">
   <table id="table-data" class="table table-data">
     <thead>
-      <tr class="hidden-csv hidden-print">
+      <tr class="hidden-csv">
         <th class="hidden-print">Actions</th>
         <th>ID</th>
         <th class="text-nowrap">Name</th>
@@ -106,16 +106,16 @@
 var control = {};
 
 control.openView = function() {
-  var data_items = window.store[config.app]['items'];
   var data_archive = window.store[config.app]['archive'];
   var data_categories = window.store[config.app]['categories'];
+  var data_items = window.store[config.app]['items'];
 
   var table = document.getElementById('table-data');
-  var selection = document.getElementById('selection');
 
-  if (! data_items || ! data_archive || ! data_categories) {
+  if (! data_archive || ! data_categories || ! data_items) {
     return app.error('control.openView', arguments, 'data*');
   }
+
 
 
   var archive_id = app.memory.get('archive_id');
@@ -124,6 +124,8 @@ control.openView = function() {
   var archive_data = data_archive[archive_id][category_id];
   var archive_items = data_archive[archive_id][category_id].items;
   var categories_data = data_categories[archive_id][category_id];
+
+
 
   var archive_selection = [];
 
@@ -143,9 +145,9 @@ control.openView = function() {
   var id = _open.setID(archive_id);
 
 
-  _open.setTitle('handle', archive_data.title);
+  _open.setTitle(archive_data.title);
 
-  _open.fillSelection(selection, archive_selection, id);
+  _open.fillSelection(archive_selection, id);
 
 
   var _events = {};
@@ -159,11 +161,6 @@ control.openView = function() {
   // join (items) + order (archive.items[id].awards) + update
 
   var _archive_items_join = app.utils.extendObject(true, data_items, archive_items);
-
-
-//TODO check extend
-//console.log(_archive_items_join, data_items, archive_items);
-
 
   var _order = [];
   var _ordered_keys = [];
@@ -189,8 +186,10 @@ control.openView = function() {
       _archive_items_join[id].pop.total += _archive_items_join[id].pop['toyes'];
       _archive_items_join[id].pop.total += _archive_items_join[id].pop['books'];
 
-      _data_updated['archive'] = data_archive;
-      _data_updated['archive'][archive_id][category_id]['items'][id].pop = _archive_items_join[id].pop;
+      if (_archive_items_join[id].pop.total) {
+        _data_updated['archive'] = data_archive;
+        _data_updated['archive'][archive_id][category_id]['items'][id].pop = _archive_items_join[id].pop;
+      }
     }
   });
 

@@ -392,6 +392,13 @@ fieldset[disabled] .btn-secondary.focus {
 .master-header {
   border: 0;
 }
+.master-header .navbar-brand {
+  cursor: default;
+}
+.master-header .navbar-brand:focus,
+.master-header .navbar-brand:hover {
+  color: #9d9d9d;
+}
 .master-header .navbar-form {
   width: auto;
   padding-top: 0;

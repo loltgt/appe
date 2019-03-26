@@ -25,7 +25,7 @@ window.config = {
       "edit": "archive-edit",
       "delete": "archive",
       "open": "archive-item-edit",
-      "chiudi": "archive",
+      "close": "archive",
     },
     "average": {
       "update": "average",

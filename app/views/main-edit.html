@@ -54,7 +54,7 @@
 <div class="row">
 <div class="form-group col-12 col-lg-2">
   <label for="main_item_awards">Awards</label>
-  <input type="number" id="main_item_awards" name="awards" class="form-control input-lg" data-transform="integer" onchange="control.action(this, 'edit')">
+  <input type="number" id="main_item_awards" name="awards" class="form-control input-lg" data-transform="integer" onchange="control.action(this, 'update')">
 </div>
 </fieldset>
 
@@ -76,26 +76,28 @@
 var control = {};
 
 control.openView = function() {
-  var data_items = window.store[config.app]['items'];
   var data_archive = window.store[config.app]['archive'];
   var data_categories = window.store[config.app]['categories'];
+  var data_items = window.store[config.app]['items'];
 
   var form = document.getElementById('form-data');
 
-  if (! data_items || ! data_archive || ! data_categories) {
+  if (! data_archive || ! data_categories || ! data_items) {
     return app.error('control.openView', arguments);
   }
+
 
 
   var archive_id = app.memory.get('archive_id');
   var category_id = app.memory.get('category_id');
 
   var archive_data = data_archive[archive_id][category_id];
-  var archive_items = data_archive[archive_id][category_id].items;
   var categories_data = data_categories[archive_id][category_id];
+  var archive_items = data_archive[archive_id][category_id].items;
 
 
-  var _open = app.view.open([ 'open' ], archive_data, form);
+
+  var _open = app.view.open(null, archive_data, form);
 
   _open.begin();
 
@@ -104,142 +106,75 @@ control.openView = function() {
   var id = _open.getID();
 
 
-  var title = 'Item "' + data_items[id].title.toUpperCase() + '"';
+  var title = 'Item "' + data_items[id].name.toUpperCase() + '"';
   title += ' – ' + data_archive[archive_id][category_id].title;
 
   _open.setTitle(title);
+  _open.setActionHandler();
 
-
-
-
-
-  control.temp = {};
-  control.temp.archive_id = archive_id;
-  control.temp.category_id = category_id;
-  control.temp.archive_data = archive_data;
 
 
   var t2body = document.querySelector('#table-2 > tbody');
   var t2head = document.querySelector('#table-2 > thead');
   var t2row = t2body.querySelector('tr');
 
-  var archive_subtotals = { 'avg': 0, 'movies': 0, 'toyes': 0, 'books': 0, 'total': 0 };
+  if (! archive_items[id].pop) {
+    archive_items[id].pop = {};
+  }
 
-  Array.prototype.forEach.call(Object.keys(archive_items), function(id) {
-    if (! archive_items[id].pop) {
-      archive_items[id].pop = { 'avg': 0, 'movies': 0, 'toyes': 0, 'books': 0, 'total': 0 };
-    }
+  archive_items[id].pop['avg'] = parseInt(archive_items[id].pop['avg'] || 0);
+  archive_items[id].pop['movies'] = parseInt(archive_items[id].pop['movies'] || 0);
+  archive_items[id].pop['toyes'] = parseInt(archive_items[id].pop['toyes'] || 0);
+  archive_items[id].pop['books'] = parseInt(archive_items[id].pop['books'] || 0);
 
-    archive_items[id].pop.total = archive_items[id].pop['avg'] + archive_items[id].pop['movies'] + archive_items[id].pop['toyes'] + archive_items[id].pop['books'];
-  });
+  if (! archive_items[id].pop.total) {
+    archive_items[id].pop.total  = 0;
+    archive_items[id].pop.total += _archive_items_join[id].pop['avg'];
+    archive_items[id].pop.total += _archive_items_join[id].pop['movies'];
+    archive_items[id].pop.total += _archive_items_join[id].pop['toyes'];
+    archive_items[id].pop.total += _archive_items_join[id].pop['books'];
+  }
 
-  Array.prototype.forEach.call([ 'avg', 'movies', 'toyes', 'books', 'total' ], function(key) {
-    t2row.innerHTML = t2row.innerHTML.replace('{archive_item_pop_' + key + '}', archive_items[id].pop[key]);
-  });
+  t2row.innerHTML = t2row.innerHTML
+    .replace('{archive_item_pop_avg}', archive_items[id].pop['avg'])
+    .replace('{archive_item_pop_movies}', archive_items[id].pop['movies'])
+    .replace('{archive_item_pop_toyes}', archive_items[id].pop['toyes'])
+    .replace('{archive_item_pop_books}', archive_items[id].pop['books'])
+    .replace('{archive_item_pop_total}', archive_items[id].pop['total']);
 
 
 
-
-
-  control.fillForm([ data_archive[archive_id][category_id].status, archive_items[id], data_items[id] ]);
-
+  _open.fillForm(form, archive_items[id], archive_data);
 
 
   _open.end();
 }
 
-control.fillForm = function(obj) {
-  if (! obj) {
+control.fillForm = function(data_form, data_extra) {
+  if (! data_form) {
     return app.error('control.fillForm', arguments);
   }
 
-  var status = obj[0] ? true : false;
 
-  if (! status) {
+  var archive_data_extra = data_extra[0];
+
+
+  if (! archive_data_extra.status) {
     document.getElementById('main_item_awards').setAttribute('readonly', '');
     document.getElementById('main_item_awards').setAttribute('disabled', '');
   }
 
-  document.getElementById('main_item_awards').setAttribute('value', (obj[1].awards || 0));
+  document.getElementById('main_item_awards').setAttribute('value', (data_form.awards || 0));
 }
 
-/*control.action = function(element, event) {
-  var data_items = window.store[config.app]['items'];
-  var data_archive = window.store[config.app]['archive'];
-
-  if (! data_items || ! data_archive || ! control.temp) {
-    return app.error('control.action', arguments);
-  }
-
-  if (! element || typeof event !== 'string') {
-    return app.error('control.action', arguments);
-  }
-
-  var ctl = false;
-  var submitted_data = {};
-
-  var form = document.getElementById('form-data');
-  var action_submit = document.getElementById('real-submit');
-  var action_index = document.getElementById('index');
-  var id = action_index.getAttribute('value');
-  id = parseInt(id);
-
-  if (! form.checkValidity()) {
-    Array.prototype.forEach.call(form.elements, function(field) {
-      var closest_group = null;
-      if (field.parentNode.className.indexOf('form-group') != -1) {
-        closest_group = field.parentNode;
-      } else if (field.parentNode.parentNode.className.indexOf('form-group') != -1) {
-        closest_group = field.parentNode.parentNode;
-      }
-      if (closest_group && closest_group.classList) {
-        if (closest_group.querySelector(':invalid')) {
-          closest_group.classList.remove('has-success');
-          closest_group.classList.add('has-error');
-        } else {
-          closest_group.classList.remove('has-error');
-          closest_group.classList.add('has-success');
-        }
-      }
-    });
-    action_submit.click();
-    return false;
-  }
-
-  var archive_id = control.temp.archive_id;
-  var category_id = control.temp.category_id;
-  var archive_items = data_archive[archive_id][category_id].items;
-
-  if (id && event === 'edit') {
-    submitted_data['archive'] = data_archive;
-
-    var ext_data_id = app.utils.extendObject(archive_items[id], app.view.getFormData(form.elements));
-
-    submitted_data['archive'][archive_id][category_id]['items'][id] = ext_data_id;
-
-    submitted_data = JSON.stringify(submitted_data);
-
-    if (submitted_data) {
-      ctl = { view: 'archive', action: event, index: id, submit: true, data: submitted_data };
-    }
-  }
-
-  if (ctl) {
-    control.temp.form_submit = true;
-    ctl = JSON.stringify(ctl);
-    window.parent.postMessage(ctl, '*');
-    return true;
-  }
-}*/
-
 control.action = function(element, event, data_extra) {
-  var data_items = window.store[config.app]['items'];
   var data_archive = window.store[config.app]['archive'];
   var data_categories = window.store[config.app]['categories'];
+  var data_items = window.store[config.app]['items'];
 
   var form = document.getElementById('form-data');
 
-  if (! data_items || ! data_archive || ! data_categories) {
+  if (! data_archive || ! data_categories || ! data_items) {
     return app.error('control.action', arguments);
   }
 
@@ -248,7 +183,7 @@ control.action = function(element, event, data_extra) {
   }
 
 
-  var _action = app.view.action([ 'edit' ], event, element, data_archive, form);
+  var _action = app.view.action([ 'update' ], event, element, data_archive, form);
 
   _action.begin();
 
@@ -266,29 +201,23 @@ control.action = function(element, event, data_extra) {
 
   var _events = {};
 
-  _events._update = function() {
+  _events.update = function() {
     var archive_id = app.memory.get('archive_id');
     var category_id = app.memory.get('category_id');
 
     _data_updated['archive'] = data_archive;
 
-    var _ext_data = app.utils.extendObject(data_archive[archive_id][category_id]['items'][id], app.view.getFormData(form.elements));
+    var _ext_data = app.utils.extendObject(true, data_archive[archive_id][category_id]['items'][id], app.view.getFormData(form.elements));
 
     _data_updated['archive'][archive_id][category_id]['items'][id] = _ext_data;
-  }
 
-  _events.edit = function() {
-    _events._update();
-
-    return _action.edit(_data_updated, true);
+    return _action.update(_data_updated, true);
   }
 
 
   var ctl = _events[event](data_extra);
 
-  console.log(ctl);
-
-  //app.view.submit(ctl);
+  app.view.submit(ctl);
 
   _action.end();
 }

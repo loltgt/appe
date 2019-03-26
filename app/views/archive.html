@@ -9,7 +9,7 @@
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
-<body class="view view_">
+<body class="view view_handle">
 <h1 id="view-title" class="page-header">Archive</h1>
 <h2 id="section-title" class="sub-header">{section}</h2>
 
@@ -45,7 +45,7 @@
   <table id="table-data" class="table table-data">
     <thead>
       <tr class="hidden-csv">
-        <th>Actions</th>
+        <th class="hidden-print">Actions</th>
         <th>ID</th>
         <th class="text-nowrap">Name</th>
         <th>New samples</th>
@@ -55,15 +55,16 @@
       <tr class="visible-csv hidden">
         <th>ID</th>
         <th>Name</th>
-        <th class="text-center">New samples</th>
-        <th class="text-center">New finds</th>
+        <th>New samples</th>
+        <th>New finds</th>
         <th>Movies</th>
         <th>Toyes</th>
         <th>Books</th>
-        <th><strong>SUBTOTAL</strong></th>
+        <th>SUBTOTAL</th>
       </tr>
       <tr class="hidden-csv">
-        <td colspan="5"></th>
+        <td class="hidden-print"></td>
+        <td colspan="4"></th>
         <td class="text-center text-nowrap">Movies</td>
         <td class="text-center text-nowrap">Toyes</td>
         <td class="text-center text-nowrap">Books</td>
@@ -135,142 +136,148 @@
 <script type="text/javascript">
 var control = {};
 
-control.openView = function() {
-  var archive_id = app.memory.get('archive_id'), category_id = app.memory.get('category_id');
-  var data_items = window.store[config.app]['items'];
-  var data_archive = window.store[config.app]['archive'];
+var control = {};
 
-  if (! data_items || ! data_archive) {
-    return app.error('control.openView', arguments);
+control.openView = function() {
+  var data_archive = window.store[config.app]['archive'];
+  var data_categories = window.store[config.app]['categories'];
+  var data_items = window.store[config.app]['items'];
+
+  var table = document.getElementById('table-data');
+
+  if (! data_archive || ! data_categories || ! data_items) {
+    return app.error('control.openView', arguments, 'data*');
   }
 
-  var view_title = document.getElementById('view-title');
-  var section_title = document.getElementById('section-title');
+
+
+  var archive_id = app.memory.get('archive_id');
+  var category_id = app.memory.get('category_id');
 
   var archive_data = data_archive[archive_id][category_id];
   var archive_items = data_archive[archive_id][category_id].items;
+  var categories_data = data_categories[archive_id][category_id];
+
+
 
   var archive_selection = [];
+
   Array.prototype.forEach.call(Object.keys(data_archive), function(id) {
     var obj = {};
     obj[id] = data_archive[id][category_id].title;
     archive_selection.push(obj);
   });
 
-  if (! archive_items || ! archive_data) {
-    return app.error('control.openView', arguments);
-  }
 
-  control.temp = {};
-  control.temp.archive_id = archive_id;
-  control.temp.category_id = category_id;
-  control.temp.archive_data = archive_data;
+  var _open = app.view.open(null, archive_data);
 
-  section_title.innerHTML = data_archive[archive_id][category_id].title;
+  _open.begin();
 
-  var select_archive = document.getElementById('selection');
-  select_archive.innerHTML = app.layout.renderSelectOptions('selection', archive_selection, archive_id);
-  select_archive.value = archive_id;
 
-  var section_actions_top = document.getElementById('section-actions-top');
-  section_actions_top.innerHTML = section_actions_top.innerHTML.replace(/\{id\}/g, archive_id);
+  var event = _open.getEvent();
+  var id = _open.setID(archive_id);
 
-  var section_actions_bottom = document.getElementById('section-actions-bottom');
-  section_actions_bottom.innerHTML = section_actions_bottom.innerHTML.replace(/\{id\}/g, archive_id);
+
+  _open.setTitle(archive_data.title);
+
+  _open.fillCTA();
+  _open.fillSelection(archive_selection, id);
+
+
+
+  // join (items) + order (archive.items[id].pop.subtotal) + subtotals
+
+  var _archive_items_join = app.utils.extendObject(true, data_items, archive_items);
+
+  var _order = [];
+  var _ordered_keys = [];
+
+  var _data_updated = {};
+
+  var _archive_items_subtotals = { 'movies': 0, 'toyes': 0, 'books': 0, 'subtotal': 0 };
+
+  Array.prototype.forEach.call(Object.keys(_archive_items_join), function(id) {
+    if (! _archive_items_join[id].pop) {
+      _archive_items_join[id].pop = {};
+    }
+
+    _archive_items_join[id].pop['movies'] = parseInt(_archive_items_join[id].pop['movies'] || 0);
+    _archive_items_join[id].pop['toyes'] = parseInt(_archive_items_join[id].pop['toyes'] || 0);
+    _archive_items_join[id].pop['books'] = parseInt(_archive_items_join[id].pop['books'] || 0);
+
+    _archive_items_join[id].pop.subtotal  = 0;
+    _archive_items_join[id].pop.subtotal += _archive_items_join[id].pop['movies'];
+    _archive_items_join[id].pop.subtotal += _archive_items_join[id].pop['toyes'];
+    _archive_items_join[id].pop.subtotal += _archive_items_join[id].pop['books'];
+
+    _archive_items_subtotals['movies'] += _archive_items_join[id].pop['movies'];
+    _archive_items_subtotals['toyes'] += _archive_items_join[id].pop['toyes'];
+    _archive_items_subtotals['books'] += _archive_items_join[id].pop['books'];
+    _archive_items_subtotals.subtotal += _archive_items_join[id].pop.subtotal;
+
+    _order.push([ id, (_archive_items_join[id].subtotal != undefined ? _archive_items_join[id].subtotal : id) ]);
+  });
+
+  _order.sort(function(a, b) { return a[1] - b[1]; });
+  _order = Object.values(_order);
+
+  Array.prototype.forEach.call(_order, function(value) {
+    _ordered_keys.push(value[0]);
+  });
+
+
+
+  _open.fillTable(table, _archive_items_join, _ordered_keys, archive_items);
+
 
 
   var t2body = document.querySelector('#table-2 > tbody');
   var t2head = document.querySelector('#table-2 > thead');
   var t2row = t2body.querySelector('tr');
 
-  var archive_subtotals = { 'movies': 0, 'toyes': 0, 'books': 0, 'subtotal': 0 };
-
-  Array.prototype.forEach.call(Object.keys(archive_items), function(id) {
-    if (! archive_items[id].pop) {
-      archive_items[id].pop = { 'movies': 0, 'toyes': 0, 'books': 0, 'subtotal': 0 };
-    }
-
-    archive_items[id].pop.subtotal = parseInt(archive_items[id].pop['movies']) + parseInt(archive_items[id].pop['toyes']) + parseInt(archive_items[id].pop['books']);
-
-    archive_subtotals['movies'] += parseInt(archive_items[id].pop['movies']);
-    archive_subtotals['toyes'] += parseInt(archive_items[id].pop['toyes']);
-    archive_subtotals['books'] += parseInt(archive_items[id].pop['movies']);
-
-    archive_subtotals.subtotal += archive_items[id].pop.subtotal;
-  });
-
-  Array.prototype.forEach.call(Object.keys(archive_subtotals), function(key) {
-    t2row.innerHTML = t2row.innerHTML.replace('{archive_pop_' + key + '}', archive_subtotals[key]);
-  });
+  t2row.innerHTML = t2row.innerHTML
+    .replace('{archive_pop_movies}', _archive_items_subtotals['movies'])
+    .replace('{archive_pop_toyes}', _archive_items_subtotals['toyes'])
+    .replace('{archive_pop_books}', _archive_items_subtotals['books'])
+    .replace('{archive_pop_subtotal}', _archive_items_subtotals.subtotal);
 
 
-  var tbody = document.querySelector('#table-data > tbody');
-  var trow_tpl = tbody.querySelector('tr.tpl');
 
-  trow_tpl = trow_tpl.cloneNode(true);
-  trow_tpl.classList.remove('tpl');
-
-  var archive_items_keys = Object.keys(archive_items);
-  var archive_items_keys_order = [];
-
-  Array.prototype.forEach.call(archive_items_keys, function(id) {
-    archive_items_keys_order.push([ id, (archive_items[id].order != undefined ? archive_items[id].order : id) ]);
-  });
-
-  var blob = '';
-
-  archive_items_keys_order.sort(function(a, b) { return a[1] - b[1]; });
-  archive_items_keys_order = Object.values(archive_items_keys_order);
-
-  archive_items_keys = [];
-
-  Array.prototype.forEach.call(archive_items_keys_order, function(value) {
-    archive_items_keys.push(value[0]);
-  });
-
-  Array.prototype.forEach.call(archive_items_keys, function(id) {
-    var row = control.renderRow(trow_tpl, [ archive_items[id], data_items[id] ]);
-    blob += row.outerHTML;
-  });
-
-  tbody.innerHTML += blob;
-
-  app.view.resizeView(false);
+  _open.end();
 }
 
-control.renderRow = function(tpl, obj) {
-  if (! obj) {
+control.renderRow = function(tpl_row, id_row, data_row, data_extra) {
+  if (! tpl_row || ! data_row) {
     return app.error('control.renderRow', arguments);
   }
 
-  var row = tpl.cloneNode(true);
 
-  row.setAttribute('data-index', obj[1].id);
+  var archive_items_extra = data_extra[0];
 
-  var archive_data = control.temp.archive_data;
-  var status = archive_data.status ? true : false;
 
-  var custom_1 = archive_data.custom['1'] ? 'yes' : 'none';
-  var custom_2 = archive_data.custom['2'] ? 'yes' : 'none';
+  var row = tpl_row.cloneNode(true);
+
+  row.setAttribute('data-index', data_row.id);
 
   row.innerHTML = row.innerHTML
-    .replace(/\{id\}/g, obj[1].id)
-    .replace('{name}', obj[1].name)
-    .replace('{custom_1}', custom_1)
-    .replace('{custom_2}', custom_2)
-    .replace('{pop_movies}', obj[0].pop['movies'])
-    .replace('{pop_toyes}', obj[0].pop['toyes'])
-    .replace('{pop_books}', obj[0].pop['books'])
-    .replace('{pop_subtotal}', obj[0].pop['subtotal']);
+    .replace(/\{id\}/g, data_row.id)
+    .replace('{name}', data_row.name)
+    .replace('{custom_1}', (archive_items_extra[data_row.id].custom['1'] ? 'yes' : 'none'))
+    .replace('{custom_2}', (archive_items_extra[data_row.id].custom['2'] ? 'yes' : 'none'))
+    .replace('{pop_movies}', data_row.pop['movies'])
+    .replace('{pop_toyes}', data_row.pop['toyes'])
+    .replace('{pop_books}', data_row.pop['books'])
+    .replace('{pop_subtotal}', data_row.pop['subtotal']);
 
   return row;
 }
 
-control.action = function(element, event) {
-  var data_items = window.store[config.app]['items'];
+control.action = function(element, event, data_extra) {
   var data_archive = window.store[config.app]['archive'];
 
-  if (! data_items || ! data_archive || ! control.temp) {
+  var table = document.getElementById('table-data');
+
+  if (! data_archive) {
     return app.error('control.action', arguments);
   }
 
@@ -278,124 +285,89 @@ control.action = function(element, event) {
     return app.error('control.action', arguments);
   }
 
-  var ctl = false;
-  var submitted_data = {};
 
-  var archive_id = control.temp.archive_id;
-  var category_id = control.temp.category_id;
+  var _action = app.view.action([ 'selection', 'open', 'edit', 'delete', 'close', 'export', 'print' ], event, element, data_archive);
 
-  if (event === 'selection') {
-    var selection = element.value.toString();
-    ctl = { view: 'archive', action: 'selection', submit: true, data: selection };
+  _action.begin();
+
+
+  var id = _action.getID();
+
+
+  var _data_updated = {};
+
+
+  var _events = {};
+
+  //TODO rename
+  _events._remove = function() {
+    _data_updated['archive'] = data_archive;
+
+    delete _data_updated[id];
   }
 
-  if (event === 'open') {
-    var trow = element.parentNode.parentNode;
-    var id = trow.getAttribute('data-index');
-    id = parseInt(id);
+  _events._close = function() {
+    var category_id = app.memory.get('category_id');
 
-    if (id) {
-      ctl = { view: 'archive', action: event, index: id };
-    }
+    _data_updated['archive'] = data_archive;
+    _data_updated['archive'][id][category_id].status = 0;
   }
 
-  if (event === 'edit' || event === 'delete' || event === 'close') {
-    var archive_id = parseInt(control.temp.archive_id);
-    var archive_title = control.temp.archive_data.title;
-
-    if (archive_id) {
-      ctl = { view: 'archive', action: event, index: archive_id };
-
-      if (event === 'delete') {
-        ctl.msg = 'Sei sicuro di voler deletere la stagione "' + archive_title + '" ?\n\n';
-        ctl.msg += 'ATTENZIONE! L’OPERAZIONE È IRREVERSIBILE E VERRANNO PERSI TUTTI I DATI INSERITI PER LA STAGIONE';
-
-        submitted_data['archive'] = data_archive;
-
-        delete submitted_data['archive'][archive_id];
-
-        ctl.submit = true;
-        ctl.data = JSON.stringify(submitted_data);
-      }
-
-      if (event === 'close') {
-        ctl.msg = 'Sei sicuro di voler chiudere la stagione "' + archive_title + '" ?';
-
-        submitted_data['archive'] = data_archive;
-
-        submitted_data['archive'][archive_id][category_id].stato = 0;
-
-        ctl.submit = true;
-        ctl.data = JSON.stringify(submitted_data);
-      }
-    }
+  _events.selection = function() {
+    return _action.selection(null, true);
   }
 
-  if (event === 'export' && arguments.length === 3) {
-    var sub_cmd = arguments[2].toString();
+  _events.open = function() {
+    return _action.open(_data_updated, false);
+  }
 
-    if (! sub_cmd) {
-      return;
-    }
+  _events.edit = function() {
+    return _action.edit(_data_updated, false);
+  }
 
-    var _table = document.querySelector('#table-data');
+  _events.delete = function() {
+    _events._remove();
+
+    var category_id = app.memory.get('category_id');
+
+    var _title = 'Are you sure to delete "' + data_archive[id][category_id].title + '" archive?';
+    _title += '\n\nATTENZIONE! L’OPERAZIONE È IRREVERSIBILE E VERRANNO PERSI TUTTI I DATI PRESENTI NELL\'ARCHIVIO';
+
+    return _action.delete(_data_updated, true, _title);
+  }
+
+  _events.close = function() {
+    _events._close();
+
+    var category_id = app.memory.get('category_id');
+
+    var _title = 'Are you sure to close "' + data_archive[id][category_id].title + '" archive?';
+
+    return _action.close(_data_updated, true, _title);
+  }
+
+  _events.export = function(subControl) {
     var _dropdown = element.parentNode.parentNode.parentNode;
 
-    if (sub_cmd === 'csv') {
-      var source = app.view.convertToCSV(_table);
-      var filename = 'csv_export';
-      var date = new Date();
+    app.view.sub(subControl, element, table)();
 
-      filename += '_' + (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '-' + (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-' + date.getFullYear();
-      filename += '_' + (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + '-' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
-
-      var file = new File(
-        [ source ],
-        filename + '.csv',
-        { type: 'text/csv;charset=utf-8' }
-      );
-
-      saveAs(file);
-    }
-
-    if (sub_cmd === 'clipboard') {
-      app.view.copyToClipboard(_table);
-
-      var _dropdown_btn = _dropdown.querySelector('.dropdown-toggle');
-      _dropdown_btn.classList.add('btn-gray-lighter');
-
-      setTimeout(function() {
-        _dropdown_btn.classList.remove('btn-gray-lighter');
-        this.clearTimeout();
-      }, 1000);
-    }
-
-    if (! ('jQuery' in window && 'dropdown' in jQuery.fn)) {
-      if (sub_cmd === 'toggler') {
-        app.utils.dropdown('toggle', element, _dropdown)();
-      }
-
-      app.utils.addEvent('click', document.body, app.utils.dropdown('close', element, _dropdown));
-    }
-  }
-
-  if (event === 'print') {
-    return window.print();
-  }
-
-  if (ctl) {
-    ctl = JSON.stringify(ctl);
-    window.parent.postMessage(ctl, '*');
     return;
   }
+
+  _events.print = function() {
+    return _action.print();
+  }
+
+
+  var ctl = _events[event](data_extra);
+
+  app.view.submit(ctl);
+
+  _action.end();
 }
 
 
-window.store = {};
-
 app.load(app.view.load);
-app.utils.addEvent('resize', window, app.view.resizeView);
-app.utils.addEvent('orientationchange', window, app.view.resizeView);
 </script>
 </body>
 </html>

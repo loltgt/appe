@@ -16,7 +16,7 @@ app._runtime = {
   exec: true,
   title: '',
   storage: false,
-  save: 0,
+  saves: 0,
   debug: true
 };
 
@@ -59,9 +59,11 @@ app.os.fileOpen = function(config, callback) {
 
     callback(file.name);
   });
+
   reader.onerror = (function() {
     callback(false);
   });
+
   reader.readAsText(file);
 }
 
@@ -240,8 +242,8 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
   return select_opts;
 }
 
-app.layout.draggable = function(event, field) {
-  if (! event) {
+app.layout.draggable = function(event, table, field) {
+  if (! event || ! table || ! field) {
     return app.error('app.view.draggable', arguments);
   }
 
@@ -280,6 +282,7 @@ app.layout.draggable = function(event, field) {
   }
 
   _draggable.end = function(e) {
+    var tbody = table.querySelector('tbody');
     var trows = tbody.querySelectorAll('tr.draggable');
 
     var items = [];
@@ -290,16 +293,12 @@ app.layout.draggable = function(event, field) {
       trow.classList.remove('over');
     });
 
-    if (! field) {
-      return;
-    }
-
     try {
       items = JSON.stringify(items);
       items = encodeURIComponent(items);
 
       if (field) {
-        document.querySelector(field).setAttribute('value', items);
+        field.setAttribute('value', items);
       }
     } catch (err) {
       return app.error('app.view.draggable.end', null, err);
@@ -312,8 +311,6 @@ app.layout.draggable = function(event, field) {
     }
 
     if (src_el != this) {
-      control.temp.moved = true;
-
       var prev_index = this.getAttribute('data-index');
       src_el.innerHTML = this.innerHTML;
       src_el.setAttribute('data-index', prev_index);
@@ -715,6 +712,695 @@ app.controller.clear = function(fn, schema) {
 }
 
 
+app.start = {};
+
+app.start.loader = function(phase) {
+  var lw = document.getElementById('loader-wait');
+  var lo = document.getElementById('loader-open');
+
+  switch (phase) {
+    case 2:
+      lo.setAttribute('style', 'visibility: visible;');
+      lw.setAttribute('style', 'visibility: visible;');
+    break;
+    case 1:
+      lo.setAttribute('style', 'visibility: visible;');
+      lw.setAttribute('style', 'visibility: hidden;');
+    break;
+    default:
+      lw.setAttribute('style', 'visibility: visible;');
+      lo.setAttribute('style', 'visibility: hidden;');
+  }
+}
+
+app.start.loadAttempt = function(callback, fn, file, schema, memo) {
+  if (! callback || ! fn || ! file || ! schema) {
+    return app.error('app.start.loadAttemp', arguments);
+  }
+
+  if (typeof callback !== 'function' || typeof fn !== 'string' || typeof file !== 'string' || typeof schema !== 'object') {
+    return app.error('app.start.loadAttemp', arguments);
+  }
+
+  var loaded = false;
+  var max_attempts = config.openAttempts;
+
+  app.os.scriptOpen(function() {
+    if (! window[fn]) {
+      //TODO check
+      //return app.error('app.start.loadAttemp', 'window[fn]');
+    }
+
+    for (var i = 0; i < schema.length; i++) {
+      if (! memo) {
+        loaded = true;
+
+        continue;
+      }
+
+      if (schema[i] in window[fn] === false) {
+        return app.error('app.start.loadAttemp', 'schema[i]');
+      }
+
+      loaded = app.store.set(fn + '_' + schema[i], window[fn][schema[i]]);
+    }
+
+    callback(loaded);
+  }, file, fn, max_attempts);
+}
+
+app.start.openFile = function() {
+  var _open = function() {
+    document.cookie = 'last_opened_file=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    //app.store.reset(); //TODO FIX
+    //app.memory.reset(); //TODO FIX
+
+    app.os.fileOpen.call(this, config, _complete);
+  }
+
+  var _complete = function(filename) {
+    app.start.loader(0);
+
+    if (filename) {
+      var _filename = window.btoa(filename.replace('.js', ''));
+
+      document.cookie = 'last_opened_file=' + _filename + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+
+      app.store.set('last_opened_file', _filename);
+      app.memory.set('last_opened_file', _filename);
+
+      app.memory.set('last_opened_time', new Date().toISOString());
+
+      app.start.redirect();
+    }
+  }
+
+  var open_input = null;
+  var open_input__std = this.getAttribute('data-open');
+
+  if (! open_input__std) {
+    this.setAttribute('data-open', '');
+
+    var open_input_ref = this.getAttribute('data-open-input');
+    var open_input = this.parentNode.querySelector(open_input_ref);
+
+    app.utils.addEvent('change', open_input, _open);
+  }
+
+  if (open_input) {
+    app.start.loader(2);
+
+    open_input.click();
+  }
+}
+
+app.start.loadComplete = function(session_resume) {
+  if (! session_resume) {
+    return start.loader(1);
+  }
+
+  session_resume = config.savePath + '/' + session_resume; 
+
+  app.start.loadAttempt(function(loaded) {
+    if (loaded) {
+      app.start.redirect();
+    } else {
+      app.start.loader(1);
+    }
+  }, config.app, session_resume, config.schema);
+
+  app.start.loader(1);
+}
+
+app.start.redirect = function() {
+  var _wait = function() {
+    app.start.loader(false);
+
+    app.redirect(config);
+
+    this.clearTimeout();
+  }
+
+  setTimeout(_wait, 1000);
+}
+
+app.start.alternative = function() {
+  var alt = [
+    'Purtroppo non è possibile eseguire l\'applicazione per via di restrizioni nel programma {browser}.',
+    'VAI NELLA CARTELLA "{alt_exec_folder}" E APRI "{alt_exec_platform}".'
+  ];
+
+  var system = app.utils.system();
+  var navigators = {
+    'chrome': 'Chrome',
+    'safari': 'Safari',
+    'firefox': 'Firefox',
+    'edge': 'Edge',
+    'ie': 'Explorer',
+    'iemobile': 'Explorer'
+  };
+
+  var browser = navigators[system.navigator];
+  var exec_platform = (system.platform in config.altExecPlatform ? system.platform : null);
+
+  if (exec_platform && config.altExecFolder && config.altExecFolder) {
+    var alt_exec_folder = config.altExecFolder;
+    var alt_exec_platform = config.altExecPlatform[exec_platform];
+
+    alt = alt[0] + '\n\n' + alt[1];
+    alt = alt.replace('{alt_exec_folder}', alt_exec_folder).replace('{alt_exec_platform}', alt_exec_platform);
+  } else {
+    alt = alt[0];
+  }
+
+  alt_electron = alt.replace('{browser}', browser);
+
+  app.start.loader(1);
+
+  return app.error(alt_electron);
+}
+
+app.start.load = function() {
+  var exec = true;
+
+  if (
+    ('sessionStorage' in window === false && 'localStorage' in window === false) ||
+    'history' in window === false ||
+    'atob' in window === false ||
+    'btoa' in window === false
+  ) {
+    exec = false;
+  }
+
+  if (
+    window.sessionStorage === undefined ||
+    'replaceState' in window.history === false ||
+    'checkValidity' in document.createElement('form') === false
+  ) {
+    exec = false;
+  }
+
+  if (! exec) {
+    app.start.alternative();
+    setTimeout(function() {
+      app.stop();
+      this.clearTimeout();
+    }, 0);
+    return;
+  }
+
+  var session_resume = app.resume(config, true);
+
+  var title = config.title;
+  app.controller.setTitle(title);
+
+  var open_action = document.querySelector('#start-action-open');
+  app.utils.addEvent('click', open_action, app.start.openFile);
+
+  var auxs_loaded = true;
+
+  for (var i = 0; i < config.auxs.length; i++) {
+    app.start.loadAttempt(function(aux_loaded) {
+      if (! aux_loaded) {
+        auxs_loaded = false;
+      }
+    }, config.auxs[i].fn, config.auxs[i].file, config.auxs[i].schema, config.auxs[i].memo);
+  }
+
+  if (auxs_loaded) {
+    app.start.loadComplete(session_resume);
+  } else {
+    return app.error('start.alternative', 'aux_loaded');
+  }
+}
+
+
+app.main = {};
+
+app.main.loadView = function(loc) {
+  var view = document.getElementById('view');
+
+  var routes = config.routes;
+  var actions = {};
+
+  Array.prototype.forEach.call(Object.keys(config.events), function(event) {
+    actions[config.events[event]] = event;
+  });
+
+  if (! loc) {
+    loc = app.controller.spoof();
+  }
+
+  var default_route = config.defaultRoute;
+  var route = default_route + '.html';
+  var pass = true;
+
+  if (loc && typeof loc === 'object') {
+    if (loc.view) {
+      if (routes[loc.view]) {
+        route = loc.view + '.html';
+      } else {
+        pass = false;
+      }
+
+      if (loc.action) {
+        if (routes[loc.view][loc.action]) {
+          route = routes[loc.view][loc.action] + '.html';
+          route += '?' + loc.action;
+        } else {
+          pass = false;
+        }
+
+        //TODO index <int>|<string>
+        if (loc.index) {
+          route += '&id=' + loc.index;
+        }
+      }
+    } else {
+      loc = { view: default_route };
+    }
+  } else {
+    pass = false;
+  }
+
+  if (pass && typeof route === 'string') {
+    app.controller.cursor(loc);
+    view.removeAttribute('height');
+    view.setAttribute('src', 'views/' + route);
+
+    if (actions[loc.action] === 'list') {
+      document.body.classList.add('full-width');
+    } else {
+      document.body.classList.remove('full-width');
+    }
+
+    var nav = document.getElementById('master-navigation');
+    var nav_selector_active = nav.querySelector('li.active');
+    var nav_selector_current = nav.querySelector('a[data-view="' + loc.view + '"]');
+
+    if (nav_selector_active) {
+      nav_selector_active.classList.remove('active');
+    }
+    if (nav_selector_current) {
+      nav_selector_current.parentNode.classList.add('active');
+    }
+  } else {
+    app,stop();
+
+    return app.error();
+  }
+}
+
+app.main.openFile = function() {
+  var _open = function() {
+    app.os.fileOpen.call(this, config, _complete);
+  }
+
+  var _complete = function(_filename) {
+    if (_filename) {
+      document.cookie = 'last_opened_file=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      //TODO
+      //app.controller.clear(config.app, config.schema);
+
+      var filename = _filename.replace('.js', '');
+      filename = window.btoa(filename);
+
+      document.cookie = 'last_opened_file=' + filename + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+      app.store.set('last_opened_file', filename);
+      app.memory.set('last_opened_file', filename);
+
+      _refresh();
+    }
+  }
+
+  var _refresh = function() {
+    location.reload();
+  }
+
+  var open_input = null;
+  var open_input__std = this.getAttribute('data-open');
+
+  if (! open_input__std) {
+    this.setAttribute('data-open', '');
+
+    var open_input_ref = this.getAttribute('data-open-input');
+    var open_input = this.parentNode.querySelector(open_input_ref);
+
+    app.utils.addEvent('change', open_input, _open);
+  }
+
+  if (open_input) {
+    open_input.click();
+  }
+}
+
+app.main.saveFile = function() {
+  var source = {};
+  var _current_timestamp = new Date();
+
+  app._runtime.saves++;
+
+
+  Array.prototype.forEach.call(config.schema, function(key) {
+    source[key] = window.store[config.app][key];
+  });  
+
+  source.file = app.os.generateFileHeading(_current_timestamp);
+
+
+  try {
+    source = JSON.stringify(source);
+    source = source.replace(/\"/g, '"');
+    source = 'window.' + config.app + ' = ' + source;
+  } catch (err) {
+    return app.error('app.main.saveFile', err);
+  }
+
+
+  var filename = config.app + '_save';
+  var filename_date = app.utils.dateFormat(_current_timestamp, 'Y-m-d_H-g-s');
+
+  filename += '_' + filename_date;
+  filename += '_' + app.utils.numberLendingZero(app._runtime.saves);
+
+
+  var file = new File(
+    [ source ],
+    filename + '.js',
+    { type: 'application/x-javascript;charset=utf-8' }
+  );
+
+  saveAs(file);
+}
+
+app.main.controlView = function(e) {
+  var config = window.config;
+  var main = window.main;
+
+  if (! config) {
+    return app.error('app.main.controlView', null, 'config');
+  }
+
+  if (! e.data) {
+    return app.error('app.main.controlView', arguments);
+  }
+
+  try {
+    var ctl = JSON.parse(e.data);
+  } catch (err) {
+    return app.error('app.main.controlView', err);
+  }
+
+
+  var _s_events = { 'resize': 'resize', 'refresh': 'refresh' };
+  var _events = app.utils.extendObject(config.events, _s_events);
+  var _event = null;
+
+  if (ctl.action && ctl.action in _events) {
+    _event = ctl.action;
+  } else {
+    return app.error('app.main.controlView', ctl);
+  }
+
+  var _loc = app.utils.extendObject({}, ctl);
+  var _href = '';
+  var _title = '';
+  var _msg = '';
+
+
+  var _control = {};
+
+  _control.getID = function() {
+    var id = parseInt(ctl.index) || 0;
+
+    return id;
+  }
+
+  _control.setAction = function() {
+    if (ctl.action in _events === false) {
+      return app.error('app.main().setAction', 'ctl.action');
+    }
+
+    _loc.action = _events[_loc.action];
+
+    return _loc.action;
+  }
+
+  _control.getAction = function() {
+    if (! _loc.action) {
+      return app.error('app.main().setAction', 'loc.actionn');
+    }
+
+    return _loc.action;
+  }
+
+  _control.setTitle = function(title) {
+    if (! (title && typeof title === 'string')) {
+      return app.error('app.main().setTitle','title');
+    }
+
+    _title = title;
+
+    return _title;
+  }
+
+  _control.getTitle = function() {
+    return _title ? _title : ((ctl.title && typeof ctl.title === 'string') && ctl.title);
+  }
+
+  _control.setMsg = function(msg) {
+    if (! (msg && typeof msg === 'string')) {
+      return app.error('app.main().setTitle', 'title');
+    }
+
+    _msg = msg;
+
+    return _msg;
+  }
+
+  _control.getMsg = function() {
+    return _msg ? _msg : ((ctl.msg && typeof ctl.msg === 'string') && ctl.msg);
+  }
+
+  _control.setURL = function(path, qs) {
+    _href = 'index.html';
+
+    _href += (path || ctl.view) && '?' + ((path && typeof path === 'string') ? path : ctl.view);
+    _href += qs && '&' + ((qs && typeof qs === 'string') && qs);
+
+    return _href;
+  }
+
+  _control.getURL = function() {
+    return _href;
+  }
+
+  _control.redirect = function(path, qs) {
+    var _href = _control.getURL();
+
+    location.href = href;
+  }
+
+  _control.refresh = function() {
+    location.reload();
+  }
+
+  _control.resize = function() {
+    var height = parseInt(ctl.height);
+    var view = document.getElementById('view');
+
+    view.height = height;
+    view.scrolling = 'no';
+  }
+
+  _control.selection = function() {
+    _control.setURL();
+
+    _control.redirect();
+  }
+
+  _control.prepare = function() {
+    var action = _control.setAction();
+    var id = _control.getID();
+
+    _control.setURL(null, action + (id && '=' + id));
+
+    if (ctl.history) {
+      _control.history();
+    }
+
+    _control.submit();
+  }
+
+  _control.prevent = function() {
+    var action = _control.setAction();
+    var msg = _control.getMsg();
+
+    if (! msg) {
+      return app.error('app.main().' + event, 'url');
+    }
+
+    _control.setURL(null, action);
+
+    if (! window.confirm(msg)) {
+      return;
+    }
+
+    _control.submit();
+  }
+
+  _control.open = _control.prepare;
+
+  _control.add = _control.prepare;
+
+  _control.edit = _control.prepare;
+
+  _control.update = _control.prepare;
+
+  _control.delete = _control.prevent;
+
+  _control.close = _control.prevent;
+
+  _control.history = function() {
+    var _title = _control.getTitle();
+    var _url = _control.getURL();
+
+    app.controller.history(_title, _url);
+  }
+
+  _control.submit = function() {
+    if (! (ctl.submit && ctl.data)) {
+      app.main.loadView(_loc);
+
+      return; // silent fail
+    }
+
+    var action = _control.getAction();
+
+    try {
+      var _data = JSON.parse(ctl.data);
+
+      app.controller.store(function() {
+        var loc = app.controller.spoof();
+
+        loc.action = null;
+        loc.index = null;
+
+        if (action != 'update') {
+          app.main.loadView(loc);
+        }
+      }, config.app, config.schema, _data);
+    } catch (err) {
+      return app.error('main.controlView.submit', err);
+    }
+  }
+
+
+  if (main && 'controlView' in main) {
+    return main.controlView(_control, _event, ctl);
+  } else {
+    return _control[_event]();
+  }
+}
+
+app.main.action = function(element, event) {
+  var main = window.main;
+
+  if (! element || typeof event !== 'string') {
+    return app.error('main.action', arguments);
+  }
+
+
+  var _action = {};
+
+  _action.menu = function() {
+    if ('jQuery' in window && 'collapse' in jQuery.fn) {
+      return;
+    }
+
+    var menu = document.querySelector(element.getAttribute('data-target'));
+
+    if (! element.getAttribute('data-is-visible')) {
+      element.setAttribute('data-is-visible', true);
+      element.setAttribute('aria-expanded', false);
+      menu.setAttribute('aria-expanded', false);
+    }
+
+    app.layout.collapse('toggle', element, menu)();
+
+    app.utils.addEvent('click', document.body, app.layout.collapse('close', element, menu));
+  }
+
+
+  if (main && 'action' in main) {
+    return main.action(_action, element, event);
+  } else {
+    return _control[event]();
+  }
+
+  return _action[event];
+}
+
+app.main.setupData = function(loc) {
+  var main = window.main;
+
+  if (main && 'setupData' in main) {
+    main.setupData.apply(loc);
+  }
+
+  app.main.loadView(loc);
+}
+
+app.main.load = function() {
+  window.store = {};
+
+
+  app.resume(config);
+
+
+  var title = config.title;
+  var routine = config.auxs;
+  routine.push({ file: '', fn: config.app, schema: config.schema });
+
+  app.controller.retrieve(app.main.setupData, routine);
+  app.controller.setTitle(title);
+
+
+  var navbar_brand = document.getElementById('brand');
+  brand.innerHTML = title;
+
+
+  var open_actions = document.querySelectorAll('.main-action-open');
+
+  if (open_actions.length) {
+    Array.prototype.forEach.call(open_actions, function(element) {
+      app.utils.addEvent('click', element, app.main.openFile);
+    });
+  }
+
+  var save_actions = document.querySelectorAll('.main-action-save');
+
+  if (save_actions.length) {
+    Array.prototype.forEach.call(save_actions, function(element) {
+      app.utils.addEvent('click', element, app.main.saveFile);
+    });
+  }
+
+
+  app.utils.addEvent('message', window, app.main.controlView);
+}
+
+app.main.unload = function() {
+  if (! app.memory.has('save_reminded') && app.memory.get('last_opened_file') !== app.memory.get('last_stored')) {
+    return;
+  }
+
+  app.memory.set('save_reminded', true);
+
+  return true;
+}
+
+
 app.view = {};
 
 app.view.spoof = function() {
@@ -741,7 +1427,11 @@ app.view.spoof = function() {
 app.view.open = function(events, data, form) {
   var control = window.control;
 
-  if (! control || (events && events instanceof Array === false) || typeof data !== 'object') {
+  if (! control) {
+    return app.error('app.view.open', 'control');
+  }
+
+  if ((events && events instanceof Array === false) || typeof data !== 'object') {
     return app.error('app.view.open', arguments);
   }
 
@@ -803,16 +1493,15 @@ app.view.open = function(events, data, form) {
     }
 
     control.temp = {};
-    control.temp.data = data;
 
     _initialized = true;
 
-    if (events && event) {
+    if (event) {
       event = _open.setEvent(event);
-    }
 
-    if (event === 'add') {
-      id = app.view.getLastID(data);
+      if (event === 'add') {
+        id = app.view.getLastID(data);
+      }
     }
 
     id = _open.setID(id);
@@ -826,14 +1515,14 @@ app.view.open = function(events, data, form) {
     app.view.resizeView(false);
 
     if (form) {
+      control.temp.form = true;
       control.temp.form_submit = false;
       control.temp.form_elements = form.elements;
       control.temp.form_changes = null;
 
-      //TODO FIX
       try {
-        control.temp.form_changes = app.view.getFormData(form.elements);
-        control.temp.form_changes = JSON.stringify(control.temp.form_changes);
+        var _changes = app.view.getFormData(form.elements);
+        control.temp.form_changes = _changes && JSON.stringify(_changes);
       } catch {}
     }
 
@@ -876,22 +1565,15 @@ app.view.open = function(events, data, form) {
     return control.temp.event;
   }
 
-  _open.setTitle = function(event, sectionTitle, viewTitle, id) {
+  _open.setTitle = function(sectionTitle, viewTitle, id) {
     _initialized || _uninitialized('setTitle');
 
-    if (typeof event !== 'string') {
-      return app.error('app.view.open().setTitle', arguments);
-    }
-
-    if (arguments.length === 1) {
-
-      sectionTitle = event;
-    }
+    var event = _open.getEvent();
 
     var _view_title = document.getElementById('view-title');
     var _section_title = document.getElementById('section-title');
 
-    id = id || _open.getID();
+    id = parseInt(id) || _open.getID();
 
     if (event === 'edit') {
       sectionTitle += ' # ' + id;
@@ -905,25 +1587,45 @@ app.view.open = function(events, data, form) {
     }
   }
 
-  _open.setActionHandler = function(event, label, id) {
+  _open.setActionHandler = function(label, id) {
     _initialized || _open.uninitialized('setActionHandler');
 
-    if (! event || ! id) {
-      return app.error('app.view.open().setActionHandler', arguments);
-    }
+    var event = _open.getEvent();
 
-    id = id || _open.getID();
+    id = parseInt(id) || _open.getID();
 
     var action_handler = document.getElementById('submit');
     var action_index = document.getElementById('index');
-    var action_handler_event = action_handler.getAttribute('onclick');
 
-    action_handler_event = action_handler_event.replace('{event}', event);
-    action_handler.setAttribute('onclick', action_handler_event);
-    action_index.setAttribute('value', id);
+    if (action_index) {
+      action_index.setAttribute('value', id);
+    } else {
+      return app.error('app.view.open().setActionHandler', null, 'action_index');
+    }
+
+    if (action_handler) {
+      var action_handler_event = action_handler.getAttribute('onclick');
+      action_handler_event = action_handler_event.replace('{event}', event);
+      action_handler.setAttribute('onclick', action_handler_event);
+    }
 
     if (label && typeof label === 'string') {
       action_handler.innerHTML = label;
+    }
+  }
+
+  _open.denySubmit = function() {
+    _initialized || _open.uninitialized('denySubmit');
+
+    var action_handler = document.getElementById('submit');
+
+    if (action_handler) {
+      action_handler.removeAttribute('onclick');
+      action_handler.setAttribute('disabled', '');
+    }
+
+    if (form) {
+      form.setAttribute('action', '');
     }
   }
 
@@ -955,21 +1657,58 @@ app.view.open = function(events, data, form) {
 
     tbody.innerHTML = _rows;
 
-    return { table: table, tbody: tbody, rows: _rows };
+    return { table: table, tbody: tbody, trow_tpl: trow_tpl, rows: _rows, data: data, args: _args };
   }
 
-  _open.fillSelection = function(select, _data, id) {
+  _open.fillForm = function(form, _data) {
+    _initialized || _open.uninitialized('fillForm');
+
+    if (! form) {
+      return app.error('app.view.open().fillForm', arguments);
+    }
+
+    if (_data && typeof _data === 'object') {
+      data = _data;
+    }
+
+    var _args = Object.values(arguments).slice(2);
+
+    control.fillForm(data, _args);
+
+    return { form: form, data: data, args: _args };
+  }
+
+  _open.fillSelection = function(_data, id) {
     _initialized || _open.uninitialized('fillSelection');
 
-    if (! select || ! (_data && typeof _data === 'object')) {
+    if (! (_data && typeof _data === 'object')) {
       return app.error('app.view.open().fillSelection', arguments);
     }
 
+    var selection = document.getElementById('selection');
+
     id = id || '';
 
-    select.innerHTML = app.layout.renderSelectOptions(select, _data, id);
-    select.value = id;
+    selection.innerHTML = app.layout.renderSelectOptions(selection, _data, id);
+    selection.value = id;
   } 
+
+  _open.fillCTA = function(id) {
+    _initialized || _open.uninitialized('fillCTA');
+
+    id = parseInt(id) || _open.getID();
+
+    var section_actions_top = document.getElementById('section-actions-top');
+    var section_actions_bottom = document.getElementById('section-actions-bottom');
+
+    if (section_actions_top) {
+      section_actions_top.innerHTML = section_actions_top.innerHTML.replace(/\{id\}/g, id);
+    }
+
+    if (section_actions_bottom) {
+      section_actions_bottom.innerHTML = section_actions_bottom.innerHTML.replace(/\{id\}/g, id);
+    }
+  }
 
   return _open;
 }
@@ -977,7 +1716,11 @@ app.view.open = function(events, data, form) {
 app.view.action = function(events, event, element, data, form) {
   var control = window.control;
 
-  if (! control && (events && (events instanceof Array === false)) || ! event || ! element) {
+  if (! control) {
+    return app.error('app.view.action', 'control');
+  }
+
+  if ((events && (events instanceof Array === false)) || ! event || ! element) {
     return app.error('app.view.action', arguments);
   }
 
@@ -1026,12 +1769,39 @@ app.view.action = function(events, event, element, data, form) {
       if (_submit === true) {
         ctl.submit = true;
         ctl.data = JSON.stringify(_data);
+
+        if (control.temp.form) {
+          control.temp.form_submit = true;
+
+          var _changes = app.view.getFormData(form.elements);
+          control.temp.form_changes = _changes && JSON.stringify(_changes);
+        }
       }
 
       return ctl;
     } catch (err) {
-      return app.error('app.view.action().' + event, ctl, err);
+      return app.error('app.view.action().' + event, null, err);
     }
+  }
+
+  _action.prevent = function(_data, _submit, title, name) {
+    _initialized || _action.uninitialized(event);
+
+    if (typeof title !== 'string') {
+      return app.error('app.view.action().' + event, arguments);
+    }
+
+    var event_label = config.events ? config.events[event] : event;
+
+    if (title && (typeof name === 'number' || typeof name === 'string')) {
+      ctl.msg  = 'Are you sure to ' + event_label + ' ' + title + ' ';
+      ctl.msg += (typeof name === 'number' ? '#' + name : '"' + name + '"');
+      ctl.msg +=' ?';
+    } else {
+      ctl.msg = title;
+    }
+
+    return _action.prepare(_data, _submit);
   }
 
   _action.open = _action.prepare;
@@ -1042,23 +1812,9 @@ app.view.action = function(events, event, element, data, form) {
 
   _action.update = _action.prepare;
 
-  _action.delete = function(_data, _submit, title, name) {
-    _initialized || _action.uninitialized('delete');
+  _action.delete = _action.prevent;
 
-    if (typeof title !== 'string') {
-      return app.error('app.view.action().delete', arguments);
-    }
-
-    if (title && (typeof name === 'number' || typeof name === 'string')) {
-      ctl.msg  = 'Are you sure to delete ' + title + ' ';
-      ctl.msg += (typeof name === 'number' ? '#' + name : '"' + name + '"');
-      ctl.msg +=' ?';
-    } else {
-      ctl.msg = title;
-    }
-
-    return _action.prepare(_data, _submit);
-  }
+  _action.close = _action.prevent;
 
   _action.selection = function(_data, _submit) {
     _initialized || _action.uninitialized('selection');
@@ -1077,17 +1833,19 @@ app.view.action = function(events, event, element, data, form) {
   _action.getID = function() {
     _initialized || _action.uninitialized('getID');
 
-    if (event === 'add') {
-      return control.temp.id;
-    } else if (event === 'update') {
-      return 0;
+    var id = 0;
+
+    try {
+      var trow = element.parentNode.parentNode;
+
+      id = trow.getAttribute('data-index');
+    } catch {}
+
+    if (! id && control.temp.id) {
+      id = control.temp.id;
     }
 
-    var trow = element.parentNode.parentNode;
-    var id = trow.getAttribute('data-index');
-    id = parseInt(id);
-
-    return id;
+    return parseInt(id);
   }
 
   _action.validateForm = function() {
@@ -1100,8 +1858,6 @@ app.view.action = function(events, event, element, data, form) {
     id = parseInt(id);
 
     if (form.checkValidity()) {
-      control.temp.form_submit = true;
-
       return false;
     }
 
@@ -1232,11 +1988,60 @@ app.view.resizeView = function(check_time) {
     control.temp.last_resize = new Date().getTime();
   }
 
-  ctl = { view: app.position(), action: 'resize', height: document.documentElement.scrollHeight };
+
+  var ctl = { action: 'resize', height: document.documentElement.scrollHeight };
+
+  var cursor = app.controller.cursor();
+
+  if ('view' in cursor) {
+    ctl.view = cursor.view;
+  }
+
   ctl = JSON.stringify(ctl);
+
   window.parent.postMessage(ctl, '*');
 
   return true;
+}
+
+app.view.submit = function(ctl) {
+  if (! ctl) {
+    return; //silent fail
+  }
+
+  if (typeof ctl !== 'object') {
+    return app.error('app.view.submit', arguments);
+  }
+
+  if ('view' in ctl === false) {
+    var cursor = app.controller.cursor();
+
+    if ('view' in cursor) {
+      ctl.view = cursor.view;
+    }
+  }
+
+  if ('action' in ctl === false) {
+    return;
+  }
+
+  try {
+    ctl = JSON.stringify(ctl);
+
+
+
+
+
+console.log(ctl);
+
+
+
+
+
+    window.parent.postMessage(ctl, '*');
+  } catch (err) {
+    return app.error('app.view.submit', null, err);
+  }
 }
 
 app.view.getLastID = function(data) {
@@ -1260,7 +2065,6 @@ app.view.getFormData = function(elements, key) {
 
   var data = {};
 
-
   for (var i = 0; i < elements.length; i++) {
     if (elements[i].nodeName == 'FIELDSET') {
       continue;
@@ -1280,36 +2084,27 @@ app.view.getFormData = function(elements, key) {
       }
     }
 
-    transform && app.utils.transform(transform, value);
-    sanitize && app.utils.sanitize(sanitize, value);
+    if (transform) {
+      value = app.utils.transform(transform, value);
+    }
+    if (sanitize) {
+      value = app.utils.sanitize(sanitize, value);
+    }
 
     if (value === undefined) {
       value = null;
     }
 
-    //TODO improve
     if (name) {
-      if (name.indexOf('[') != -1) {
-        name = name.replace(/\]/g, '').split('[');
+      name = name.match(/([\w]+)/g, '$1');
 
-        if (! data[name[0]]) {
-          data[name[0]] = {};
-        }
+      var _data = {};
 
-        if (name.length === 1) {
-          data[name[0]] = value;
-        } else if (name.length === 2) {
-          data[name[0]][name[1]] = value;
-        } else if (name.length === 3) {
-          if (! data[name[0]][name[1]]) {
-            data[name[0]][name[1]] = {};
-          }
+      Array.prototype.reduce.call(name, function(_obj, _key, _i) {
+        return _obj[_key] = (_i != (name.length - 1)) && {} || value;
+      }, _data);
 
-          data[name[0]][name[1]][name[2]] = value;
-        }
-      } else {
-        data[name] = value;
-      }
+      app.utils.extendObject(true, data, _data);
     }
   }
 
@@ -1373,50 +2168,6 @@ app.view.copyToClipboard = function(source) {
   document.body.removeChild(_clipboard);
 }
 
-app.view.submit = function(ctl) {
-  if (! ctl) {
-    return; //silent fail
-  }
-
-  if (typeof ctl !== 'object') {
-    return app.error('app.view.submit', arguments);
-  }
-
-  if ('view' in ctl === false) {
-    var cursor = app.controller.cursor();
-
-    if ('view' in cursor) {
-      ctl.view = cursor.view;
-    }
-  }
-
-  if ('action' in ctl === false) {
-    return;
-  }
-
-  try {
-    if (control && control.temp) {
-      control.temp.submit = true;
-    }
-
-    ctl = JSON.stringify(ctl);
-
-
-
-
-
-console.log(ctl);
-
-
-
-
-
-    window.parent.postMessage(ctl, '*');
-  } catch (err) {
-    return app.error('app.view.submit', ctl, err);
-  }
-}
-
 app.view.load = function() {
   var config = window.config;
 
@@ -1441,19 +2192,18 @@ app.view.unload = function() {
     return app.error('app.view.unload', null);
   }
 
-  if (control.temp.form_submit) {
+  if (control.temp.form && ! control.temp.form_submit) {
     try {
       var _changes = app.view.getFormData(control.temp.form_elements);
-      _changes = JSON.stringify(_changes);
-
-      //TODO FIX
-      if (control.temp.form_changes === _changes) {
-        return;
-      }
+      _changes = _changes && JSON.stringify(_changes);
     } catch {}
+
+    if (control.temp.form_changes !== _changes) {
+      return true;
+    }
   }
 
-  return 'Ricordati di salvare!';
+  return;
 }
 
 
@@ -1477,7 +2227,7 @@ app.utils.isPlainObject = function( obj ) {
     return false;
   }
 
-  proto = getProto( obj );
+  proto = Object.getPrototypeOf( obj );
 
   // Objects with no prototype (e.g., `Object.create( null )`) are plain
   if ( !proto ) {
@@ -1486,7 +2236,7 @@ app.utils.isPlainObject = function( obj ) {
 
   // Objects with prototype are plain iff they were constructed by a global Object function
   Ctor = hasOwn.call( proto, "constructor" ) && proto.constructor;
-  return typeof Ctor === "function" && fnToString.call( Ctor ) === ObjectFunctionString;
+  return typeof Ctor === "function" && hasOwn.toString.call( Ctor ) === hasOwn.toString.call( Object );
 }
 
 /**!
@@ -1514,7 +2264,7 @@ app.utils.extendObject = function() {
   }
 
   // Handle case when target is a string or something (possible in deep copy)
-  if ( typeof target !== "object" && !isFunction( target ) ) {
+  if ( typeof target !== "object" && !(typeof target === "function" && typeof target.nodeType !== "number") ) {
     target = {};
   }
 
@@ -1876,7 +2626,7 @@ app.unload = function(fn) {
   window.onbeforeunload = fn;
 }
 
-app.redirection = function(config) {
+app.redirect = function(config) {
   var _base = config.basePath;
   var _filename = 'index';
 
@@ -1921,7 +2671,7 @@ app.resume = function(config, start) {
     if (! session_resume && ! start) {
       app._runtime.exec = false;
       app.error();
-      //app.redirection(config);
+      //app.redirect(config);
     }
     if (session_resume) {
       session_resume = window.atob(session_resume) + '.js';
@@ -1969,27 +2719,45 @@ app.error = function() {
   }
 
   if (app._runtime.debug) {
-    if (! app._runtime.exec) {
+    if (app._runtime.exec) {
+      console.error(msg || 'ERR', fnn, app.position());
+    } else {
       console.warn(msg || 'WARN', fnn, app.position());
     }
 
-    console.error(msg || 'ERR', fnn, app.position());
-
-    if (dbg && dbg.length) {
+    if (dbg) {
       console.log(dbg);
     }
   }
 
   if (! msg) {
     msg = 'Si è verificato un errore, impossibile proseguire.';
+
+    if (! app._runtime.exec) {
+      msg += '\n\nRicarica l\'applicazione.';
+    }
   }
 
-  if (app._runtime.notify === undefined || ! app._runtime.notify) {
+  if (app._runtime.notify !== undefined && ! app._runtime.notify) {
     var _alert = top.alert || parent.alert || window.alert;
     _alert(msg);
   }
 
+  if (! app._runtime.exec) {
+    app._runtime.notify = false;
+
+    app.blind();
+  }
+
   return app._runtime.exec;
+}
+
+app.blind = function() {
+  var _high = top.document || parent.document || window.document;
+  var _blind = document.createElement('div');
+  _blind.setAttribute('style', 'position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.3);');
+
+  _high.body.appendChild(_blind);
 }
 
 app.getVersion = function(info) {
