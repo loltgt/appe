@@ -13,7 +13,7 @@
 <body class="main">
 <nav id="master-header" class="master-header navbar navbar-inverse navbar-fixed-top">
   <div class="container-fluid">
-    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#master-navigation" aria-expanded="true" aria-controls="master-navigation" onclick="main.action(this, 'menu')">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#master-navigation" aria-expanded="true" aria-controls="master-navigation" onclick="app.main.action(this, 'menu')">
       <span class="sr-only">Menu</span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
@@ -67,9 +67,13 @@
 var main = {};
 
 main.controlView = function(control, event, ctl) {
-  var _events = app.utils.extendObject({}, control);
+  if (! control || ! event || ! ctl) {
+    return app.error('main.controlView', arguments);
+  }
 
-  _events.selection = function() {
+  var _actions = app.utils.extendObject({}, control);
+
+  _actions.selection = function() {
     if (ctl && ctl.data) {
       app.memory.set('archive_id', parseInt(ctl.data));
     }
@@ -77,17 +81,30 @@ main.controlView = function(control, event, ctl) {
     return control.selection();
   }
 
-  _events[event]();
+  _actions[event]();
 }
 
-main.setupData = function(loc) {
-  if (! app.memory.get('archive_id')) {
+main.setupData = function() {
+  if (! app.memory.has('archive_id')) {
     app.memory.set('archive_id', 1);
   }
-
-  if (! app.memory.get('category_id')) {
+  if (! app.memory.has('category_id')) {
     app.memory.set('category_id', 1);
   }
+}
+
+main.action = function(action, element, event) {
+  if (! action || ! element || ! event) {
+    return app.error('main.action', arguments);
+  }
+
+  var _events = app.utils.extendObject({}, action);
+
+  _events.menu = function() {
+    return action.menu();
+  }
+
+  _events[event]();
 }
 
 

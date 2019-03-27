@@ -18,7 +18,7 @@
     <div class="vcontent-centered-inner">
       <div class="loader">
         <div id="loader-open" class="loader-open" style="visibility: hidden;">
-          <p class="lead">Open the last save</p>
+          <p class="lead">Open latest file save</p>
           <input id="start-action-open-file" type="file" accept="application/x-javascript" style="display: none;" hidden>
           <button id="start-action-open" class="btn btn-lg btn-big btn-info start-action-open" data-open-input="#start-action-open-file">Open</button>
         </div>
@@ -38,6 +38,8 @@
 
 
 <script type="text/javascript">
+var start = true;
+
 app.load(app.start.load);
 </script>
 </body>

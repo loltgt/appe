@@ -22,9 +22,9 @@
 </div>
 </div>
 
-<div class="page-block">
-  <p id="appe"><strong>&#123;appe&#125;</strong> {release}</p>
-  <p>2018 &copy; Leonardo Laureti</p>
+<div id="appe" class="page-block">
+  <p><strong>&#123;appe&#125;</strong> &nbsp; {release}</p>
+  <p>{copyright_year} &copy; Leonardo Laureti</p>
 </div>
 </section>
 
@@ -57,9 +57,7 @@
 <section class="page-section">
 <h5>Application license</h5>
 
-<p>{license}</p>
-
-<iframe class="license">
+<div id="license"></div>
 </section>
 
 
@@ -73,36 +71,76 @@ var control = {};
 
 control.openView = function() {
   var data_file = window.store[config.app]['file'];
-  var appe = app.getVersion();
 
-  if (! data_file || ! appe) {
-    return app.error('control.openView', arguments);
+  var table = document.getElementById('table-data');
+
+  if (! data_file) {
+    return app.error('control.openView', arguments, 'data*');
   }
 
-  var view_title = document.getElementById('view-title');
 
-  var appe_ver = document.getElementById('appe');
-  appe_ver.innerHTML = appe_ver.innerHTML.replace('{release}', appe.release);
+  var _open = app.view.open(null, data_file);
+
+  _open.begin();
+
+
+  var appe = document.getElementById('appe');
+
+  appe.innerHTML = appe.innerHTML
+    .replace('{release}', app.getVersion('release'))
+    .replace('{copyright_year}', new Date().getFullYear());
+
 
   var app_name = document.getElementById('app-name');
-  app_name.innerHTML = config.title;
+  app_name.innerHTML = app.getName();
 
   var app_file_name = app.os.getLastFileName(config) || 'n.d.';
-  var app_file_version = data_file.version || 'n.d.'; //TODO
-  var app_file_checksum = 'n.d.'; //TODO
+  var app_file_version = data_file.version || 'n.d.';
+  var app_file_checksum = 'n.d.'; //TODO fn
 
-  control.temp = {};
 
-  var tbody = document.querySelector('#table-data > tbody');
-  tbody.classList.remove('tpl');
+  var tbody = table.querySelector('tbody');
+  var rows = tbody.innerHTML;
 
-  var blob = tbody.innerHTML;
-
-  blob = blob.replace('{file_name}', app_file_name)
+  rows = rows.replace('{file_name}', app_file_name)
     .replace('{file_version}', app_file_version)
     .replace('{file_checksum}', app_file_checksum);
 
-  tbody.innerHTML = blob;
+  tbody.innerHTML = rows;
+
+
+  var license = document.getElementById('license');
+  var app_license = app.getLicense();
+
+  if (app_license) {
+    var _license = null;
+
+    if (typeof app_license === 'object') {
+      _license = document.createElement('p');
+      _license.innerHTML = app_license.text.toString();
+      license.appendChild(_license);
+
+      _license = document.createElement('iframe');
+      _license.setAttribute('class', 'license');
+      _license.setAttribute('readonly', '');
+      _license.setAttribute('src', app_license.file.toString());
+      license.appendChild(_license);
+    } else if (app_license.length <= 64) {
+      _license = document.createElement('p');
+      _license.innerHTML = app_license.toString();
+      license.appendChild(_license);
+    } else {
+      _license = document.createElement('textarea');
+      _license.setAttribute('class', 'license');
+      _license.setAttribute('readonly', '');
+      _license.setAttribute('disabled', '');
+      _license.innerHTML = app_license;
+      license.appendChild(_license);
+    }
+  } else {
+    license.parentNode.remove();
+  }
+
 
   if ('matchMedia' in window) {
     var wab_btn = document.querySelector('.btn-wab');
@@ -113,15 +151,12 @@ control.openView = function() {
     }
   }
 
-  app.view.resizeView(false);
+
+  _open.end();
 }
 
 
-window.store = {};
-
 app.load(app.view.load);
-app.utils.addEvent('resize', window, app.view.resizeView);
-app.utils.addEvent('orientationchange', window, app.view.resizeView);
 </script>
 </body>
 </html>

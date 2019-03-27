@@ -1,8 +1,8 @@
 /*!
  * {appe}
- * ver. 1.0 alpha
+ * ver. 1.0 beta
  *
- * Copyright 2018 Leonardo Laureti
+ * Copyright (c) Leonardo Laureti
  *
  * MIT License
  */
@@ -454,6 +454,7 @@ fieldset[disabled] .btn-secondary.focus {
 }
 
 .view {
+  margin-bottom: 20px;
   padding: 20px;
   overflow-x: hidden;
 }
@@ -470,6 +471,7 @@ fieldset[disabled] .btn-secondary.focus {
 .page-section,
 .page-block {
   display: block;
+  clear: both;
 }
 .page-section {
   margin-bottom: 5px;
@@ -635,6 +637,9 @@ fieldset.form-submit {
 .about .page-section:nth-child(3) p {
   margin-bottom: 12px;
 }
+.about .page-section:last-of-type {
+  margin-bottom: 40px;
+}
 .about .page-block p {
   font-size: 14px;
 }
@@ -645,7 +650,7 @@ fieldset.form-submit {
 .license {
   display: block;
   padding: 9.5px;
-  margin: 0 0 10px;
+  margin: 30px 0 10px;
   min-width: 480px;
   min-height: 100px;
   overflow: auto;
@@ -705,6 +710,7 @@ fieldset.form-submit {
     padding: 10px 0;
   }
   .view {
+    margin-bottom: 0;
     padding-right: 40px;
     padding-left: 40px;
   }
@@ -726,6 +732,9 @@ fieldset.form-submit {
     padding-top: 20px;
     padding-bottom: 20px;
     font-size: 18px;
+  }
+  .about .page-section:last-of-type {
+    margin-bottom: 80px;
   }
 }
 

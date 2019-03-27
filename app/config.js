@@ -1,8 +1,9 @@
 window.config = {
   "app": "demo",
   "launcherName": "LAUNCH",
-  "title": "{appe} demo app",
-  "language": "it",
+  "name": "{appe} demo app",
+  "language": "en",
+  "debug": true,
   "schema": [ "file", "archive", "categories", "items", "sample" ],
   "events": {
     "selection": "selection",
@@ -48,11 +49,15 @@ window.config = {
   "basePath": "app",
   "savePath": "save",
   "openAttempts": 10,
-  "auxs": [],
   "altExecFolder": "alt",
   "altExecPlatform": {
     "win": "LAUNCH.win.exe",
     "mac": "LAUNCH.mac.app",
     "hta": "LAUNCH.hta"
+  },
+  "auxs": [],
+  "license": {
+    "text": "LGPL-3.0-or-later",
+    "file": "../LICENSE"
   }
 }

@@ -129,10 +129,10 @@ control.openView = function() {
 
   if (! archive_items[id].pop.total) {
     archive_items[id].pop.total  = 0;
-    archive_items[id].pop.total += _archive_items_join[id].pop['avg'];
-    archive_items[id].pop.total += _archive_items_join[id].pop['movies'];
-    archive_items[id].pop.total += _archive_items_join[id].pop['toyes'];
-    archive_items[id].pop.total += _archive_items_join[id].pop['books'];
+    archive_items[id].pop.total += archive_items[id].pop['avg'];
+    archive_items[id].pop.total += archive_items[id].pop['movies'];
+    archive_items[id].pop.total += archive_items[id].pop['toyes'];
+    archive_items[id].pop.total += archive_items[id].pop['books'];
   }
 
   t2row.innerHTML = t2row.innerHTML

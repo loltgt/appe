@@ -130,12 +130,11 @@
 
 
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
-<script type="text/javascript" src="../assets/js/file-saver/FileSaver.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
-<script type="text/javascript">
-var control = {};
 
+
+<script type="text/javascript">
 var control = {};
 
 control.openView = function() {
@@ -253,6 +252,8 @@ control.renderRow = function(tpl_row, id_row, data_row, data_extra) {
 
 
   var archive_items_extra = data_extra[0];
+  //TODO FIX data
+  archive_items_extra[data_row.id].custom = archive_items_extra[data_row.id].custom || { '1': false, '2': false };
 
 
   var row = tpl_row.cloneNode(true);
