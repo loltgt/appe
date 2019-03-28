@@ -73,21 +73,24 @@
 var control = {};
 
 control.openView = function() {
+  var data_archive = window.store[config.app]['archive'];
   var data_items = window.store[config.app]['items'];
   var data_categories = window.store[config.app]['categories'];
 
   var table = document.getElementById('table-data');
 
-  if (! data_items || ! data_categories) {
-    return app.error('control.openView', arguments, 'data*');
+  if (! data_archive || ! data_items || ! data_categories) {
+    return app.error('control.openView', 'data*');
   }
 
 
 
+  var __data = Object.keys(data_archive).length;
+
   var archive_id = app.memory.get('archive_id');
   var category_id = app.memory.get('category_id');
 
-  var categories_data = data_categories[archive_id][category_id];
+  var categories_data = data_categories[category_id];
 
 
 
@@ -198,7 +201,7 @@ control.action = function(element, event, data_extra) {
 
   var ctl = _events[event](data_extra);
 
-  app.view.submit(ctl);
+  app.view.send(ctl);
 
   _action.end();
 }

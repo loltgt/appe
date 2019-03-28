@@ -11,13 +11,12 @@ var app = window.app = {};
 
 
 app._runtime = {
-  system: null,
   version: '1.0',
   release: '1.0 beta',
+  system: null,
   exec: true,
   title: '',
   storage: false,
-  saves: 0,
   debug: false
 };
 
@@ -115,11 +114,11 @@ app.os.fileSave = function(callback, source, timestamp) {
   var config = window.config;
 
   if (! config) {
-    return app.stop('app.os.fileOpen');
+    return app.stop('app.os.fileSave');
   }
 
   if (! (callback && typeof callback === 'function') || ! (timestamp && timestamp instanceof Date)) {
-    return app.error('app.os.fileOpen', arguments);
+    return app.error('app.os.fileSave', arguments);
   }
 
   if (! (source && typeof source === 'object')) {
@@ -137,13 +136,15 @@ app.os.fileSave = function(callback, source, timestamp) {
   }
 
 
-  app._runtime.saves++;
+  var file_saves = app.memory.has('file_saves') ? parseInt(app.memory.get('file_saves')) : 0;
+
+  file_saves++;
 
   var filename = config.app + '_save';
-  var filename_date = app.utils.dateFormat(timestamp, 'Y-m-d_H-g-s');
+  var filename_date = app.utils.dateFormat(timestamp, 'Y-m-d_H-M-S');
 
   filename += '_' + filename_date;
-  filename += '_' + app._runtime.saves;
+  filename += '_' + file_saves;
 
 
   var file = new File(
@@ -152,9 +153,13 @@ app.os.fileSave = function(callback, source, timestamp) {
     { type: 'application/x-javascript;charset=utf-8' }
   );
 
-  if (saveAs(file)) {
+  try {
+    saveAs(file);
+
+    app.memory.set('file_saves', file_saves);
+
     callback(filename);
-  } else {
+  } catch (err) {
     callback(false);
   }
 }
@@ -234,7 +239,7 @@ app.os.generateFileHead = function(source, timestamp) {
   }
 
   var _checksum = ''; //TODO
-  var _timestamp = app.utils.dateFormat(timestamp, 'u');
+  var _timestamp = app.utils.dateFormat(timestamp, 'Q');
 
   return {
     'checksum': _checksum,
@@ -273,6 +278,7 @@ app.os.getLastFileName = function() {
     file_name = app.memory.get('last_opened_file');
   }
 
+  //TODO atob whitespace
   file_name = file_name ? window.atob(file_name) + '.js' : null;
 
   return file_name;
@@ -473,15 +479,19 @@ app.layout.draggable = function(event, table, field) {
     return app.error('app.view.draggable', arguments);
   }
 
-
   var _draggable = {};
 
-  var element = null;
-  var next_index = null;
+  if (! table._draggable) {
+    table._draggable = {};
+  }
+
+  table._draggable.current = null;
+  table._draggable.prev_index = null;
+  table._draggable.next_index = null;
 
   _draggable.start = function(e) {
-    element = this;
-    next_index = this.getAttribute('data-index');
+    table._draggable.current = this;
+    table._draggable.next_index = this.getAttribute('data-index');
 
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.innerHTML);
@@ -515,6 +525,7 @@ app.layout.draggable = function(event, table, field) {
 
     Array.prototype.forEach.call(trows, function (trow) {
       items.push(trow.getAttribute('data-index'));
+
       trow.classList.remove('move');
       trow.classList.remove('over');
     });
@@ -538,17 +549,17 @@ app.layout.draggable = function(event, table, field) {
       e.stopPropagation();
     }
 
-    if (element != this) {
-      var prev_index = this.getAttribute('data-index');
+    if (table._draggable.current != this) {
+      table._draggable.prev_index = this.getAttribute('data-index');
 
-      element.innerHTML = this.innerHTML;
-      element.setAttribute('data-index', prev_index);
+      table._draggable.current.innerHTML = this.innerHTML;
+      table._draggable.current.setAttribute('data-index', table._draggable.prev_index);
 
-      this.setAttribute('data-index', next_index);
+      this.setAttribute('data-index', table._draggable.next_index);
       this.innerHTML = e.dataTransfer.getData('text/html');
       this.querySelector('meta').remove();
     } else {
-      next_index = null;
+      table._draggable.next_index = null;
     }
 
     return false;
@@ -703,24 +714,7 @@ app.memory = {};
  * @return
  */
 app.memory.set = function(key, value) {
-  //if (sessionStorage) {
-    return app.utils.storage(true, 'set', key, value);
-  //}
-
-
-  /*var obj = window.tmp;
-
-  if (! obj || typeof obj !== 'object') {
-    obj = {};
-  }
-
-  if (typeof value === 'object') {
-    value = JSON.stringify(value);
-  }
-
-  var _set = (obj[key] == value) ? true : false;
-  top.tmp = parent.tmp = window.tmp = obj;
-  return _set;*/
+  return app.utils.storage(true, 'set', key, value);
 }
 
 
@@ -734,26 +728,7 @@ app.memory.set = function(key, value) {
  * @return
  */
 app.memory.get = function(key) {
-  //if (sessionStorage) {
-    return app.utils.storage(true, 'get', key);
-  //}
-
-
-  /*var obj = window.tmp;
-
-  if (! obj || typeof obj !== 'object') {
-    obj = {};
-  }
-
-  if (key in obj) {
-    if (typeof obj[key] === 'object') {
-      obj[key] = JSON.parse(obj[key]);
-    }
-
-    return obj[key];
-  }
-
-  return '';*/
+  return app.utils.storage(true, 'get', key);
 }
 
 
@@ -767,26 +742,7 @@ app.memory.get = function(key) {
  * @return <Boolean>
  */
 app.memory.has = function(key, value) {
-  //if (sessionStorage) {
-    return app.utils.storage(true, 'has', key, value);
-  //}
-
-
-  /*var obj = window.tmp;
-
-  if (! obj || typeof obj !== 'object') {
-    obj = {};
-  }
-
-  if (value) {
-    if (typeof value === 'object') {
-      value = JSON.stringify(value);
-    }
-  } else {
-    value = true;
-  }
-
-  return (key in obj && (obj[key] === value)) ? true : false;*/
+  return app.utils.storage(true, 'has', key, value);
 }
 
 
@@ -796,24 +752,10 @@ app.memory.has = function(key, value) {
  * Remove persistent storage entry by key
  *
  * @param <String> key
- * @return <Boolean>
+ * @return
  */
 app.memory.del = function(key) {
-  //if (sessionStorage) {
-    return app.utils.storage(true, 'del', key);
-  //}
-
-
-  /*var top = window.top || undefined;
-  var obj = top.tmp || parent.tmp || window.tmp;
-
-  if (! obj || typeof obj !== 'object') {
-    obj = {};
-  }
-
-  var _del = (key in obj && (delete obj[key])) ? true : false;
-  window.tmp = obj;
-  return _del;*/
+  return app.utils.storage(true, 'del', key);
 }
 
 
@@ -822,18 +764,10 @@ app.memory.del = function(key) {
  *
  * Reset persistent storage
  *
- * @return <Boolean>
+ * @return
  */
 app.memory.reset = function() {
-  //if (sessionStorage) {
-    return app.utils.storage(true, 'reset');
-  //}
-
-
-  /*var obj = top.tmp || parent.tmp || window.tmp;
-  obj = {};
-  window.tmp = obj;
-  return true;*/
+  return app.utils.storage(true, 'reset');
 }
 
 
@@ -887,7 +821,7 @@ app.store.has = function(key, value) {
  * Remove storage entry by key
  *
  * @param <String> key
- * @return <Boolean>
+ * @return
  */
 app.store.del = function(key) {
   return app.utils.storage(false, 'del', key);
@@ -899,7 +833,7 @@ app.store.del = function(key) {
  *
  * Reset storage
  *
- * @return <Boolean>
+ * @return
  */
 app.store.reset = function() {
   return app.utils.storage(false, 'reset');
@@ -1023,12 +957,13 @@ app.controller.setTitle = function(title) {
  */
 app.controller.retrieve = function(callback, routine) {
   if (typeof callback !== 'function' || typeof routine !== 'object') {
-    return app.error('app.controller.retrieve', arguments);
+    return app.stop('app.controller.retrieve', arguments);
   }
+
 
   var _retrieve = function(fn, schema) {
     if (typeof fn !== 'string' || typeof schema !== 'object') {
-      return app.error('app.controller.retrieve() > _retrieve', arguments);
+      return app.stop('app.controller.retrieve() > _retrieve', arguments);
     }
 
     var _data = window.store;
@@ -1043,7 +978,7 @@ app.controller.retrieve = function(callback, routine) {
       var obj = app.store.get(fn + '_' + schema[i]);
 
       if (! obj) {
-        return app.error('app.controller.retrieve() > _retrieve', arguments);
+        return app.stop('app.controller.retrieve() > _retrieve', 'obj');
       }
 
       _data[schema[i]] = obj;
@@ -1052,10 +987,12 @@ app.controller.retrieve = function(callback, routine) {
     return _data;
   }
 
+
   for (var i = 0; i < routine.length; i++) {
     if (routine[i].file) {
       routine[i].file = '../' + routine[i].file;
     }
+
     window.store[routine[i].fn] = _retrieve(routine[i].fn, routine[i].schema);
   }
 
@@ -1077,33 +1014,39 @@ app.controller.retrieve = function(callback, routine) {
  */
 app.controller.store = function(callback, fn, schema, data) {
   if (typeof callback !== 'function' || typeof fn !== 'string' || typeof schema !== 'object' || typeof data !== 'object') {
-    return app.error('app.controller.store', arguments);
+    return app.stop('app.controller.store', arguments);
   }
 
   var source = window.store[fn];
 
   if (! source) {
-    return app.error('app.controller.store', arguments);
+    return app.stop('app.controller.store', 'source');
   }
+
 
   var _store = function(key, values) {
     if (typeof key !== 'string' || typeof values !== 'object') {
-      return app.error('app.controller.store() > _store', arguments);
+      return app.stop('app.controller.store() > _store', arguments);
     }
 
     if (! source[key]) {
-      return app.error('_store', arguments);
+      return app.stop('app.controller.store() > _store', 'source[key]');
     }
 
     var _data = values;
     var obj = app.store.set(fn + '_' + key, _data);
 
     if (! obj) {
-      return app.error('_store', arguments);
+      return app.stop('app.controller.store() > _store', 'obj');
     }
 
     return _data;
   }
+
+
+  var _current_timestamp = new Date();
+  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
+
 
   var keys = Object.keys(data);
 
@@ -1112,13 +1055,15 @@ app.controller.store = function(callback, fn, schema, data) {
     var values = data[key];
 
     if (schema.indexOf(key) === -1 || ! Object.keys(values).length) {
-      return app.error('app.controller.store() > _store', arguments);
+      return app.stop('app.controller.store', 'keys');
     }
 
     window.store[fn][key] = _store(key, values);
   }
 
-  app.memory.set('last_stored', new Date().toISOString());
+  app.memory.del('save_reminded');
+
+  app.memory.set('last_stored', _current_timestamp);
 
   callback();
 }
@@ -1127,24 +1072,28 @@ app.controller.store = function(callback, fn, schema, data) {
 /**
  * app.controller.clear
  *
- * Clears the current session data
+ * Reset the current session data
  *
+ * @global <Object> config
  * @global <Object> store
- * @param <String> fn
- * @param <Object> schema
  * @return <Boolean>
  */
-app.controller.clear = function(fn, schema) {
-  if (typeof fn !== 'string' || typeof schema !== 'object') {
-    return app.error('app.controller.clear', arguments);
+app.controller.clear = function() {
+  var config = window.config;
+
+  if (! config) {
+    return app.stop('app.controller.clear');
   }
 
-  if (fn in window.store) {
-    delete window.store[fn];
-  }
+  var fn = config.app;
+  var schema = config.schema;
 
   for (var i = 0; i < schema.length; i++) {
     app.store.del(fn + '_' + schema[i]);
+
+    if (window.store && (fn + '_' + schema[i]) in window.store) {
+      delete window.store[fn + '_' + schema[i]];
+    }
   }
 
   app.memory.del('last_stored');
@@ -1204,11 +1153,11 @@ app.start.loadAttempt = function(callback, fn, file, schema, memo) {
   }
 
   if (! callback || ! fn || ! file || ! schema) {
-    return app.error('app.start.loadAttemp', arguments);
+    return app.stop('app.start.loadAttemp', arguments);
   }
 
   if (typeof callback !== 'function' || typeof fn !== 'string' || typeof file !== 'string' || typeof schema !== 'object') {
-    return app.error('app.start.loadAttemp', arguments);
+    return app.stop('app.start.loadAttemp', arguments);
   }
 
   var loaded = false;
@@ -1216,6 +1165,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memo) {
 
   app.os.scriptOpen(function() {
     if (! window[fn]) {
+      console.info('app.start.loadAttempt', fn);
       //TODO check
       //return app.error('app.start.loadAttemp', 'window[fn]');
     }
@@ -1263,7 +1213,7 @@ app.start.loadComplete = function(session_resume) {
 
   app.start.loadAttempt(function(loaded) {
     if (loaded) {
-      app.start.redirect();
+      app.start.redirect(true);
     } else {
       app.start.loader(1);
     }
@@ -1277,8 +1227,10 @@ app.start.loadComplete = function(session_resume) {
  * app.start.redirect
  *
  * Tries to redirect after a delay
+ *
+ * @param <Boolean> loaded
  */
-app.start.redirect = function() {
+app.start.redirect = function(loaded) {
   var _wait = function() {
     app.start.loader(false);
 
@@ -1381,7 +1333,9 @@ app.start.load = function() {
     exec = false;
   }
 
-  app._runtime.debug = config.debug || false;
+
+  app.session(config);
+
 
   if (! exec) {
     app.start.alternative();
@@ -1396,24 +1350,29 @@ app.start.load = function() {
   }
 
 
-  var session_resume = app.resume(config, true);
+  var session_resume = app.resume(config);
 
 
   var title = config.name;
   app.controller.setTitle(title);
 
-  var open_action = document.querySelector('#start-action-open');
-  app.utils.addEvent('click', open_action, app.openFile);
+  var open_action = document.getElementById('start-action-open');
+  app.utils.addEvent('click', open_action, app.openSession);
+
+  var new_action = document.getElementById('start-action-new');
+  app.utils.addEvent('click', new_action, app.newSession);
 
   var auxs_loaded = true;
 
   // load extensions
-  for (var i = 0; i < config.auxs.length; i++) {
+  var routine = config.auxs || {};
+
+  for (var i = 0; i < routine.length; i++) {
     app.start.loadAttempt(function(aux_loaded) {
       if (! aux_loaded) {
         auxs_loaded = false;
       }
-    }, config.auxs[i].fn, config.auxs[i].file, config.auxs[i].schema, config.auxs[i].memo);
+    }, routine[i].fn, routine[i].file, routine[i].schema, routine[i].memo);
   }
 
   if (auxs_loaded) {
@@ -1514,9 +1473,7 @@ app.main.loadView = function(loc) {
       nav_selector_current.parentNode.classList.add('active');
     }
   } else {
-    app,stop();
-
-    return app.error();
+    return app.stop('app.main.load', arguments);
   }
 }
 
@@ -1539,6 +1496,7 @@ app.main.loadView = function(loc) {
  *  - refresh ()
  *  - resize ()
  *  - selection ()
+ *  - export ()
  *  - prepare ()
  *  - prevent ()
  *  - open () <=> prepare ()
@@ -1548,7 +1506,7 @@ app.main.loadView = function(loc) {
  *  - delete () <=> prevent ()
  *  - close () <=> prevent ()
  *  - history ()
- *  - submit () //TODO rename
+ *  - receive ()
  *
  * @global <Object> config
  * @global <Object> main
@@ -1576,7 +1534,7 @@ app.main.controlView = function(e) {
 
 
   // standard events
-  var _s_events = { 'resize': 'resize', 'refresh': 'refresh' };
+  var _s_events = { 'resize': 'resize', 'refresh': 'refresh', 'export': 'export' };
 
   var _events = app.utils.extendObject(config.events, _s_events);
   var _event = null;
@@ -1672,6 +1630,10 @@ app.main.controlView = function(e) {
   }
 
   _control.resize = function() {
+    if (! ctl.height) {
+      return; // silent fail
+    }
+
     var height = parseInt(ctl.height);
     var view = document.getElementById('view');
 
@@ -1680,9 +1642,25 @@ app.main.controlView = function(e) {
   }
 
   _control.selection = function() {
-    _control.setURL();
+    _control.refresh();
+  }
 
-    _control.redirect();
+  _control.export = function() {
+    if (! ctl.data || ! (ctl.file && typeof ctl.file === 'object')) {
+      return app.error('app.main.controlView().export', ctl);
+    }
+
+    if (! (ctl.file.name && typeof ctl.file.name === 'string') || ! (ctl.file.options && typeof ctl.file.options === 'object')) {
+      return app.error('app.main.controlView().export', 'file');
+    }
+
+    var file = new File(
+      [ ctl.data ],
+      ctl.file.name,
+      (ctl.file.options || {})
+    );
+
+    saveAs(file);
   }
 
   // generic method for all actions
@@ -1696,7 +1674,7 @@ app.main.controlView = function(e) {
       _control.history();
     }
 
-    _control.submit();
+    _control.receive();
   }
 
   // generic method for prevented actions like delete
@@ -1705,7 +1683,7 @@ app.main.controlView = function(e) {
     var msg = _control.getMsg();
 
     if (! msg) {
-      return app.error('app.main().' + event, 'url');
+      return app.error('app.main().' + event, ctl);
     }
 
     _control.setURL(null, action);
@@ -1714,7 +1692,7 @@ app.main.controlView = function(e) {
       return;
     }
 
-    _control.submit();
+    _control.receive();
   }
 
   _control.open = _control.prepare;
@@ -1736,7 +1714,7 @@ app.main.controlView = function(e) {
     app.controller.history(_title, _url);
   }
 
-  _control.submit = function() {
+  _control.receive = function() {
     // no submit, reload
     if (! (ctl.submit && ctl.data)) {
       app.main.loadView(_loc);
@@ -1878,16 +1856,15 @@ app.main.load = function() {
   app.checkConfig(config);
 
 
-  window.store = {};
+  app.session(config, true);
 
 
-  app._runtime.debug = config.debug || false;
-
-  app.resume(config);
+  app.resume(config, true);
 
 
   var title = config.name;
-  var routine = config.auxs;
+
+  var routine = config.auxs || {};
   routine.push({ file: '', fn: config.app, schema: config.schema });
 
   app.controller.retrieve(app.main.setupData, routine);
@@ -1902,15 +1879,25 @@ app.main.load = function() {
 
   if (open_actions.length) {
     Array.prototype.forEach.call(open_actions, function(element) {
-      app.utils.addEvent('click', element, app.openFile);
+      app.utils.addEvent('click', element, app.openSession);
     });
   }
+
+
+  var new_actions = document.querySelectorAll('.main-action-new');
+
+  if (new_actions.length) {
+    Array.prototype.forEach.call(new_actions, function(element) {
+      app.utils.addEvent('click', element, app.newSession);
+    });
+  }
+
 
   var save_actions = document.querySelectorAll('.main-action-save');
 
   if (save_actions.length) {
     Array.prototype.forEach.call(save_actions, function(element) {
-      app.utils.addEvent('click', element, app.saveFile);
+      app.utils.addEvent('click', element, app.saveSession);
     });
   }
 
@@ -1927,7 +1914,7 @@ app.main.load = function() {
  * @return <Boolean>
  */
 app.main.unload = function() {
-  if (! app.memory.has('save_reminded') && app.memory.get('last_opened_file') !== app.memory.get('last_stored')) {
+  if (app.memory.has('save_reminded') || app.memory.get('last_time') === app.memory.get('last_stored')) {
     return;
   }
 
@@ -2155,10 +2142,10 @@ app.view.open = function(events, data, form) {
       section_title += ' # ' + id;
     }
 
-    if (view_title) {
+    if (view_title != undefined) {
       _view_title.innerHTML = view_title;
     }
-    if (section_title) {
+    if (section_title != undefined) {
       _section_title.innerHTML = section_title;
     }
   }
@@ -2212,11 +2199,11 @@ app.view.open = function(events, data, form) {
       return app.error('app.view.open().fillTable', arguments);
     }
 
-    var order = ((_order && _order instanceof Array) && _order) || Object.keys(data);
-
     if (_data && typeof _data === 'object') {
       data = _data;
     }
+
+    var order = (_order && _order instanceof Array) ? _order : Object.keys(data);
 
     var _args = Object.values(arguments).slice(3);
 
@@ -2243,7 +2230,7 @@ app.view.open = function(events, data, form) {
       tbody.innerHTML = _rows;
     }
 
-    return { table: table, tbody: tbody, trow_tpl: trow_tpl, rows: _rows, data: data, args: _args };
+    return { data: data, rows: _rows, tpl: trow_tpl, args: _args };
   }
 
   _open.fillForm = function(form, _data) {
@@ -2269,7 +2256,7 @@ app.view.open = function(events, data, form) {
       control.fillForm(data, _args);
     }
 
-    return { form: form, data: data, args: _args };
+    return { data: data, args: _args };
   }
 
   _open.fillSelection = function(_data, id) {
@@ -2281,26 +2268,43 @@ app.view.open = function(events, data, form) {
 
     var selection = document.getElementById('selection');
 
-    id = id || '';
+    id = id || null;
 
-    selection.innerHTML = app.layout.renderSelectOptions(selection, _data, id);
-    selection.value = id;
+    if (id) {
+      selection.innerHTML = app.layout.renderSelectOptions(selection, _data, id);
+      selection.value = id;
+    } else {
+
+      selection.parentNode.classList.add('hidden');
+    }
   } 
 
   _open.fillCTA = function(id) {
     _initialized || _open.uninitialized('fillCTA');
 
-    id = parseInt(id) || _open.getID();
+    id = parseInt(id) || null;
 
     var section_actions_top = document.getElementById('section-actions-top');
     var section_actions_bottom = document.getElementById('section-actions-bottom');
 
     if (section_actions_top) {
-      section_actions_top.innerHTML = section_actions_top.innerHTML.replace(/\{id\}/g, id);
+      if (id) {
+        section_actions_top.innerHTML = section_actions_top.innerHTML.replace(/\{id\}/g, id);
+      } else {
+        Array.prototype.forEach.call(section_actions_top.querySelectorAll('.action'), function(element) {
+          element.remove();
+        });
+      }
     }
 
     if (section_actions_bottom) {
-      section_actions_bottom.innerHTML = section_actions_bottom.innerHTML.replace(/\{id\}/g, id);
+      if (id) {
+        section_actions_bottom.innerHTML = section_actions_bottom.innerHTML.replace(/\{id\}/g, id);
+      } else {
+        Array.prototype.forEach.call(section_actions_bottom.querySelectorAll('.action'), function(element) {
+          element.remove();
+        });
+      }
     }
   }
 
@@ -2327,7 +2331,7 @@ app.view.open = function(events, data, form) {
  *  - update (_data <Object>, _submit <Boolean>)<=> prepare ()
  *  - delete (_data <Object>, _submit <Boolean>, title <String>, name) <=> prevent ()
  *  - close (_data <Object>, _submit <Boolean>, title <String>, name) <=> prevent ()
- *  - selection (_data <Object>, _submit <Boolean>)
+ *  - selection
  *  - print ()
  *
  * @global <Object> control
@@ -2504,12 +2508,18 @@ app.view.action = function(events, event, element, data, form) {
 
   _action.close = _action.prevent;
 
-  _action.selection = function(_data, _submit) {
+  _action.selection = function() {
     _initialized || _action.uninitialized('selection');
 
-    _data = _data || element.value.toString();
+    var selected = element.value.toString();
 
-    return _action.prepare(_data, _submit);
+    if (! selected) {
+      return app.error('app.view.action().selection', 'selected');
+    }
+
+    var _data = { 'id': selected };
+
+    return _action.prepare(_data, true);
   }
 
   _action.print = function() {
@@ -2532,12 +2542,19 @@ app.view.action = function(events, event, element, data, form) {
  *  - clipboard ()
  *  - toggler ()
  *
+ * @global <Object> config
  * @param <String> method
  * @param <NodeElement> element
  * @param <NodeElement> table
  * @return <Function>
  */
 app.view.sub = function(method, element, table) {
+  var config = window.config;
+
+  if (! config) {
+    return app.stop('app.view.sub');
+  }
+
   if (! method || ! element) {
     return app.error('app.view.sub', arguments);
   }
@@ -2557,20 +2574,17 @@ app.view.sub = function(method, element, table) {
       source += line.join(';') + '\r\n';
     });
 
-    var filename = filename_prefix ? filename_prefix : 'csv_export';
+    var filename = (config.csv && config.csv.filename) ? config.csv.filename : 'csv_export';
+    var filename_separator = (config.csv && config.csv.filename_separator) ? config.csv.filename_separator : '_';
+    var filename_date_format = (config.csv && config.csv.filename_date_format) ? config.csv.filename_date_format : 'Y-m-d_H-M-S';
 
-    //TODO stdz
-    filename_separator = filename_separator || '_';
-    filename_date_format = filename_date_format || 'Y-m-d_H-g';
     filename += filename_separator + app.utils.dateFormat(true, filename_date_format);
 
-    var file = new File(
-      [ source ],
-      filename + '.csv',
-      { type: 'text/csv;charset=utf-8' }
-    );
+    var file = { 'name': filename + '.csv', 'options': { 'type': 'text/csv;charset=utf-8' } };
 
-    saveAs(file);
+    var ctl = { action: 'export', file: file, data: source };
+
+    return app.view.send(ctl);
   }
 
   _sub.clipboard = function() {
@@ -2652,7 +2666,7 @@ app.view.resizeView = function(check_time) {
   var control = window.control;
 
   if (! (control && control.temp)) {
-    return; //TODO improve silentfail
+    return; // silent fail
   }
 
   if (check_time) {
@@ -2666,40 +2680,25 @@ app.view.resizeView = function(check_time) {
 
   var ctl = { action: 'resize', height: document.documentElement.scrollHeight };
 
-  var cursor = app.controller.cursor();
-
-  if ('view' in cursor) {
-    ctl.view = cursor.view;
-  }
-
-  try {
-    ctl = JSON.stringify(ctl);
-
-    // send control submission to parent "main" window
-    window.parent.postMessage(ctl, '*');
-  } catch (err) {
-    return app.error('app.view.resizeView', err);
-  }
-
-  return true;
+  return app.view.send(ctl);
 }
 
 
 /**
- * app.view.submit
+ * app.view.send
  *
  * Sends control messages to parent "main" window
  *
  * @param <Object> ctl
  * @return
  */
-app.view.submit = function(ctl) {
+app.view.send = function(ctl) {
   if (! ctl) {
     return; //silent fail
   }
 
   if (typeof ctl !== 'object') {
-    return app.error('app.view.submit', arguments);
+    return app.error('app.view.send', arguments);
   }
 
   if ('view' in ctl === false) {
@@ -2729,7 +2728,7 @@ console.log(ctl);
     // send control submission to parent "main" window
     window.parent.postMessage(ctl, '*');
   } catch (err) {
-    return app.error('app.view.submit', err);
+    return app.error('app.view.send', err);
   }
 }
 
@@ -2798,6 +2797,7 @@ app.view.getFormData = function(elements) {
       value = null;
     }
 
+    // re-build array name and assign value
     if (name) {
       name = name.match(/([\w]+)/g, '$1');
 
@@ -2828,8 +2828,8 @@ app.view.convertTableCSV = function(table) {
     return app.error('app.view.convertTableCSV', arguments);
   }
 
-  var thead_th = table.querySelectorAll('thead th');
-  var tbody_trow = table.querySelectorAll('tbody tr');
+  var thead_th = table.querySelectorAll('thead tr:not(.hidden-csv) th');
+  var tbody_trow = table.querySelectorAll('tbody tr:not(.hidden-csv)');
 
   var csv = [ [] ];
 
@@ -2907,15 +2907,13 @@ app.view.load = function() {
   }
 
 
-  window.store = {};
+  app.session(config, false);
 
 
-  app._runtime.debug = config.debug || false;
-
-  app.resume(config);
+  app.resume(config, false);
 
 
-  var routine = config.auxs;
+  var routine = config.auxs || {};
   routine.push({ fn: config.app, schema: config.schema });
 
   app.controller.retrieve(app.view.openView, routine);
@@ -3294,6 +3292,8 @@ app.utils.sanitize = function(method, value) {
  *
  * Storage utility, it memoizes persistent and non-persistent data using localStorage and sessionStorage
  *
+ * //TODO prefix storage keys with appe_
+ *
  * @param <String> fn
  * @param <String> method
  * @param <String> key
@@ -3316,7 +3316,7 @@ app.utils.storage = function(fn, method, key, value) {
 
   _storage.set = function(key, value) {
     if (key === undefined || value === undefined) {
-      return app.error('app.utils.storage', arguments);
+      return app.error('app.utils.storage().set', arguments);
     }
 
     if (typeof value === 'object') {
@@ -3332,7 +3332,7 @@ app.utils.storage = function(fn, method, key, value) {
 
   _storage.get = function(key) {
     if (key === undefined) {
-      return app.error('app.utils.storage', arguments);
+      return app.error('app.utils.storage().get', arguments);
     }
 
     var obj = window[_fn].getItem(key);
@@ -3340,7 +3340,7 @@ app.utils.storage = function(fn, method, key, value) {
     try {
       var _obj = obj;
       obj = JSON.parse(obj);
-    } catch (err) {
+    } catch {
       obj = _obj;
     }
 
@@ -3349,23 +3349,27 @@ app.utils.storage = function(fn, method, key, value) {
 
   _storage.has = function(key, value) {
     if (key === undefined) {
-      return app.error('app.utils.storage', arguments);
+      return app.error('app.utils.storage().has', arguments);
     }
 
-    if (value) {
+    if (value != undefined) {
       if (typeof value === 'object') {
-        value = JSON.stringify(value);
+        try {
+          value = JSON.stringify(value);
+        } catch (err) {
+          return app.error('app.utils.storage().has', err);
+        }
       }
-    } else {
-      value = true;
+
+      return (window[_fn].getItem(key) === value) ? true : false;
     }
 
-    return (window[_fn].getItem(key) == value) ? true : false;
+    return window[_fn].getItem(key) ? true : false;
   }
 
   _storage.del = function(key) {
     if (key === undefined) {
-      return app.error('app.utils.storage', arguments);
+      return app.error('app.utils.storage().del', arguments);
     }
 
     return window[_fn].removeItem(key);
@@ -3383,7 +3387,35 @@ app.utils.storage = function(fn, method, key, value) {
 /**
  * app.utils.dateFormat
  *
- * Formats date, ?, it accepts Date time format or true for 'now'
+ * Formats date, supported format specifiers are like them used in strftime() C library function, 
+ * it accepts Date time format or true for 'now'
+ *
+ * format specifiers:
+ *  - d  <Number> Day of the month, digits preceded by zero (01-31)
+ *  - J  <Number> Day of the month (1-31)
+ *  - w  <Number> Day of the week (1 Mon - 7 Sun)
+ *  - m  <Number> Month, digits preceded by zero (01-12)
+ *  - n  <Number> Month (1-12)
+ *  - N  <Number> Month, start from zero (0-11)
+ *  - Y  <Number> Year, four digits (1970)
+ *  - y  <Number> Year, two digits (70)
+ *  - H  <Number> Hours, digits preceded by zero (00-23)
+ *  - G  <Number> Hours (0-23)
+ *  - M  <Number> Minutes, digits preceded by zero (00-59)
+ *  - I  <Number> Minutes (0-59)
+ *  - S  <Number> Seconds, digits preceded by zero (00-59)
+ *  - K  <Number> Seconds (0-59)
+ *  - v  <Number> Milliseconds, three digits
+ *  - a  <String> Abbreviated day of the week name (Thu)
+ *  - b  <String> Abbreviated month name (Jan)
+ *  - x  <String> Date representation (1970/01/01)
+ *  - X  <String> Time representation (01:00:00)
+ *  - s  <Number> Seconds since the Unix Epoch
+ *  - V  <Number> Milliseconds since the Unix Epoch
+ *  - O  <String> Difference to Greenwich time GMT in hours (+0100)
+ *  - z  <String> Time zone offset (+0100 (CEST))
+ *  - C  <String> Date and time representation (Thu, 01 Jan 1970 00:00:00 GMT)
+ *  - Q  <String> ISO 8601 date representation (1970-01-01T00:00:00.000Z)
  *
  * @param <Date> | <Boolean> time
  * @return <String> formatted_date
@@ -3402,17 +3434,34 @@ app.utils.dateFormat = function(time, format) {
   var _date = function(f) {
     switch (f) {
       case 'd': return app.utils.numberLendingZero(date.getDate());
+      case 'J': return date.getDate();
+      case 'w': return date.getDay();
       case 'm': return app.utils.numberLendingZero(date.getMonth() + 1);
+      case 'n': return (date.getMonth() + 1);
+      case 'N': return date.getMonth();
       case 'Y': return date.getFullYear();
       case 'y': return date.getFullYear().toString().slice(2);
       case 'H': return app.utils.numberLendingZero(date.getHours());
-      case 'g': return app.utils.numberLendingZero(date.getMinutes());
-      case 's': return app.utils.numberLendingZero(date.getSeconds());
-      case 'u': return date.toISOString();
+      case 'G': return date.getHours();
+      case 'M': return app.utils.numberLendingZero(date.getMinutes());
+      case 'I': return date.getMinutes();
+      case 'S': return app.utils.numberLendingZero(date.getSeconds());
+      case 'K': return date.getSeconds();
+      case 'v': return date.getMilliseconds();
+      case 'a': return date.toDateString().split(' ')[0];
+      case 'b': return date.toDateString().split(' ')[1];
+      case 'x': return date.toISOString().split('T')[0].replace(/-/g, '/');
+      case 'X': return date.toTimeString().split(' ')[0];
+      case 's': return Math.round(date.getTime() / 1000);
+      case 'V': return date.getTime();
+      case 'O': return date.toTimeString().match(/([\+[\d]{4,})/)[0];
+      case 'z': return date.toTimeString().split('GMT')[1];
+      case 'C': return date.toUTCString();
+      case 'Q': return date.toISOString();
     }
   }
 
-  format = format || 'Y-m-d H:g';
+  format = format || 'Y-m-d H:M';
   format = format.match(/.{1}/g);
 
   var formatted_date = '';
@@ -3449,7 +3498,7 @@ app.utils.numberLendingZero = function(number) {
  */
 app.load = function(func) {
   if (typeof func !== 'function') {
-    return app.stop('app.unload');
+    return app.stop('app.load');
   }
 
   var _loaded = false;
@@ -3496,11 +3545,16 @@ app.unload = function(func) {
  *
  * Performs app redirects
  *
- * //TODO config ?
- *
- * @param <Object> config
+ * @global <Object> config
+ * @return
  */
-app.redirect = function(config) {
+app.redirect = function() {
+  var config = window.config;
+
+  if (! config) {
+    return app.stop('app.redirect');
+  }
+
   var _base = config.basePath;
   var _filename = 'index';
 
@@ -3539,15 +3593,46 @@ app.position = function() {
 
 
 /**
+ * app.session
+ *
+ * Start the session
+ *
+ * @global <Object> store
+ * @param <Object> config
+ * @param <String> target
+ * @return
+ */
+app.session = function(config, target) {
+  if (! config) {
+    return app.stop('app.resume');
+  }
+
+  window.store = {};
+
+  app._runtime.debug = config.debug || false;
+
+  if (! target) {
+    return;
+  }
+
+  setTimeout(function() {
+    app.store.has('notify') && app.store.del('notify');
+
+    this.clearTimeout();
+  }, 0);
+}
+
+
+/**
  * app.resume
  *
  * Resume session, return last opened file
  *
  * @param <Object> config
- * @param <Boolean> start
+ * @param <Boolean> target
  * @return <String> session_resume
  */
-app.resume = function(config, start) {
+app.resume = function(config, target) {
   if (! config) {
     return app.stop('app.resume');
   }
@@ -3564,14 +3649,21 @@ app.resume = function(config, start) {
     if (! session_resume) {
       session_resume = app.memory.get('last_opened_file');
     }
-    if (! session_resume && ! start) {
+
+
+
+
+    /*if (! session_resume && target != undefined) {
       app._runtime.exec = false;
 
       app.error();
+    }*/
 
-      //app.redirect(config);
-    }
+
+
+
     if (session_resume) {
+      //TODO atob whitespace
       session_resume = window.atob(session_resume) + '.js';
     }
 
@@ -3639,19 +3731,19 @@ app.checkFile = function(source) {
     return app.stop('app.checkFile');
   }
 
-  if (! (source && typeof source !== 'object')) {
+  if (! (source && typeof source === 'object')) {
     return app.error('app.checkFile', arguments);
   }
 
   if (app._runtime.version !== source.file.version) {
-    return app.error('app.checkFile', 'version', 'This file is incompatible with running version: ' + app._runtime.version + '.');
+    return app.error('app.checkFile', 'This file is incompatible with running version: ' + app._runtime.version + '.', source.file);
   }
 
   if (config.verifyFileChecksum) {
     try {
       source = JSON.stringify(source);
 
-      //TODO
+      //TODO checksum
     } catch (err) {
       return app.error('app.checkFile', 'source');
     }
@@ -3663,22 +3755,76 @@ app.checkFile = function(source) {
 
 
 /**
- * app.openFile
+ * app.newSession
  *
- * Opens an app js file
+ * Create a new empty session
+ *
+ * @global <Object> config
+ * @return <Boolean>
+ */
+app.newSession = function() {
+  var config = window.config;
+
+  if (! config) {
+    return app.stop('app.newSession');
+  }
+
+  var _is_start = ! (window.start === undefined);
+
+  var _current_timestamp = new Date();
+  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
+
+
+  var schema = config.schema;
+
+  var _new = function() {
+    // reset current session data
+    app.controller.clear();
+
+    app.memory.del('last_opened_file');
+    app.store.del('last_opened_file');
+
+    app.memory.set('last_stored', _current_timestamp);
+    app.memory.set('last_time', _current_timestamp);
+
+    for (var i = 0; i < schema.length; i++) {
+      app.store.set(config.app + '_' + schema[i], {});
+    }
+
+    _complete();
+  }
+
+  var _complete = function() {
+    _is_start ? app.start.redirect(false) : location.reload();
+  }
+
+  _new();
+}
+
+
+/**
+ * app.openSession
+ *
+ * Opens session from an app js file
  *
  * @param <Object> source
  * @return
  */
-app.openFile = function() {
+app.openSession = function() {
+  var config = window.config;
+
+  if (! config) {
+    return app.stop('app.openSession');
+  }
+
   var _is_start = ! (window.start === undefined);
+
+  var _current_timestamp = new Date();
+  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
 
 
   var _open = function() {
     app.os.fileOpen.call(this, _complete);
-
-    //app.store.reset(); //TODO FIX
-    //app.memory.reset(); //TODO FIX
   }
 
   var _complete = function(filename) {
@@ -3688,11 +3834,11 @@ app.openFile = function() {
       return; // silent fail
     }
 
+    //TODO cookie utils
     document.cookie = 'last_opened_file=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    //TODO
-    //app.controller.clear(config.app, config.schema);
 
     var _filename = filename.replace('.js', '');
+    //TODO btoa whitespace
     _filename = window.btoa(_filename);
 
     document.cookie = 'last_opened_file=' + _filename + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
@@ -3700,7 +3846,10 @@ app.openFile = function() {
     app.store.set('last_opened_file', _filename);
     app.memory.set('last_opened_file', _filename);
 
-    _isStart && app.start.redirect() || location.reload();
+    app.memory.set('last_stored', _current_timestamp);
+    app.memory.set('last_time', _current_timestamp);
+
+    _is_start ? app.start.redirect(true) : location.reload();
   }
 
 
@@ -3725,14 +3874,22 @@ app.openFile = function() {
 
 
 /**
- * app.saveFile
+ * app.saveSession
  *
- * Saves to app js file
+ * Saves session to app js file
  *
  * @global <Object> store
  * @param <Object> source
  */
-app.saveFile = function() {
+app.saveSession = function() {
+  var config = window.config;
+
+  if (! config) {
+    return app.stop('app.saveSession');
+  }
+
+  var _is_start = ! (window.start === undefined);
+
   var source = {};
 
   var _current_timestamp = new Date();
@@ -3771,17 +3928,22 @@ app.debug = function() {
  *
  * Stops app execution
  *
- * @param <String> funcName
  * @return <Boolean>
  */
-app.stop = function(funcName) {
+app.stop = function() {
   if (! app._runtime.exec) {
     return false;
   }
 
   app._runtime.exec = false;
 
-  app.error(funcName, null);
+  var _args = Object.values(arguments).slice(0);
+
+  if (arguments.length == 1) {
+    _args.push(null);
+  }
+
+  app.error.apply(this, _args);
 
   app.blind();
 
@@ -3814,9 +3976,9 @@ app.error = function() {
 
   if (app._runtime.debug) {
     if (app._runtime.exec) {
-      console.error('ERR', fnn, msg, app.position());
+      console.error('ERR', fnn, app.position(), msg);
     } else {
-      console.warn('WARN', fnn, msg, app.position());
+      console.warn('WARN', fnn, app.position(), msg);
     }
 
     if (dbg) {
@@ -3832,12 +3994,12 @@ app.error = function() {
     }
   }
 
-  if (app._runtime.notify == undefined || app._runtime.notify) {
+  if (! app.store.has('notify', 'false')) {
     window.alert(msg);
-  }
 
-  if (! app._runtime.exec) {
-    app._runtime.notify = false;
+    if (! app._runtime.exec) {
+      app.store.set('notify', 'false');
+    }
   }
 
   return false;

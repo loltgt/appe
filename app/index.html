@@ -22,8 +22,9 @@
     <span id="brand" class="navbar-brand hidden-xs">{appe}</span>
     <div class="navbar-form navbar-right">
       <div class="form-group">
-        <input id="main-action-open-file-header" type="file" accept="application/x-javascript" style="display: none;" hidden>
-        <button type="button" id="main-action-open-header" class="btn main-action-open" data-open-input="#main-action-open-file-header">Open</button>
+        <input id="main-action-open-session-header" type="file" accept="application/x-javascript" style="display: none;" hidden>
+        <button type="button" id="main-action-new-header" class="btn main-action-new">New</button>
+        <button type="button" id="main-action-open-header" class="btn main-action-open" data-open-input="#main-action-open-session-header">Open</button>
         <button type="button" id="main-action-save-header" class="btn btn-success main-action-save">Save</button>
       </div>
     </div>
@@ -74,8 +75,12 @@ main.controlView = function(control, event, ctl) {
   var _actions = app.utils.extendObject({}, control);
 
   _actions.selection = function() {
-    if (ctl && ctl.data) {
-      app.memory.set('archive_id', parseInt(ctl.data));
+    try {
+      var _data = JSON.parse(ctl.data);
+
+      app.memory.set('archive_id', parseInt(_data.id));
+    } catch {
+      return;
     }
 
     return control.selection();
@@ -85,12 +90,86 @@ main.controlView = function(control, event, ctl) {
 }
 
 main.setupData = function() {
-  if (! app.memory.has('archive_id')) {
-    app.memory.set('archive_id', 1);
-  }
-  if (! app.memory.has('category_id')) {
-    app.memory.set('category_id', 1);
-  }
+  var data_categories = {
+    "1": {
+      "title": "Dinosaurs",
+      "types": {
+        "abelisauridae": "Abelisauridae",
+        "allosauridae": "Allosauridae",
+        "ankylosauridae": "Ankylosauridae",
+        "brachiosauridae": "Brachiosauridae",
+        "ceratopsidae": "Ceratopsidae",
+        "ceratosauridae": "Ceratosauridae",
+        "compsognathidae": "Compsognathidae",
+        "dilophosauridae": "Dilophosauridae",
+        "dimorphodontidae": "Dimorphodontidae",
+        "diplodocidae": "Diplodocidae",
+        "dromaeosauridae": "Dromaeosauridae",
+        "hadrosauridae": "Hadrosauridae",
+        "mamenchisauridae": "Mamenchisauridae",
+        "mosasauridae": "Mosasauridae",
+        "ornithomimidae": "Ornithomimidae",
+        "pachycephalosauridae": "Pachycephalosauridae",
+        "pteranodontidae": "Pteranodontidae",
+        "spinosauridae": "Spinosauridae",
+        "stegosauridae": "Stegosauridae",
+        "tyrannosauridae": "Tyrannosauridae",
+        "hybrid": "Hybrid"
+      }
+    }
+  };
+
+  ! app.memory.has('archive_id') && app.memory.set('archive_id', 1);
+
+  ! app.memory.has('demo_categories') && app.store.set('demo_categories', data_categories);
+
+  app.memory.set('category_id', 1);
+
+
+
+
+
+
+  var config = window.config;
+
+  var data_archive = window.store[config.app]['archive'];
+  var data_categories = window.store[config.app]['categories'];
+
+  var __data = Object.keys(data_archive).length;
+
+  if (! __data) { return; }
+
+  var archive_id = app.memory.get('archive_id');
+  var category_id = app.memory.get('category_id');
+
+  var archive_items = data_archive[archive_id][category_id].items;
+
+  Array.prototype.forEach.call(Object.keys(archive_items), function(id) {
+    if (! archive_items[id].pop) {
+      archive_items[id].pop = {};
+    }
+
+    archive_items[id].pop['avg'] = Math.round(Math.random(0).toExponential()*10);
+    archive_items[id].pop['movies'] = Math.floor(Math.random(1).toExponential()*100);
+    archive_items[id].pop['toyes'] = Math.floor(Math.random(2).toExponential()*100);
+    archive_items[id].pop['books'] = Math.floor(Math.random(3).toExponential()*100);
+    archive_items[id].awards = Math.ceil(Math.random(new Date(archive_items[id].date).getTime()) * 1000);
+
+    if (! archive_items[id].pop.total) {
+      archive_items[id].pop.total  = 0;
+      archive_items[id].pop.total += archive_items[id].pop['avg'];
+      archive_items[id].pop.total += archive_items[id].pop['movies'];
+      archive_items[id].pop.total += archive_items[id].pop['toyes'];
+      archive_items[id].pop.total += archive_items[id].pop['books'];
+    }
+  });
+
+  app.store.set('demo_archive', data_archive);
+
+
+
+
+
 }
 
 main.action = function(action, element, event) {

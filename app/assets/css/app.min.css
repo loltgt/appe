@@ -374,14 +374,19 @@ fieldset[disabled] .btn-secondary.focus {
 }
 .loader {
   display: block;
-  margin-top: -5%;
+  margin-top: 20px;
   text-align: center;
 }
 .loader-open p {
+  padding-top: 80px;
+}
+.loader-open .lead {
   margin-bottom: 40px;
+  padding-top: 0;
 }
 .loader-wait {
   padding: 80px 0;
+  padding: 6vh 0;
   color: #666;
 }
 .loader-wait p {
@@ -412,6 +417,12 @@ fieldset[disabled] .btn-secondary.focus {
 .master-header .navbar-right {
   float: right !important;
   margin-right: -15px;
+}
+.master-header .main-action-new {
+  margin-right: 15px;
+  color: #999;
+  background-color: transparent;
+  border-color: #666;
 }
 .master-header .main-action-save {
   font-weight: bold;
@@ -772,6 +783,12 @@ fieldset.form-submit {
   }
   .section-actions-top > div:not(.pull-right) div ~ .btn {
     margin-right: 0;
+  }
+}
+
+@media (min-height: 480px) {
+  .loader {
+    margin-top: -4vh;
   }
 }
 

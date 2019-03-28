@@ -34,7 +34,19 @@
 
 <div class="form-group col-5 col-lg-3">
   <label for="sample_type">Type</label>
-  <select id="sample_type" name="type" class="form-control"><option value="berlina">berlina</option></select>
+  <select id="sample_type" name="type" class="form-control">
+    <option value="Microcar">Microcar</option>
+    <option value="Berline">Berline</option>
+    <option value="Station wagon">Station wagon</option>
+    <option value="Coupé">Coupé</option>
+    <option value="Sports car">Sports car</option>
+    <option value="MPV">MPV</option>
+    <option value="SUV">SUV</option>
+    <option value="Van">Van</option>
+    <option value="Pickup">Pickup</option>
+    <option value="Truck">Truck</option>
+    <option value="other">other</option>
+  </select>
 </div>
 
 <div class="clearfix visible-lg-block"></div>
@@ -86,7 +98,7 @@ control.openView = function() {
   var form = document.getElementById('form-data');
 
   if (! data) {
-    return app.error('control.openView', arguments, 'data*');
+    return app.error('control.openView', 'data*');
   }
 
 
@@ -180,20 +192,22 @@ control.action = function(element, event, data_extra) {
 
   //TODO rename
   _events._update = function() {
-    _data_updated['sample'] = data;
-
     var _ext_data = app.utils.extendObject(true, data[id], app.view.getFormData(form.elements));
 
     _data_updated['sample'][id] = _ext_data;
   }
 
   _events.add = function() {
+    _data_updated['sample'] = data;
+
     _events._update();
 
     return _action.add(_data_updated, true);
   }
 
   _events.edit = function() {
+    _data_updated['sample'] = data;
+
     _events._update();
 
     return _action.edit(_data_updated, true);
@@ -202,7 +216,7 @@ control.action = function(element, event, data_extra) {
 
   var ctl = _events[event](data_extra);
 
-  app.view.submit(ctl);
+  app.view.send(ctl);
 
   _action.end();
 }

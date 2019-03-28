@@ -80,7 +80,7 @@ control.openView = function() {
   var table = document.getElementById('table-data');
 
   if (! data) {
-    return app.error('control.openView', arguments, 'data*');
+    return app.error('control.openView', 'data*');
   }
 
 
@@ -183,7 +183,7 @@ control.action = function(element, event, data_extra) {
 
   var ctl = _events[event](data_extra);
 
-  app.view.submit(ctl);
+  app.view.send(ctl);
 
   _action.end();
 }

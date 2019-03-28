@@ -116,8 +116,13 @@ control.openView = function() {
   var table = document.getElementById('table-data');
 
   if (! data_archive || ! data_categories || ! data_items) {
-    return app.error('control.openView', arguments, 'data*');
+    return app.error('control.openView', 'data*');
   }
+
+
+
+  var __data = Object.keys(data_archive).length;
+
 
 
   var _open = app.view.open([ 'add', 'edit' ], data_archive, form);
@@ -150,7 +155,9 @@ control.openView = function() {
   _events.edit = function() {
     var category_id = app.memory.get('category_id');
 
-    var archive_data = data_archive[id][category_id];
+    var archive_data = __data ? data_archive[id][category_id] : {};
+
+
 
     _open.setTitle('Edit Archive "' + archive_data.title + '"');
     _open.setActionHandler('Update Archive');
@@ -437,8 +444,6 @@ control.action = function(element, event, data_extra) {
   _events._update = function() {
     var category_id = app.memory.get('category_id');
 
-    _data_updated['archive'] = data_archive;
-
     var _form_data = app.view.getFormData(form.elements);
     var _items_data = data_archive[id][category_id].items;
     var _ext_data = app.utils.extendObject(true, data_archive[id][category_id], _form_data);
@@ -452,16 +457,22 @@ control.action = function(element, event, data_extra) {
   }
 
   _events.add = function() {
-    _events._update();
+    var category_id = app.memory.get('category_id');
+
+    _data_updated['archive'] = data_archive;
 
     _data_updated['archive'][id] = {};
     _data_updated['archive'][id][category_id] = {};
     _data_updated['archive'][id][category_id].items = {};
 
+    _events._update();
+
     return _action.add(_data_updated, true);
   }
 
   _events.edit = function() {
+    _data_updated['archive'] = data_archive;
+
     _events._update();
 
     return _action.edit(_data_updated, true);
@@ -470,7 +481,7 @@ control.action = function(element, event, data_extra) {
 
   var ctl = _events[event](data_extra);
 
-  app.view.submit(ctl);
+  app.view.send(ctl);
 
   _action.end();
 }
