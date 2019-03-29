@@ -11,12 +11,12 @@
 
 <body class="view view_edit">
 <h1 id="view-title" class="page-header">Archive</h1>
-<h2 id="section-title" class="sub-header">{section}</h2>
+<h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top">
   <div>
-    <a class="btn btn-sm btn-gray-lighter" href="../index.html?archive" target="_parent">&laquo; torna indietro</a>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?archive" target="_parent">&laquo; Return Back</a>
   </div>
 </div>
 
@@ -35,15 +35,15 @@
   <tbody>
     <td>
       <label for="archive_item_pop_movies" class="sr-only" aria-hidden="true">Movies</label>
-      <input type="number" id="archive_item_pop_movies" name="pop[movies]" class="form-control input-lg" value="0" data-transform="integer" required {readonly} {disabled}>
+      <input type="number" id="archive_item_pop_movies" name="pop[movies]" class="form-control input-lg" value="0" data-transform="integer" required>
     </td>
     <td>
       <label for="archive_item_pop_toyes" class="sr-only" aria-hidden="true">Toyes</label>
-      <input type="number" id="archive_item_pop_toyes" name="pop[toyes]" class="form-control input-lg" value="0" data-transform="integer" required {readonly} {disabled}>
+      <input type="number" id="archive_item_pop_toyes" name="pop[toyes]" class="form-control input-lg" value="0" data-transform="integer" required>
     </td>
     <td>
       <label for="archive_item_pop_books" class="sr-only" aria-hidden="true">Books</label>
-      <input type="number" id="archive_item_pop_books" name="pop[books]" class="form-control input-lg" value="0" data-transform="integer" required {readonly} {disabled}>
+      <input type="number" id="archive_item_pop_books" name="pop[books]" class="form-control input-lg" value="0" data-transform="integer" required>
     </td>
   </tbody>
 </table>
@@ -155,9 +155,11 @@ control.fillForm = function(data_form, data_extra) {
   }
 
 
+
   var archive_data_extra = data_extra[0];
-  //TODO FIX data
+
   data_form.custom = data_form.custom || { '1': false, '2': false };
+
 
 
   document.getElementById('archive_item_pop_movies').setAttribute('value', (data_form.pop['movies'] || 0));

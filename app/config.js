@@ -16,34 +16,34 @@ window.config = {
     "list": "list"
   },
   "routes": {
-    "main": {
-      "open": "main-edit",
-      "list": "main-list",
-      "update": "main",
+    "demo": {
+      "open": "demo-edit",
+      "list": "demo-wide-list",
+      "update": "demo"
     },
     "archive": {
       "add": "archive-edit",
       "edit": "archive-edit",
       "delete": "archive",
       "open": "archive-item-edit",
-      "close": "archive",
+      "close": "archive"
     },
     "average": {
-      "update": "average",
+      "update": "average"
     },
     "items": {
       "add": "items-edit",
       "edit": "items-edit",
-      "delete": "items",
+      "delete": "items"
     },
     "sample": {
       "add": "sample-edit",
       "edit": "sample-edit",
-      "delete": "sample",
+      "delete": "sample"
     },
     "about": {}
   },
-  "defaultRoute": "main",
+  "defaultRoute": "demo",
   "defaultEvent": "add",
   "verifyFileChecksum": true,
   "basePath": "app",

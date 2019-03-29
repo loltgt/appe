@@ -9,7 +9,7 @@
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
-<body class="view view_handle">
+<body class="view view_list">
 <h1 class="page-header">Sample</h1>
 <h2 class="sub-header">Vehicle List</h2>
 
@@ -25,7 +25,6 @@
     </div>
     <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
   </div>
-  <div class="clearfix"></div>
   <div>
     <a class="btn btn-gray" href="../index.html?sample&add" target="_parent">Add Item &raquo;</a>
   </div>
@@ -109,7 +108,7 @@ control.renderRow = function(tpl_row, id_row, data_row) {
     .replace('{title}', data_row.title)
     .replace('{type}', data_row.type)
     .replace('{date}', app.utils.dateFormat(data_row.date))
-    .replace('{amount}', data_row.amount)
+    .replace('{amount}', data_row.amount) //TODO app.utils.numberFormat
     .replace('{status}', data_row.status)
 
   return row;
@@ -141,19 +140,14 @@ control.action = function(element, event, data_extra) {
 
   var _events = {};
 
-  //TODO rename
-  _events._remove = function() {
-    _data_updated['sample'] = data;
-
-    delete _data_updated['sample'][id];
-  }
-
   _events.edit = function() {
     return _action.edit(_data_updated, false);
   }
 
   _events.delete = function() {
-    _events._remove();
+    _data_updated['sample'] = data;
+
+    delete _data_updated['sample'][id];
 
     return _action.delete(_data_updated, true, 'Vehicle', id);
   }

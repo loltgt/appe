@@ -265,23 +265,25 @@ app.os.getLastFileName = function() {
     return app.stop('app.os.getLastFileName');
   }
 
-  var file_name = null;
+  var filename = '';
 
   //TODO move document.cookie to app.utils
-  if (document.cookie.indexOf('last_opened_file') != -1) {
-    file_name = document.cookie.replace(/(?:(?:^|.*;\s*)last_opened_file\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+  _cookie_name = window.btoa('appe_last_opened_file');
+
+  if (document.cookie.indexOf(_cookie_name) != -1) {
+    filename = document.cookie.replace(new RegExp('/(?:(?:^|.*;\s*)' + _cookie_name + '\s*\=\s*([^;]*).*$)|^.*$/'), '$1');
   }
-  if (! file_name) {
-    file_name = app.store.get('last_opened_file');
+  if (! filename) {
+    filename = app.memory.get('last_opened_file');
   }
-  if (! file_name) {
-    file_name = app.memory.get('last_opened_file');
+  if (! filename) {
+    return false;
   }
 
   //TODO atob whitespace
-  file_name = file_name ? window.atob(file_name) + '.js' : null;
+  filename = filename ? window.atob(filename) + '.js' : null;
 
-  return file_name;
+  return filename;
 }
 
 
@@ -2168,7 +2170,7 @@ app.view.open = function(events, data, form) {
 
     if (action_handler) {
       var action_handler_event = action_handler.getAttribute('onclick');
-      action_handler_event = action_handler_event.replace('{event}', event);
+      action_handler_event = action_handler_event.replace('{action_event}', event);
       action_handler.setAttribute('onclick', action_handler_event);
     }
 
@@ -3638,29 +3640,41 @@ app.resume = function(config, target) {
   }
 
   var _session = function() {
-    var session_resume = null;
+    var session_resume = '';
+    var session_last = '';
 
-    if (document.cookie.indexOf('last_opened_file') != -1) {
-      session_resume = document.cookie.replace(/(?:(?:^|.*;\s*)last_opened_file\s*\=\s*([^;]*).*$)|^.*$/, '$1');
-    }
-    if (! session_resume) {
-      session_resume = app.store.get('last_opened_file');
+
+    //TODO app.utils.cookie, btoa whitespace
+    var _cookie_name = '';
+
+    _cookie_name = encodeURIComponent(window.btoa('appe_last_opened_file'));
+
+    if (document.cookie.indexOf(_cookie_name) != -1) {
+      session_resume = document.cookie.replace(new RegExp('/(?:(?:^|.*;\s*)' + _cookie_name + '\s*\=\s*([^;]*).*$)|^.*$/'), '$1');
     }
     if (! session_resume) {
       session_resume = app.memory.get('last_opened_file');
     }
 
 
+    //TODO app.utils.cookie, btoa whitespace
+    _cookie_name = encodeURIComponent(window.btoa('appe_last_session'));
+
+    if (document.cookie.indexOf(_cookie_name) != -1) {
+      session_last = document.cookie.replace(new RegExp('/(?:(?:^|.*;\s*)' + _cookie_name + '\s*\=\s*([^;]*).*$)|^.*$/'), '$1');
+    }
+    if (! session_last) {
+      session_last = app.memory.get('last_session');
+    }
 
 
-    /*if (! session_resume && target != undefined) {
-      app._runtime.exec = false;
-
-      app.error();
-    }*/
-
-
-
+    if (! session_resume && target === undefined) {
+      return app.stop('app.resume', 'session_resume');
+    } else if (app._runtime.debug) {
+      return (! session_last) && app.newSession();
+    } else if (! session_last) {
+      return app.redirect();
+    }
 
     if (session_resume) {
       //TODO atob whitespace
@@ -3781,11 +3795,23 @@ app.newSession = function() {
     // reset current session data
     app.controller.clear();
 
+    //TODO cookie utils
+    var _cookie_name = '';
+
+    _cookie_name = encodeURIComponent(window.btoa('appe_last_opened_file'));
+    document.cookie = _cookie_name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+    _cookie_name = encodeURIComponent(window.btoa('appe_last_session'));
+    document.cookie = _cookie_name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
     app.memory.del('last_opened_file');
-    app.store.del('last_opened_file');
+
+    _cookie_name = encodeURIComponent(window.btoa('appe_last_session'));
+    document.cookie = _cookie_name + '=' + encodeURIComponent(window.btoa(_current_timestamp)) + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
 
     app.memory.set('last_stored', _current_timestamp);
     app.memory.set('last_time', _current_timestamp);
+    app.memory.set('last_session', window.btoa(_current_timestamp));
 
     for (var i = 0; i < schema.length; i++) {
       app.store.set(config.app + '_' + schema[i], {});
@@ -3834,20 +3860,33 @@ app.openSession = function() {
       return; // silent fail
     }
 
-    //TODO cookie utils
-    document.cookie = 'last_opened_file=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    //TODO app.utils.cookie, btoa whitespace
+    var _cookie_name = '';
+
+    _cookie_name = encodeURIComponent(window.btoa('appe_last_opened_file'));
+    document.cookie = _cookie_name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+    _cookie_name = encodeURIComponent(window.btoa('appe_last_session'));
+    document.cookie = _cookie_name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
 
     var _filename = filename.replace('.js', '');
-    //TODO btoa whitespace
     _filename = window.btoa(_filename);
 
-    document.cookie = 'last_opened_file=' + _filename + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
 
-    app.store.set('last_opened_file', _filename);
+    _cookie_name = encodeURIComponent(window.btoa('appe_last_opened_file'));
+    document.cookie = _cookie_name + '=' + _filename + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+
+    _cookie_name = encodeURIComponent(window.btoa('appe_last_session'));
+    document.cookie = _cookie_name + '=' + encodeURIComponent(window.btoa(_current_timestamp)) + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+
+
     app.memory.set('last_opened_file', _filename);
 
     app.memory.set('last_stored', _current_timestamp);
     app.memory.set('last_time', _current_timestamp);
+    app.memory.set('last_session', window.btoa(_current_timestamp));
+
 
     _is_start ? app.start.redirect(true) : location.reload();
   }

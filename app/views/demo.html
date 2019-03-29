@@ -9,9 +9,9 @@
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
-<body class="view view_handle">
-<h1 id="view-title" class="page-header">Main</h1>
-<h2 id="section-title" class="sub-header">{section}</h2>
+<body class="view view_list">
+<h1 id="view-title" class="page-header"></h1>
+<h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
@@ -31,13 +31,13 @@
   </div>
   <div class="clearfix"></div>
   <div>
-    <a class="btn btn-gray-light" href="../index.html?main&list" target="_parent">List View &bull;</a>
+    <a class="btn btn-gray-light" href="../index.html?demo&list" target="_parent">List View &bull;</a>
   </div>
 </div>
 
 
 <div class="table-responsive">
-  <table id="table-data" class="table table-data">
+  <table id="table-data" class="table table-large table-data">
     <thead>
       <tr class="hidden-csv">
         <th class="hidden-print">Actions</th>
@@ -47,6 +47,7 @@
         <th class="text-nowrap">Family</th>
         <th class="text-center text-nowrap">Discovered</th>
         <th class="text-center">Fantastic</th>
+        <th class="separator"></th>
         <th colspan="5" class="text-center">Popularity</th>
         <th class="text-center"><strong>AWARDS</strong></th>
       </tr>
@@ -57,6 +58,7 @@
         <th>Family</th>
         <th>Discovered</th>
         <th>Fantasy</th>
+        <th></th>
         <th>AVG</th>
         <th>Movies</th>
         <th>Toyes</th>
@@ -65,7 +67,7 @@
         <th>AWARDS</th>
       </tr>
       <tr class="hidden-csv">
-        <td colspan="7"></th>
+        <td colspan="8"></th>
         <td class="text-center text-nowrap">AVG</td>
         <td class="text-center text-nowrap">Movies</td>
         <td class="text-center text-nowrap">Toyes</td>
@@ -77,7 +79,7 @@
     <tbody>
       <tr class="tpl">
         <td class="hidden-print">
-          <a class="action btn btn-gray" href="../index.html?main&open={id}" onclick="control.action(this, 'open'); return false;" target="_parent">Open</a>
+          <a class="action btn btn-gray" href="../index.html?demo&open={id}" onclick="control.action(this, 'open'); return false;" target="_parent">Open</a>
         </td>
         <td>{id}</td>
         <td class="text-nowrap text-uppercase">{name}</td>
@@ -85,6 +87,7 @@
         <td class="text-nowrap"><em>{type}</em></td>
         <td class="text-center">{date}</td>
         <td class="text-center">{checked}</td>
+        <td class="separator"></td>
         <td class="text-center">{pop_avg}</td>
         <td class="text-center">{pop_movies}</td>
         <td class="text-center">{pop_toyes}</td>
@@ -146,7 +149,9 @@ control.openView = function() {
   var id = _open.setID(archive_id);
 
 
-  _open.setTitle(archive_data.title || '');
+  var title = (archive_data.title || '');
+
+  _open.setTitle(title, 'Demo');
 
   _open.fillSelection(archive_selection, (__data && id));
 

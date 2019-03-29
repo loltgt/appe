@@ -25,6 +25,7 @@
 <div id="appe" class="page-block">
   <p><strong>&#123;appe&#125;</strong> &nbsp; {release}</p>
   <p>{copyright_year} &copy; Leonardo Laureti</p>
+  <p>Website: <a href="https://loltgt.ga" class="btn btn-link btn-sm" target="_blank">loltgt.ga</a> &nbsp; Github page: <a href="https://github.com/loltgt/appe/" class="btn btn-link btn-sm" target="_blank">github.com/loltgt/appe/</a></p>
 </div>
 </section>
 
@@ -35,19 +36,19 @@
 
 <p id="app-name" class="lead">{app}</p>
 
-<table id="table-data" class="table table-bordered table-auto table-data">
+<table id="table" class="table table-bordered table-auto">
   <tbody>
     <tr>
-      <td>File loaded</td>
-      <td>{file_name}</td>
+      <th>File loaded</th>
+      <td><span>{file_name}</span></td>
     </tr>
     <tr>
-      <td>File version</td>
-      <td>{file_version}</td>
+      <th>File version</th>
+      <td><span>{file_version}</span></td>
     </tr>
     <tr>
-      <td>File checksum</td>
-      <td>{file_checksum}</td>
+      <th>File checksum</th>
+      <td><span>{file_checksum}</span></td>
     </tr>
   </tbody>
 </table>
@@ -70,16 +71,7 @@
 var control = {};
 
 control.openView = function() {
-  var data_file = window.store[config.app]['file'];
-
-  var table = document.getElementById('table-data');
-
-  if (! data_file) {
-    return app.error('control.openView', 'data*');
-  }
-
-
-  var _open = app.view.open(null, data_file);
+  var _open = app.view.open(null, {});
 
   _open.begin();
 
@@ -94,11 +86,12 @@ control.openView = function() {
   var app_name = document.getElementById('app-name');
   app_name.innerHTML = app.getName();
 
-  var app_file_name = app.os.getLastFileName(config) || 'n.d.';
-  var app_file_version = data_file.version || 'n.d.';
-  var app_file_checksum = 'n.d.'; //TODO fn
+  var app_file_name = app.os.getLastFileName() || '?';
+  var app_file_version = app.os.getLastFileVersion('version') || '?';
+  var app_file_checksum = app.os.getLastFileChecksum() || '?';
 
 
+  var table = document.getElementById('table');
   var tbody = table.querySelector('tbody');
   var rows = tbody.innerHTML;
 
@@ -139,16 +132,6 @@ control.openView = function() {
     }
   } else {
     license.parentNode.remove();
-  }
-
-
-  if ('matchMedia' in window) {
-    var wab_btn = document.querySelector('.btn-wab');
-
-    if (matchMedia('(min-width: 1200px)').matches) {
-      wab_btn.setAttribute('data-mobile-href', wab_btn.href);
-      wab_btn.setAttribute('href', wab_btn.getAttribute('data-desktop-href'));
-    }
   }
 
 

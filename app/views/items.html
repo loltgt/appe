@@ -9,7 +9,7 @@
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
-<body class="view view_handle">
+<body class="view view_list">
 <h1 class="page-header">Items</h1>
 <h2 class="sub-header">Items list</h2>
 
@@ -25,7 +25,6 @@
     </div>
     <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
   </div>
-  <div class="clearfix"></div>
   <div>
     <a class="btn btn-gray" href="../index.html?items&add" target="_parent">Add item &raquo;</a>
   </div>
@@ -157,8 +156,11 @@ control.action = function(element, event, data_extra) {
 
   var _events = {};
 
-  //TODO rename
-  _events._remove = function() {
+  _events.edit = function() {
+    return _action.edit(_data_updated, false);
+  }
+
+  _events.delete = function() {
     var archive_id = app.memory.get('archive_id');
     var category_id = app.memory.get('category_id');
 
@@ -174,14 +176,6 @@ control.action = function(element, event, data_extra) {
     });
 
     delete _data_updated['items'][id];
-  }
-
-  _events.edit = function() {
-    return _action.edit(_data_updated, false);
-  }
-
-  _events.delete = function() {
-    _events._remove();
 
     return _action.delete(_data_updated, true, 'Item', id);
   }

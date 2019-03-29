@@ -9,9 +9,9 @@
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
-<body class="view view_handle">
+<body class="view view_list">
 <h1 id="view-title" class="page-header">Archive</h1>
-<h2 id="section-title" class="sub-header">{section}</h2>
+<h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
@@ -48,8 +48,9 @@
         <th class="hidden-print">Actions</th>
         <th>ID</th>
         <th class="text-nowrap">Name</th>
-        <th>New samples</th>
-        <th>New finds</th>
+        <th class="text-center text-nowrap">New samples</th>
+        <th class="text-center text-nowrap">New finds</th>
+        <th class="separator"></th>
         <th colspan="4" class="text-center">Popularity</th>
       </tr>
       <tr class="visible-csv hidden">
@@ -57,6 +58,7 @@
         <th>Name</th>
         <th>New samples</th>
         <th>New finds</th>
+        <th></th>
         <th>Movies</th>
         <th>Toyes</th>
         <th>Books</th>
@@ -64,7 +66,7 @@
       </tr>
       <tr class="hidden-csv">
         <td class="hidden-print"></td>
-        <td colspan="4"></th>
+        <td colspan="5"></th>
         <td class="text-center text-nowrap">Movies</td>
         <td class="text-center text-nowrap">Toyes</td>
         <td class="text-center text-nowrap">Books</td>
@@ -78,8 +80,9 @@
         </td>
         <td>{id}</td>
         <td class="text-uppercase text-nowrap">{name}</td>
-        <td class="text-nowrap">{custom_1}</td>
-        <td class="text-nowrap">{custom_2}</td>
+        <td class="text-center text-nowrap">{custom_1}</td>
+        <td class="text-center text-nowrap">{custom_2}</td>
+        <td class="separator"></td>
         <td class="text-center">{pop_movies}</td>
         <td class="text-center">{pop_toyes}</td>
         <td class="text-center">{pop_books}</td>
@@ -92,7 +95,7 @@
 
 
 <div id="table-wrap-2">
-<h4>Review</h4>
+<h4>Summary</h4>
 
 <table id="table-2" class="table table-bordered table-auto table-inline">
   <thead>
@@ -112,6 +115,13 @@
     </tr>
   </tbody>
 </table>
+
+<div id="note-2">
+  <h5>NOTE</h5>
+
+  <p><strong>New samples:</strong> {archive_custom_1}</p>
+  <p><strong>New finds:</strong> {archive_custom_2}</p>
+</div>
 </div>
 
 
@@ -123,9 +133,10 @@
 
 
 <style type="text/css">
-#table-wrap-2 { margin-bottom: 60px; }
+#table-wrap-2 { margin-top: 50px; margin-bottom: 70px; }
+#table-wrap-2 table { margin-bottom: 50px; }
 #table-wrap-2 h4 { margin-bottom: 25px; }
-#table-wrap-2 h5 { margin-top: 20px; margin-bottom: 10px; }
+#table-wrap-2 h5 { margin-top: 20px; margin-bottom: 25px; }
 </style>
 
 
@@ -240,14 +251,19 @@ control.openView = function() {
 
 
   var t2body = document.querySelector('#table-2 > tbody');
-  var t2head = document.querySelector('#table-2 > thead');
   var t2row = t2body.querySelector('tr');
+
+  var t2note = document.querySelector('#note-2');
 
   t2row.innerHTML = t2row.innerHTML
     .replace('{archive_pop_movies}', _archive_items_subtotals['movies'])
     .replace('{archive_pop_toyes}', _archive_items_subtotals['toyes'])
     .replace('{archive_pop_books}', _archive_items_subtotals['books'])
     .replace('{archive_pop_subtotal}', _archive_items_subtotals.subtotal);
+
+  t2note.innerHTML = t2note.innerHTML
+    .replace('{archive_custom_1}', (archive_data.custom['1'] || 'n.d.'))
+    .replace('{archive_custom_2}', (archive_data.custom['2'] || 'n.d.'));
 
 
 
@@ -260,10 +276,12 @@ control.renderRow = function(tpl_row, id_row, data_row, data_extra) {
   }
 
 
+
   var archive_items_extra = data_extra[0];
-  //TODO FIX data
+
   archive_items_extra[data_row.id] = archive_items_extra[data_row.id] || {};
   archive_items_extra[data_row.id].custom = archive_items_extra[data_row.id].custom || { '1': false, '2': false };
+
 
 
   var row = tpl_row.cloneNode(true);
@@ -310,20 +328,6 @@ control.action = function(element, event, data_extra) {
 
   var _events = {};
 
-  //TODO rename
-  _events._remove = function() {
-    _data_updated['archive'] = data_archive;
-
-    delete _data_updated[id];
-  }
-
-  _events._close = function() {
-    var category_id = app.memory.get('category_id');
-
-    _data_updated['archive'] = data_archive;
-    _data_updated['archive'][id][category_id].status = 0;
-  }
-
   _events.selection = function() {
     return _action.selection(null, true);
   }
@@ -337,18 +341,23 @@ control.action = function(element, event, data_extra) {
   }
 
   _events.delete = function() {
-    _events._remove();
-
     var category_id = app.memory.get('category_id');
 
     var _title = 'Are you sure to delete "' + data_archive[id][category_id].title + '" archive?';
     _title += '\n\nATTENZIONE! L’OPERAZIONE È IRREVERSIBILE E VERRANNO PERSI TUTTI I DATI PRESENTI NELL\'ARCHIVIO';
 
+    _data_updated['archive'] = data_archive;
+
+    delete _data_updated[id];
+
     return _action.delete(_data_updated, true, _title);
   }
 
   _events.close = function() {
-    _events._close();
+    var category_id = app.memory.get('category_id');
+
+    _data_updated['archive'] = data_archive;
+    _data_updated['archive'][id][category_id].status = 0;
 
     var category_id = app.memory.get('category_id');
 

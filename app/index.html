@@ -35,7 +35,7 @@
   <div class="row">
     <nav id="master-navigation" class="col-sm-3 col-md-2 sidebar">
       <ul class="nav nav-sidebar">
-        <li><a href="index.html?main" data-view="main">Main</a></li>
+        <li><a href="index.html?demo" data-view="demo">Demo</a></li>
         <li><a href="index.html?archive" data-view="archive">Archive</a></li>
         <li><a href="index.html?average" data-view="average">Average</a></li>
         <li><a href="index.html?items" data-view="items">Items</a></li>
@@ -130,10 +130,12 @@ main.setupData = function() {
 
 
 
+  // populate with random data
+
   var config = window.config;
 
-  var data_archive = window.store[config.app]['archive'];
-  var data_categories = window.store[config.app]['categories'];
+  var data_archive = window.store[config.app]['archive'] || {};
+  var data_categories = window.store[config.app]['categories'] || {};
 
   var __data = Object.keys(data_archive).length;
 
@@ -145,14 +147,19 @@ main.setupData = function() {
   var archive_items = data_archive[archive_id][category_id].items;
 
   Array.prototype.forEach.call(Object.keys(archive_items), function(id) {
+    if (! archive_items[id].custom) {
+      archive_items[id].custom = {};
+    }
     if (! archive_items[id].pop) {
       archive_items[id].pop = {};
     }
 
-    archive_items[id].pop['avg'] = Math.round(Math.random(0).toExponential()*10);
-    archive_items[id].pop['movies'] = Math.floor(Math.random(1).toExponential()*100);
-    archive_items[id].pop['toyes'] = Math.floor(Math.random(2).toExponential()*100);
-    archive_items[id].pop['books'] = Math.floor(Math.random(3).toExponential()*100);
+    archive_items[id].custom['1'] = (Math.round(Math.random() * 10) < 5 ? true : false);
+    archive_items[id].custom['2'] = (Math.round(Math.random() * 10) > 5 ? true : false);
+    archive_items[id].pop['avg'] = Math.round(Math.random(0).toExponential() * 10);
+    archive_items[id].pop['movies'] = Math.floor(Math.random(1).toExponential() * 100);
+    archive_items[id].pop['toyes'] = Math.floor(Math.random(2).toExponential() * 100);
+    archive_items[id].pop['books'] = Math.floor(Math.random(3).toExponential() * 100);
     archive_items[id].awards = Math.ceil(Math.random(new Date(archive_items[id].date).getTime()) * 1000);
 
     if (! archive_items[id].pop.total) {
@@ -165,6 +172,7 @@ main.setupData = function() {
   });
 
   app.store.set('demo_archive', data_archive);
+
 
 
 

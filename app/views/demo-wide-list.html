@@ -9,9 +9,9 @@
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
-<body class="view view_list">
-<h1 id="view-title" class="page-header hide">Main</h1>
-<h2 id="section-title" class="sub-header">{section}</h2>
+<body class="view view_list view_wide_list">
+<h1 id="view-title" class="page-header hide"></h1>
+<h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
@@ -31,14 +31,13 @@
   </div>
   <div class="clearfix"></div>
   <div>
-    <a class="btn btn-sm btn-gray-lighter" href="../index.html?main" target="_parent">&laquo; torna indietro</a>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?demo" target="_parent">&laquo; Return Back</a>
   </div>
 </div>
 
 
 <div class="table-responsive">
   <table id="table-data" class="table table-bordered table-data">
-    <thead>
     <thead>
       <tr class="hidden-csv">
         <th class="thrv"><span class="trv"><span><strong>ID</strong></span></span></th>
@@ -150,7 +149,9 @@ control.openView = function() {
   var id = _open.setID(archive_id);
 
 
-  _open.setTitle(archive_data.title || '');
+  var title = (archive_data.title || '');
+
+  _open.setTitle(title, 'Demo');
 
   _open.fillSelection(archive_selection, id);
 

@@ -9,9 +9,9 @@
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
-<body class="view view_update">
+<body class="view view_list">
 <h1 id="view-title" class="page-header">Average</h1>
-<h2 id="section-title" class="sub-header">{section}</h2>
+<h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
@@ -60,6 +60,11 @@
   <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, 'update')">Update Average</button>
 </fieldset>
 </form>
+
+
+<style type="text/css">
+.table > thead > tr > th:first-child, .table > tbody > tr > td:first-child { width: 100px; }
+</style>
 
 
 <script type="text/javascript" src="../assets/js/app.min.js"></script>

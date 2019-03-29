@@ -11,18 +11,18 @@
 
 <body class="view view_edit">
 <h1 id="view-title" class="page-header">Items</h1>
-<h2 id="section-title" class="sub-header">{section}</h2>
+<h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top">
   <div>
-    <a class="btn btn-sm btn-gray-lighter" href="../index.html?sample" target="_parent">&laquo; torna indietro</a>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?sample" target="_parent">&laquo; Return Back</a>
   </div>
 </div>
 
 <form id="form-data" class="form form-data" autocomplete="off" validate>
 <fieldset>
-<legend>Vehicle</legend>
+<legend>Entry</legend>
 
 <div class="row">
 <div class="form-group col-6 col-lg-4">
@@ -79,7 +79,7 @@
 <fieldset class="form-submit">
   <input type="hidden" id="index" name="id" value="{id}" data-transform="integer">
   <input type="submit" id="real-submit" class="hide" hidden>
-  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, '{event}')">{action_label}</button>
+  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, '{action_event}')">{action_label}</button>
 </fieldset>
 </form>
 
@@ -128,10 +128,10 @@ control.openView = function() {
 
 
   var model_selection = [
-    {'FAN': [ 'Fan Sushi 1.2 hybrid' ]},
+    {'FAN': [ 'Fan Saké 1.2 hybrid' ]},
     {'SOUPE': [ 'Soupe Chapelure 1.9 gasoline', 'Soupe Bouillie 1.9 gasoline', 'Soupe Crème 1.2 gasoline' ]},
     {'PFEIL': [ 'Pfeil Bach 1.6 hybrid', 'Pfeil Beethoven VAN 1.6 diesel' ]},
-    {'GALA': [ 'Gala Rook 1.0 electric', 'Gala Rook Sport 2.0 gasoline' ]},
+    {'GALA': [ 'Gala Rook 1.0 electric', 'Gala Rook 2.0 gasoline' ]},
     {'OTTO': [ 'Otto Gogh VAN 2.0 diesel' ]},
   ];
   var model_selected = (event === 'edit' ? data[id].title : '');
@@ -190,8 +190,7 @@ control.action = function(element, event, data_extra) {
 
   var _events = {};
 
-  //TODO rename
-  _events._update = function() {
+  _events._prepare = function() {
     var _ext_data = app.utils.extendObject(true, data[id], app.view.getFormData(form.elements));
 
     _data_updated['sample'][id] = _ext_data;
@@ -200,7 +199,7 @@ control.action = function(element, event, data_extra) {
   _events.add = function() {
     _data_updated['sample'] = data;
 
-    _events._update();
+    _events._prepare();
 
     return _action.add(_data_updated, true);
   }
@@ -208,7 +207,7 @@ control.action = function(element, event, data_extra) {
   _events.edit = function() {
     _data_updated['sample'] = data;
 
-    _events._update();
+    _events._prepare();
 
     return _action.edit(_data_updated, true);
   }
