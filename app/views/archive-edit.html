@@ -105,12 +105,14 @@
 
 
 <script type="text/javascript">
-var control = {};
+var control = window.appe__control = {};
 
-control.openView = function() {
-  var data_archive = window.store[config.app]['archive'];
-  var data_categories = window.store[config.app]['categories'];
-  var data_items = window.store[config.app]['items'];
+
+
+control.openView = function(data) {
+  var data_archive = data['archive'];
+  var data_categories = data['categories'];
+  var data_items = data['items'];
 
   var form = document.getElementById('form-data');
   var table = document.getElementById('table-data');
@@ -149,7 +151,7 @@ control.openView = function() {
       data_items[id].status && _items.toDrag.push(id);
     });
 
-    control.draggable(table, 'init', _items);
+    control.draggable(data, table, 'init', _items);
   }
 
   _events.edit = function() {
@@ -170,7 +172,7 @@ control.openView = function() {
       Object.keys(archive_data.items).indexOf(id) != -1 && _items.toDrag.push(id);
     });
 
-    control.draggable(table, 'init', _items, (! archive_data.status));
+    control.draggable(data, table, 'init', _items, (! archive_data.status));
   }
 
 
@@ -180,7 +182,9 @@ control.openView = function() {
   _open.end();
 }
 
-control.fillForm = function(data_form, data_extra) {
+
+
+control.fillForm = function(data_form, extra) {
   if (! data_form) {
     return app.error('control.fillForm', arguments);
   }
@@ -214,14 +218,18 @@ control.fillForm = function(data_form, data_extra) {
   }
 }
 
+
+
 control.draggable = function(element, event, items, disallow) {
-  var data = window.store[config.app]['items'];
+  var data = app.data();
+
+  var data_items = data['items'];
 
   var table = document.getElementById('table-data');
   var select = document.getElementById('items');
   var field = document.getElementById('archive_items');
 
-  if (! data) {
+  if (! data_items) {
     return app.error('control.action', arguments);
   }
 
@@ -261,7 +269,7 @@ control.draggable = function(element, event, items, disallow) {
     var opts = [];
 
     Array.prototype.forEach.call(items.toSelect, function(index) {
-      var name = data[index].name;
+      var name = data_items[index].name;
 
       var obj = {};
       obj[index] = name;
@@ -296,7 +304,7 @@ control.draggable = function(element, event, items, disallow) {
 
     trow.setAttribute('data-index', index);
 
-    var name = data[index].name;
+    var name = data_items[index].name;
 
     var td = trow.querySelectorAll('td');
 
@@ -382,7 +390,7 @@ control.draggable = function(element, event, items, disallow) {
     var index = null;
     var name = null;
 
-    if (selected_item.value in data) {
+    if (selected_item.value in data_items) {
       index = selected_item.value;
     }
 
@@ -392,7 +400,7 @@ control.draggable = function(element, event, items, disallow) {
       return;
     }
 
-    name = data[index].name;
+    name = data_items[index].name;
 
     if (! name) {
       return app.error('control.draggable.add', null, 'name');
@@ -406,13 +414,17 @@ control.draggable = function(element, event, items, disallow) {
   }
 
 
-  _events[event](data);
+  _events[event](data_items);
 }
 
-control.action = function(element, event, data_extra) {
-  var data_archive = window.store[config.app]['archive'];
-  var data_categories = window.store[config.app]['categories'];
-  var data_items = window.store[config.app]['items'];
+
+
+control.action = function(element, event, extra) {
+  var data = app.data();
+
+  var data_archive = data['archive'];
+  var data_categories = data['categories'];
+  var data_items = data['items'];
 
   var form = document.getElementById('form-data');
 
@@ -481,12 +493,13 @@ control.action = function(element, event, data_extra) {
   }
 
 
-  var ctl = _events[event](data_extra);
+  var ctl = _events[event](extra);
 
   app.view.send(ctl);
 
   _action.end();
 }
+
 
 
 app.load(app.view.load);

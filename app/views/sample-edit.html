@@ -90,19 +90,21 @@
 
 
 <script type="text/javascript">
-var control = {};
+var control = window.appe__control = {};
 
-control.openView = function() {
-  var data = window.store[config.app]['sample'];
+
+
+control.openView = function(data) {
+  var data_sample = data['sample'];
 
   var form = document.getElementById('form-data');
 
-  if (! data) {
+  if (! data_sample) {
     return app.error('control.openView', 'data*');
   }
 
 
-  var _open = app.view.open([ 'add', 'edit' ], data, form);
+  var _open = app.view.open([ 'add', 'edit' ], data_sample, form);
 
   _open.begin();
 
@@ -122,7 +124,7 @@ control.openView = function() {
     _open.setTitle('Edit Vehicle');
     _open.setActionHandler('Update Vehicle');
 
-    control.fillForm(data[id]);
+    control.fillForm(data_sample[id]);
   }
 
 
@@ -134,7 +136,7 @@ control.openView = function() {
     {'GALA': [ 'Gala Rook 1.0 electric', 'Gala Rook 2.0 gasoline' ]},
     {'OTTO': [ 'Otto Gogh VAN 2.0 diesel' ]},
   ];
-  var model_selected = (event === 'edit' ? data[id].title : '');
+  var model_selected = (event === 'edit' ? data_sample[id].title : '');
 
   var select_model = document.getElementById('sample_title');
   select_model.innerHTML = app.layout.renderSelectOptions('sample_title', model_selection, model_selected);
@@ -148,6 +150,8 @@ control.openView = function() {
   _open.end();
 }
 
+
+
 control.fillForm = function(data_field) {
   if (! data_field) {
     return app.error('control.fillForm', arguments);
@@ -158,12 +162,16 @@ control.fillForm = function(data_field) {
   document.getElementById('sample_amount').setAttribute('value', data_field.amount);
 }
 
-control.action = function(element, event, data_extra) {
-  var data = window.store[config.app]['sample'];
+
+
+control.action = function(element, event, extra) {
+  var data = app.data();
+
+  var data_sample = data['sample'];
 
   var form = document.getElementById('form-data');
 
-  if (! data) {
+  if (! data_sample) {
     return app.error('control.action', arguments);
   }
 
@@ -172,7 +180,7 @@ control.action = function(element, event, data_extra) {
   }
 
 
-  var _action = app.view.action([ 'add', 'edit' ], event, element, data, form);
+  var _action = app.view.action([ 'add', 'edit' ], event, element, data_sample, form);
 
   _action.begin();
 
@@ -191,13 +199,13 @@ control.action = function(element, event, data_extra) {
   var _events = {};
 
   _events._prepare = function() {
-    var _ext_data = app.utils.extendObject(true, data[id], app.view.getFormData(form.elements));
+    var _ext_data = app.utils.extendObject(true, data_sample[id], app.view.getFormData(form.elements));
 
     _data_updated['sample'][id] = _ext_data;
   }
 
   _events.add = function() {
-    _data_updated['sample'] = data;
+    _data_updated['sample'] = data_sample;
 
     _events._prepare();
 
@@ -205,7 +213,7 @@ control.action = function(element, event, data_extra) {
   }
 
   _events.edit = function() {
-    _data_updated['sample'] = data;
+    _data_updated['sample'] = data_sample;
 
     _events._prepare();
 
@@ -213,7 +221,7 @@ control.action = function(element, event, data_extra) {
   }
 
 
-  var ctl = _events[event](data_extra);
+  var ctl = _events[event](extra);
 
   app.view.send(ctl);
 

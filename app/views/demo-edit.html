@@ -73,12 +73,14 @@
 
 
 <script type="text/javascript">
-var control = {};
+var control = window.appe__control = {};
 
-control.openView = function() {
-  var data_archive = window.store[config.app]['archive'];
-  var data_categories = window.store[config.app]['categories'];
-  var data_items = window.store[config.app]['items'];
+
+
+control.openView = function(data) {
+  var data_archive = data['archive'];
+  var data_categories = data['categories'];
+  var data_items = data['items'];
 
   var form = document.getElementById('form-data');
 
@@ -156,13 +158,15 @@ control.openView = function() {
   _open.end();
 }
 
-control.fillForm = function(data_form, data_extra) {
+
+
+control.fillForm = function(data_form, extra) {
   if (! data_form) {
     return app.error('control.fillForm', arguments);
   }
 
 
-  var archive_data_extra = data_extra[0];
+  var archive_data_extra = extra[0];
 
 
   if (! archive_data_extra.status) {
@@ -173,10 +177,14 @@ control.fillForm = function(data_form, data_extra) {
   document.getElementById('main_item_awards').setAttribute('value', (data_form.awards || 0));
 }
 
-control.action = function(element, event, data_extra) {
-  var data_archive = window.store[config.app]['archive'];
-  var data_categories = window.store[config.app]['categories'];
-  var data_items = window.store[config.app]['items'];
+
+
+control.action = function(element, event, extra) {
+  var data = app.data();
+
+  var data_archive = data['archive'];
+  var data_categories = data['categories'];
+  var data_items = data['items'];
 
   var form = document.getElementById('form-data');
 
@@ -221,12 +229,13 @@ control.action = function(element, event, data_extra) {
   }
 
 
-  var ctl = _events[event](data_extra);
+  var ctl = _events[event](extra);
 
   app.view.send(ctl);
 
   _action.end();
 }
+
 
 
 app.load(app.view.load);

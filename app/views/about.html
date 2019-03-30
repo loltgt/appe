@@ -68,9 +68,11 @@
 
 
 <script type="text/javascript">
-var control = {};
+var control = window.appe__control = {};
 
-control.openView = function() {
+
+
+control.openView = function(data) {
   var _open = app.view.open(null, {});
 
   _open.begin();
@@ -137,6 +139,7 @@ control.openView = function() {
 
   _open.end();
 }
+
 
 
 app.load(app.view.load);

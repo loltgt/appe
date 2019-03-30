@@ -90,12 +90,14 @@
 
 
 <script type="text/javascript">
-var control = {};
+var control = window.appe__control = {};
 
-control.openView = function() {
-  var data_archive = window.store[config.app]['archive'];
-  var data_items = window.store[config.app]['items'];
-  var data_categories = window.store[config.app]['categories'];
+
+
+control.openView = function(data) {
+  var data_archive = data['archive'];
+  var data_items = data['items'];
+  var data_categories = data['categories'];
 
   var form = document.getElementById('form-data');
 
@@ -160,6 +162,8 @@ control.openView = function() {
   _open.end();
 }
 
+
+
 control.fillForm = function(data_field) {
   if (! data_field) {
     return app.error('control.fillForm', arguments);
@@ -178,8 +182,12 @@ control.fillForm = function(data_field) {
   data_field.status && (document.getElementById('items_status').setAttribute('checked', ''));
 }
 
-control.action = function(element, event, data_extra) {
-  var data_items = window.store[config.app]['items'];
+
+
+control.action = function(element, event, extra) {
+  var data = app.data();
+
+  var data_items = data['items'];
 
   var form = document.getElementById('form-data');
 
@@ -233,12 +241,13 @@ control.action = function(element, event, data_extra) {
   }
 
 
-  var ctl = _events[event](data_extra);
+  var ctl = _events[event](extra);
 
   app.view.send(ctl);
 
   _action.end();
 }
+
 
 
 app.load(app.view.load);

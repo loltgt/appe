@@ -47,7 +47,7 @@
         <td>{id}</td>
         <td>{name}</td>
         <td>
-          <input type="number" name="items[{id}][pop][avg]" class="form-control form-control-editable input-lg" value="{avg}" data-transform="integer" {readonly} {disabled}>
+          <input type="number" name="items[{id}][pop][avg]" class="form-control form-control-editable input-lg" data-placeholder-value data-transform="integer" data-placeholder-readonly data-placeholder-disabled>
           <input type="hidden" name="items[{id}][pop][total]" value="">
         </td>
       </tr>
@@ -73,11 +73,13 @@
 
 
 <script type="text/javascript">
-var control = {};
+var control = window.appe__control = {};
 
-control.openView = function() {
-  var data_items = window.store[config.app]['items'];
-  var data_archive = window.store[config.app]['archive'];
+
+
+control.openView = function(data) {
+  var data_items = data['items'];
+  var data_archive = data['archive'];
 
   var form = document.getElementById('form-data');
   var table = document.getElementById('table-data');
@@ -151,15 +153,24 @@ control.openView = function() {
   _open.fillTable(table, _archive_items_join, false, archive_data);
 
 
+
+  if (! __data || ! archive_data.status) {
+    _open.denySubmit();
+  }
+
+
+
   _open.end();
 }
 
-control.renderRow = function(tpl_row, id_row, data_row, data_extra) {
+
+
+control.renderRow = function(tpl_row, id_row, data_row, extra) {
   if (! tpl_row || ! data_row) {
     return app.error('control.renderRow', arguments);
   }
 
-  var archive_data_extra = data_extra[0];
+  var archive_data_extra = extra[0];
 
 
   var row = tpl_row.cloneNode(true);
@@ -169,16 +180,20 @@ control.renderRow = function(tpl_row, id_row, data_row, data_extra) {
   row.innerHTML = row.innerHTML
     .replace(/\{id\}/g, data_row.id)
     .replace('{name}', data_row.name)
-    .replace('{avg}', (data_row.pop['avg'] || 0))
-    .replace('{readonly}', (archive_data_extra.status ? '' : 'readonly'))
-    .replace('{disabled}', (archive_data_extra.status ? '' : 'disabled'));
+    .replace('data-placeholder-value', 'value="' + (data_row.pop['avg'] || 0) + '"')
+    .replace('data-placeholder-readonly', (archive_data_extra.status ? '' : 'readonly'))
+    .replace('data-placeholder-disabled', (archive_data_extra.status ? '' : 'disabled'));
 
   return row;
 }
 
-control.action = function(element, event, data_extra) {
-  var data_items = window.store[config.app]['archive'];
-  var data_archive = window.store[config.app]['archive'];
+
+
+control.action = function(element, event, extra) {
+  var data = app.data();
+
+  var data_items = data['archive'];
+  var data_archive = data['archive'];
 
   var table = document.getElementById('table-data');
   var form = document.getElementById('form-data');
@@ -225,7 +240,7 @@ control.action = function(element, event, data_extra) {
   _events.export = function(subControl) {
     var _dropdown = element.parentNode.parentNode.parentNode;
 
-    app.view.sub(subControl, element, table)();
+    app.view.sub(subControl, element, table);
 
     return;
   }
@@ -235,12 +250,13 @@ control.action = function(element, event, data_extra) {
   }
 
 
-  var ctl = _events[event](data_extra);
+  var ctl = _events[event](extra);
 
   app.view.send(ctl);
 
   _action.end();
 }
+
 
 
 app.load(app.view.load);

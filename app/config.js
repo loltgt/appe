@@ -1,4 +1,4 @@
-window.config = {
+window.appe__config = {
   "app": "demo",
   "launcherName": "LAUNCH",
   "name": "{appe} demo app",
