@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="stylesheet" type="text/css" href="assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="assets/css/lib/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="assets/css/app.min.css">
 <title>{appe}</title>
 </head>
@@ -23,9 +23,9 @@
     <div class="navbar-form navbar-right">
       <div class="form-group">
         <input id="main-action-open-session-header" type="file" accept="application/x-javascript" style="display: none;" hidden>
-        <button type="button" id="main-action-new-header" class="btn main-action-new">New</button>
-        <button type="button" id="main-action-open-header" class="btn main-action-open" data-open-input="#main-action-open-session-header">Open</button>
-        <button type="button" id="main-action-save-header" class="btn btn-success main-action-save">Save</button>
+        <button type="button" id="main-action-new-header" class="btn btn-action-new main-action-new">New</button>
+        <button type="button" id="main-action-open-header" class="btn btn-action-open main-action-open" data-open-input="#main-action-open-session-header">Open</button>
+        <button type="button" id="main-action-save-header" class="btn btn-action-save main-action-save">Save</button>
       </div>
     </div>
   </div>
@@ -54,13 +54,13 @@
 
 <footer id="master-footer" class="master-footer footer">
   <div class="container-fluid text-center">
-    <p class="visible-md-inline-block visible-lg-inline-block">Ricordati di salvare prima di chiudere l'applicazione!</p>
-    <button type="button" id="main-action-save-footer" class="btn btn-lg btn-big btn-success main-action-save">Save</a>
+    <p class="visible-md-inline-block visible-lg-inline-block">Should save before close the application!</p>
+    <button type="button" id="main-action-save-footer" class="btn btn-lg btn-big btn-action-save main-action-save">Save</a>
   </div>
 </footer>
 
 
-<script type="text/javascript" src="assets/js/file-saver/FileSaver.min.js"></script>
+<script type="text/javascript" src="assets/js/lib/file-saver/FileSaver.min.js" async defer></script>
 <script type="text/javascript" src="assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="config.js"></script>
@@ -69,14 +69,15 @@ var main = window.appe__main = {};
 
 
 
-main.controlView = function(control, event, ctl) {
-  if (! control || ! event || ! ctl) {
-    return app.error('main.controlView', arguments);
+main.handle = function(handler, event, ctl) {
+  if (! handler || ! event || ! ctl) {
+    return app.error('main.handler', arguments);
   }
 
-  var _control = app.utils.extendObject({}, control);
+  var _handler = app.utils.extendObject({}, handler);
 
-  _control.selection = function() {
+
+  _handler.selection = function() {
     try {
       var _data = JSON.parse(ctl.data);
 
@@ -85,15 +86,16 @@ main.controlView = function(control, event, ctl) {
       return;
     }
 
-    return control.selection();
+    return handler.selection();
   }
 
-  _control[event]();
+
+  _handler[event]();
 }
 
 
 
-main.setupData = function(data) {
+main.setup = function(data) {
   var data_categories = {
     "1": {
       "title": "Dinosaurs",
@@ -178,18 +180,26 @@ main.setupData = function(data) {
 
 
 
-main.action = function(action, element, event) {
-  if (! action || ! element || ! event) {
+main.action = function(element, event, extra) {
+  if (! element || ! event) {
     return app.error('main.action', arguments);
   }
 
-  var _events = app.utils.extendObject({}, action);
+  var _action = app.main.action([ 'menu' ], event, element);
+
+  _action.begin();
+
+
+  var _events = {};
 
   _events.menu = function() {
-    return action.menu();
+    return _action.menu(element, event);
   }
 
-  _events[event]();
+
+  _events[event](extra);
+
+  _action.end();
 }
 
 

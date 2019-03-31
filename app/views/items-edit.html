@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="stylesheet" type="text/css" href="../assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
@@ -94,7 +94,7 @@ var control = window.appe__control = {};
 
 
 
-control.openView = function(data) {
+control.handle = function(data) {
   var data_archive = data['archive'];
   var data_items = data['items'];
   var data_categories = data['categories'];
@@ -102,7 +102,7 @@ control.openView = function(data) {
   var form = document.getElementById('form-data');
 
   if (! data_archive || ! data_items || ! data_categories) {
-    return app.error('control.openView', 'data*');
+    return app.error('control.handle', 'data*');
   }
 
 
@@ -116,25 +116,28 @@ control.openView = function(data) {
   var categories_data = data_categories[archive_id];
 
 
-  var _open = app.view.open([ 'add', 'edit' ], data_items, form);
+  var _control = app.view.control([ 'add', 'edit' ], data_items, form);
 
-  _open.begin();
+  _control.begin();
 
   
-  var event = _open.getEvent();
-  var id = _open.getID();
+  var event = _control.getEvent();
+  var id = _control.getID();
 
 
   var _events = {};
 
   _events.add = function() {
-    _open.setTitle('Add New Item');
-    _open.setActionHandler('Add Item');
+    _control.setTitle('Add New Item');
+
+    _control.setActionHandler('Add Item');
   }
 
   _events.edit = function() {
-    _open.setTitle('Edit Item');
-    _open.setActionHandler('Update Item');
+    _control.setTitle('Edit Item');
+
+    _control.setActionHandler('Update Item');
+
 
     control.fillForm(data_items[id]);
   }
@@ -159,7 +162,7 @@ control.openView = function(data) {
   _events[event]();
 
 
-  _open.end();
+  _control.end();
 }
 
 
@@ -185,22 +188,14 @@ control.fillForm = function(data_field) {
 
 
 control.action = function(element, event, extra) {
-  var data = app.data();
-
-  var data_items = data['items'];
-
   var form = document.getElementById('form-data');
-
-  if (! data_items) {
-    return app.error('control.action', arguments);
-  }
 
   if (! element || typeof event !== 'string') {
     return app.error('control.action', arguments);
   }
 
 
-  var _action = app.view.action([ 'add', 'edit' ], event, element, data_items, form);
+  var _action = app.view.action([ 'add', 'edit' ], event, element, form);
 
   _action.begin();
 
@@ -219,12 +214,18 @@ control.action = function(element, event, extra) {
   var _events = {};
 
   _events._prepare = function() {
-    var _ext_data = app.utils.extendObject(true, data_items[id], app.view.getFormData(form.elements));
+    var _ext_data = app.utils.extendObject(true, _data_updated['items'][id], app.view.getFormData(form.elements));
 
     _data_updated['items'][id] = _ext_data;
   }
 
   _events.add = function() {
+    var data_items = app.data('items');
+
+    if (! data_items) {
+      return app.error('control.action().add', 'data*');
+    }
+
     _data_updated['items'] = data_items;
 
     _events._prepare();
@@ -233,6 +234,12 @@ control.action = function(element, event, extra) {
   }
 
   _events.edit = function() {
+    var data_items = app.data('items');
+
+    if (! data_items) {
+      return app.error('control.action().edit', 'data*');
+    }
+
     _data_updated['items'] = data_items;
 
     _events._prepare();

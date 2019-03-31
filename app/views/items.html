@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="stylesheet" type="text/css" href="../assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
@@ -73,7 +73,7 @@ var control = window.appe__control = {};
 
 
 
-control.openView = function(data) {
+control.handle = function(data) {
   var data_archive = data['archive'];
   var data_items = data['items'];
   var data_categories = data['categories'];
@@ -81,7 +81,7 @@ control.openView = function(data) {
   var table = document.getElementById('table-data');
 
   if (! data_archive || ! data_items || ! data_categories) {
-    return app.error('control.openView', 'data*');
+    return app.error('control.handle', 'data*');
   }
 
 
@@ -95,15 +95,15 @@ control.openView = function(data) {
 
 
 
-  var _open = app.view.open(null, data_items);
+  var _control = app.view.control(null, data_items);
 
-  _open.begin();
-
-
-  _open.fillTable(table, null, null, categories_data);
+  _control.begin();
 
 
-  _open.end();
+  _control.fillTable(table, null, null, categories_data);
+
+
+  _control.end();
 }
 
 
@@ -136,23 +136,14 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
 
 
 control.action = function(element, event, extra) {
-  var data = app.data();
-
-  var data_items = data['items'];
-  var data_archive = data['archive'];
-
   var table = document.getElementById('table-data');
-
-  if (! data_items || ! data_archive) {
-    return app.error('control.action', arguments);
-  }
 
   if (! element || typeof event !== 'string') {
     return app.error('control.action', arguments);
   }
 
 
-  var _action = app.view.action([ 'edit', 'delete', 'export', 'print' ], event, element, data_items);
+  var _action = app.view.action([ 'edit', 'delete', 'export', 'print' ], event, element);
 
   _action.begin();
 
@@ -169,15 +160,22 @@ control.action = function(element, event, extra) {
   }
 
   _events.delete = function() {
+    var data_items = app.data('items');
+    var data_archive = app.data('archive');
+
+    if (! data_items || ! data_archive) {
+      return app.error('control.action().delete', 'data*');
+    }
+
     var archive_id = app.memory.get('archive_id');
     var category_id = app.memory.get('category_id');
 
     _data_updated['items'] = data_items;
     _data_updated['archive'] = data_archive;
 
-    Array.prototype.forEach.call(data_archive, function(archive_id) {
-      Array.prototype.forEach.call(data_archive[archive_id], function(category_id) {
-        if (data_archive[archive_id][category_id]['items'] && data_archive[archive_id][category_id]['items'].indexOf(id) != 1) {
+    Array.prototype.forEach.call(_data_updated['archive'], function(archive_id) {
+      Array.prototype.forEach.call(_data_updated['archive'][archive_id], function(category_id) {
+        if (_data_updated['archive'][archive_id][category_id]['items'] && _data_updated['archive'][archive_id][category_id]['items'].indexOf(id) != 1) {
           delete _data_updated['archive'][archive_id][category_id]['items'][id];
         }
       });
@@ -188,10 +186,8 @@ control.action = function(element, event, extra) {
     return _action.delete(_data_updated, true, 'Item', id);
   }
 
-  _events.export = function(subControl) {
-    var _dropdown = element.parentNode.parentNode.parentNode;
-
-    app.view.sub(subControl, element, table);
+  _events.export = function(method) {
+    app.view.sub(method, element, table);
 
     return;
   }

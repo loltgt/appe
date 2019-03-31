@@ -11,6 +11,6 @@
   "dependencies": {
     "bootstrap": "^3.4.1",
     "file-saver": "^2.0.1",
-    "xlsx": "^0.14.1"
+    "jquery": "^3.3.1"
   }
 }

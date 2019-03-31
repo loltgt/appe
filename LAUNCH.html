@@ -16,14 +16,14 @@
 <div class="container">
   <div class="vcontent-centered-outer">
     <div class="vcontent-centered-inner">
-      <div class="loader">
-        <div id="loader-open" class="loader-open" style="visibility: hidden;">
+      <div class="start-progress">
+        <div id="start-progress-open" class="start-progress-open" style="visibility: hidden;">
           <p class="lead">Open latest file save</p>
           <input id="start-action-open-session" type="file" accept="application/x-javascript" style="display: none;" hidden>
-          <button id="start-action-open" class="btn btn-lg btn-big btn-info start-action-open" data-open-input="#start-action-open-session">Open</button>
-          <p><button id="start-action-new" class="btn btn-link start-action-new">New Session</button>
+          <button id="start-action-open" class="btn btn-lg btn-big btn-start-action-open start-action-open" data-open-input="#start-action-open-session">Open</button>
+          <p><button id="start-action-new" class="btn btn-mini btn-start-action-new start-action-new">New Session</button>
         </div>
-        <div id="loader-wait" class="loader-wait" style="visibility: visible;">
+        <div id="start-progress-wait" class="start-progress-wait" style="visibility: visible;">
           <p class="lead">loading . . .</p>
         </div>
       </div>

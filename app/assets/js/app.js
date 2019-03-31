@@ -2,7 +2,7 @@
  * {appe}
  * ver. 1.0 beta
  *
- * Copyright (c) Leonardo Laureti
+ * Copyright 2018-2019 (c) Leonardo Laureti
  *
  * MIT License
  */
@@ -16,13 +16,22 @@ app._runtime = {
   system: null,
   exec: true,
   title: '',
+  name: '',
   storage: false,
-  debug: false
+  encryption: false,
+  debug: false,
+  hangs: 0
 };
 
 
 
+/**
+ * app.os
+ *
+ * Handles filesystem functions
+ */
 app.os = {};
+
 
 /**
  * app.os.fileOpen
@@ -30,6 +39,7 @@ app.os = {};
  * Opens a file through FileReader api, stores it, returns to callback
  *
  * @global <Object> appe__config
+ * @global <Object> FileReader
  * @param <Function> callback
  * @return
  */
@@ -38,6 +48,18 @@ app.os.fileOpen = function(callback) {
 
   if (! config) {
     return app.stop('app.os.fileOpen');
+  }
+
+  if (config.file && typeof config.file !== 'object') {
+    return app.error('app.os.fileOpen', 'config');
+  }
+
+  if (config.file && !! config.file.binary && false) {
+    return app.error('app.os.fileOpen', 'zlib');
+  }
+
+  if (config.file && !! config.file.binary || !! app._runtime.encryption && false) {
+    return app.error('app.os.fileSave', 'crypto');
   }
 
   if (! FileReader) {
@@ -52,13 +74,21 @@ app.os.fileOpen = function(callback) {
     return; // silent fail
   }
 
+  var _app_name = app._runtime.name.toString();
+
   var file = this.files[0];
 
   if (file.type.indexOf('javascript') === -1) {
-    return app.error('app.os.fileOpen', 'Il formato di file non è corretto.', arguments);
+    return app.error('app.os.fileOpen', 'The file format is not correct.', arguments);
   }
 
   var schema = config.schema;
+
+  var file_binary = config.file && config.file.binary ? !! config.file.binary : false;
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+  var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+
   var reader = new FileReader();
 
   reader.onload = (function() {
@@ -66,9 +96,15 @@ app.os.fileOpen = function(callback) {
 
     // try to restore file source
     try {
+      if (file_binary) {
+        source = source;
+      }
+      if (file_crypt) {
+        source = source;
+      }
+
       source = source.replace(/[\r\n]([\s]+){2}/g, '')
-        .replace(new RegExp('window.' + config.app + ' ?= ?'), '')
-        .replace(/};/, '');
+        .replace(new RegExp(file_heads + '='), '');
 
       source = JSON.parse(source);
     } catch (err) {
@@ -83,7 +119,7 @@ app.os.fileOpen = function(callback) {
         return app.error('app.os.fileOpen', 'schema[i]');
       }
 
-      app.store.set(config.app + '_' + schema[i], source[schema[i]]);
+      app.store.set(_app_name + '_' + schema[i], source[schema[i]]);
     }
 
     callback(file.name);
@@ -117,6 +153,18 @@ app.os.fileSave = function(callback, source, timestamp) {
     return app.stop('app.os.fileSave');
   }
 
+  if (config.file && typeof config.file !== 'object') {
+    return app.error('app.os.fileSave', 'config');
+  }
+
+  if (config.file && !! config.file.binary && false) {
+    return app.error('app.os.fileSave', 'zlib');
+  }
+
+  if (config.file && !! config.file.binary || !! app._runtime.encryption && false) {
+    return app.error('app.os.fileSave', 'crypto');
+  }
+
   if (! (callback && typeof callback === 'function') || ! (timestamp && timestamp instanceof Date)) {
     return app.error('app.os.fileSave', arguments);
   }
@@ -125,12 +173,25 @@ app.os.fileSave = function(callback, source, timestamp) {
     return callback(false);
   }
 
+  var _app_name = app._runtime.name.toString();
+
+  var file_binary = config.file && config.file.binary ? !! config.file.binary : false;
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+  var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
   // prepare file source
   try {
     source = JSON.stringify(source);
     source = source.replace(/\"/g, '"');
-    source = 'window.' + config.app + ' = ' + source;
+
+    if (file_crypt) {
+      source = source;
+    }
+    if (file_binary) {
+      source = source;
+    }
+
+    source = file_heads + '=' + source;
   } catch (err) {
     return app.error('app.os.fileSave', err);
   }
@@ -140,11 +201,15 @@ app.os.fileSave = function(callback, source, timestamp) {
 
   file_saves++;
 
-  var filename = config.app + '_save';
-  var filename_date = app.utils.dateFormat(timestamp, 'Y-m-d_H-M-S');
+  var filename_prefix = config.file && config.file.filename_prefix ? config.file.filename_prefix.toString() : _app_name + '_save';
+  var filename_separator = config.file && config.file.filename_separator ? config.file.filename_separator.toString() : '_';
+  var filename_date_format = config.file && config.file.filename_date_format ? config.file.filename_date_format.toString() : 'Y-m-d_H-M-S';
 
-  filename += '_' + filename_date;
-  filename += '_' + file_saves;
+  var filename = filename_prefix;
+  var filename_date = app.utils.dateFormat(timestamp, filename_date_format);
+
+  filename += filename_separator + filename_date;
+  filename += filename_separator + file_saves;
 
 
   var file = new File(
@@ -200,9 +265,9 @@ app.os.scriptOpen = function(callback, file, fn, max_attempts) {
       var obj = top[fn] || parent[fn] || window[fn];
 
       if (obj || max === attempts) {
-        callback();
-
         clearInterval(interr);
+
+        callback();        
       }
     }, 1000);
   }
@@ -244,8 +309,8 @@ app.os.generateFileHead = function(source, timestamp) {
   return {
     'checksum': checksum,
     'date': timestamp,
-    'version': app._runtime.version,
-    'release': app._runtime.release
+    'version': app._runtime.version.toString(),
+    'release': app._runtime.release.toString()
   };
 }
 
@@ -289,20 +354,19 @@ app.os.getLastFileName = function() {
  *
  * Gets the last opened file version
  *
- * @global <Object> appe__config
  * @global <Object> appe__store
  * @return <String>
  */
 app.os.getLastFileVersion = function() {
-  var config = window.appe__config;
-
-  if (! config) {
-    return app.stop('app.os.getLastFileVersion');
-  }
-
   var store = window.appe__store;
 
-  var data_file = store[config.app]['file'];
+  if (! store) {
+    return app.stop('app.os.getLastFileVersion', 'store');
+  }
+
+  var _app_name = app._runtime.name.toString();
+
+  var data_file = store[_app_name]['file'];
 
   if (! data_file) {
     return app.error('app.os.getLastFileVersion', 'data_file');
@@ -323,23 +387,22 @@ app.os.getLastFileVersion = function() {
  *
  * Gets the last opened file checksum
  *
- * @global <Object> appe__config
  * @global <Object> appe__store
  * @return <String>
  */
 app.os.getLastFileChecksum = function() {
-  var config = window.appe__config;
-
-  if (! config) {
-    return app.stop('app.os.getLastFileChecksum');
-  }
-
   var store = window.appe__store;
 
-  var data_file = store[config.app]['file'];
+  if (! store) {
+    return app.stop('app.os.getLastFileChecksum', 'store');
+  }
+
+  var _app_name = app._runtime.name.toString();
+
+  var data_file = store[_app_name]['file'];
 
   if (! data_file) {
-    return app.error('app.os.getLastFileChecksum', 'store[config.app][\'file\']');
+    return app.error('app.os.getLastFileChecksum', 'data_file');
   }
 
   var file_checksum = null;
@@ -368,8 +431,78 @@ app.os.getLastFileHead = function() {
 }
 
 
-
+/**
+ * app.layout
+ *
+ * Handles layout functions
+ */
 app.layout = {};
+
+/**
+ * app.layout.renderElement
+ *
+ * Renders an Element
+ *
+ * @param <String> node
+ * @param <String> content
+ * @param <Object> attributes
+ * @return <String>
+ */
+app.layout.renderElement = function(node, content, attributes) {
+  if (typeof node !== 'string' || (content && typeof content !== 'string') || (attributes && typeof attributes !== 'object')) {
+    return app.error('app.layout.renderElement', arguments);
+  }
+
+  var _node = node.toLowerCase();
+  var _element = '<' + _node;
+
+  if (attributes) {
+    var _names = Object.keys(attributes);
+    var _length = _names.length;
+
+    for (var i = 0; i < _length; i++) {
+      if (attributes[_names[i]] === null) {
+        continue;
+      }
+
+      if (_length != i) {
+        _element += ' ';
+      }
+
+      _element += attributes[_names[i]] ? (_names[i] + '="' + attributes[_names[i]].toString() + '"') : _names[i];
+    }
+  }
+
+  _element += content ? '>' + content + '</' + _node + '>' : '>';
+
+  return _element;
+}
+
+/**
+ * app.layout.renderSelect
+ *
+ * Renders a SELECT
+ *
+ * @param <String> select_id
+ * @param <Object> data
+ * @param <Object> attributes
+ * @return <String>
+ */
+app.layout.renderSelect = function(select_id, data, selected, attributes) {
+  if (! select_id || typeof data !== 'object') {
+    return app.error('app.layout.renderSelectOptions', arguments);
+  }
+
+  var select_attrs = app.utils.extendObject({ id: select_id }, attributes);
+  var select_opts = '';
+
+  if (data) {
+    select_opts = app.layout.renderSelectOptions(select_id, data, selected);
+  }
+
+  return app.layout.renderElement('select', select_opts, select_attrs);
+}
+
 
 /**
  * app.layout.renderSelectOption
@@ -386,7 +519,7 @@ app.layout.renderSelectOption = function(value, name, selected) {
     return app.error('app.layout.renderSelectOption', arguments);
   }
 
-  return '<option value="' + value + '"' + (selected ? ' selected' : '') + '>' + name + '<\/option>';
+  return app.layout.renderElement('option', name, { value: value, selected: (selected ? '' : null) });
 }
 
 
@@ -404,7 +537,7 @@ app.layout.renderSelectOptionGroup = function(label, options) {
     return app.error('app.layout.renderSelectOptionGroup', arguments);
   }
 
-  return '<optgroup label="' + label + '">' + options + '<\/optgroup>';
+  return app.layout.renderElement('optgroup', options, { label: label });
 }
 
 
@@ -475,97 +608,122 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
  * @return <Function>
  */
 app.layout.draggable = function(event, table, field) {
-  if (! event || ! table || ! field) {
+  if (! event || ! table) {
     return app.error('app.view.draggable', arguments);
   }
 
-  var _draggable = {};
+  var self = app.layout.draggable.prototype;
 
   if (! table._draggable) {
-    table._draggable = {};
+    table._draggable = { current: null, prev_index: null, next_index: null };
   }
 
-  table._draggable.current = null;
-  table._draggable.prev_index = null;
-  table._draggable.next_index = null;
 
-  _draggable.start = function(e) {
-    table._draggable.current = this;
-    table._draggable.next_index = this.getAttribute('data-index');
+  var _proxy = (function(e) {
+    return self[event].apply(this, [ table, e, field ]);
+  });
 
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.innerHTML);
+  return _proxy;
+}
 
-    this.classList.add('move');
+app.layout.draggable.prototype.start = function(table, e) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.start', e, table._draggable);
   }
 
-  _draggable.over = function(e) {
-    if (e.preventDefault) {
-      e.preventDefault();
+  table._draggable.current = this;
+  table._draggable.next_index = this.getAttribute('data-index');
+
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.innerHTML);
+
+  this.classList.add('move');
+}
+
+app.layout.draggable.prototype.over = function(table, e) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.over', e, table._draggable);
+  }
+
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+
+  e.dataTransfer.dropEffect = 'move';
+
+  return false;
+}
+
+app.layout.draggable.prototype.enter = function(table, e) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.enter', e, table._draggable);
+  }
+
+  this.classList.add('over');
+}
+
+app.layout.draggable.prototype.leave = function(table, e) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.leave', e, table._draggable);
+  }
+
+  this.classList.remove('over');
+}
+
+app.layout.draggable.prototype.end = function(table, e, field) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.end', e, table._draggable);
+  }
+
+  var tbody = table.querySelector('tbody');
+  var trows = tbody.querySelectorAll('tr.draggable');
+
+  var items = [];
+
+  Array.prototype.forEach.call(trows, function (trow) {
+    items.push(trow.getAttribute('data-index'));
+
+    trow.classList.remove('move');
+    trow.classList.remove('over');
+  });
+
+  // prepare items
+  try {
+    items = JSON.stringify(items);
+    items = encodeURIComponent(items);
+
+    // set items
+    if (field) {
+      field.setAttribute('value', items);
     }
+  } catch (err) {
+    return app.error('app.view.draggable.end', err);
+  }
+}
 
-    e.dataTransfer.dropEffect = 'move';
-
-    return false;
+app.layout.draggable.prototype.drop = function(table, e) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.drop', e, table._draggable);
   }
 
-  _draggable.enter = function(e) {
-    this.classList.add('over');
+  if (e.stopPropagation) {
+    e.stopPropagation();
   }
 
-  _draggable.leave = function(e) {
-    this.classList.remove('over');
+  if (table._draggable.current != this) {
+    table._draggable.prev_index = this.getAttribute('data-index');
+
+    table._draggable.current.innerHTML = this.innerHTML;
+    table._draggable.current.setAttribute('data-index', table._draggable.prev_index);
+
+    this.setAttribute('data-index', table._draggable.next_index);
+    this.innerHTML = e.dataTransfer.getData('text/html');
+    this.querySelector('meta').remove();
+  } else {
+    table._draggable.next_index = null;
   }
 
-  _draggable.end = function(e) {
-    var tbody = table.querySelector('tbody');
-    var trows = tbody.querySelectorAll('tr.draggable');
-
-    var items = [];
-
-    Array.prototype.forEach.call(trows, function (trow) {
-      items.push(trow.getAttribute('data-index'));
-
-      trow.classList.remove('move');
-      trow.classList.remove('over');
-    });
-
-    // prepare items
-    try {
-      items = JSON.stringify(items);
-      items = encodeURIComponent(items);
-
-      // set items
-      if (field) {
-        field.setAttribute('value', items);
-      }
-    } catch (err) {
-      return app.error('app.view.draggable.end', err);
-    }
-  }
-
-  _draggable.drop = function(e) {
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    }
-
-    if (table._draggable.current != this) {
-      table._draggable.prev_index = this.getAttribute('data-index');
-
-      table._draggable.current.innerHTML = this.innerHTML;
-      table._draggable.current.setAttribute('data-index', table._draggable.prev_index);
-
-      this.setAttribute('data-index', table._draggable.next_index);
-      this.innerHTML = e.dataTransfer.getData('text/html');
-      this.querySelector('meta').remove();
-    } else {
-      table._draggable.next_index = null;
-    }
-
-    return false;
-  }
-
-  return _draggable[event];
+  return false;
 }
 
 
@@ -589,55 +747,71 @@ app.layout.dropdown = function(event, element, dropdown) {
     return app.error('app.view.dropdown', arguments);
   }
 
+  var self = app.layout.dropdown.prototype;
 
-  var _dropdown = {};
+  self.event = event;
+  self.element = element;
+  self.dropdown = dropdown;
 
-  _dropdown.open = function(e) {
-    if (element.getAttribute('aria-expanded') === 'true') {
-      return;
-    }
-    if (e && e.target && (e.target === element || e.target.offsetParent === element)) {
-      return;
-    }
 
-    element.parentNode.classList.add('open');
-    element.setAttribute('aria-expanded', true);
+  return self[event].bind(self);
+}
 
-    dropdown.classList.add('open');
-    dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', true);
+app.layout.dropdown.prototype.open = function(e) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.collapse.prototype.open', (e && e.target), e);
   }
 
-  _dropdown.close = function(e) {
-    if (element.getAttribute('aria-expanded') === 'false') {
-      return;
-    }
-    if (e && e.target && (e.target === element || e.target.offsetParent === element)) {
-      return;
-    }
-
-    element.parentNode.classList.remove('open');
-    element.setAttribute('aria-expanded', false);
-
-    dropdown.classList.remove('open');
-    dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', false);
+  if (this.element.getAttribute('aria-expanded') === 'true') {
+    return;
+  }
+  if (e && e.target && (e.target === this.element || e.target.offsetParent === this.element)) {
+    return;
   }
 
-  _dropdown.toggle = function() {
-    if (element.getAttribute('aria-expanded') === 'false') {
-      _dropdown.open();
-    } else {
-      _dropdown.close();
-    }
+  this.element.parentNode.classList.add('open');
+  this.element.setAttribute('aria-expanded', true);
+
+  this.dropdown.classList.add('open');
+  this.dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', true);
+}
+
+app.layout.dropdown.prototype.close = function(e) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.collapse.prototype.open', (e && e.target), e);
   }
 
-  return _dropdown[event];
+  if (this.element.getAttribute('aria-expanded') === 'false') {
+    return;
+  }
+  if (e && e.target && (e.target === this.element || e.target.offsetParent === this.element)) {
+    return;
+  }
+
+  this.element.parentNode.classList.remove('open');
+  this.element.setAttribute('aria-expanded', false);
+
+  this.dropdown.classList.remove('open');
+  this.dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', false);
+}
+
+app.layout.dropdown.prototype.toggle = function() {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.dropdown.prototype.toggle');
+  }
+
+  if (this.element.getAttribute('aria-expanded') === 'false') {
+    this.open();
+  } else {
+    this.close();
+  }
 }
 
 
 /**
  * app.layout.collapse
  *
- * Helper for collapsable, returns requested object method
+ * Helper for collapsible, returns requested object method
  *
  * available methods:
  *  - open (e <Object>)
@@ -646,63 +820,92 @@ app.layout.dropdown = function(event, element, dropdown) {
  *
  * @param <String> event
  * @param <ElementNode> element
- * @param <ElementNode> collapsable
+ * @param <ElementNode> collapsible
  * @return <Function>
  */
-app.layout.collapse = function(event, element, collapsable) {
-  if (! event || ! element || ! collapsable) {
-    return app.error('app.view.dropdown', arguments);
+app.layout.collapse = function(event, element, collapsible) {
+  if (! event || ! element || ! collapsible) {
+    return app.error('app.layout.collapse', arguments);
   }
 
+  var self = app.layout.collapse.prototype;
 
-  var _collapse = {};
+  self.event = event;
+  self.element = element;
+  self.collapsible = collapsible;
 
-  _collapse.open = function(e) {
-    console.log('_open', e && e.target);
-    if (element.getAttribute('aria-expanded') === 'true') {
-      return;
-    }
-    if (e && e.target && (e.target === element || e.target.offsetParent === element)) {
-      return;
-    }
 
-    collapsable.classList.add('collapse');
-    collapsable.classList.add('in');
-    collapsable.setAttribute('aria-expanded', true);
-    element.setAttribute('aria-expanded', true);
-    element.classList.remove('collapsed');
+  return self[event].bind(self);
+}
+
+app.layout.collapse.prototype.open = function(e) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.collapse.prototype.open', (e && e.target), e);
   }
 
-  _collapse.close = function(e) {
-    console.log('_close', e && e.target);
-    if (element.getAttribute('aria-expanded') === 'false') {
-      return;
-    }
-    if (e && e.target && (e.target === element || e.target.offsetParent === element)) {
-      return;
-    }
-
-    collapsable.classList.remove('collapse');
-    collapsable.classList.remove('in');
-    collapsable.setAttribute('aria-expanded', false);
-    element.setAttribute('aria-expanded', false);
-    element.classList.add('collapsed');
+  if (this.element.getAttribute('aria-expanded') === 'true') {
+    return;
+  }
+  if (e && e.target && (e.target === this.element || e.target.offsetParent === this.element)) {
+    return;
   }
 
-  _collapse.toggle = function() {
-    if (element.getAttribute('aria-expanded') === 'false') {
-      _collapse.open();
-    } else {
-      _collapse.close();
-    }
+  this.collapsible.classList.add('collapse');
+  this.collapsible.classList.add('in');
+  this.collapsible.setAttribute('aria-expanded', true);
+
+  this.element.setAttribute('aria-expanded', true);
+  this.element.classList.remove('collapsed');
+}
+
+app.layout.collapse.prototype.close = function(e) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.collapse.prototype.open', (e && e.target), e);
   }
 
-  return _collapse[event];
+  if (this.element.getAttribute('aria-expanded') === 'false') {
+    return;
+  }
+  if (e && e.target && (e.target === this.element || e.target.offsetParent === this.element)) {
+    return;
+  }
+
+  this.collapsible.classList.remove('collapse');
+  this.collapsible.classList.remove('in');
+  this.collapsible.setAttribute('aria-expanded', false);
+
+  this.element.setAttribute('aria-expanded', false);
+  this.element.classList.add('collapsed');
+}
+
+app.layout.collapse.prototype.toggle = function() {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.collapse.prototype.toggle');
+  }
+
+  if (this.element.getAttribute('aria-expanded') === 'false') {
+    this.open();
+  } else {
+    this.close();
+  }
 }
 
 
 
+/**
+ * app.memory
+ *
+ * Handles persistent storage entries
+ *
+ * available methods:
+ * - set (key <String>, value)
+ * - get (key <String>)
+ * - has (has <String>, value)
+ * - del (key <String>)
+ * - reset ()
+ */
 app.memory = {};
+
 
 /**
  * app.memory.set
@@ -772,7 +975,20 @@ app.memory.reset = function() {
 
 
 
+/**
+ * app.store
+ *
+ * Handles storage entries
+ *
+ * available methods:
+ * - set (key <String>, value)
+ * - get (key <String>)
+ * - has (has <String>, value)
+ * - del (key <String>)
+ * - reset ()
+ */
 app.store = {};
+
 
 /**
  * app.store.set
@@ -841,10 +1057,16 @@ app.store.reset = function() {
 
 
 
+/**
+ * app.controller
+ *
+ * Controller functions
+ */
 app.controller = {};
 
+
 /**
- * app.controller.setTitle
+ * app.controller.cursor
  *
  * Get or set the controller cursor,
  * it contains current position in the app { view, action, index }
@@ -912,10 +1134,12 @@ app.controller.spoof = function() {
  * @param <String> url
  */
 app.controller.history = function(title, url) {
+  var _title = app._runtime.title.toString();
+
   if (title) {
-    title += ' – ' + app._runtime.title;
+    title += ' – ' + _title;
   } else {
-    title = app._runtime.title;
+    title = _title;
   }
 
   if (app._runtime.system.navigator === 'safari') {
@@ -935,13 +1159,26 @@ app.controller.history = function(title, url) {
  * Set and store the document title
  *
  * @param <String> title
+ * @return <String>
  */
 app.controller.setTitle = function(title) {
-  document.title = title;
+  app._runtime.title = title.toString();
 
-  if (! app._runtime.title) {
-    app._runtime.title = title;
-  }
+  document.title = app._runtime.title;
+
+  return app._runtime.title;
+}
+
+
+/**
+ * app.controller.getTitle
+ *
+ * Gets the document title
+ *
+ * @return <String>
+ */
+app.controller.getTitle = function() {
+  return app._runtime.title.toString();
 }
 
 
@@ -956,11 +1193,27 @@ app.controller.setTitle = function(title) {
  * @return
  */
 app.controller.retrieve = function(callback, routine) {
+  var config = window.appe__config;
+
+  if (! config) {
+    return app.stop('app.controller.retrieve');
+  }
+
+  var store = window.appe__store;
+
+  if (! store) {
+    return app.stop('app.controller.retrieve', 'store');
+  }
+
   if (typeof callback !== 'function' || typeof routine !== 'object') {
     return app.stop('app.controller.retrieve', arguments);
   }
 
-  var store = window.appe__store;
+  var schema = config.schema;
+
+  if (typeof schema !== 'object') {
+    return app.error('app.controller.retrieve', 'schema');
+  }
 
 
   var _retrieve = function(fn, schema) {
@@ -975,13 +1228,14 @@ app.controller.retrieve = function(callback, routine) {
     store = {};
 
     for (var i = 0; i < schema.length; i++) {
-      var obj = app.store.get(fn + '_' + schema[i]);
+      var key = schema[i].toString();
+      var obj = app.store.get(fn + '_' + key);
 
       if (! obj) {
         return app.stop('app.controller.retrieve() > _retrieve', 'obj');
       }
 
-      store[schema[i]] = obj;
+      store[key] = obj;
     }
 
     return store;
@@ -989,11 +1243,13 @@ app.controller.retrieve = function(callback, routine) {
 
 
   for (var i = 0; i < routine.length; i++) {
+    var fn = routine[i].fn.toString();
+
     if (routine[i].file) {
-      routine[i].file = '../' + routine[i].file;
+      routine[i].file = '../' + routine[i].file.toString();
     }
 
-    store[routine[i].fn] = _retrieve(routine[i].fn, routine[i].schema);
+    store[fn] = _retrieve(fn, routine[i].schema);
   }
 
   callback();
@@ -1013,11 +1269,15 @@ app.controller.retrieve = function(callback, routine) {
  * @return
  */
 app.controller.store = function(callback, fn, schema, data) {
+  var store = window.appe__store;
+
+  if (! store) {
+    return app.stop('app.controller.store', 'store');
+  }
+
   if (typeof callback !== 'function' || typeof fn !== 'string' || typeof schema !== 'object' || typeof data !== 'object') {
     return app.stop('app.controller.store', arguments);
   }
-
-  var store = window.appe__store;
 
   var source = store[fn];
 
@@ -1036,11 +1296,8 @@ app.controller.store = function(callback, fn, schema, data) {
     }
 
     var _data = values;
-    var obj = app.store.set(fn + '_' + key, _data);
 
-    if (! obj) {
-      return app.stop('app.controller.store() > _store', 'obj');
-    }
+    app.store.set(fn + '_' + key, _data);
 
     return _data;
   }
@@ -1089,14 +1346,25 @@ app.controller.clear = function() {
 
   var store = window.appe__store;
 
-  var fn = config.app;
+  if (! store) {
+    return app.stop('app.controller.clear', 'store');
+  }
+
+  var _app_name = app._runtime.name.toString();
+
   var schema = config.schema;
 
-  for (var i = 0; i < schema.length; i++) {
-    app.store.del(fn + '_' + schema[i]);
+  if (typeof schema !== 'object') {
+    return app.error('app.controller.clear', 'schema');
+  }
 
-    if (store && (fn + '_' + schema[i]) in store) {
-      delete store[fn + '_' + schema[i]];
+  for (var i = 0; i < schema.length; i++) {
+    var key = schema[i].toString();
+
+    app.store.del(_app_name + '_' + key);
+
+    if (store[_app_name] && key in store[_app_name]) {
+      delete store[_app_name][key];
     }
   }
 
@@ -1107,32 +1375,36 @@ app.controller.clear = function() {
 
 
 
+/**
+ * app.start
+ *
+ * Launcher functions
+ */
 app.start = {};
 
 /**
- * app.start.loader
- * //TODO rename
+ * app.start.progress
  *
  * Controls the current load status
  *
  * @param <Number> phase
  */
-app.start.loader = function(phase) {
-  var lw = document.getElementById('loader-wait');
-  var lo = document.getElementById('loader-open');
+app.start.progress = function(phase) {
+  var progress_wait = document.getElementById('start-progress-wait');
+  var progress_open = document.getElementById('start-progress-open');
 
   switch (phase) {
     case 2:
-      lo.setAttribute('style', 'visibility: visible;');
-      lw.setAttribute('style', 'visibility: visible;');
+      progress_open.setAttribute('style', 'visibility: visible;');
+      progress_wait.setAttribute('style', 'visibility: visible;');
     break;
     case 1:
-      lo.setAttribute('style', 'visibility: visible;');
-      lw.setAttribute('style', 'visibility: hidden;');
+      progress_open.setAttribute('style', 'visibility: visible;');
+      progress_wait.setAttribute('style', 'visibility: hidden;');
     break;
     default:
-      lw.setAttribute('style', 'visibility: visible;');
-      lo.setAttribute('style', 'visibility: hidden;');
+      progress_wait.setAttribute('style', 'visibility: visible;');
+      progress_open.setAttribute('style', 'visibility: hidden;');
   }
 }
 
@@ -1143,14 +1415,15 @@ app.start.loader = function(phase) {
  * Attemps to load files and scripts, returns to callback
  *
  * @global <Object> appe__config
+ * @global <Object> appe__store
  * @param <Function> callback
  * @param <String> fn
  * @param <String> file
  * @param <Object> schema
- * @param <Boolean> memo
+ * @param <Boolean> memoize
  * @return
  */
-app.start.loadAttempt = function(callback, fn, file, schema, memo) {
+app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
   var config = window.appe__config;
 
   if (! config) {
@@ -1165,28 +1438,29 @@ app.start.loadAttempt = function(callback, fn, file, schema, memo) {
     return app.stop('app.start.loadAttemp', arguments);
   }
 
+
   var loaded = false;
-  var max_attempts = config.openAttempts;
+  var max_attempts = parseInt(config.openAttempts);
 
   app.os.scriptOpen(function() {
+    var source = window[fn];
+
     if (! window[fn]) {
-      console.info('app.start.loadAttempt', fn);
-      //TODO check
-      //return app.error('app.start.loadAttemp', 'window[fn]');
+      return app.error('app.start.loadAttemp', 'source');
     }
 
     for (var i = 0; i < schema.length; i++) {
-      if (! memo) {
-        loaded = true;
-
+      if (! memoize) {
         continue;
       }
 
-      if (schema[i] in window[fn] === false) {
-        return app.error('app.start.loadAttemp', 'schema[i]');
+      var key = schema[i].toString();
+
+      if (key in source === false) {
+        return app.error('app.start.loadAttemp', 'schema');
       }
 
-      loaded = app.store.set(fn + '_' + schema[i], window[fn][schema[i]]);
+      loaded = app.store.set(fn + '_' + key, source[key]);
     }
 
     callback(loaded);
@@ -1211,20 +1485,28 @@ app.start.loadComplete = function(session_resume) {
   }
 
   if (! session_resume) {
-    return app.start.loader(1);
+    return app.start.progress(1);
   }
 
-  session_resume = config.savePath + '/' + session_resume; 
+  var _app_name = app._runtime.name.toString();
+
+  var schema = config.schema;
+
+  if (typeof schema !== 'object') {
+    return app.error('app.start.loadComplete', 'schema');
+  }
+
+  session_resume = config.savePath.toString() + '/' + session_resume; 
 
   app.start.loadAttempt(function(loaded) {
     if (loaded) {
       app.start.redirect(true);
     } else {
-      app.start.loader(1);
+      app.start.progress(1);
     }
-  }, config.app, session_resume, config.schema);
+  }, _app_name, session_resume, schema, true);
 
-  app.start.loader(1);
+  app.start.progress(1);
 }
 
 
@@ -1237,7 +1519,7 @@ app.start.loadComplete = function(session_resume) {
  */
 app.start.redirect = function(loaded) {
   var _wait = function() {
-    app.start.loader(false);
+    app.start.progress(false);
 
     app.redirect();
 
@@ -1250,6 +1532,8 @@ app.start.redirect = function(loaded) {
 
 /**
  * app.start.alternative
+ *
+ * //TODO hook
  *
  * Display messages with info and alternatives to help to execute app 
  *
@@ -1281,6 +1565,7 @@ app.start.alternative = function() {
   };
 
   var browser = navigators[system.navigator];
+  //TODO check config.altExecPlatform before
   var exec_platform = (system.platform in config.altExecPlatform ? system.platform : null);
 
   if (exec_platform && config.altExecFolder && config.altExecFolder) {
@@ -1295,7 +1580,7 @@ app.start.alternative = function() {
 
   alt_electron = alt.replace('{browser}', browser);
 
-  app.start.loader(1);
+  app.start.progress(1);
 
   return app.error(alt_electron);
 }
@@ -1357,9 +1642,7 @@ app.start.load = function() {
 
   var session_resume = app.resume(config);
 
-
-  var title = config.name;
-  app.controller.setTitle(title);
+  app.controller.setTitle(config.name);
 
   var open_action = document.getElementById('start-action-open');
   app.utils.addEvent('click', open_action, app.openSession);
@@ -1367,20 +1650,22 @@ app.start.load = function() {
   var new_action = document.getElementById('start-action-new');
   app.utils.addEvent('click', new_action, app.newSession);
 
-  var auxs_loaded = true;
+  var _loaded = true;
 
-  // load extensions
-  var routine = config.auxs || {};
+  // try to load extensions
+  var routine = (config.auxs && typeof config.auxs === 'object') ? config.auxs : {};
 
-  for (var i = 0; i < routine.length; i++) {
-    app.start.loadAttempt(function(aux_loaded) {
-      if (! aux_loaded) {
-        auxs_loaded = false;
-      }
-    }, routine[i].fn, routine[i].file, routine[i].schema, routine[i].memo);
+  if (routine.length) {
+    for (var i = 0; i < routine.length; i++) {
+      app.start.loadAttempt(function(aux_loaded) {
+        if (! aux_loaded) {
+          _loaded = false;
+        }
+      }, routine[i].fn, routine[i].file, routine[i].schema, routine[i].memoize);
+    }
   }
 
-  if (auxs_loaded) {
+  if (_loaded) {
     app.start.loadComplete(session_resume);
   } else {
     return app.error('app.start.alternative', 'aux_loaded');
@@ -1389,10 +1674,15 @@ app.start.load = function() {
 
 
 
+/**
+ * app.main
+ *
+ * "main" functions
+ */
 app.main = {};
 
 /**
- * app.main.loadView
+ * app.main.control
  *
  * Init "main" function that fires when "main" document is ready
  *
@@ -1400,41 +1690,47 @@ app.main = {};
  * @param <Object> loc
  * @return
  */
-app.main.loadView = function(loc) {
+app.main.control = function(loc) {
   var config = window.appe__config;
 
   if (! config) {
-    return app.stop('app.main.load');
+    return app.stop('app.main.control');
+  }
+
+  if (! (config.routes && typeof config.routes === 'object') || ! (config.events && typeof config.events === 'object')) {
+    return app.error('app.main.control', 'config');
   }
 
   var view = document.getElementById('view');
 
-  var routes = config.routes;
+  var _routes = config.routes;
+  var _events = config.events;
+
   var actions = {};
 
-  Array.prototype.forEach.call(Object.keys(config.events), function(event) {
-    actions[config.events[event]] = event;
+  Array.prototype.forEach.call(Object.keys(_events), function(event) {
+    actions[_events[event]] = event;
   });
 
   if (! loc) {
     loc = app.controller.spoof();
   }
 
-  var default_route = config.defaultRoute;
+  var default_route = config.defaultRoute.toString();
   var route = default_route + '.html';
   var step = true;
 
   if (loc && typeof loc === 'object') {
     if (loc.view) {
-      if (routes[loc.view]) {
+      if (_routes[loc.view]) {
         route = encodeURIComponent(loc.view) + '.html';
       } else {
         step = false;
       }
 
       if (loc.action) {
-        if (routes[loc.view][loc.action]) {
-          route = routes[loc.view][loc.action] + '.html';
+        if (_routes[loc.view][loc.action]) {
+          route = _routes[loc.view][loc.action] + '.html';
           route += '?' + encodeURIComponent(loc.action);
         } else {
           step = false;
@@ -1480,15 +1776,15 @@ app.main.loadView = function(loc) {
       nav_selector_current.parentNode.classList.add('active');
     }
   } else {
-    return app.stop('app.main.load', arguments);
+    return app.stop('app.main.control', arguments);
   }
 }
 
 
 /**
- * app.main.controlView
+ * app.main.handle
  *
- * Control "main" function handling actions, could return object constructor
+ * Control "main" function handling requests, could return object constructor
  *
  * avalaible methods:
  *  - getID ()
@@ -1520,32 +1816,38 @@ app.main.loadView = function(loc) {
  * @param <Object> e
  * @return
  */
-app.main.controlView = function(e) {
+app.main.handle = function(e) {
   var config = window.appe__config;
 
   if (! config) {
-    return app.stop('app.main.controlView');
+    return app.stop('app.main.handle');
+  }
+
+  if (! (config.events && typeof config.events === 'object')) {
+    return app.error('app.main.handle', 'config');
   }
 
   var main = window.appe__main;
 
-  var self = app.main.controlView.prototype;
+  var self = app.main.handle.prototype;
 
   if (! e.data) {
-    return app.error('app.main.controlView', arguments);
+    return app.error('app.main.handle', arguments);
   }
 
   try {
     self.ctl = JSON.parse(e.data);
   } catch (err) {
-    return app.error('app.main.controlView', err);
+    return app.error('app.main.handle', err);
   }
 
 
   // standard events
   var _s_events = { 'resize': 'resize', 'refresh': 'refresh', 'export': 'export' };
 
-  self.events = app.utils.extendObject(config.events, _s_events);
+  var _events = config.events;
+
+  self.events = app.utils.extendObject(_events, _s_events);
 
   self.event = null;
 
@@ -1553,7 +1855,7 @@ app.main.controlView = function(e) {
   if (self.ctl.action && self.ctl.action in self.events) {
     self.event = self.ctl.action;
   } else {
-    return app.error('app.main.controlView', self.ctl);
+    return app.error('app.main.handle', self.ctl);
   }
 
   self.loc = app.utils.extendObject({}, self.ctl);
@@ -1564,26 +1866,26 @@ app.main.controlView = function(e) {
 
 
   /**
-   * main.controlView hook
+   * main.handle hook
    *
-   * @param <Object> __construct
+   * @param <Object> __constructor
    * @param <String> event
    * @param <Object> ctl
    */
-  if (main && 'controlView' in main && typeof main.controlView === 'function') {
-    return main.controlView.apply(self, [ self, self.event, self.ctl ]);
+  if (main && 'handle' in main && typeof main.handle === 'function') {
+    return main.handle(self, self.event, self.ctl);
   } else {
     return self[self.event].apply(self);
   }
 }
 
-app.main.controlView.prototype.getID = function() {
+app.main.handle.prototype.getID = function() {
   var id = parseInt(this.ctl.index) || 0;
 
   return id;
 }
 
-app.main.controlView.prototype.setAction = function() {
+app.main.handle.prototype.setAction = function() {
   if (this.ctl.action in this.events === false) {
     return app.error('app.main.prototype.setAction', 'ctl');
   }
@@ -1593,7 +1895,7 @@ app.main.controlView.prototype.setAction = function() {
   return this.loc.action;
 }
 
-app.main.controlView.prototype.getAction = function() {
+app.main.handle.prototype.getAction = function() {
   if (! this.loc.action) {
     return app.error('app.main.prototype.setAction', 'loc');
   }
@@ -1601,9 +1903,9 @@ app.main.controlView.prototype.getAction = function() {
   return this.loc.action;
 }
 
-app.main.controlView.prototype.setTitle = function(title) {
+app.main.handle.prototype.setTitle = function(title) {
   if (! (title && typeof title === 'string')) {
-    return app.error('app.main.controlView.prototype.setTitle', 'title');
+    return app.error('app.main.handle.prototype.setTitle', 'title');
   }
 
   this._title = title;
@@ -1611,13 +1913,13 @@ app.main.controlView.prototype.setTitle = function(title) {
   return this._title;
 }
 
-app.main.controlView.prototype.getTitle = function() {
+app.main.handle.prototype.getTitle = function() {
   return this._title ? this._title : ((this.ctl.title && typeof this.ctl.title === 'string') && this.ctl.title);
 }
 
-app.main.controlView.prototype.setMsg = function(msg) {
+app.main.handle.prototype.setMsg = function(msg) {
   if (! (msg && typeof msg === 'string')) {
-    return app.error('app.main.controlView.prototype.setTitle', 'title');
+    return app.error('app.main.handle.prototype.setTitle', 'title');
   }
 
   this._msg = msg;
@@ -1625,11 +1927,11 @@ app.main.controlView.prototype.setMsg = function(msg) {
   return this._msg;
 }
 
-app.main.controlView.prototype.getMsg = function() {
+app.main.handle.prototype.getMsg = function() {
   return this._msg ? this._msg : ((this.ctl.msg && typeof this.ctl.msg === 'string') && this.ctl.msg);
 }
 
-app.main.controlView.prototype.setURL = function(path, qs) {
+app.main.handle.prototype.setURL = function(path, qs) {
   var href = 'index.html';
 
   href += (path || this.ctl.view) && '?' + ((path && typeof path === 'string') ? path : this.ctl.view);
@@ -1640,21 +1942,21 @@ app.main.controlView.prototype.setURL = function(path, qs) {
   return this._href;
 }
 
-app.main.controlView.prototype.getURL = function() {
+app.main.handle.prototype.getURL = function() {
   return this._href;
 }
 
-app.main.controlView.prototype.redirect = function() {
+app.main.handle.prototype.redirect = function() {
   var href = this.getURL();
 
   location.href = href;
 }
 
-app.main.controlView.prototype.refresh = function() {
+app.main.handle.prototype.refresh = function() {
   location.reload();
 }
 
-app.main.controlView.prototype.resize = function() {
+app.main.handle.prototype.resize = function() {
   if (! this.ctl.height) {
     return; // silent fail
   }
@@ -1666,17 +1968,17 @@ app.main.controlView.prototype.resize = function() {
   view.scrolling = 'no';
 }
 
-app.main.controlView.prototype.selection = function() {
+app.main.handle.prototype.selection = function() {
   this.refresh();
 }
 
-app.main.controlView.prototype.export = function() {
+app.main.handle.prototype.export = function() {
   if (! this.ctl.data || ! (this.ctl.file && typeof this.ctl.file === 'object')) {
-    return app.error('app.main.controlView.prototype.export', 'ctl');
+    return app.error('app.main.handle.prototype.export', 'ctl');
   }
 
   if (! (this.ctl.file.name && typeof this.ctl.file.name === 'string') || ! (this.ctl.file.options && typeof this.ctl.file.options === 'object')) {
-    return app.error('app.main.controlView.prototype.export', 'file');
+    return app.error('app.main.handle.prototype.export', 'file');
   }
 
   var file = new File(
@@ -1689,7 +1991,7 @@ app.main.controlView.prototype.export = function() {
 }
 
 // generic method for all actions
-app.main.controlView.prototype.prepare = function() {
+app.main.handle.prototype.prepare = function() {
   var action = this.setAction();
   var id = this.getID();
 
@@ -1703,12 +2005,12 @@ app.main.controlView.prototype.prepare = function() {
 }
 
 // generic method for prevented actions like delete
-app.main.controlView.prototype.prevent = function() {
+app.main.handle.prototype.prevent = function() {
   var action = this.setAction();
   var msg = this.getMsg();
 
   if (! msg) {
-    return app.error('app.main.controlView.prototype.' + this.event, 'msg');
+    return app.error('app.main.handle.prototype.' + this.event, 'msg');
   }
 
   this.setURL(null, action);
@@ -1720,35 +2022,43 @@ app.main.controlView.prototype.prevent = function() {
   this.receive();
 }
 
-app.main.controlView.prototype.open = app.main.controlView.prototype.prepare;
+app.main.handle.prototype.open = app.main.handle.prototype.prepare;
 
-app.main.controlView.prototype.add = app.main.controlView.prototype.prepare;
+app.main.handle.prototype.add = app.main.handle.prototype.prepare;
 
-app.main.controlView.prototype.edit = app.main.controlView.prototype.prepare;
+app.main.handle.prototype.edit = app.main.handle.prototype.prepare;
 
-app.main.controlView.prototype.update = app.main.controlView.prototype.prepare;
+app.main.handle.prototype.update = app.main.handle.prototype.prepare;
 
-app.main.controlView.prototype.delete = app.main.controlView.prototype.prevent;
+app.main.handle.prototype.delete = app.main.handle.prototype.prevent;
 
-app.main.controlView.prototype.close = app.main.controlView.prototype.prevent;
+app.main.handle.prototype.close = app.main.handle.prototype.prevent;
 
-app.main.controlView.prototype.history = function() {
+app.main.handle.prototype.history = function() {
   var title = this.getTitle();
   var url = this.getURL();
 
   app.controller.history(title, url);
 }
 
-app.main.controlView.prototype.receive = function() {
+app.main.handle.prototype.receive = function() {
   var config = window.appe__config;
 
   if (! config) {
-    return app.stop('app.main.controlView.prototype.receive');
+    return app.stop('app.main.handle.prototype.receive');
   }
+
+  var schema = config.schema;
+
+  if (typeof schema !== 'object') {
+    return app.error('app.main.handle.prototype.receive', 'schema');
+  }
+
+  var _app_name = app._runtime.name.toString();
 
   // no submit, reload
   if (! (this.ctl.submit && this.ctl.data)) {
-    app.main.loadView(this.loc);
+    app.main.control(this.loc);
 
     return; // silent fail
   }
@@ -1756,6 +2066,7 @@ app.main.controlView.prototype.receive = function() {
   var action = this.getAction();
 
   try {
+    var self = this;
     var data = JSON.parse(this.ctl.data);
 
     app.controller.store(function() {
@@ -1766,14 +2077,13 @@ app.main.controlView.prototype.receive = function() {
 
       // action update needs reload
       if (action === 'update') {
-        //TODO it doesn't reload
-        this.refresh();
+        self.refresh();
       } else {
-        app.main.loadView(loc);
+        app.main.control(loc);
       }
-    }, config.app, config.schema, data);
+    }, _app_name, schema, data);
   } catch (err) {
-    return app.error('main.controlView.prototype.receive', err);
+    return app.error('app.main.handle.prototype.receive', err);
   }
 }
 
@@ -1781,18 +2091,19 @@ app.main.controlView.prototype.receive = function() {
 /**
  * app.main.action
  *
- * Actions "main", could return object constructor
+ * Actions "main", returns object constructor
  *
  * avalaible methods:
  *  - menu ()
  *
  * @global <Object> appe__config
  * @global <Object> appe__main
- * @param <NodeElement> element
+ * @param <Array> events
  * @param <String> event
+ * @param <NodeElement> element
  * @return
  */
-app.main.action = function(element, event) {
+app.main.action = function(events, event, element) {
   var config = window.appe__config;
 
   if (! config) {
@@ -1803,31 +2114,40 @@ app.main.action = function(element, event) {
 
   var self = app.main.action.prototype;
 
-  if (! element || typeof event !== 'string') {
+  if ((events && (events instanceof Array === false)) || ! event || ! element) {
     return app.error('app.main.action', arguments);
   }
 
+  this._initialized = false;
 
-  /**
-   * main.action hook
-   *
-   * @param <Object> _action
-   * @param <NodeElement> element
-   * @param <String> event
-   */
-  if (main && 'action' in main && typeof main.action === 'function') {
-    return main.action.apply(self, [ element, event ]);
-  } else {
-    return self[event].apply(self, [ element, event ]);
-  }
+
+  return self;
 }
 
-app.main.action.prototype.menu = function(element, event) {
+app.main.action.prototype.isInitialized = function(funcName) {
+  if (this._initialized) { return; }
+
+  return app.error('app.main.action.prototype.isInitialized', funcName);
+}
+
+app.main.action.prototype.begin = function() {
+  this._initialized = true;
+}
+
+app.main.action.prototype.end = function() {
+  this.isInitialized('end');
+
+  this._initialized = false;
+}
+
+app.main.action.prototype.menu = function(element) {
+  this.isInitialized('menu');
+
   if ('jQuery' in window && 'collapse' in jQuery.fn) {
     return;
   }
 
-  if (! element || ! event) {
+  if (! element) {
     return app.error('app.main.action.prototype.menu', arguments);
   }
 
@@ -1846,25 +2166,25 @@ app.main.action.prototype.menu = function(element, event) {
 
 
 /**
- * app.main.setupData
+ * app.main.setup
  *
  * Setup "main" data
  *
  * @global <Object> appe__main
  */
-app.main.setupData = function() {
+app.main.setup = function() {
   var main = window.appe__main;
 
   /**
-   * main.setupData hook
+   * main.setup hook
    *
    * @param <Object> data
    */
-  if (main && 'setupData' in main && typeof main.setupData === 'function') {
-    main.setupData(app.data());
+  if (main && 'setup' in main && typeof main.setup === 'function') {
+    main.setup(app.data());
   }
 
-  app.main.loadView();
+  app.main.control();
 }
 
 
@@ -1893,17 +2213,16 @@ app.main.load = function() {
   app.resume(config, true);
 
 
-  var title = config.name;
-
-  var routine = config.auxs || {};
+  var routine = (config.auxs && typeof config.auxs === 'object') ? config.auxs : {};
   routine.push({ file: '', fn: config.app, schema: config.schema });
 
-  app.controller.retrieve(app.main.setupData, routine);
-  app.controller.setTitle(title);
+  app.controller.retrieve(app.main.setup, routine);
+
+  app.controller.setTitle(config.name);
 
 
   var navbar_brand = document.getElementById('brand');
-  brand.innerHTML = title;
+  brand.innerHTML = app.controller.getTitle();
 
 
   var open_actions = document.querySelectorAll('.main-action-open');
@@ -1933,7 +2252,7 @@ app.main.load = function() {
   }
 
 
-  app.utils.addEvent('message', window, app.main.controlView);
+  app.utils.addEvent('message', window, app.main.handle);
 }
 
 
@@ -1956,6 +2275,11 @@ app.main.unload = function() {
 
 
 
+/**
+ * app.view
+ *
+ * "view" functions
+ */
 app.view = {};
 
 /**
@@ -1991,9 +2315,9 @@ app.view.spoof = function() {
 
 
 /**
- * app.view.open
+ * app.view.control
  *
- * Control "view" function, returns object contructor
+ * Control "view" function, returns object constructor
  *
  * avalaible methods:
  *  - uninitialized (funcName <String>)
@@ -2001,6 +2325,7 @@ app.view.spoof = function() {
  *  - end ()
  *  - setID (id <Number>)
  *  - getID ()
+ *  - getLastID ()
  *  - setEvent (event <String>)
  *  - getEvent ()
  *  - setTitle (section_title <String>, view_title <String>, id <String>)
@@ -2018,29 +2343,29 @@ app.view.spoof = function() {
  * @param <NodeElement> form
  * @return <Object> __construct
  */
-app.view.open = function(events, data, form) {
+app.view.control = function(events, data, form) {
   var config = window.appe__config;
 
   if (! config) {
-    return app.stop('app.view.action');
+    return app.stop('app.view.control');
   }
 
   var control = window.appe__control;
 
   if (! control) {
-    return app.error('app.view.open', 'control');
+    return app.error('app.view.control', 'control');
   }
 
-  var self = app.view.open.prototype;
+  var self = app.view.control.prototype;
 
-  if ((events && events instanceof Array === false) || typeof data !== 'object') {
-    return app.error('app.view.open', arguments);
+  if ((events && events instanceof Array === false) || (data && typeof data !== 'object')) {
+    return app.error('app.view.control', arguments);
   }
 
   self._initialized = false;
 
-  self.events = events;
-  self.data = data;
+  self.events = events || null;
+  self.data = data || {};
   self.form = form || null;
   
   self.ctl = {};
@@ -2049,17 +2374,21 @@ app.view.open = function(events, data, form) {
   return self;
 }
 
-app.view.open.prototype.isInitialized = function(funcName) {
+app.view.control.prototype.isInitialized = function(funcName) {
   if (this._initialized) { return; }
 
-  return app.error('app.view.open.prototype.isInitialized', funcName);
+  return app.error('app.view.control.prototype.isInitialized', funcName);
 }
 
-app.view.open.prototype.begin = function() {
+app.view.control.prototype.begin = function() {
   var config = window.appe__config;
 
   if (! config) {
-    return app.stop('app.view.open.prototype.begin');
+    return app.stop('app.view.control.prototype.begin');
+  }
+
+  if (! (config.routes && typeof config.routes === 'object') || ! (config.events && typeof config.events === 'object')) {
+    return app.error('app.view.control.prototype.begin', 'config');
   }
 
   var cursor = app.controller.cursor();
@@ -2072,21 +2401,23 @@ app.view.open.prototype.begin = function() {
     view = cursor.view;
   }
 
-  var routes = config.routes;
+  var _routes = config.routes;
+  var _events = config.events;
+
   var actions = {};
 
-  Array.prototype.forEach.call(Object.keys(config.events), function(event) {
-    actions[config.events[event]] = event;
+  Array.prototype.forEach.call(Object.keys(_events), function(event) {
+    actions[_events[event]] = event;
   });
 
   var loc = app.view.spoof();
 
-  var default_event = config.defaultEvent;  
+  var default_event = config.defaultEvent.toString();  
   var step = true;
 
   if (loc && typeof loc === 'object') {
     if (loc.action) {
-      if (routes[view][loc.action]) {
+      if (_routes[view][loc.action]) {
         event = actions[loc.action];
       } else {
         step = false;
@@ -2104,7 +2435,7 @@ app.view.open.prototype.begin = function() {
   }
 
   if ((this.events && this.events.indexOf(event) === -1) || ! step) {
-    return app.error('app.view.open.prototype.begin', 'event');
+    return app.error('app.view.control.prototype.begin', 'event');
   }
 
   control.temp = {};
@@ -2115,7 +2446,7 @@ app.view.open.prototype.begin = function() {
     event = this.setEvent(event);
 
     if (event === 'add') {
-      id = app.view.getLastID(this.data);
+      id = this.getLastID();
     }
   }
 
@@ -2124,10 +2455,10 @@ app.view.open.prototype.begin = function() {
   return id;
 }
 
-app.view.open.prototype.end = function() {
+app.view.control.prototype.end = function() {
   this.isInitialized('end');
 
-  app.view.resizeView(false);
+  app.view.resize(true);
 
   if (this.form) {
     control.temp.form = true;
@@ -2139,13 +2470,15 @@ app.view.open.prototype.end = function() {
     try {
       var _changes = app.view.getFormData(this.form.elements);
       control.temp.form_changes = _changes && JSON.stringify(_changes);
-    } catch {}
+    } catch (err) {
+      return app.error('app.view.control.prototype.end', err);
+    }
   }
 
   _initialized = false;
 }
 
-app.view.open.prototype.setID = function(id) {
+app.view.control.prototype.setID = function(id) {
   this.isInitialized('setID');
 
   control.temp.id = parseInt(id);
@@ -2153,7 +2486,7 @@ app.view.open.prototype.setID = function(id) {
   return control.temp.id;
 }
 
-app.view.open.prototype.getID = function() {
+app.view.control.prototype.getID = function() {
   this.isInitialized('getID');
 
   if (control.temp.id) {
@@ -2163,11 +2496,19 @@ app.view.open.prototype.getID = function() {
   return parseInt(control.temp.id);
 }
 
-app.view.open.prototype.setEvent = function(event) {
+app.view.control.prototype.getLastID = function() {
+  this.isInitialized('getLastID');
+
+  var last_id = Object.keys(this.data).pop();
+
+  return last_id ? (parseInt(last_id) + 1) : 1;
+}
+
+app.view.control.prototype.setEvent = function(event) {
   this.isInitialized('setEvent');
 
   if ((this.events && this.events.indexOf(event) === -1)) {
-    return app.error('app.view.open.prototype.setEvent', arguments);
+    return app.error('app.view.control.prototype.setEvent', arguments);
   }
 
   control.temp.event = event;
@@ -2175,13 +2516,13 @@ app.view.open.prototype.setEvent = function(event) {
   return control.temp.event;
 }
 
-app.view.open.prototype.getEvent = function() {
+app.view.control.prototype.getEvent = function() {
   this.isInitialized('getEvent');
 
   return control.temp.event;
 }
 
-app.view.open.prototype.setTitle = function(section_title, view_title, id) {
+app.view.control.prototype.setTitle = function(section_title, view_title, id) {
   this.isInitialized('setTitle');
 
   var event = this.getEvent();
@@ -2189,7 +2530,7 @@ app.view.open.prototype.setTitle = function(section_title, view_title, id) {
   var _view_title = document.getElementById('view-title');
   var _section_title = document.getElementById('section-title');
 
-  id = parseInt(id) || app.view.open.prototype.getID();
+  id = parseInt(id) || app.view.control.prototype.getID();
 
   if (event === 'edit') {
     section_title += ' # ' + id;
@@ -2203,7 +2544,7 @@ app.view.open.prototype.setTitle = function(section_title, view_title, id) {
   }
 }
 
-app.view.open.prototype.setActionHandler = function(label, id) {
+app.view.control.prototype.setActionHandler = function(label, id) {
   this.isInitialized('setActionHandler');
 
   var event = this.getEvent();
@@ -2216,7 +2557,7 @@ app.view.open.prototype.setActionHandler = function(label, id) {
   if (action_index) {
     action_index.setAttribute('value', id);
   } else {
-    return app.error('app.view.open.prototype.setActionHandler', null, 'action_index');
+    return app.error('app.view.control.prototype.setActionHandler', null, 'action_index');
   }
 
   if (action_handler) {
@@ -2230,7 +2571,7 @@ app.view.open.prototype.setActionHandler = function(label, id) {
   }
 }
 
-app.view.open.prototype.denySubmit = function() {
+app.view.control.prototype.denySubmit = function() {
   this.isInitialized('denySubmit');
 
   var action_handler = document.getElementById('submit');
@@ -2245,11 +2586,11 @@ app.view.open.prototype.denySubmit = function() {
   }
 }
 
-app.view.open.prototype.fillTable = function(table, data, order) {
+app.view.control.prototype.fillTable = function(table, data, order) {
   this.isInitialized('fillTable');
 
   if (! table) {
-    return app.error('app.view.open.prototype.fillTable', arguments);
+    return app.error('app.view.control.prototype.fillTable', arguments);
   }
 
   var _data = data;
@@ -2289,11 +2630,11 @@ app.view.open.prototype.fillTable = function(table, data, order) {
   return { rows: rows, tpl: trow_tpl, data: _data, args: _args };
 }
 
-app.view.open.prototype.fillForm = function(form, data) {
+app.view.control.prototype.fillForm = function(form, data) {
   this.isInitialized('fillForm');
 
   if (! this.form) {
-    return app.error('app.view.open.prototype.fillForm', arguments);
+    return app.error('app.view.control.prototype.fillForm', arguments);
   }
 
   var _data = data;
@@ -2317,11 +2658,11 @@ app.view.open.prototype.fillForm = function(form, data) {
   return { data: _data, args: _args };
 }
 
-app.view.open.prototype.fillSelection = function(data, id) {
+app.view.control.prototype.fillSelection = function(data, id) {
   this.isInitialized('fillSelection');
 
   if (! (data && typeof data === 'object')) {
-    return app.error('app.view.open.prototype.fillSelection', arguments);
+    return app.error('app.view.control.prototype.fillSelection', arguments);
   }
 
   var selection = document.getElementById('selection');
@@ -2337,7 +2678,7 @@ app.view.open.prototype.fillSelection = function(data, id) {
   }
 } 
 
-app.view.open.prototype.fillCTA = function(id) {
+app.view.control.prototype.fillCTA = function(id) {
   this.isInitialized('fillCTA');
 
   id = parseInt(id) || null;
@@ -2394,11 +2735,10 @@ app.view.open.prototype.fillCTA = function(id) {
  * @param <Array> events
  * @param <String> event
  * @param <NodeElement> element
- * @param <Object> data
  * @param <NodeElement> form
  * @return <Object> __construct
  */
-app.view.action = function(events, event, element, data, form) {
+app.view.action = function(events, event, element, form) {
   var config = window.appe__config;
 
   if (! config) {
@@ -2423,7 +2763,6 @@ app.view.action = function(events, event, element, data, form) {
   self.events = events;
   self.event = event.toString();
   self.element = element;
-  self.data = data; //TODO check is required?
   self.form = form || null;
 
   self.ctl = {};
@@ -2473,11 +2812,15 @@ app.view.action.prototype.getID = function() {
 app.view.action.prototype.validateForm = function() {
   this.isInitialized('validateForm');
 
-  var action_submit = document.getElementById('real-submit');
-  var action_index = document.getElementById('index');
+  if (! this.form) {
+    return app.error('app.view.action.prototype.validateForm', 'form');
+  }
 
-  var id = action_index.getAttribute('value');
-  id = parseInt(id);
+  var action_submit = document.getElementById('real-submit');
+
+  if (! action_submit) {
+    return app.error('app.view.action.prototype.validateForm', 'action_submit');
+  }
 
   // not valid form
   if (this.form.checkValidity()) {
@@ -2512,7 +2855,6 @@ app.view.action.prototype.validateForm = function() {
 app.view.action.prototype.prepare = function(data, submit) {
   this.isInitialized(this.event);
 
-  //TODO check data required?
   if (data && typeof data !== 'object') {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
@@ -2559,11 +2901,21 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
 
   this.isInitialized(this.event);
 
+  if (! (config.events && typeof config.events === 'object')) {
+    return app.error('app.view.control.prototype.begin', 'config');
+  }
+
+  var _events = config.events;
+
+  if (data && typeof data !== 'object') {
+    return app.error('app.view.action.prototype.' + this.event, arguments);
+  }
+
   if (typeof title !== 'string') {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
-  var event_label = config.events ? config.events[this.event] : this.event;
+  var event_label = _events ? _events[this.event] : this.event;
 
   if (title && (typeof name === 'number' || typeof name === 'string')) {
     this.ctl.msg  = 'Are you sure to ' + event_label + ' ' + title + ' ';
@@ -2638,10 +2990,16 @@ app.view.sub = function(method, element, table) {
     return app.error('app.view.sub', arguments);
   }
 
-  return self[method].apply(self, [ element, table ]);
+  return self[method](element, table);
 }
 
 app.view.sub.prototype.csv = function(element, table) {
+  var config = window.appe__config;
+
+  if (! config) {
+    return app.stop('app.view.sub.prototype.csv');
+  }
+
   if (! element || ! table) {
     return app.error('app.view.sub.prototype.csv', arguments);
   }
@@ -2654,11 +3012,20 @@ app.view.sub.prototype.csv = function(element, table) {
     source += line.join(';') + '\r\n';
   });
 
-  var filename = (config.csv && config.csv.filename) ? config.csv.filename : 'csv_export';
-  var filename_separator = (config.csv && config.csv.filename_separator) ? config.csv.filename_separator : '_';
-  var filename_date_format = (config.csv && config.csv.filename_date_format) ? config.csv.filename_date_format : 'Y-m-d_H-M-S';
+  var filename_prefix = 'csv_export';
+  var filename_separator = '_';
+  var filename_date_format = 'Y-m-d_H-M-S';
 
-  filename += filename_separator + app.utils.dateFormat(true, filename_date_format);
+  if (config.csv && typeof config.csv === 'object') {
+    filename_prefix = config.csv.filename_prefix.toString();
+    filename_separator = config.csv.filename_separator.toString();
+    filename_date_format = config.csv.filename_date_format.toString();
+  }
+
+  var filename = filename_prefix;
+  var filename_date = app.utils.dateFormat(true, filename_date_format);
+
+  filename += filename_separator + filename_date;
 
   var file = { 'name': filename + '.csv', 'options': { 'type': 'text/csv;charset=utf-8' } };
 
@@ -2709,7 +3076,7 @@ app.view.sub.prototype.toggler = function(element) {
 
 
 /**
- * app.view.openView
+ * app.view.handle
  *
  * Fires when "view" document is loaded
  *
@@ -2717,17 +3084,17 @@ app.view.sub.prototype.toggler = function(element) {
  * @global <Object> appe__control
  * @return
  */
-app.view.openView = function() {
+app.view.handle = function() {
   var config = window.appe__config;
 
   if (! config) {
-    return app.stop('app.view.action');
+    return app.stop('app.view.handle');
   }
 
   var control = window.appe__control;
 
   if (! control) {
-    return app.error('app.view.openView', 'control');
+    return app.error('app.view.handle', 'control');
   }
 
   /**
@@ -2735,24 +3102,24 @@ app.view.openView = function() {
    *
    * @param <Object> data
    */
-  if ('openView' in control && typeof control.openView === 'function') {
-    control.openView(app.data());
+  if ('handle' in control && typeof control.handle === 'function') {
+    control.handle(app.data());
   }
 
-  app.utils.addEvent('resize', window, app.view.resizeView);
-  app.utils.addEvent('orientationchange', window, app.view.resizeView);
+  app.utils.addEvent('resize', window, app.view.resize);
+  app.utils.addEvent('orientationchange', window, app.view.resize);
 }
 
 
 /**
- * app.view.resizeView
+ * app.view.resize
  *
  * Fires when "view" frame is resized
  *
  * @global <Object> appe__control
  * @return
  */
-app.view.resizeView = function(check_time) {
+app.view.resize = function(check_time) {
   var control = window.appe__control;
 
   if (! (control && control.temp)) {
@@ -2760,7 +3127,7 @@ app.view.resizeView = function(check_time) {
   }
 
   if (check_time) {
-    if ((new Date().getTime() - control.temp.last_resize) < 3000) {
+    if ((new Date().getTime() - control.temp.last_resize) < 1000) {
       return;
     }
 
@@ -2818,16 +3185,11 @@ app.view.send = function(ctl) {
   }
 
   try {
+    if (!! app._runtime.debug) {
+      console.info('app.view.send', ctl);
+    }
+
     ctl = JSON.stringify(ctl);
-
-
-
-
-
-console.log(ctl);
-
-
-
 
     // send control submission to parent "main" window
     window.parent.postMessage(ctl, '*');
@@ -2838,26 +3200,7 @@ console.log(ctl);
 
 
 /**
- * app.view.getLastID
- *
- * Helper to calculate the last ID
- *
- * @param <Object> data
- * @return <Number> last_id
- */
-app.view.getLastID = function(data) {
-  if (typeof data !== 'object') {
-    return app.error('app.view.getLastID', arguments);
-  }
-
-  var last_id = Object.keys(data).pop();
-
-  return last_id ? (parseInt(last_id) + 1) : 1;
-}
-
-
-/**
- * app.view.getLastID
+ * app.view.getFormData
  *
  * Helper to get form data with transformation and sanitization
  *
@@ -2920,7 +3263,7 @@ app.view.getFormData = function(elements) {
 
 
 /**
- * app.view.getLastID
+ * app.view.convertTableCSV
  *
  * Helper to convert object data to csv text format
  *
@@ -3019,7 +3362,7 @@ app.view.load = function() {
   var routine = config.auxs || {};
   routine.push({ fn: config.app, schema: config.schema });
 
-  app.controller.retrieve(app.view.openView, routine);
+  app.controller.retrieve(app.view.handle, routine);
 }
 
 
@@ -3035,14 +3378,16 @@ app.view.unload = function() {
   var control = window.appe__control;
 
   if (! control) {
-    return app.error('app.view.unload', null);
+    return app.error('app.view.unload', 'control');
   }
 
   if (control.temp.form && ! control.temp.form_submit) {
     try {
       var _changes = app.view.getFormData(control.temp.form_elements);
       _changes = _changes && JSON.stringify(_changes);
-    } catch {}
+    } catch (err) {
+      return app.error('app.view.unload', err);
+    }
 
     if (control.temp.form_changes !== _changes) {
       return true;
@@ -3054,6 +3399,11 @@ app.view.unload = function() {
 
 
 
+/**
+ * app.utils
+ *
+ * Utils functions
+ */
 app.utils = {};
 
 /**!
@@ -3314,18 +3664,17 @@ app.utils.removeEvent = function(event, element, func) {
  * app.utils.transform
  *
  * Transforms type of passed value
- * //TODO rename method
  *
- * @param <String> method
+ * @param <String> purpose
  * @param value
  * @return value
  */
-app.utils.transform = function(method, value) {
-  if (! method) {
+app.utils.transform = function(purpose, value) {
+  if (! purpose) {
     return app.error('app.utils.transform', arguments);
   }
 
-  switch (method) {
+  switch (purpose) {
     case 'lowercase': return value.toLowerCase();
     case 'uppercase': return value.toUpperCase();
     case 'numeric': return parseFloat(value);
@@ -3344,18 +3693,17 @@ app.utils.transform = function(method, value) {
  * app.utils.sanitize
  *
  * Sanitizes passed value
- * //TODO rename method
  *
- * @param <String> method
+ * @param <String> purpose
  * @param value
  * @return value
  */
-app.utils.sanitize = function(method, value) {
-  if (! method) {
+app.utils.sanitize = function(purpose, value) {
+  if (! purpose) {
     return app.error('app.utils.sanitize', arguments);
   }
 
-  switch (method) {
+  switch (purpose) {
     case 'whitespace': return value.replace(/\\s/g, '');
     case 'breakline': return value.replace(/\\r\\n/g, '');
     case 'date':
@@ -3395,7 +3743,7 @@ app.utils.sanitize = function(method, value) {
 /**!
  * app.utils.storage
  *
- * Storage utility, it memoizes persistent and non-persistent data using localStorage and sessionStorage
+ * Storage utility, it memorizes persistent and non-persistent data using localStorage and sessionStorage
  *
  * available methods:
  * - set (key <String>, value)
@@ -3417,8 +3765,10 @@ app.utils.storage = function(fn, method, key, value) {
 
   var self = app.utils.storage.prototype;
 
+  var _storage = app._runtime.storage.toString();
+
   self._prefix = 'appe.';
-  self._fn = fn ? 'sessionStorage' : app._runtime.storage;
+  self._fn = fn ? 'sessionStorage' : _storage;
 
   if (self._fn in window === false) {
     return app.error('app.utils.storage', self._fn);
@@ -3444,11 +3794,7 @@ app.utils.storage.prototype.set = function(key, value) {
 
   value = value.toString();
 
-  try {
-    window[this._fn].setItem(_key, value);
-  } catch (err) {
-    return app.error('app.utils.storage.prototype.set', err);
-  }
+  window[this._fn].setItem(_key, value);
 
   return true;
 }
@@ -3505,21 +3851,13 @@ app.utils.storage.prototype.del = function(key) {
 
   var _key = app.utils.btoa(this._prefix + key);
 
-  try {
-    window[this._fn].removeItem(key);
-  } catch (err) {
-    return app.error('app.utils.storage.prototype.del', err);
-  }
+  window[this._fn].removeItem(_key);
 
   return true;
 }
 
 app.utils.storage.prototype.reset = function() {
-  try {
-    window[this._fn].clear();
-  } catch (err) {
-    return app.error('app.utils.storage.prototype.reset', err);
-  }
+  window[this._fn].clear();
 
   return true;
 }
@@ -3823,7 +4161,7 @@ app.load = function(func) {
 
   var _loaded = false;
 
-  var _proxy = function() {
+  var _func = function() {
     _loaded = true;
 
     if (! _loaded) {
@@ -3832,9 +4170,9 @@ app.load = function(func) {
   }
 
   if (document.readyState === 'complete') {
-    _proxy();
+    _func();
   } else {
-    document.addEventListener('DOMContentLoaded', _proxy);
+    document.addEventListener('DOMContentLoaded', _func);
   }
 
   if (! _loaded) {
@@ -3875,12 +4213,12 @@ app.redirect = function() {
     return app.stop('app.redirect');
   }
 
-  var _base = config.basePath;
+  var _base = config.basePath.toString();
   var _filename = 'index';
 
-  if (window.location.href.indexOf(config.basePath + '/') != -1) {
+  if (window.location.href.indexOf(_base + '/') != -1) {
     _base = '..';
-    _filename = config.launcherName;
+    _filename = config.launcherName.toString();
   }
 
   window.location.href = _base + '/' + _filename + '.html';
@@ -3915,7 +4253,7 @@ app.position = function() {
 /**
  * app.session
  *
- * Start the session
+ * Starts the session
  *
  * @global <Object> appe__store
  * @param <Object> config
@@ -3924,12 +4262,14 @@ app.position = function() {
  */
 app.session = function(config, target) {
   if (! config) {
-    return app.stop('app.resume');
+    return app.stop('app.session');
   }
 
   window.appe__store = {};
 
-  app._runtime.debug = config.debug || false;
+  app._runtime.name = config.app.toString();
+  app._runtime.debug = !! config.debug ? true : false;
+  app._runtime.encryption = !! config.encryption ? true : false;
 
   if (! target) {
     return;
@@ -3946,7 +4286,7 @@ app.session = function(config, target) {
 /**
  * app.resume
  *
- * Resume session, return last opened file
+ * Resumes session, return last opened file
  *
  * @param <Object> config
  * @param <Boolean> target
@@ -3971,16 +4311,17 @@ app.resume = function(config, target) {
 
 
     if (app.utils.cookie('has', 'last_session')) {
-      session_resume = app.utils.cookie('get', 'last_session');
+      session_last = app.utils.cookie('get', 'last_session');
     }
     if (! session_last) {
       session_last = app.memory.get('last_session');
     }
 
 
-    if (! session_resume && target === undefined) {
-      return app.stop('app.resume', 'session_resume');
-    } else if (app._runtime.debug) {
+    if (target === undefined && !! (! session_resume || session_last)) {
+      // there's nothing to do
+      session_resume = false;
+    } else if (!! app._runtime.debug && target !== undefined) {
       return (! session_last) && app.newSession();
     } else if (! session_last) {
       return app.redirect();
@@ -4006,7 +4347,7 @@ app.resume = function(config, target) {
     app._runtime.storage = 'localStorage';
   }
 
-  document.documentElement.setAttribute('lang', config.language);
+  document.documentElement.setAttribute('lang', config.language.toString());
 
   return _session();
 }
@@ -4016,24 +4357,33 @@ app.resume = function(config, target) {
  *
  * Get data store
  *
- * @global <Object> appe__config
  * @global <Object> appe__store
+ * @param <String> key
  * @return <Object>
  */
-app.data = function() {
-  var config = window.appe__config;
-
-  if (! config) {
-    return app.stop('app.data');
-  }
-
+app.data = function(key) {
   var store = window.appe__store;
 
-  if (! store[config.app]) {
-    return app.stop('app.view.openView');
+  if (! store) {
+    return app.stop('app.data', 'store');
   }
 
-  return store[config.app];
+  //TODO fn
+  var _app_name = app._runtime.name.toString();
+
+  if (! store[_app_name]) {
+    return app.stop('app.data', 'store');
+  }
+
+  if (key && typeof key === 'string') {
+    if (key in store[_app_name]) {
+      return store[_app_name][key];
+    } else {
+      return app.error('app.data', 'key');
+    }
+  }
+
+  return store[_app_name];
 }
 
 
@@ -4083,11 +4433,13 @@ app.checkFile = function(source) {
     return app.error('app.checkFile', arguments);
   }
 
-  if (app._runtime.version !== source.file.version) {
-    return app.error('app.checkFile', 'This file is incompatible with running version: ' + app._runtime.version + '.', source.file);
+  var _app_version = app._runtime.version.toString();
+
+  if (_app_version !== source.file.version) {
+    return app.error('app.checkFile', 'This file is incompatible with running version: ' + _app_version + '.', source.file);
   }
 
-  if (config.verifyFileChecksum) {
+  if (!! config.verifyFileChecksum) {
     try {
       source = JSON.stringify(source);
 
@@ -4115,10 +4467,12 @@ app.newSession = function() {
   var config = window.appe__config;
 
   if (! config) {
-    return app.stop('app.newSession');
+    return app.stop('app.openSession');
   }
 
   var _is_start = ! (window.appe__start === undefined);
+
+  var _app_name = app._runtime.name.toString();
 
   var _current_timestamp = new Date();
   _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
@@ -4127,6 +4481,11 @@ app.newSession = function() {
 
 
   var schema = config.schema;
+
+  if (typeof schema !== 'object') {
+    return app.error('app.openSession', 'schema');
+  }
+
 
   var _new = function() {
     // reset current session data
@@ -4147,7 +4506,7 @@ app.newSession = function() {
 
 
     for (var i = 0; i < schema.length; i++) {
-      app.store.set(config.app + '_' + schema[i], {});
+      app.store.set(_app_name + '_' + schema[i], {});
     }
 
 
@@ -4155,9 +4514,9 @@ app.newSession = function() {
   }
 
   var _complete = function() {
-    //TODO check refresh loop
     _is_start ? app.start.redirect(false) : location.reload();
   }
+
 
   _new();
 }
@@ -4182,6 +4541,12 @@ app.openSession = function() {
 
   var _is_start = ! (window.appe__start === undefined);
 
+  var schema = config.schema;
+
+  if (typeof schema !== 'object') {
+    return app.error('app.openSession', 'schema');
+  }
+
   var _current_timestamp = new Date();
   _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
 
@@ -4193,7 +4558,7 @@ app.openSession = function() {
   }
 
   var _complete = function(filename) {
-    _is_start && app.start.loader(0);
+    _is_start && app.start.progress(0);
 
     if (! filename) {
       return; // silent fail
@@ -4236,7 +4601,7 @@ app.openSession = function() {
   }
 
   if (open_input) {
-    _is_start && app.start.loader(2);
+    _is_start && app.start.progress(2);
 
     open_input.click();
   }
@@ -4262,22 +4627,34 @@ app.saveSession = function() {
 
   var store = window.appe__store;
 
+  if (! store) {
+    return app.stop('app.saveSession', 'store');
+  }
+
   var _is_start = ! (window.appe__start === undefined);
+
+  var _app_name = app._runtime.name.toString();
+
+  var schema = config.schema;
+
+  if (typeof schema !== 'object') {
+    return app.error('app.saveSession', 'schema');
+  }
 
   var source = {};
 
   var _current_timestamp = new Date();
 
 
-  Array.prototype.forEach.call(config.schema, function(key) {
-    source[key] = store[config.app][key];
+  Array.prototype.forEach.call(schema, function(key) {
+    source[key] = store[_app_name][key];
   });  
 
   source.file = app.os.generateFileHead(source, _current_timestamp);
 
 
   app.os.fileSave(function(filename) {
-    if (app._runtime.debug) {
+    if (!! app._runtime.debug) {
       console.info('save', filename);
     }
   }, source, _current_timestamp);
@@ -4328,14 +4705,12 @@ app.stop = function() {
 /**
  * app.error
  *
- * //TODO solve too much recursions
- *
  * Helper to debug and display error messages
  *
  * @return <Boolean>
  */
 app.error = function() {
-  /*var fnn = null;
+  var fnn = null;
   var msg = null;
   var dbg = null;
 
@@ -4370,13 +4745,18 @@ app.error = function() {
     }
   }
 
+  // avoid too much recursions
+  if (!! app._runtime.hangs++) {
+    return;
+  }
+
   if (! app.store.has('notify', 'false')) {
     window.alert(msg);
 
     if (! app._runtime.exec) {
       app.store.set('notify', 'false');
     }
-  }*/
+  }
 
   return false;
 }
@@ -4425,17 +4805,17 @@ app.getInfo = function(from, info) {
   switch (from) {
     case 'config':
       _available_infos = {
-        'debug': config.debug ? true : false,
-        'name': config.name,
-        'language': config.language,
-        'schema': config.schema,
-        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text, 'file': config.license.file } : config.license) || false
+        'debug': !! config.debug ? true : false,
+        'name': config.name.toString(),
+        'language': config.language.toString(),
+        'schema': typeof config.schema === 'object' ? config.schema : {},
+        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': config.license.file.toString() } : config.license.toString()) || false
       };
     break;
     case 'runtime':
       _available_infos = {
-        'version': app._runtime.version,
-        'release': app._runtime.release
+        'version': app._runtime.version.toString(),
+        'release': app._runtime.release.toString()
       };
     break;
     default:

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="stylesheet" type="text/css" href="../assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
@@ -109,7 +109,7 @@ var control = window.appe__control = {};
 
 
 
-control.openView = function(data) {
+control.handle = function(data) {
   var data_archive = data['archive'];
   var data_categories = data['categories'];
   var data_items = data['items'];
@@ -117,7 +117,7 @@ control.openView = function(data) {
   var table = document.getElementById('table-data');
 
   if (! data_archive || ! data_categories || ! data_items) {
-    return app.error('control.openView', 'data*');
+    return app.error('control.handle', 'data*');
   }
 
 
@@ -142,20 +142,20 @@ control.openView = function(data) {
   });
 
 
-  var _open = app.view.open(null, archive_data);
+  var _control = app.view.control(null, archive_data);
 
-  _open.begin();
+  _control.begin();
 
 
-  var event = _open.getEvent();
-  var id = _open.setID(archive_id);
+  var event = _control.getEvent();
+  var id = _control.setID(archive_id);
 
 
   var title = (archive_data.title || '');
 
-  _open.setTitle(title, 'Demo');
+  _control.setTitle(title, 'Demo');
 
-  _open.fillSelection(archive_selection, id);
+  _control.fillSelection(archive_selection, (__data && id));
 
 
 
@@ -204,10 +204,10 @@ control.openView = function(data) {
 
 
 
-  _open.fillTable(table, _archive_items_join, _ordered_keys, categories_data);
+  _control.fillTable(table, _archive_items_join, _ordered_keys, categories_data);
 
 
-  _open.end();
+  _control.end();
 }
 
 
@@ -247,22 +247,14 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
 
 
 control.action = function(element, event, extra) {
-  var data = app.data();
-
-  var data_archive = data['archive'];
-
   var table = document.getElementById('table-data');
-
-  if (! data_archive) {
-    return app.error('control.action', arguments);
-  }
 
   if (! element || typeof event !== 'string') {
     return app.error('control.action', arguments);
   }
 
 
-  var _action = app.view.action([ 'selection', 'open', 'export', 'print' ], event, element, data_archive);
+  var _action = app.view.action([ 'selection', 'open', 'export', 'print' ], event, element);
 
   _action.begin();
 
@@ -276,17 +268,15 @@ control.action = function(element, event, extra) {
   var _events = {};
 
   _events.selection = function() {
-    return _action.selection(null, true);
+    return _action.selection();
   }
 
   _events.open = function() {
     return _action.open(null);
   }
 
-  _events.export = function(subControl) {
-    var _dropdown = element.parentNode.parentNode.parentNode;
-
-    app.view.sub(subControl, element, table);
+  _events.export = function(method) {
+    app.view.sub(method, element, table);
 
     return;
   }

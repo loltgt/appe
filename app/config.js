@@ -13,33 +13,33 @@ window.appe__config = {
     "add": "add",
     "edit": "edit",
     "delete": "delete",
-    "list": "list"
+    "list": "list",
   },
   "routes": {
     "demo": {
       "open": "demo-edit",
       "list": "demo-wide-list",
-      "update": "demo"
+      "update": "demo",
     },
     "archive": {
       "add": "archive-edit",
       "edit": "archive-edit",
       "delete": "archive",
       "open": "archive-item-edit",
-      "close": "archive"
+      "close": "archive",
     },
     "average": {
-      "update": "average"
+      "update": "average",
     },
     "items": {
       "add": "items-edit",
       "edit": "items-edit",
-      "delete": "items"
+      "delete": "items",
     },
     "sample": {
       "add": "sample-edit",
       "edit": "sample-edit",
-      "delete": "sample"
+      "delete": "sample",
     },
     "about": {}
   },
@@ -59,5 +59,19 @@ window.appe__config = {
   "license": {
     "text": "LGPL-3.0-or-later",
     "file": "../LICENSE"
-  }
+  },
+  /**
+  "file": {
+    "binary": false,
+    "crypt": false,
+    "filename_prefix": "appe_save",
+    "filename_separator": "_",
+    "filename_date_format: "Y-m-d_H-M-S",
+  },
+  "csv": {
+    "filename_prefix": "csv_export",
+    "filename_separator": "_",
+    "filename_date_format": "Y-m-d_H-M-S",
+  },
+  */
 }

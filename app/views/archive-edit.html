@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="stylesheet" type="text/css" href="../assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
@@ -109,7 +109,7 @@ var control = window.appe__control = {};
 
 
 
-control.openView = function(data) {
+control.handle = function(data) {
   var data_archive = data['archive'];
   var data_categories = data['categories'];
   var data_items = data['items'];
@@ -127,13 +127,13 @@ control.openView = function(data) {
 
 
 
-  var _open = app.view.open([ 'add', 'edit' ], data_archive, form);
+  var _control = app.view.control([ 'add', 'edit' ], data_archive, form);
 
-  _open.begin();
+  _control.begin();
 
   
-  var event = _open.getEvent();
-  var id = _open.getID();
+  var event = _control.getEvent();
+  var id = _control.getID();
 
 
   var _items = { 'toSelect': Object.keys(data_items), 'toDrag': [] };
@@ -142,8 +142,9 @@ control.openView = function(data) {
   var _events = {};
 
   _events.add = function() {
-    _open.setTitle('Add New Archive');
-    _open.setActionHandler('Add Archive');
+    _control.setTitle('Add New Archive');
+
+    _control.setActionHandler('Add Archive');
 
 
 
@@ -151,7 +152,7 @@ control.openView = function(data) {
       data_items[id].status && _items.toDrag.push(id);
     });
 
-    control.draggable(data, table, 'init', _items);
+    control.draggable(table, 'init', _items);
   }
 
   _events.edit = function() {
@@ -161,10 +162,12 @@ control.openView = function(data) {
 
 
 
-    _open.setTitle('Edit Archive "' + archive_data.title + '"');
-    _open.setActionHandler('Update Archive');
+    _control.setTitle('Edit Archive "' + archive_data.title + '"');
 
-    _open.fillForm(form, archive_data);
+    _control.setActionHandler('Update Archive');
+
+
+    _control.fillForm(form, archive_data);
 
 
 
@@ -172,14 +175,14 @@ control.openView = function(data) {
       Object.keys(archive_data.items).indexOf(id) != -1 && _items.toDrag.push(id);
     });
 
-    control.draggable(data, table, 'init', _items, (! archive_data.status));
+    control.draggable(table, 'init', _items, (! archive_data.status));
   }
 
 
   _events[event]();
 
 
-  _open.end();
+  _control.end();
 }
 
 
@@ -221,20 +224,18 @@ control.fillForm = function(data_form, extra) {
 
 
 control.draggable = function(element, event, items, disallow) {
-  var data = app.data();
-
-  var data_items = data['items'];
+  var data_items = app.data('items');
 
   var table = document.getElementById('table-data');
   var select = document.getElementById('items');
   var field = document.getElementById('archive_items');
 
   if (! data_items) {
-    return app.error('control.action', arguments);
+    return app.error('control.draggable', 'data*');
   }
 
   if (! element || typeof event !== 'string') {
-    return app.error('control.action', arguments);
+    return app.error('control.draggable', arguments);
   }
 
 
@@ -247,7 +248,7 @@ control.draggable = function(element, event, items, disallow) {
     ! isInitialized() || app.error('config.draggable.init', null);
 
     if (items && typeof items !== 'object') {
-      return app.error('control.action.init', null, 'items');
+      return app.error('control.draggable.init', null, 'items');
     }
 
     var tfoot = table.querySelector('tfoot');
@@ -355,7 +356,7 @@ control.draggable = function(element, event, items, disallow) {
       field.setAttribute('value', items);
 
       if (event != 'init') {
-        app.view.resizeView(false);
+        app.view.resize(false);
       }
 
       return items;
@@ -420,24 +421,12 @@ control.draggable = function(element, event, items, disallow) {
 
 
 control.action = function(element, event, extra) {
-  var data = app.data();
-
-  var data_archive = data['archive'];
-  var data_categories = data['categories'];
-  var data_items = data['items'];
-
-  var form = document.getElementById('form-data');
-
-  if (! data_archive || ! data_categories || ! data_items) {
-    return app.error('control.action', arguments);
-  }
-
   if (! element || typeof event !== 'string') {
     return app.error('control.action', arguments);
   }
 
 
-  var _action = app.view.action([ 'add', 'edit' ], event, element, data_archive, form);
+  var _action = app.view.action([ 'add', 'edit' ], event, element, form);
 
   _action.begin();
 
@@ -459,8 +448,8 @@ control.action = function(element, event, extra) {
     var category_id = app.memory.get('category_id');
 
     var _form_data = app.view.getFormData(form.elements);
-    var _items_data = data_archive[id][category_id].items;
-    var _ext_data = app.utils.extendObject(true, data_archive[id][category_id], _form_data);
+    var _items_data = _data_updated['archive'][id][category_id].items;
+    var _ext_data = app.utils.extendObject(true, _data_updated['archive'][id][category_id], _form_data);
 
     Array.prototype.forEach.call(_form_data.items, function(_id) {
       _items_data[_id] = (_id in _items_data ? _items_data[_id] : {});
@@ -471,6 +460,12 @@ control.action = function(element, event, extra) {
   }
 
   _events.add = function() {
+    var data_archive = app.data('archive');
+
+    if (! data_archive) {
+      return app.error('control.action().add', 'data*');
+    }
+
     var category_id = app.memory.get('category_id');
 
     _data_updated['archive'] = data_archive;
@@ -485,6 +480,12 @@ control.action = function(element, event, extra) {
   }
 
   _events.edit = function() {
+    var data_archive = app.data('archive');
+
+    if (! data_archive) {
+      return app.error('control.action().add', 'data*');
+    }
+
     _data_updated['archive'] = data_archive;
 
     _events._prepare();

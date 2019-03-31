@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="stylesheet" type="text/css" href="../assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
@@ -87,7 +87,7 @@ var control = window.appe__control = {};
 
 
 
-control.openView = function(data) {
+control.handle = function(data) {
   var data_archive = data['archive'];
   var data_categories = data['categories'];
   var data_items = data['items'];
@@ -95,7 +95,7 @@ control.openView = function(data) {
   var form = document.getElementById('form-data');
 
   if (! data_archive || ! data_categories || ! data_items) {
-    return app.error('control.openView', 'data*');
+    return app.error('control.handle', 'data*');
   }
 
 
@@ -111,13 +111,13 @@ control.openView = function(data) {
 
 
 
-  var _open = app.view.open(null, archive_data, form);
+  var _control = app.view.control(null, archive_data, form);
 
-  _open.begin();
+  _control.begin();
 
   
-  var event = _open.getEvent();
-  var id = _open.getID();
+  var event = _control.getEvent();
+  var id = _control.getID();
 
 
   var title = '';
@@ -127,8 +127,9 @@ control.openView = function(data) {
     title += ' – ' + data_archive[archive_id][category_id].title;
   }
 
-  _open.setTitle(title);
-  _open.setActionHandler();
+  _control.setTitle(title);
+
+  _control.setActionHandler();
 
 
 
@@ -138,17 +139,17 @@ control.openView = function(data) {
 
 
 
-  _open.fillForm(form, archive_items[id], archive_data);
+  _control.fillForm(form, archive_items[id], archive_data);
 
 
 
   if (! archive_data.status) {
-    _open.denySubmit();
+    _control.denySubmit();
   }
 
 
 
-  _open.end();
+  _control.end();
 }
 
 
@@ -197,24 +198,14 @@ control.fillForm = function(data_form, extra) {
 
 
 control.action = function(element, event, extra) {
-  var data = app.data();
-
-  var data_archive = data['archive'];
-  var data_categories = data['categories'];
-  var data_items = data['items'];
-
   var form = document.getElementById('form-data');
-
-  if (! data_archive || ! data_categories || ! data_items) {
-    return app.error('control.action', arguments);
-  }
 
   if (! element || typeof event !== 'string') {
     return app.error('control.action', arguments);
   }
 
 
-  var _action = app.view.action([ 'edit' ], event, element, data_archive, form);
+  var _action = app.view.action([ 'edit' ], event, element, form);
 
   _action.begin();
 
@@ -233,12 +224,18 @@ control.action = function(element, event, extra) {
   var _events = {};
 
   _events.edit = function() {
+    var data_archive = app.data('archive');
+
+    if (! data_archive) {
+      return app.error('control.action().edit', 'data*');
+    }
+
     var archive_id = app.memory.get('archive_id');
     var category_id = app.memory.get('category_id');
 
     _data_updated['archive'] = data_archive;
 
-    var _ext_data = app.utils.extendObject(true, data_archive[archive_id][category_id]['items'][id], app.view.getFormData(form.elements));
+    var _ext_data = app.utils.extendObject(true, _data_updated['archive'][archive_id][category_id]['items'][id], app.view.getFormData(form.elements));
 
     _data_updated['archive'][archive_id][category_id]['items'][id] = _ext_data;
 

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="stylesheet" type="text/css" href="../assets/css/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>
 
@@ -75,25 +75,25 @@ var control = window.appe__control = {};
 
 
 
-control.openView = function(data) {
+control.handle = function(data) {
   var data_sample = data['sample'];
 
   var table = document.getElementById('table-data');
 
   if (! data_sample) {
-    return app.error('control.openView', 'data*');
+    return app.error('control.handle', 'data*');
   }
 
 
-  var _open = app.view.open(null, data_sample);
+  var _control = app.view.control(null, data_sample);
 
-  _open.begin();
-
-
-  _open.fillTable(table);
+  _control.begin();
 
 
-  _open.end();
+  _control.fillTable(table);
+
+
+  _control.end();
 }
 
 
