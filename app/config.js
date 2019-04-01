@@ -3,6 +3,9 @@ window.appe__config = {
   "launcherName": "LAUNCH",
   "name": "{appe} demo app",
   "language": "en",
+  "compression": false,
+  "encryption": true,
+  "secret_passphrase": "test",
   "debug": true,
   "schema": [ "file", "archive", "categories", "items", "sample" ],
   "events": {
@@ -60,10 +63,14 @@ window.appe__config = {
     "text": "LGPL-3.0-or-later",
     "file": "../LICENSE"
   },
+  "file": {
+    "compress": false
+    //"heads": "e"
+  }
   /**
   "file": {
-    "binary": false,
-    "crypt": false,
+    "binary": true,
+    "compress": true,
     "filename_prefix": "appe_save",
     "filename_separator": "_",
     "filename_date_format: "Y-m-d_H-M-S",

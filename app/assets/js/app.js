@@ -18,6 +18,7 @@ app._runtime = {
   title: '',
   name: '',
   storage: false,
+  compression: false,
   encryption: false,
   debug: false,
   hangs: 0
@@ -54,12 +55,12 @@ app.os.fileOpen = function(callback) {
     return app.error('app.os.fileOpen', 'config');
   }
 
-  if (config.file && !! config.file.binary && false) {
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
     return app.error('app.os.fileOpen', 'zlib');
   }
 
-  if (config.file && !! config.file.binary || !! app._runtime.encryption && false) {
-    return app.error('app.os.fileSave', 'crypto');
+  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    return app.error('app.os.fileSave', 'CryptoJS');
   }
 
   if (! FileReader) {
@@ -84,9 +85,20 @@ app.os.fileOpen = function(callback) {
 
   var schema = config.schema;
 
-  var file_binary = config.file && config.file.binary ? !! config.file.binary : false;
+  var file_binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.compression;
   var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
   var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+
+  var _secret = null;
+
+  if (file_crypt) {
+    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
+      _secret = document[app._runtime.secret];
+    } else {
+      return app.error('app.os.fileOpen', 'runtime');
+    }
+  }
 
 
   var reader = new FileReader();
@@ -96,15 +108,29 @@ app.os.fileOpen = function(callback) {
 
     // try to restore file source
     try {
+      source = source.replace(new RegExp(file_heads + '\=(?![^"]+)'), '')
+        .replace(/(^"|"$)/g, '');
+
       if (file_binary) {
-        source = source;
-      }
-      if (file_crypt) {
-        source = source;
+        source = source.replace(/\"/g, '"'); //TODO test
+        //source = app.utils.atob(source);
+        source = pako.inflate(source, { level: 9, to: 'string' });
+
+        if (! source) {
+          throw 'binary';
+        }
       }
 
-      source = source.replace(/[\r\n]([\s]+){2}/g, '')
-        .replace(new RegExp(file_heads + '='), '');
+      //source = source.replace(/[\r\n]([\s]+){2}/g, '');
+
+      if (file_crypt && !! _secret) {
+        source = CryptoJS.AES.decrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+        source = source.toString(CryptoJS.enc.Utf8);
+
+        if (! source) {
+          throw 'crypt';
+        }
+      }
 
       source = JSON.parse(source);
     } catch (err) {
@@ -157,12 +183,12 @@ app.os.fileSave = function(callback, source, timestamp) {
     return app.error('app.os.fileSave', 'config');
   }
 
-  if (config.file && !! config.file.binary && false) {
-    return app.error('app.os.fileSave', 'zlib');
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    return app.error('app.os.fileSave', 'pako');
   }
 
-  if (config.file && !! config.file.binary || !! app._runtime.encryption && false) {
-    return app.error('app.os.fileSave', 'crypto');
+  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    return app.error('app.os.fileSave', 'CryptoJS');
   }
 
   if (! (callback && typeof callback === 'function') || ! (timestamp && timestamp instanceof Date)) {
@@ -175,20 +201,55 @@ app.os.fileSave = function(callback, source, timestamp) {
 
   var _app_name = app._runtime.name.toString();
 
-  var file_binary = config.file && config.file.binary ? !! config.file.binary : false;
+  var file_binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.compression;
   var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
   var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+
+  var _binary = null;
+
+  if (file_binary) {
+    _binary = true;
+  }
+
+  var _secret = null;
+
+  if (file_crypt) {
+    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
+      _secret = document[app._runtime.secret];
+    } else {
+      return app.error('app.session', 'runtime');
+    }
+  }
+
+
+  var wrapped = !! ((file_crypt && _secret) || (file_binary && _binary));
 
   // prepare file source
   try {
     source = JSON.stringify(source);
     source = source.replace(/\"/g, '"');
 
-    if (file_crypt) {
-      source = source;
+    if (file_crypt && !! _secret) {
+      source = CryptoJS.AES.encrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+      source = source.toString();
+
+      if (! source) {
+        throw 'crypt';
+      }
     }
     if (file_binary) {
-      source = source;
+      source = pako.deflate(source, { level: 9, to: 'string' });
+      //source = app.utils.btoa(source);
+      source = source.replace(/"/g, '\"'); //TODO test
+
+      if (! source) {
+        throw 'binary';
+      }
+    }
+
+    if (wrapped) {
+      source = '"' + source + '"';
     }
 
     source = file_heads + '=' + source;
@@ -245,6 +306,9 @@ app.os.scriptOpen = function(callback, file, fn, max_attempts) {
     return app.error('app.os.scriptOpen', arguments);
   }
 
+  fn = fn.toString();
+
+
   var _load = function(file) {
     var script = document.createElement('script');
     script.src = file;
@@ -255,16 +319,13 @@ app.os.scriptOpen = function(callback, file, fn, max_attempts) {
   }
 
   var _check = function(callback, fn) {
-    var max = max_attempts || 5;
+    var max = parseInt(max_attempts) || 5;
     var attempts = 0;
 
     var interr = setInterval(function() {
       attempts++;
 
-      var top = window.top || undefined;
-      var obj = top[fn] || parent[fn] || window[fn];
-
-      if (obj || max === attempts) {
+      if (!! window[fn] || max === attempts) {
         clearInterval(interr);
 
         callback();        
@@ -274,7 +335,7 @@ app.os.scriptOpen = function(callback, file, fn, max_attempts) {
 
   _load(file);
 
-  if (fn) {
+  if (fn in window === false) {
     _check(callback, fn);
   } else {
     callback();
@@ -1259,7 +1320,7 @@ app.controller.retrieve = function(callback, routine) {
 /**
  * app.controller.store
  *
- * Memoizes data from current session, returns to callback
+ * Stores data from current session, returns to callback
  *
  * @global <Object> appe__store
  * @param <Function> callback
@@ -1430,6 +1491,18 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.stop('app.start.loadAttempt');
   }
 
+  if (config.file && typeof config.file !== 'object') {
+    return app.error('app.start.loadAttemp', 'config');
+  }
+
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    return app.error('app.start.loadAttemp', 'pako');
+  }
+
+  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    return app.error('app.start.loadAttemp', 'CryptoJS');
+  }
+
   if (! callback || ! fn || ! file || ! schema) {
     return app.stop('app.start.loadAttemp', arguments);
   }
@@ -1438,22 +1511,85 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.stop('app.start.loadAttemp', arguments);
   }
 
+  fn = fn.toString();
 
-  var loaded = false;
-  var max_attempts = parseInt(config.openAttempts);
+  var file_binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.compression;
+  var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
-  app.os.scriptOpen(function() {
-    var source = window[fn];
 
-    if (! window[fn]) {
+  var _secret = null;
+
+  if (file_crypt) {
+    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
+      _secret = document[app._runtime.secret];
+    } else {
+      return app.error('app.start.loadAttemp', 'runtime');
+    }
+  }
+
+
+  var _binary = function(source) {
+    try {
+      source = source.replace(/\"/g, '"'); //TODO test
+      //source = app.utils.atob(source);
+      source = pako.inflate(source, { level: 9, to: 'string' });
+
+      if (! source) {
+        throw 'binary';
+      }
+
+      return source;
+    } catch (err) {
+      return app.error('app.start.loadAttempt() > _binary', err);
+    }
+  }
+
+  var _crypto = function(source) {
+    try {
+      source = CryptoJS.AES.decrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+      source = source.toString(CryptoJS.enc.Utf8);
+
+      if (! source) {
+        throw 'crypt';
+      }
+
+      return source;
+    } catch (err) {
+      return app.error('app.start.loadAttempt() > _crypto', err);
+    }
+  }
+
+  var _try = function() {
+    if (fn in window === false) {
       return app.error('app.start.loadAttemp', 'source');
     }
 
-    for (var i = 0; i < schema.length; i++) {
-      if (! memoize) {
-        continue;
-      }
+    var source = window[fn];
 
+    if (! memoize) {
+      return callback(false);
+    }
+
+    try {
+      if (file_binary || file_crypt) {
+        if (file_binary) {
+          source = _binary(source);
+        }
+        if (file_crypt && !! _secret) {
+          source = _crypto(source);
+        }
+
+        source = JSON.parse(source);
+      }
+    } catch (err) {
+      return app.error('app.start.loadAttemp', err);
+    }
+
+    if (! source) {
+      return callback(false);
+    }
+
+    for (var i = 0; i < schema.length; i++) {
       var key = schema[i].toString();
 
       if (key in source === false) {
@@ -1464,7 +1600,13 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     }
 
     callback(loaded);
-  }, file, fn, max_attempts);
+  }
+
+
+  var loaded = false;
+  var max_attempts = parseInt(config.openAttempts);
+
+  app.os.scriptOpen(_try, file, fn, max_attempts);
 }
 
 
@@ -1484,6 +1626,18 @@ app.start.loadComplete = function(session_resume) {
     return app.stop('app.start.loadComplete');
   }
 
+  if (config.file && typeof config.file !== 'object') {
+    return app.error('app.start.loadComplete', 'config');
+  }
+
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    return app.error('app.start.loadComplete', 'pako');
+  }
+
+  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    return app.error('app.start.loadComplete', 'CryptoJS');
+  }
+
   if (! session_resume) {
     return app.start.progress(1);
   }
@@ -1498,13 +1652,17 @@ app.start.loadComplete = function(session_resume) {
 
   session_resume = config.savePath.toString() + '/' + session_resume; 
 
+
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+
+
   app.start.loadAttempt(function(loaded) {
     if (loaded) {
       app.start.redirect(true);
     } else {
       app.start.progress(1);
     }
-  }, _app_name, session_resume, schema, true);
+  }, file_heads, session_resume, schema, true);
 
   app.start.progress(1);
 }
@@ -1722,15 +1880,15 @@ app.main.control = function(loc) {
 
   if (loc && typeof loc === 'object') {
     if (loc.view) {
-      if (_routes[loc.view]) {
+      if (!! _routes[loc.view]) {
         route = encodeURIComponent(loc.view) + '.html';
       } else {
         step = false;
       }
 
       if (loc.action) {
-        if (_routes[loc.view][loc.action]) {
-          route = _routes[loc.view][loc.action] + '.html';
+        if (!! _routes[loc.view][loc.action]) {
+          route = _routes[loc.view][loc.action].toString() + '.html';
           route += '?' + encodeURIComponent(loc.action);
         } else {
           step = false;
@@ -1890,7 +2048,7 @@ app.main.handle.prototype.setAction = function() {
     return app.error('app.main.prototype.setAction', 'ctl');
   }
 
-  this.loc.action = this.events[this.loc.action];
+  this.loc.action = this.events[this.loc.action].toString();
 
   return this.loc.action;
 }
@@ -2417,7 +2575,7 @@ app.view.control.prototype.begin = function() {
 
   if (loc && typeof loc === 'object') {
     if (loc.action) {
-      if (_routes[view][loc.action]) {
+      if (!! _routes[view][loc.action]) {
         event = actions[loc.action];
       } else {
         step = false;
@@ -2915,7 +3073,7 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
-  var event_label = _events ? _events[this.event] : this.event;
+  var event_label = _events ? _events[this.event].toString() : this.event;
 
   if (title && (typeof name === 'number' || typeof name === 'string')) {
     this.ctl.msg  = 'Are you sure to ' + event_label + ' ' + title + ' ';
@@ -4270,16 +4428,108 @@ app.session = function(config, target) {
   app._runtime.name = config.app.toString();
   app._runtime.debug = !! config.debug ? true : false;
   app._runtime.encryption = !! config.encryption ? true : false;
+  app._runtime.compression = !! config.compression || !! (config.file && config.file.binary) ? app._runtime.encryption : false;
 
-  if (! target) {
+
+  // only main
+  if (target) {
+    setTimeout(function() {
+      app.store.has('notify') && app.store.del('notify');
+
+      this.clearTimeout();
+    }, 0);
+
+  }
+
+  // only start and main
+  if (target === false) {
     return;
   }
 
-  setTimeout(function() {
-    app.store.has('notify') && app.store.del('notify');
 
-    this.clearTimeout();
-  }, 0);
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    return app.error('app.session', 'pako');
+  }
+
+  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    return app.error('app.session', 'CryptoJS');
+  }
+
+
+  var _secret_passphrase = null;
+
+  var loaded = false;
+  var max_attempts = config.openAttempts;
+
+
+  var _loadAttempt = function(callback, fn) {
+    var max = parseInt(max_attempts) || 5;
+    var attempts = 0;
+
+    var interr = setInterval(function() {
+      attempts++;
+
+      console.log(target, attempts);
+
+      if (!! window[fn] || max === attempts) {
+        clearInterval(interr);
+
+        callback();
+      }
+    }, 1000);
+  }
+
+  var _binary = function() {
+    if (! (pako && pako.inflate && pako.deflate)) {
+      return app.error('app.session', 'pako');
+    }
+  }
+
+  var _doBinary = function() {
+    if ('pako' in window === false) {
+      loaded = false;
+
+      _loadAttempt(_binary, 'pako');
+    } else {
+      _binary();
+    }
+  }
+
+  var _crypto = function() {
+    if (! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+      return app.error('app.session', 'CryptoJS');
+    }
+
+    var _secret = CryptoJS.SHA512(Math.random().toString(), { outputLength: 384 });
+
+    app._runtime.secret = _secret.toString(CryptoJS.enc.Hex);
+
+    document[app._runtime.secret] = _secret_passphrase;
+  }
+
+  var _doCrypto = function() {
+    if (! (config.secret_passphrase && typeof config.secret_passphrase === 'string')) {
+      return app.error('app.session', 'config');
+    }
+
+    _secret_passphrase = config.secret_passphrase.toString();
+
+    delete config.secret_passphrase;
+
+
+    if ('CryptoJS' in window === false) {
+      loaded = false;
+
+      _loadAttempt(_crypto, 'CryptoJS');
+    } else {
+      _crypto();
+    }
+  }
+
+  if (!! app._runtime.compression || !! app._runtime.encryption) {
+    app._runtime.compression && _doBinary();
+    app._runtime.encryption && _doCrypto();
+  }
 }
 
 
@@ -4297,7 +4547,8 @@ app.resume = function(config, target) {
     return app.stop('app.resume');
   }
 
-  var _session = function() {
+
+  var _try = function() {
     var session_resume = '';
     var session_last = '';
 
@@ -4320,7 +4571,7 @@ app.resume = function(config, target) {
 
     if (target === undefined && !! (! session_resume || session_last)) {
       // there's nothing to do
-      session_resume = false;
+      //session_resume = false;
     } else if (!! app._runtime.debug && target !== undefined) {
       return (! session_last) && app.newSession();
     } else if (! session_last) {
@@ -4349,7 +4600,8 @@ app.resume = function(config, target) {
 
   document.documentElement.setAttribute('lang', config.language.toString());
 
-  return _session();
+
+  return _try();
 }
 
 /**
@@ -4406,8 +4658,20 @@ app.checkConfig = function(config) {
   Array.prototype.forEach.call(_required_keys, function(key) {
     if (key in config === false) {
       _error = true;
+    } else if ((key == 'schema' || key == 'events' || key == 'routes') && typeof config[key] != 'object') {
+      _error = true;
+    } else if (typeof config[key] != 'object' && typeof config[key] != 'string' && typeof config[key] != 'number' && typeof config[key] != 'boolean') {
+      _error = true;
     }
   });
+
+  if (
+    (config.encryption && ! (config.secret_passphrase && typeof config.secret_passphrase == 'string')) ||
+    (config.file && typeof config.file != 'object') ||
+    (config.csv && typeof config.csv != 'object')
+  ) {
+    _error = true;
+  }
 
   return !! _error && app.stop('app.checkConfig');
 }
@@ -4499,6 +4763,7 @@ app.newSession = function() {
 
 
     app.memory.del('last_opened_file');
+    app.memory.del('file_saves');
 
     app.memory.set('last_stored', _current_timestamp);
     app.memory.set('last_time', _current_timestamp);
