@@ -1,1 +1,6 @@
--s .DS_Store
+.DS_Store
+package-lock.json
+node_modules/
+appe/docs/wiki/.git/
+electron/.git/
+electron/node_modules/
