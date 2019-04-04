@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="app/assets/css/lib/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="app/assets/css/app.min.css">
+<title>{appe}</title>
+<noscript><meta http-equiv="refresh" content="5" id="preventHistoryBackStop"></noscript>
+</head>
+
+<body class="start">
+
+<div class="container">
+  <div class="vcontent-centered-outer">
+    <div class="vcontent-centered-inner">
+      <div class="start-progress">
+        <div id="start-progress-open" class="start-progress-open" style="visibility: hidden;">
+          <p class="lead">Open latest file save</p>
+          <input id="start-action-open-session" type="file" accept="application/x-javascript" style="display: none;" hidden>
+          <button id="start-action-open" class="btn btn-lg btn-big btn-start-action-open start-action-open" data-open-input="#start-action-open-session">Open</button>
+          <p><button id="start-action-new" class="btn btn-mini btn-start-action-new start-action-new">New Session</button>
+        </div>
+        <div id="start-progress-wait" class="start-progress-wait" style="visibility: visible;">
+          <p class="lead">loading . . .</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript" src="app/assets/js/app.min.js"></script>
+<script type="text/javascript" src="app/assets/js/lib/file-saver/FileSaver.min.js" async defer></script>
+<script type="text/javascript" src="app/assets/js/lib/pako/pako.min.js" async defer></script>
+<script type="text/javascript" src="app/assets/js/lib/crypto-js/crypto-js.min.js" async defer></script>
+
+<script type="text/javascript" src="app/config.js"></script>
+
+
+<style type="text/css">
+.vcontent-centered-outer { position: relative; top: 0; left: auto; }
+.vcontent-centered-inner:after, .vcontent-centered-inner:before { content: 'DEMO MODE'; position: absolute; right: 0; left: 0; font-weight: bold; font-size: 64px; text-align: center; white-space: nowrap; color: #fff; z-index: -1; }
+.vcontent-centered-inner:before { top: 0; }
+.vcontent-centered-inner:after { bottom: 0; }
+@media screen and (max-width: 780px) { .vcontent-centered-inner:after, .vcontent-centered-inner:before { font-size: 48px; white-space: inherit; } }
+</style>
+
+
+<script type="text/javascript">
+var start = window.appe__start = {};
+
+
+// DEMO
+start.load = function() {
+  if (! (app.memory.has('last_opened_file')) || ! (app.memory.has('last_session'))) {
+    var _demo = app.utils.btoa('demo_save_2019-04-01_21-49-08_1');
+
+    //app.utils.cookie('set', 'last_opened_file', _demo);
+    app.memory.set('last_opened_file', _demo);
+  }
+
+  app.start.load();
+}
+
+
+app.load(start.load);
+</script>
+</body>
+</html>

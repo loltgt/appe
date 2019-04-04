@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
+</head>
+
+<body class="view view_edit">
+<h1 id="view-title" class="page-header">Archive</h1>
+<h2 id="section-title" class="sub-header"></h2>
+
+
+<div id="section-actions-top" class="section-actions section-actions-top">
+  <div>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?archive" target="_parent">&laquo; Return Back</a>
+  </div>
+</div>
+
+<form id="form-data" class="form form-data" autocomplete="off" validate>
+<fieldset>
+<legend>Entry</legend>
+
+<div class="row">
+<div class="form-group col-12 col-lg-6">
+  <label for="archive_title">Title</label>
+  <input type="text" id="archive_title" name="title" class="form-control" required>
+</div>
+</div>
+</fieldset>
+
+
+<fieldset>
+<legend>Select items</legend>
+
+<div class="table-responsive">
+<table id="table-data" class="table table-auto table-drag table-data">
+  <tbody>
+    <tr class="tpl" draggable="true">
+      <td>{name}</td>
+      <td class="text-right"><button type="button" class="btn btn-danger btn-sm" onclick="control.draggable(this, 'remove')">Remove</button></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"><span class="help-block">Puoi spostare items per ordinarli, clicca su uno di essi e trascinalo per cambiare ordine.</span></td>
+    </tr>
+    <tr>
+      <td>
+        <select id="items" class="form-control"></select>
+      </td>
+      <td class="text-right"><button type="button" class="btn btn-secondary btn-sm" onclick="control.draggable(this, 'add')">Add</button></td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+<input type="hidden" id="archive_items" name="items" data-transform="json" data-sanitize="array" required>
+</fieldset>
+
+
+<fieldset>
+<legend>Custom fields example</legend>
+
+<div class="row">
+<div class="form-group col-12 col-lg-4">
+  <label for="archive_custom_1">Custom field 1</label>
+  <input type="text" id="archive_custom_1" name="custom_1" class="form-control">
+</div>
+
+<div class="clearfix"></div>
+
+<div class="form-group col-12 col-lg-4">
+  <label for="archive_custom_2">Custom field 2</label>
+  <input type="text" id="archive_custom_2" name="custom_2" class="form-control">
+</div>
+</div>
+
+<span class="help-block">Custom description text.</span>
+</fieldset>
+
+
+<fieldset>
+<div class="form-group">
+  <div class="checkbox">
+    <label for="archive_status"><input type="checkbox" id="archive_status" name="status"> opened</label>
+  </div>
+</div>
+</fieldset>
+
+
+<fieldset class="form-submit">
+  <input type="hidden" id="index" name="id" value="{id}" data-transform="integer">
+  <input type="submit" id="real-submit" hidden class="hide">
+  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, '{event}')">Update Archive</button>
+</fieldset>
+</form>
+
+
+<script type="text/javascript" src="../assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="../config.js"></script>
+
+
+<script type="text/javascript">
+var control = window.appe__control = {};
+
+
+
+control.handle = function(data) {
+  var data_archive = data['archive'];
+  var data_categories = data['categories'];
+  var data_items = data['items'];
+
+  var form = document.getElementById('form-data');
+  var table = document.getElementById('table-data');
+
+  if (! data_archive || ! data_categories || ! data_items) {
+    return app.error('control.openView', 'data*');
+  }
+
+
+
+  var __data = Object.keys(data_archive).length;
+
+
+
+  var _control = app.view.control([ 'add', 'edit' ], data_archive, form);
+
+  _control.begin();
+
+  
+  var event = _control.getEvent();
+  var id = _control.getID();
+
+
+  var _items = { 'toSelect': Object.keys(data_items), 'toDrag': [] };
+
+
+  var _events = {};
+
+  _events.add = function() {
+    _control.setTitle('Add New Archive');
+
+    _control.setActionHandler('Add Archive');
+
+
+
+    Array.prototype.forEach.call(Object.keys(data_items), function(id) {
+      data_items[id].status && _items.toDrag.push(id);
+    });
+
+    control.draggable(table, 'init', _items);
+  }
+
+  _events.edit = function() {
+    var category_id = app.memory.get('category_id');
+
+    var archive_data = __data ? data_archive[id][category_id] : {};
+
+
+
+    _control.setTitle('Edit Archive "' + archive_data.title + '"');
+
+    _control.setActionHandler('Update Archive');
+
+
+    _control.fillForm(form, archive_data);
+
+
+
+    Array.prototype.forEach.call(Object.keys(data_items), function(id) {
+      Object.keys(archive_data.items).indexOf(id) != -1 && _items.toDrag.push(id);
+    });
+
+    control.draggable(table, 'init', _items, (! archive_data.status));
+  }
+
+
+  _events[event]();
+
+
+  _control.end();
+}
+
+
+
+control.fillForm = function(data_form, extra) {
+  if (! data_form) {
+    return app.error('control.fillForm', arguments);
+  }
+
+
+
+  data_form.custom = data_form.custom || { '1': '', '2': '' };
+
+
+
+  document.getElementById('archive_title').setAttribute('value', data_form.title);
+
+
+  document.getElementById('archive_custom_1').setAttribute('value', (data_form.custom['1'] || ''));
+  document.getElementById('archive_custom_2').setAttribute('value', (data_form.custom['2'] || ''));
+
+
+  data_form.status && (document.getElementById('archive_status').setAttribute('checked', ''));
+
+
+  if (! data_form.status) {
+    document.getElementById('archive_title').setAttribute('readonly', '');
+    document.getElementById('archive_title').setAttribute('disabled', '');
+
+
+    document.getElementById('archive_custom_1').setAttribute('readonly', '');
+    document.getElementById('archive_custom_1').setAttribute('disabled', '');
+
+    document.getElementById('archive_custom_2').setAttribute('readonly', '');
+    document.getElementById('archive_custom_2').setAttribute('disabled', '');
+  }
+}
+
+
+
+control.draggable = function(element, event, items, disallow) {
+  var data_items = app.data('items');
+
+  var table = document.getElementById('table-data');
+  var select = document.getElementById('items');
+  var field = document.getElementById('archive_items');
+
+  if (! data_items) {
+    return app.error('control.draggable', 'data*');
+  }
+
+  if (! element || typeof event !== 'string') {
+    return app.error('control.draggable', arguments);
+  }
+
+
+  var isInitialized = function() { return table.getAttribute('data-draggable'); }
+
+
+  var _events = {};
+
+  _events.init = function() {
+    ! isInitialized() || app.error('config.draggable.init', null);
+
+    if (items && typeof items !== 'object') {
+      return app.error('control.draggable.init', null, 'items');
+    }
+
+    var tfoot = table.querySelector('tfoot');
+
+    Array.prototype.forEach.call(items.toDrag, function(index) {
+      _events._addRow(index);
+    });
+
+    if (disallow) {
+      tfoot.remove();
+
+      table.setAttribute('data-draggable', false);
+
+      _events._store(items.toDrag);
+
+      return;
+    }
+
+    var opts = [];
+
+    Array.prototype.forEach.call(items.toSelect, function(index) {
+      var name = data_items[index].name;
+
+      var obj = {};
+      obj[index] = name;
+
+      opts.push(obj);
+    });
+
+    select.innerHTML = app.layout.renderSelectOptions(select, opts);
+
+    table.setAttribute('data-draggable', true);
+
+    _events._store(items.toDrag);
+  }
+
+  _events._removeRow = function() {
+    var trow = element.parentNode.parentNode;
+    var index = trow.getAttribute('data-index');
+    index = index.toString();
+
+    trow.remove();
+
+    return index;
+  }
+
+  _events._addRow = function(index) {
+    var tbody = table.querySelector('tbody');
+    var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
+
+    trow_tpl.classList.remove('tpl');
+
+    var trow = trow_tpl.cloneNode(true);
+
+    trow.setAttribute('data-index', index);
+
+    var name = data_items[index].name;
+
+    var td = trow.querySelectorAll('td');
+
+    td[0].innerHTML = name;
+
+    if (disallow) {
+      td[1].remove();
+    } else {
+      trow.classList.add('draggable');
+
+      app.utils.addEvent('dragstart', trow, app.layout.draggable('start', table, field));
+      app.utils.addEvent('dragenter', trow, app.layout.draggable('enter', table, field));
+      app.utils.addEvent('dragover', trow, app.layout.draggable('over', table, field));
+      app.utils.addEvent('dragleave', trow, app.layout.draggable('leave', table, field));
+      app.utils.addEvent('dragend', trow, app.layout.draggable('end', table, field));
+      app.utils.addEvent('drop', trow, app.layout.draggable('drop', table, field));
+    }
+
+    tbody.appendChild(trow);
+  }
+
+  _events._retrieve = function() {
+    isInitialized() || app.error('config.draggable._retrieve', null);
+
+    var items = field.getAttribute('value');
+
+    try {
+      items = decodeURIComponent(items);
+      items = JSON.parse(items);
+
+      if (! items) {
+        items = [];
+      }
+
+      return items;
+    } catch (err) {
+      return app.error('control.draggable._retrieve', null, err);
+    }
+  }
+
+  _events._store = function(items) {
+    isInitialized() || app.error('config.draggable._store', null);
+
+    try {
+      items = JSON.stringify(items);
+      items = encodeURIComponent(items);
+
+      field.setAttribute('value', items);
+
+      if (event != 'init') {
+        app.view.resize(false);
+      }
+
+      return items;
+    } catch (err) {
+      return app.error('control.draggable._store', null, err);
+    }
+  }
+
+  _events.remove = function() {
+    isInitialized() || app.error('config.draggable.remove', null);
+
+    var items = _events._retrieve();
+
+    var index = _events._removeRow();
+
+    if (index === undefined) {
+      return app.error('control.draggable.remove', null, 'index');
+    }
+
+    delete items[index];
+
+    _events._store(items);
+  }
+
+  _events.add = function() {
+    isInitialized() || app.error('config.draggable.add', null);
+
+    var items = _events._retrieve();
+
+    var selected_item = document.getElementById('items');
+
+    var index = null;
+    var name = null;
+
+    if (selected_item.value in data_items) {
+      index = selected_item.value;
+    }
+
+    if (items.indexOf(index) != -1) {
+      window.alert('This item is already in list.');
+
+      return;
+    }
+
+    name = data_items[index].name;
+
+    if (! name) {
+      return app.error('control.draggable.add', null, 'name');
+    }
+
+    _events._addRow(index);
+
+    items.push(index);
+
+    _events._store(items);
+  }
+
+
+  _events[event](data_items);
+}
+
+
+
+control.action = function(element, event, extra) {
+  if (! element || typeof event !== 'string') {
+    return app.error('control.action', arguments);
+  }
+
+
+  var _action = app.view.action([ 'add', 'edit' ], event, element, form);
+
+  _action.begin();
+
+
+  if (_action.validateForm()) {
+    return;
+  }
+
+
+  var id = _action.getID();
+
+
+  var _data_updated = {};
+
+
+  var _events = {};
+
+  _events._prepare = function() {
+    var category_id = app.memory.get('category_id');
+
+    var _form_data = app.view.getFormData(form.elements);
+    var _items_data = _data_updated['archive'][id][category_id].items;
+    var _ext_data = app.utils.extendObject(true, _data_updated['archive'][id][category_id], _form_data);
+
+    Array.prototype.forEach.call(_form_data.items, function(_id) {
+      _items_data[_id] = (_id in _items_data ? _items_data[_id] : {});
+    });
+
+    _data_updated['archive'][id][category_id] = _ext_data;
+    _data_updated['archive'][id][category_id].items = _items_data;
+  }
+
+  _events.add = function() {
+    var data_archive = app.data('archive');
+
+    if (! data_archive) {
+      return app.error('control.action().add', 'data*');
+    }
+
+    var category_id = app.memory.get('category_id');
+
+    _data_updated['archive'] = data_archive;
+
+    _data_updated['archive'][id] = {};
+    _data_updated['archive'][id][category_id] = {};
+    _data_updated['archive'][id][category_id].items = {};
+
+    _events._prepare();
+
+    return _action.add(_data_updated, true);
+  }
+
+  _events.edit = function() {
+    var data_archive = app.data('archive');
+
+    if (! data_archive) {
+      return app.error('control.action().add', 'data*');
+    }
+
+    _data_updated['archive'] = data_archive;
+
+    _events._prepare();
+
+    return _action.edit(_data_updated, true);
+  }
+
+
+  var ctl = _events[event](extra);
+
+  app.view.send(ctl);
+
+  _action.end();
+}
+
+
+
+app.load(app.view.load);
+app.unload(app.view.unload);
+</script>
+</body>
+</html>

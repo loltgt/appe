@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
+</head>
+
+<body class="view about">
+<h1 class="page-header">About</h1>
+
+<section class="page-section">
+<div class="row">
+<div class="col-xs-3 col-md-1">
+  <span class="appe">&#123;appe&#125;</span>
+</div>
+<div class="col-xs-9 col-md-8 col-lg-9">
+  <p class="text-muted">un micro gestionale per esecuzione locale che consente di creare applicazioni al volo e anche <em>fare delle ottime spaghettate</em> <br>volendo può essere rinforzato per essere eseguito in remoto</p>
+</div>
+</div>
+
+<div id="appe" class="page-block">
+  <p><strong>&#123;appe&#125;</strong> &nbsp; {release}</p>
+  <p>2019 &copy; Leonardo Laureti</p>
+  <p>Website: <a href="https://loltgt.ga" class="btn btn-link btn-sm" target="_blank">loltgt.ga</a> &nbsp; Github page: <a href="https://github.com/loltgt/appe/" class="btn btn-link btn-sm" target="_blank">github.com/loltgt/appe/</a></p>
+</div>
+</section>
+
+<hr>
+
+<section class="page-section">
+<h5>Running application</h5>
+
+<p id="app-name" class="lead">{app}</p>
+
+<table id="table" class="table table-bordered table-auto">
+  <tbody>
+    <tr>
+      <th>File loaded</th>
+      <td><span>{file_name}</span></td>
+    </tr>
+    <tr>
+      <th>File version</th>
+      <td><span>{file_version}</span></td>
+    </tr>
+    <tr>
+      <th>File checksum</th>
+      <td><span>{file_checksum}</span></td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+
+<section class="page-section">
+<h5>Application license</h5>
+
+<div id="license"></div>
+</section>
+
+
+<script type="text/javascript" src="../assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="../config.js"></script>
+
+
+<script type="text/javascript">
+var control = window.appe__control = {};
+
+
+
+control.handle = function(data) {
+  var _handler = app.view.control();
+
+  _handler.begin();
+
+
+  var appe = document.getElementById('appe');
+
+  appe.innerHTML = appe.innerHTML
+    .replace('{release}', app.getVersion('release'));
+
+
+  var app_name = document.getElementById('app-name');
+  app_name.innerHTML = app.getName();
+
+  var app_file_name = app.os.getLastFileName() || '?';
+  var app_file_version = app.os.getLastFileVersion('version') || '?';
+  var app_file_checksum = app.os.getLastFileChecksum() || '?';
+
+
+  var table = document.getElementById('table');
+  var tbody = table.querySelector('tbody');
+  var rows = tbody.innerHTML;
+
+  rows = rows.replace('{file_name}', app_file_name)
+    .replace('{file_version}', app_file_version)
+    .replace('{file_checksum}', app_file_checksum);
+
+  tbody.innerHTML = rows;
+
+
+  var license = document.getElementById('license');
+  var app_license = app.getLicense();
+
+  if (app_license) {
+    var _license = null;
+
+    if (typeof app_license === 'object') {
+      _license = document.createElement('p');
+      _license.innerHTML = app_license.text.toString();
+      license.appendChild(_license);
+
+      _license = document.createElement('iframe');
+      _license.setAttribute('class', 'license');
+      _license.setAttribute('readonly', '');
+      _license.setAttribute('src', app_license.file.toString());
+      license.appendChild(_license);
+    } else if (app_license.length <= 64) {
+      _license = document.createElement('p');
+      _license.innerHTML = app_license.toString();
+      license.appendChild(_license);
+    } else {
+      _license = document.createElement('textarea');
+      _license.setAttribute('class', 'license');
+      _license.setAttribute('readonly', '');
+      _license.setAttribute('disabled', '');
+      _license.innerHTML = app_license;
+      license.appendChild(_license);
+    }
+  } else {
+    license.parentNode.remove();
+  }
+
+
+  _handler.end();
+}
+
+
+
+app.load(app.view.load);
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
+</head>
+
+<body class="view view_list">
+<h1 class="page-header">Sample</h1>
+<h2 class="sub-header">Vehicle List</h2>
+
+
+<div id="section-actions-top" class="section-actions section-actions-top clearfix">
+  <div class="pull-right">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')">Export <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;">Export CSV</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;">Copy to clipboard</a></li>
+      </ul>
+    </div>
+    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
+  </div>
+  <div>
+    <a class="btn btn-gray" href="../index.html?sample&add" target="_parent">Add Item &raquo;</a>
+  </div>
+</div>
+
+<form id="form-data" class="form form-data" autocomplete="off" validate>
+<div class="table-responsive">
+  <table id="table-data" class="table table-data">
+    <thead>
+      <tr>
+        <th class="hidden-print">Actions</th>
+        <th>ID</th>
+        <th class="text-nowrap">Vehicle Name</th>
+        <th class="text-nowrap">Vehicle Type</th>
+        <th class="text-nowrap">Manufactured</th>
+        <th class="text-nowrap">Value Price</th>
+        <th class="hidden-print">Buy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="tpl">
+        <td class="hidden-print">
+          <a class="action btn btn-secondary" href="../index.html?sample&edit={id}" onclick="control.action(this, 'edit'); return false;" target="_parent">Edit</a>
+          <a class="action btn btn-danger" href="../index.html?sample&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent">Delete</a>
+        </td>
+        <td>{id}</td>
+        <td>{title}</td>
+        <td>{type}</td>
+        <td class="text-nowrap">{date}</td>
+        <td class="text-nowrap">{amount}</td>
+        <td class="hidden-print">
+          <a class="action btn btn-link btn-sm" href="../index.html?sample" onclick="control.action(this, 'example'); return false;" target="_parent">BUY</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</form>
+
+
+<script type="text/javascript" src="../assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="../config.js"></script>
+
+
+<script type="text/javascript">
+var control = window.appe__control = {};
+
+
+
+control.handle = function(data) {
+  var data_sample = data['sample'];
+
+  var table = document.getElementById('table-data');
+
+  if (! data_sample) {
+    return app.error('control.handle', 'data*');
+  }
+
+
+  var _control = app.view.control(null, data_sample);
+
+  _control.begin();
+
+
+  _control.fillTable(table);
+
+
+  _control.end();
+}
+
+
+
+control.renderRow = function(tpl_row, id_row, data_row, extra) {
+  if (! tpl_row || ! data_row) {
+    return app.error('control.renderRow', arguments);
+  }
+
+  var row = tpl_row.cloneNode(true);
+
+  row.setAttribute('data-index', id_row);
+
+  row.innerHTML = row.innerHTML
+    .replace(/\{id\}/g, data_row.id)
+    .replace('{title}', data_row.title)
+    .replace('{type}', data_row.type)
+    .replace('{date}', app.utils.dateFormat(data_row.date))
+    .replace('{amount}', data_row.amount) //TODO app.utils.numberFormat
+    .replace('{status}', data_row.status)
+
+  return row;
+}
+
+
+
+control.action = function(element, event, extra) {
+  var data = app.data();
+
+  var data_sample = data['sample'];
+
+  var table = document.getElementById('table-data');
+
+  if (! data_sample) {
+    return app.error('control.action', arguments);
+  }
+
+  if (! element || typeof event !== 'string') {
+    return app.error('control.action', arguments);
+  }
+
+
+  var _action = app.view.action([ 'edit', 'delete', 'export', 'print', 'example' ], event, element, data_sample);
+
+  _action.begin();
+
+
+  var id = _action.getID();
+
+  var _data_updated = {};
+
+
+  var _events = {};
+
+  _events.edit = function() {
+    return _action.edit(_data_updated, false);
+  }
+
+  _events.delete = function() {
+    _data_updated['sample'] = data_sample;
+
+    delete _data_updated['sample'][id];
+
+    return _action.delete(_data_updated, true, 'Vehicle', id);
+  }
+
+  _events.export = function(subControl) {
+    var _dropdown = element.parentNode.parentNode.parentNode;
+
+    app.view.sub(subControl, element, table);
+
+    return;
+  }
+
+  _events.print = function() {
+    return _action.print();
+  }
+
+
+
+  // Custom action example
+  _events.example = function() {
+    window.alert('Custom action example');
+
+    return;
+  }
+
+
+
+  var ctl = _events[event](extra);
+
+  app.view.send(ctl);
+
+  _action.end();
+}
+
+
+
+app.load(app.view.load);
+</script>
+</body>
+</html>
