@@ -28,7 +28,7 @@ app.os.fileOpen = function(callback) {
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.os.fileOpen', 'zlib');
+    return app.error('app.os.fileOpen', 'pako');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
@@ -85,7 +85,7 @@ app.os.fileOpen = function(callback) {
 
       if (file_binary) {
         source = source.replace(/\"/g, '"'); //TODO test
-        //source = app.utils.atob(source);
+        //source = app.utils.base64('decode', source);
         source = pako.inflate(source, { level: 9, to: 'string' });
 
         if (! source) {
@@ -212,7 +212,7 @@ app.os.fileSave = function(callback, source, timestamp) {
     }
     if (file_binary) {
       source = pako.deflate(source, { level: 9, to: 'string' });
-      //source = app.utils.btoa(source);
+      //source = app.utils.base64('encode', source);
       source = source.replace(/"/g, '\"'); //TODO test
 
       if (! source) {
@@ -247,8 +247,8 @@ app.os.fileSave = function(callback, source, timestamp) {
 
   var file = new File(
     [ source ],
-    filename + '.js',
-    { type: 'application/x-javascript;charset=utf-8' }
+    filename + '.js', //TODO custom file type
+    { type: 'application/x-javascript;charset=utf-8' } //TODO custom mime type
   );
 
   try {
@@ -376,7 +376,7 @@ app.os.getLastFileName = function() {
   }
 
 
-  filename = filename ? app.utils.atob(filename) + '.js' : null;
+  filename = filename ? app.utils.base64('decode', filename) + '.js' : null;
 
   return filename;
 }

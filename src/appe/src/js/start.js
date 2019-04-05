@@ -61,6 +61,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.error('app.start.loadAttemp', 'pako');
   }
 
+  //TODO implement binary = no session resume
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
     return app.error('app.start.loadAttemp', 'CryptoJS');
   }
@@ -93,7 +94,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
   var _binary = function(source) {
     try {
       source = source.replace(/\"/g, '"'); //TODO test
-      //source = app.utils.atob(source);
+      //source = app.utils.base64('decode', source);
       source = pako.inflate(source, { level: 9, to: 'string' });
 
       if (! source) {
@@ -254,6 +255,8 @@ app.start.redirect = function(loaded) {
  * app.start.alternative
  *
  * //TODO hook
+ * //TODO translate
+ * //TODO test hta
  *
  * Display messages with info and alternatives to help to execute app 
  *
@@ -351,7 +354,7 @@ app.start.load = function() {
     app.start.alternative();
 
     setTimeout(function() {
-      app.stop();
+      app.stop('app.start.load');
 
       this.clearTimeout();
     }, 0);
@@ -369,6 +372,7 @@ app.start.load = function() {
 
   var new_action = document.getElementById('start-action-new');
   app.utils.addEvent('click', new_action, app.newSession);
+
 
   var _loaded = true;
 

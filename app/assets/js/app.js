@@ -2,7 +2,7 @@
  * {appe}
  *
  * @version 1.0.0~beta
- * @copyright Copyright 2018-2019 (c) Leonardo Laureti
+ * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
  * contains:
@@ -31,7 +31,7 @@ app._runtime = {
 /**
  * app.load
  *
- * Helper document unload event
+ * Helper document load event
  *
  * @param <Function> func
  * @return
@@ -58,7 +58,7 @@ app.load = function(func) {
   }
 
   if (! _loaded) {
-    window.onload = func;
+    app.utils.addEvent('load', window, func);
   }
 }
 
@@ -76,7 +76,7 @@ app.unload = function(func) {
     return app.stop('app.unload');
   }
 
-  window.onbeforeunload = func;
+  app.utils.addEvent('beforeunload', window, func);
 }
 
 
@@ -193,8 +193,6 @@ app.session = function(config, target) {
     var interr = setInterval(function() {
       attempts++;
 
-      console.log(target, attempts);
-
       if (!! window[fn] || max === attempts) {
         clearInterval(interr);
 
@@ -295,6 +293,7 @@ app.resume = function(config, target) {
 
     if (target === undefined && !! (! session_resume || session_last)) {
       // there's nothing to do
+      //TODO implement no resume, custom file type .appe
       //session_resume = false;
     } else if (!! app._runtime.debug && target !== undefined) {
       return (! session_last) && app.newSession();
@@ -303,7 +302,7 @@ app.resume = function(config, target) {
     }
 
     if (session_resume) {
-      session_resume = app.utils.atob(session_resume) + '.js';
+      session_resume = app.utils.base64('decode', session_resume) + '.js';
     }
 
     return session_resume;
@@ -465,7 +464,7 @@ app.newSession = function() {
   var _current_timestamp = new Date();
   _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
 
-  var _current_timestamp_enc = app.utils.btoa(_current_timestamp);
+  var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
 
 
   var schema = config.schema;
@@ -539,7 +538,7 @@ app.openSession = function() {
   var _current_timestamp = new Date();
   _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
 
-  var _current_timestamp_enc = app.utils.btoa(_current_timestamp);
+  var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
 
 
   var _open = function() {
@@ -559,7 +558,7 @@ app.openSession = function() {
 
 
     var _filename = filename.replace('.js', '');
-    _filename = app.utils.btoa(_filename);
+    _filename = app.utils.base64('encode', _filename);
 
 
     app.utils.cookie('set', 'last_opened_file', _filename);
@@ -671,6 +670,7 @@ app.debug = function() {
  * @return <Boolean>
  */
 app.stop = function() {
+  console.log(arguments);
   if (! app._runtime.exec) {
     return false;
   }
@@ -702,7 +702,7 @@ app.error = function() {
   var fnn = null;
   var msg = null;
   var dbg = null;
-
+console.log(arguments);
   if (arguments.length == 3) {
     fnn = arguments[0];
     msg = arguments[1];
@@ -727,10 +727,10 @@ app.error = function() {
   }
 
   if (! msg) {
-    msg = 'Si è verificato un errore, impossibile proseguire.';
+    msg = 'There is an error while executing.';
 
     if (! app._runtime.exec) {
-      msg += '\n\nRicarica l\'applicazione.';
+      msg += '\n\nPlease reload the application.';
     }
   }
 
@@ -766,7 +766,7 @@ app.blind = function() {
   }
 
   var _blind = document.createElement('div');
-  _blind.setAttribute('style', 'position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.3);');
+  _blind.setAttribute('style', 'position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; background: rgba(0,0,0,0.3);');
 
   window.document.body.appendChild(_blind);
 }
@@ -865,6 +865,9 @@ app.getVersion = function(info) {
 app.getLicense = function() {
   return app.getInfo('config', 'license');
 }
+
+
+
 /**
  * app.os
  *
@@ -895,7 +898,7 @@ app.os.fileOpen = function(callback) {
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.os.fileOpen', 'zlib');
+    return app.error('app.os.fileOpen', 'pako');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
@@ -952,7 +955,7 @@ app.os.fileOpen = function(callback) {
 
       if (file_binary) {
         source = source.replace(/\"/g, '"'); //TODO test
-        //source = app.utils.atob(source);
+        //source = app.utils.base64('decode', source);
         source = pako.inflate(source, { level: 9, to: 'string' });
 
         if (! source) {
@@ -1079,7 +1082,7 @@ app.os.fileSave = function(callback, source, timestamp) {
     }
     if (file_binary) {
       source = pako.deflate(source, { level: 9, to: 'string' });
-      //source = app.utils.btoa(source);
+      //source = app.utils.base64('encode', source);
       source = source.replace(/"/g, '\"'); //TODO test
 
       if (! source) {
@@ -1114,8 +1117,8 @@ app.os.fileSave = function(callback, source, timestamp) {
 
   var file = new File(
     [ source ],
-    filename + '.js',
-    { type: 'application/x-javascript;charset=utf-8' }
+    filename + '.js', //TODO custom file type
+    { type: 'application/x-javascript;charset=utf-8' } //TODO custom mime type
   );
 
   try {
@@ -1243,7 +1246,7 @@ app.os.getLastFileName = function() {
   }
 
 
-  filename = filename ? app.utils.atob(filename) + '.js' : null;
+  filename = filename ? app.utils.base64('decode', filename) + '.js' : null;
 
   return filename;
 }
@@ -1329,6 +1332,8 @@ app.os.getLastFileHead = function() {
     'checksum': app.os.getLastFileChecksum()
   };
 }
+
+
 /**
  * app.controller
  *
@@ -1644,6 +1649,9 @@ app.controller.clear = function() {
 
   return true;
 }
+
+
+
 /**
  * app.memory
  *
@@ -1724,6 +1732,8 @@ app.memory.del = function(key) {
 app.memory.reset = function() {
   return app.utils.storage(true, 'reset');
 }
+
+
 /**
  * app.store
  *
@@ -1803,6 +1813,8 @@ app.store.del = function(key) {
 app.store.reset = function() {
   return app.utils.storage(false, 'reset');
 }
+
+
 /**
  * app.start
  *
@@ -1866,6 +1878,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.error('app.start.loadAttemp', 'pako');
   }
 
+  //TODO implement binary = no session resume
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
     return app.error('app.start.loadAttemp', 'CryptoJS');
   }
@@ -1898,7 +1911,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
   var _binary = function(source) {
     try {
       source = source.replace(/\"/g, '"'); //TODO test
-      //source = app.utils.atob(source);
+      //source = app.utils.base64('decode', source);
       source = pako.inflate(source, { level: 9, to: 'string' });
 
       if (! source) {
@@ -2059,6 +2072,8 @@ app.start.redirect = function(loaded) {
  * app.start.alternative
  *
  * //TODO hook
+ * //TODO translate
+ * //TODO test hta
  *
  * Display messages with info and alternatives to help to execute app 
  *
@@ -2156,7 +2171,7 @@ app.start.load = function() {
     app.start.alternative();
 
     setTimeout(function() {
-      app.stop();
+      app.stop('app.start.load');
 
       this.clearTimeout();
     }, 0);
@@ -2174,6 +2189,7 @@ app.start.load = function() {
 
   var new_action = document.getElementById('start-action-new');
   app.utils.addEvent('click', new_action, app.newSession);
+
 
   var _loaded = true;
 
@@ -2196,6 +2212,8 @@ app.start.load = function() {
     return app.error('app.start.alternative', 'aux_loaded');
   }
 }
+
+
 /**
  * app.main
  *
@@ -2794,6 +2812,8 @@ app.main.unload = function() {
 
   return true;
 }
+
+
 /**
  * app.view
  *
@@ -3846,12 +3866,17 @@ app.view.copyToClipboard = function(source) {
   }
 
   var _clipboard = document.createElement('TEXTAREA');
-  _clipboard.style = 'position:absolute;top:0;right:0;width:0;height:0;overflow:hidden';
+
+  _clipboard.style = 'position: absolute; top: 0; right: 0; width: 0; height: 0; z-index: -1; overflow: hidden;';
   _clipboard.value = source;
+
   document.body.appendChild(_clipboard);
+
   _clipboard.focus();
   _clipboard.select();
+
   document.execCommand('copy');
+
   document.body.removeChild(_clipboard);
 }
 
@@ -3915,6 +3940,8 @@ app.view.unload = function() {
 
   return;
 }
+
+
 /**
  * app.layout
  *
@@ -4375,6 +4402,8 @@ app.layout.collapse.prototype.toggle = function() {
     this.close();
   }
 }
+
+
 /**
  * app.utils
  *
@@ -4510,9 +4539,10 @@ app.utils.extendObject = function() {
  *
  * Detects browser and system environments
  *
+ * @param <String> purpose
  * @return <Object> system
  */
-app.utils.system = function() {
+app.utils.system = function(purpose) {
   var system = { 'platform': null, 'architecture': null, 'navigator': null, 'release': null };
 
   var _platform = window.navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
@@ -4587,6 +4617,10 @@ app.utils.system = function() {
         system.release = parseFloat(_release);
       }
     }
+  }
+
+  if (purpose && typeof purpose === 'string' && purpose in system) {
+    return system[purpose];
   }
 
   return system;
@@ -4731,15 +4765,19 @@ app.utils.sanitize = function(purpose, value) {
  *  - del (key <String>)
  *  - reset ()
  *
- * @param <String> fn
+ * @param <String> persists
  * @param <String> method
  * @param <String> key
  * @param value
  * @return
  */
-app.utils.storage = function(fn, method, key, value) {
-  if (fn === undefined || method === undefined) {
+app.utils.storage = function(persists, method, key, value) {
+  if (persists === undefined || method === undefined) {
     return app.error('app.utils.storage', arguments);
+  }
+
+  if (! app._runtime.storage) {
+    return app.stop('app.utils.storage', 'runtime');
   }
 
   var self = app.utils.storage.prototype;
@@ -4747,7 +4785,7 @@ app.utils.storage = function(fn, method, key, value) {
   var _storage = app._runtime.storage.toString();
 
   self._prefix = 'appe.';
-  self._fn = fn ? 'sessionStorage' : _storage;
+  self._fn = persists ? _storage : 'sessionStorage';
 
   if (self._fn in window === false) {
     return app.error('app.utils.storage', self._fn);
@@ -4761,7 +4799,7 @@ app.utils.storage.prototype.set = function(key, value) {
     return app.error('app.utils.storage.prototype.set', arguments);
   }
 
-  var _key = app.utils.btoa(this._prefix + key);
+  var _key = app.utils.base64('encode', this._prefix + key);
 
   if (typeof value == 'object') {
     try {
@@ -4783,13 +4821,9 @@ app.utils.storage.prototype.get = function(key) {
     return app.error('app.utils.storage.prototype.get', arguments);
   }
 
-  var _key = app.utils.btoa(this._prefix + key);
+  var _key = app.utils.base64('encode', this._prefix + key);
 
-  try {
-    var value = window[this._fn].getItem(_key);
-  } catch (err) {
-    return app.error('app.utils.storage.prototype.get', err);
-  }
+  var value = window[this._fn].getItem(_key);
 
   try {
     var _value = value;
@@ -4828,7 +4862,7 @@ app.utils.storage.prototype.del = function(key) {
     return app.error('app.utils.storage.prototype.del', arguments);
   }
 
-  var _key = app.utils.btoa(this._prefix + key);
+  var _key = app.utils.base64('encode', this._prefix + key);
 
   window[this._fn].removeItem(_key);
 
@@ -4883,7 +4917,7 @@ app.utils.cookie.prototype.set = function(key, value, expire_time) {
     _time = expire_time.toUTCString(); 
   }
 
-  var _key = app.utils.btoa(this._prefix + key);
+  var _key = app.utils.base64('encode', this._prefix + key);
   _key = encodeURIComponent(_key);
 
   if (typeof value == 'object') {
@@ -4907,14 +4941,16 @@ app.utils.cookie.prototype.get = function(key) {
     return app.error('app.utils.cookie.prototype.get', arguments);
   }
 
-  var _key = app.utils.btoa(this._prefix + key);
+  var _key = app.utils.base64('encode', this._prefix + key);
   _key = encodeURIComponent(_key);
 
   var value = null;
 
   if (document.cookie.indexOf(_key) != -1) {
-    var _key_regex = new RegExp('/(?:(?:^|.*;\s*)' + _key + '\s*\=\s*([^;]*).*$)|^.*$/');
-    value = document.cookie.replace(_key_regex, '$1');
+    var _key_regex = new RegExp(_key + '\=([^\;]+)');
+    var _value_match = document.cookie.match(_key_regex);
+
+    value = _value_match.length ? _value_match[1] : null;
   }
 
   if (! value) {
@@ -4961,7 +4997,7 @@ app.utils.cookie.prototype.del = function(key) {
     return app.error('app.utils.cookie.prototype.del', arguments);
   }
 
-  var _key = app.utils.btoa(this._prefix + key);
+  var _key = app.utils.base64('encode', this._prefix + key);
   _key = encodeURIComponent(_key);
 
   document.cookie = _key + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -5080,19 +5116,48 @@ app.utils.numberLendingZero = function(number) {
 
 
 /**
- * app.utils.btoa
+ * app.utils.base64
  *
- * Alias to btoa (base64) browser implementation with URI encoding
+ * Alias to base64 browser implementation with URI encoding
  *
+ * available methods:
+ *  - encode (to_encode <String>)
+ *  - decode (to_decode <String>)
+ *
+ * @global <Function> btoa
  * @global <Function> atob
  * @param to_encode
  * @return
  */
-app.utils.btoa = function(to_encode) {
+app.utils.base64 = function(method, data) {
+  var self = app.utils.base64.prototype;
+
+  if ('btoa' in window == false || 'atob' in window == false) {
+    return app.stop('app.utils.base64');
+  }
+
+  if (method === undefined || ! data) {
+    return app.error('app.utils.base64', arguments);
+  }
+
+  return self[method](data);
+}
+
+
+/**
+ * app.utils.base64.prototype.encode
+ *
+ * Alias to btoa (base64) function with URI encoding
+ *
+ * @global <Function> btoa
+ * @param to_encode
+ * @return
+ */
+app.utils.base64.prototype.encode = function(to_encode) {
   var _btoa = window.btoa;
 
   if (typeof to_encode !== 'string') {
-    return app.error('app.utils.btoa', arguments);
+    return app.error('app.utils.base64.prototype.encode', arguments);
   }
 
   to_encode = encodeURIComponent(to_encode);
@@ -5103,19 +5168,19 @@ app.utils.btoa = function(to_encode) {
 
 
 /**
- * app.utils.atob
+ * app.utils.base64.prototype.decode
  *
- * Alias to atob (base64) browser implementation with URI encoding
+ * Alias to atob (base64) function with URI encoding
  *
  * @global <Function> atob
  * @param to_decode
  * @return
  */
-app.utils.atob = function(to_decode) {
+app.utils.base64.prototype.decode = function(to_decode) {
   var _atob = window.atob;
 
   if (typeof to_decode !== 'string') {
-    return app.error('app.utils.atob', arguments);
+    return app.error('app.utils.base64.prototype.decode', arguments);
   }
 
   to_decode = _atob(to_decode);

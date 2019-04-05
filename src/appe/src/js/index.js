@@ -2,7 +2,7 @@
  * {appe}
  *
  * @version 1.0.0~beta
- * @copyright Copyright 2018-2019 (c) Leonardo Laureti
+ * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
  * contains:
@@ -31,7 +31,7 @@ app._runtime = {
 /**
  * app.load
  *
- * Helper document unload event
+ * Helper document load event
  *
  * @param <Function> func
  * @return
@@ -58,7 +58,7 @@ app.load = function(func) {
   }
 
   if (! _loaded) {
-    window.onload = func;
+    app.utils.addEvent('load', window, func);
   }
 }
 
@@ -76,7 +76,7 @@ app.unload = function(func) {
     return app.stop('app.unload');
   }
 
-  window.onbeforeunload = func;
+  app.utils.addEvent('beforeunload', window, func);
 }
 
 
@@ -193,8 +193,6 @@ app.session = function(config, target) {
     var interr = setInterval(function() {
       attempts++;
 
-      console.log(target, attempts);
-
       if (!! window[fn] || max === attempts) {
         clearInterval(interr);
 
@@ -295,6 +293,7 @@ app.resume = function(config, target) {
 
     if (target === undefined && !! (! session_resume || session_last)) {
       // there's nothing to do
+      //TODO implement no resume, custom file type .appe
       //session_resume = false;
     } else if (!! app._runtime.debug && target !== undefined) {
       return (! session_last) && app.newSession();
@@ -303,7 +302,7 @@ app.resume = function(config, target) {
     }
 
     if (session_resume) {
-      session_resume = app.utils.atob(session_resume) + '.js';
+      session_resume = app.utils.base64('decode', session_resume) + '.js';
     }
 
     return session_resume;
@@ -465,7 +464,7 @@ app.newSession = function() {
   var _current_timestamp = new Date();
   _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
 
-  var _current_timestamp_enc = app.utils.btoa(_current_timestamp);
+  var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
 
 
   var schema = config.schema;
@@ -539,7 +538,7 @@ app.openSession = function() {
   var _current_timestamp = new Date();
   _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
 
-  var _current_timestamp_enc = app.utils.btoa(_current_timestamp);
+  var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
 
 
   var _open = function() {
@@ -559,7 +558,7 @@ app.openSession = function() {
 
 
     var _filename = filename.replace('.js', '');
-    _filename = app.utils.btoa(_filename);
+    _filename = app.utils.base64('encode', _filename);
 
 
     app.utils.cookie('set', 'last_opened_file', _filename);
@@ -671,6 +670,7 @@ app.debug = function() {
  * @return <Boolean>
  */
 app.stop = function() {
+  console.log(arguments);
   if (! app._runtime.exec) {
     return false;
   }
@@ -702,7 +702,7 @@ app.error = function() {
   var fnn = null;
   var msg = null;
   var dbg = null;
-
+console.log(arguments);
   if (arguments.length == 3) {
     fnn = arguments[0];
     msg = arguments[1];
@@ -727,10 +727,10 @@ app.error = function() {
   }
 
   if (! msg) {
-    msg = 'Si è verificato un errore, impossibile proseguire.';
+    msg = 'There is an error while executing.';
 
     if (! app._runtime.exec) {
-      msg += '\n\nRicarica l\'applicazione.';
+      msg += '\n\nPlease reload the application.';
     }
   }
 
@@ -766,7 +766,7 @@ app.blind = function() {
   }
 
   var _blind = document.createElement('div');
-  _blind.setAttribute('style', 'position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.3);');
+  _blind.setAttribute('style', 'position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; background: rgba(0,0,0,0.3);');
 
   window.document.body.appendChild(_blind);
 }
@@ -865,3 +865,4 @@ app.getVersion = function(info) {
 app.getLicense = function() {
   return app.getInfo('config', 'license');
 }
+

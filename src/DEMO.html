@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="stylesheet" type="text/css" href="app/assets/css/lib/bootstrap/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="app/assets/css/app.min.css">
+<link rel="stylesheet" type="text/css" href="../app/assets/css/lib/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../app/assets/css/app.min.css">
 <title>{appe}</title>
 <noscript><meta http-equiv="refresh" content="5" id="preventHistoryBackStop"></noscript>
 </head>
@@ -32,12 +32,12 @@
 </div>
 
 
-<script type="text/javascript" src="app/assets/js/app.min.js"></script>
-<script type="text/javascript" src="app/assets/js/lib/file-saver/FileSaver.min.js" async defer></script>
-<script type="text/javascript" src="app/assets/js/lib/pako/pako.min.js" async defer></script>
-<script type="text/javascript" src="app/assets/js/lib/crypto-js/crypto-js.min.js" async defer></script>
+<script type="text/javascript" src="../app/assets/js/app.min.js"></script>
+<script type="text/javascript" src="../app/assets/js/lib/file-saver/FileSaver.min.js" async defer></script>
+<script type="text/javascript" src="../app/assets/js/lib/pako/pako.min.js" async defer></script>
+<script type="text/javascript" src="../app/assets/js/lib/crypto-js/crypto-js.min.js" async defer></script>
 
-<script type="text/javascript" src="app/config.js"></script>
+<script type="text/javascript" src="../app/config.js"></script>
 
 
 <style type="text/css">
@@ -55,10 +55,36 @@ var start = window.appe__start = {};
 
 // DEMO
 start.load = function() {
-  if (! (app.memory.has('last_opened_file')) || ! (app.memory.has('last_session'))) {
-    var _demo = app.utils.btoa('demo_save_2019-04-01_21-49-08_1');
+  var config = window.appe__config;
 
-    //app.utils.cookie('set', 'last_opened_file', _demo);
+  if (! config) {
+    return app.stop('start.load');
+  }
+
+
+  config.savePath = '../' + config.savePath;
+
+  app.redirect = function() {
+    window.location.href = '../app/index.html';
+  }
+
+  if ('localStorage' in window === false) {
+    app._runtime.storage = 'sessionStorage';
+  } else if ('sessionStorage' in window === false) {
+    app._runtime.storage = 'localStorage';
+  } else if (app.utils.system('navigator') === 'safari') {
+    app._runtime.storage = 'sessionStorage';
+  } else {
+    app._runtime.storage = 'localStorage';
+  }
+
+  if (
+    ! (app.utils.cookie('has', 'last_opened_file') || app.memory.has('last_opened_file')) ||
+    ! (app.utils.cookie('has', 'last_session') || app.memory.has('last_session'))
+  ) {
+    var _demo = app.utils.base64('encode', 'demo_save_2019-04-01_21-49-08_1');
+
+    app.utils.cookie('set', 'last_opened_file', _demo);
     app.memory.set('last_opened_file', _demo);
   }
 

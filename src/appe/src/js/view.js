@@ -1050,12 +1050,17 @@ app.view.copyToClipboard = function(source) {
   }
 
   var _clipboard = document.createElement('TEXTAREA');
-  _clipboard.style = 'position:absolute;top:0;right:0;width:0;height:0;overflow:hidden';
+
+  _clipboard.style = 'position: absolute; top: 0; right: 0; width: 0; height: 0; z-index: -1; overflow: hidden;';
   _clipboard.value = source;
+
   document.body.appendChild(_clipboard);
+
   _clipboard.focus();
   _clipboard.select();
+
   document.execCommand('copy');
+
   document.body.removeChild(_clipboard);
 }
 

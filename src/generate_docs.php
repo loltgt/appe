@@ -1,19 +1,19 @@
 <?php
 
 $paths = ['src'];
-$dirs = ['appe/src'];
+$dirs = ['appe/src/js'];
 
 $priorities = [
-	0 => 'src:appe/src:index',
-	10 => 'src:appe/src:os',
-	20 => 'src:appe/src:controller',
-	30 => 'src:appe/src:memory',
-	40 => 'src:appe/src:store',
-	50 => 'src:appe/src:start',
-	60 => 'src:appe/src:main',
-	70 => 'src:appe/src:view',
-	80 => 'src:appe/src:layout',
-	90 => 'src:appe/src:utils',
+	0 => 'src:appe/src/js:index',
+	10 => 'src:appe/src/js:os',
+	20 => 'src:appe/src/js:controller',
+	30 => 'src:appe/src/js:memory',
+	40 => 'src:appe/src/js:store',
+	50 => 'src:appe/src/js:start',
+	60 => 'src:appe/src/js:main',
+	70 => 'src:appe/src/js:view',
+	80 => 'src:appe/src/js:layout',
+	90 => 'src:appe/src/js:utils',
 ];
 
 $namespaces = [

@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "watch": "node build.js watch",
+    "watch-js": "node build.js watch js",
+    "watch-css": "node build.js watch css",
     "build": "node build.js",
+    "build-js": "node build.js js",
+    "build-css": "node build.js css",
     "docs": "php -f generate_docs.php"
   },
   "author": "Leonardo Laureti",
@@ -16,6 +20,7 @@
     "jquery": "^3.3.1"
   },
   "devDependencies": {
+    "clean-css": "^4.2.1",
     "uglify-js": "^3.5.3"
   }
 }

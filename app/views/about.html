@@ -110,21 +110,26 @@ control.handle = function(data) {
     var _license = null;
 
     if (typeof app_license === 'object') {
-      _license = document.createElement('p');
-      _license.innerHTML = app_license.text.toString();
+      var _license_text = app_license.text.toString();
+      var _license_uri = app_license.file.toString();
+
+      _license = document.createElement('P');
+      _license.innerHTML = _license_text;
       license.appendChild(_license);
 
-      _license = document.createElement('iframe');
+      _license = document.createElement('IFRAME');
       _license.setAttribute('class', 'license');
       _license.setAttribute('readonly', '');
-      _license.setAttribute('src', app_license.file.toString());
+      _license.setAttribute('src', _license_uri);
       license.appendChild(_license);
     } else if (app_license.length <= 64) {
+      var _license_text = app_license.text.toString();
+
       _license = document.createElement('p');
-      _license.innerHTML = app_license.toString();
+      _license.innerHTML = _license_text;
       license.appendChild(_license);
     } else {
-      _license = document.createElement('textarea');
+      _license = document.createElement('TEXTAREA');
       _license.setAttribute('class', 'license');
       _license.setAttribute('readonly', '');
       _license.setAttribute('disabled', '');
