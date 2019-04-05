@@ -58,7 +58,7 @@ app.memory.has = function(key, value) {
 /**
  * app.memory.del
  *
- * Remove persistent storage entry by key
+ * Removes persistent storage entry by key
  *
  * @param <String> key
  * @return

@@ -5,6 +5,7 @@
  */
 app.main = {};
 
+
 /**
  * app.main.control
  *
@@ -133,7 +134,7 @@ app.main.control = function(loc) {
  *  - delete () <=> prevent ()
  *  - close () <=> prevent ()
  *  - history ()
- *  - receive ()
+ *  - receiver ()
  *
  * @global <Object> appe__config
  * @global <Object> appe__main
@@ -297,6 +298,10 @@ app.main.handle.prototype.selection = function() {
 }
 
 app.main.handle.prototype.export = function() {
+  if (! Blob || ! saveAs) {
+    return app.error('app.main.handle.prototype.export', 'FileSaver');
+  }
+
   if (! this.ctl.data || ! (this.ctl.file && typeof this.ctl.file === 'object')) {
     return app.error('app.main.handle.prototype.export', 'ctl');
   }
@@ -305,13 +310,13 @@ app.main.handle.prototype.export = function() {
     return app.error('app.main.handle.prototype.export', 'file');
   }
 
-  var file = new File(
-    [ this.ctl.data ],
-    this.ctl.file.name,
-    (this.ctl.file.options || {})
-  );
+  try {
+    var blob = new Blob([ this.ctl.data ], (this.ctl.file.options || {}));
 
-  saveAs(file);
+    saveAs(blob, this.ctl.file.name);
+  } catch (err) {
+    return app.error('app.main.handle.prototype.export', err);
+  }
 }
 
 // generic method for all actions
@@ -325,7 +330,7 @@ app.main.handle.prototype.prepare = function() {
     this.history();
   }
 
-  this.receive();
+  this.receiver();
 }
 
 // generic method for prevented actions like delete
@@ -343,7 +348,7 @@ app.main.handle.prototype.prevent = function() {
     return;
   }
 
-  this.receive();
+  this.receiver();
 }
 
 app.main.handle.prototype.open = app.main.handle.prototype.prepare;
@@ -365,17 +370,17 @@ app.main.handle.prototype.history = function() {
   app.controller.history(title, url);
 }
 
-app.main.handle.prototype.receive = function() {
+app.main.handle.prototype.receiver = function() {
   var config = window.appe__config;
 
   if (! config) {
-    return app.stop('app.main.handle.prototype.receive');
+    return app.stop('app.main.handle.prototype.receiver');
   }
 
   var schema = config.schema;
 
   if (typeof schema !== 'object') {
-    return app.error('app.main.handle.prototype.receive', 'schema');
+    return app.error('app.main.handle.prototype.receiver', 'schema');
   }
 
   var _app_name = app._runtime.name.toString();
@@ -407,7 +412,7 @@ app.main.handle.prototype.receive = function() {
       }
     }, _app_name, schema, data);
   } catch (err) {
-    return app.error('app.main.handle.prototype.receive', err);
+    return app.error('app.main.handle.prototype.receiver', err);
   }
 }
 
@@ -481,11 +486,13 @@ app.main.action.prototype.menu = function(element) {
     element.setAttribute('data-is-visible', true);
     element.setAttribute('aria-expanded', false);
     menu.setAttribute('aria-expanded', false);
+
+    app.utils.addEvent('click', document.body, app.layout.collapse('close', element, menu));
   }
 
   app.layout.collapse('toggle', element, menu)();
 
-  app.utils.addEvent('click', document.body, app.layout.collapse('close', element, menu));
+  window.scrollTo(0, 0);
 }
 
 

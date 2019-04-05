@@ -3,7 +3,7 @@ const UglifyJS = require('uglify-js');
 const CleanCSS = require('clean-css');
 
 const contents = {
-  js: ['index', 'os', 'controller', 'memory', 'store', 'start', 'main', 'view', 'layout', 'utils'],
+  js: ['index', 'os', 'controller', 'memory', 'store', 'start', 'main', 'view', 'layout', 'utils', 'lockdown'],
   css: ['app']
 };
 
@@ -132,7 +132,7 @@ build = (fn, type) => {
   }
 
   if (type) {
-    return build.prototype[fn]();
+    return build.prototype[fn](type);
   }
 
   build.prototype[fn]('css');
@@ -286,10 +286,10 @@ build.prototype.init = (type) => {
 
 
 
-(process.argv[2] && process.argv[2] == 'js') || (process.argv[3] && process.argv[3] == 'js') && build('init', 'js');
-(process.argv[2] && process.argv[2] == 'css') || (process.argv[3] && process.argv[3] == 'css') && build('init', 'css');
-(! process.argv[2] || ! process.argv[3]) && build('init');
+(process.argv[2] == 'js' || process.argv[3] == 'js') && build('init', 'js');
+(process.argv[2] == 'css' || process.argv[3] == 'css') && build('init', 'css');
+(! process.argv[2] || process.argv[2] == 'watch' && ! process.argv[3]) && build('init');
 
-(process.argv[2] && process.argv[2] == 'watch') || (process.argv[3] && process.argv[3] == 'js') && build('watch', 'js');
-(process.argv[2] && process.argv[2] == 'watch') || (process.argv[3] && process.argv[3] == 'css') && build('watch', 'css');
-(process.argv[2] && ! process.argv[3] && process.argv[2] == 'watch') && build('watch');
+(process.argv[2] == 'watch' && process.argv[3] == 'js') && build('watch', 'js');
+(process.argv[2] == 'watch' && process.argv[3] == 'css') && build('watch', 'css');
+(process.argv[2] == 'watch' && ! process.argv[3]) && build('watch');

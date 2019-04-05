@@ -5,6 +5,7 @@
  */
 app.start = {};
 
+
 /**
  * app.start.progress
  *
@@ -38,7 +39,8 @@ app.start.progress = function(phase) {
  * Attemps to load files and scripts, returns to callback
  *
  * @global <Object> appe__config
- * @global <Object> appe__store
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <Function> callback
  * @param <String> fn
  * @param <String> file
@@ -179,6 +181,8 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
  * Fires on "start" load complete
  *
  * @global <Object> appe__config
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <String> session_resume
  * @return
  */
@@ -254,11 +258,11 @@ app.start.redirect = function(loaded) {
 /**
  * app.start.alternative
  *
+ * Display messages with info and alternatives to help to execute app 
+ *
  * //TODO hook
  * //TODO translate
  * //TODO test hta
- *
- * Display messages with info and alternatives to help to execute app 
  *
  * @global <Object> appe__config
  * @return
@@ -272,8 +276,8 @@ app.start.alternative = function() {
 
 
   var alt = [
-    'Purtroppo non è possibile eseguire l\'applicazione per via di restrizioni nel programma {browser}.',
-    'VAI NELLA CARTELLA "{alt_exec_folder}" E APRI "{alt_exec_platform}".'
+    'This application cannot be run due to restrictions into the software {browser}.',
+    'GO TO FOLDER "{alt_exec_folder}" AND OPEN "{alt_exec_platform}".'
   ];
 
 
@@ -313,6 +317,8 @@ app.start.alternative = function() {
  * app.start.load
  *
  * Default "start" load function
+ *
+ * //TODO hook?
  *
  * @global <Object> appe__config
  * @return
@@ -374,7 +380,7 @@ app.start.load = function() {
   app.utils.addEvent('click', new_action, app.newSession);
 
 
-  var _loaded = true;
+  var loaded = true;
 
   // try to load extensions
   var routine = (config.auxs && typeof config.auxs === 'object') ? config.auxs : {};
@@ -383,15 +389,15 @@ app.start.load = function() {
     for (var i = 0; i < routine.length; i++) {
       app.start.loadAttempt(function(aux_loaded) {
         if (! aux_loaded) {
-          _loaded = false;
+          loaded = false;
         }
       }, routine[i].fn, routine[i].file, routine[i].schema, routine[i].memoize);
     }
   }
 
-  if (_loaded) {
+  if (loaded) {
     app.start.loadComplete(session_resume);
   } else {
-    return app.error('app.start.alternative', 'aux_loaded');
+    return app.error('app.start.alternative', 'auxs');
   }
 }

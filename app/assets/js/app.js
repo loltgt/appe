@@ -41,12 +41,12 @@ app.load = function(func) {
     return app.stop('app.load');
   }
 
-  var _loaded = false;
+  var loaded = false;
 
   var _func = function() {
-    _loaded = true;
+    loaded = true;
 
-    if (! _loaded) {
+    if (! loaded) {
       func();
     }
   }
@@ -57,7 +57,7 @@ app.load = function(func) {
     document.addEventListener('DOMContentLoaded', _func);
   }
 
-  if (! _loaded) {
+  if (! loaded) {
     app.utils.addEvent('load', window, func);
   }
 }
@@ -95,15 +95,15 @@ app.redirect = function() {
     return app.stop('app.redirect');
   }
 
-  var _base = config.basePath.toString();
-  var _filename = 'index';
+  var base = config.basePath.toString();
+  var filename = 'index';
 
-  if (window.location.href.indexOf(_base + '/') != -1) {
-    _base = '..';
-    _filename = config.launcherName.toString();
+  if (window.location.href.indexOf(base + '/') != -1) {
+    base = '..';
+    filename = config.launcherName.toString();
   }
 
-  window.location.href = _base + '/' + _filename + '.html';
+  window.location.href = base + '/' + filename + '.html';
 }
 
 
@@ -138,6 +138,8 @@ app.position = function() {
  * Starts the session
  *
  * @global <Object> appe__store
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <Object> config
  * @param <String> target
  * @return
@@ -301,7 +303,8 @@ app.resume = function(config, target) {
       return app.redirect();
     }
 
-    if (session_resume) {
+    //TODO location.protocol
+    if (!! session_resume) {
       session_resume = app.utils.base64('decode', session_resume) + '.js';
     }
 
@@ -375,16 +378,16 @@ app.checkConfig = function(config) {
     return app.stop('app.checkConfig');
   }
 
-  var _error = false;
+  var error = false;
   var _required_keys = [ 'app', 'launcherName', 'name', 'language', 'debug', 'schema', 'events', 'routes', 'defaultRoute', 'defaultEvent', 'verifyFileChecksum', 'basePath', 'savePath', 'openAttempts' ];
 
   Array.prototype.forEach.call(_required_keys, function(key) {
     if (key in config === false) {
-      _error = true;
+      error = true;
     } else if ((key == 'schema' || key == 'events' || key == 'routes') && typeof config[key] != 'object') {
-      _error = true;
+      error = true;
     } else if (typeof config[key] != 'object' && typeof config[key] != 'string' && typeof config[key] != 'number' && typeof config[key] != 'boolean') {
-      _error = true;
+      error = true;
     }
   });
 
@@ -393,10 +396,10 @@ app.checkConfig = function(config) {
     (config.file && typeof config.file != 'object') ||
     (config.csv && typeof config.csv != 'object')
   ) {
-    _error = true;
+    error = true;
   }
 
-  return !! _error && app.stop('app.checkConfig');
+  return !! error && app.stop('app.checkConfig');
 }
 
 
@@ -696,13 +699,15 @@ app.stop = function() {
  *
  * Helper to debug and display error messages
  *
+ * //TODO test avoid too much recursions
+ *
  * @return <Boolean>
  */
 app.error = function() {
   var fnn = null;
   var msg = null;
   var dbg = null;
-console.log(arguments);
+
   if (arguments.length == 3) {
     fnn = arguments[0];
     msg = arguments[1];
@@ -727,7 +732,7 @@ console.log(arguments);
   }
 
   if (! msg) {
-    msg = 'There is an error while executing.';
+    msg = 'There was an error while executing.';
 
     if (! app._runtime.exec) {
       msg += '\n\nPlease reload the application.';
@@ -735,7 +740,9 @@ console.log(arguments);
   }
 
   // avoid too much recursions
-  if (!! app._runtime.hangs++) {
+  app._runtime.hangs++;
+
+  if (!! app._runtime.hangs) {
     return;
   }
 
@@ -882,7 +889,8 @@ app.os = {};
  * Opens a file through FileReader api, stores it, returns to callback
  *
  * @global <Object> appe__config
- * @global <Object> FileReader
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <Function> callback
  * @return
  */
@@ -897,16 +905,16 @@ app.os.fileOpen = function(callback) {
     return app.error('app.os.fileOpen', 'config');
   }
 
+  if (! FileReader) {
+    return app.error('app.os.fileOpen', 'FileReader');
+  }
+
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
     return app.error('app.os.fileOpen', 'pako');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
     return app.error('app.os.fileSave', 'CryptoJS');
-  }
-
-  if (! FileReader) {
-    return app.error('app.os.fileOpen', 'FileReader');
   }
 
   if (! (callback && typeof callback === 'function')) {
@@ -921,8 +929,12 @@ app.os.fileOpen = function(callback) {
 
   var file = this.files[0];
 
-  if (file.type.indexOf('javascript') === -1) {
-    return app.error('app.os.fileOpen', 'The file format is not correct.', arguments);
+  //TODO custom file extension
+  //:WORKAROUND temp ios
+  if (app._runtime.system.platform !== 'ios') {
+    if (file.type.indexOf('javascript') === -1) {
+      return app.error('app.os.fileOpen', 'This file format cannot be open.', arguments);
+    }
   }
 
   var schema = config.schema;
@@ -950,8 +962,10 @@ app.os.fileOpen = function(callback) {
 
     // try to restore file source
     try {
-      source = source.replace(new RegExp(file_heads + '\=(?![^"]+)'), '')
+      source = source.replace(new RegExp(file_heads + '\=(?![^"\{\}]+)'), '')
         .replace(/(^"|"$)/g, '');
+
+      console.log(source);
 
       if (file_binary) {
         source = source.replace(/\"/g, '"'); //TODO test
@@ -1009,6 +1023,8 @@ app.os.fileOpen = function(callback) {
  * Sends a file to the browser, returns to callback
  *
  * @global <Object> appe__config
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <Function> callback
  * @param <Object> source
  * @param <Date> timestamp
@@ -1023,6 +1039,10 @@ app.os.fileSave = function(callback, source, timestamp) {
 
   if (config.file && typeof config.file !== 'object') {
     return app.error('app.os.fileSave', 'config');
+  }
+
+  if (! Blob || ! saveAs) {
+    return app.error('app.os.fileSave', 'FileSaver');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
@@ -1115,19 +1135,20 @@ app.os.fileSave = function(callback, source, timestamp) {
   filename += filename_separator + file_saves;
 
 
-  var file = new File(
-    [ source ],
-    filename + '.js', //TODO custom file type
-    { type: 'application/x-javascript;charset=utf-8' } //TODO custom mime type
-  );
-
   try {
-    saveAs(file);
+    var blob = new Blob(
+      [ source ],
+      { type: 'application/x-javascript;charset=utf-8' } //TODO custom mime type
+    );
+
+    saveAs(blob, filename + '.js'); //TODO custom file extension
 
     app.memory.set('file_saves', file_saves);
 
     callback(filename);
   } catch (err) {
+    app.error('app.os.fileSave', err);
+
     callback(false);
   }
 }
@@ -1712,7 +1733,7 @@ app.memory.has = function(key, value) {
 /**
  * app.memory.del
  *
- * Remove persistent storage entry by key
+ * Removes persistent storage entry by key
  *
  * @param <String> key
  * @return
@@ -1764,7 +1785,7 @@ app.store.set = function(key, value) {
 
 
 /**
- * app.store.set
+ * app.store.get
  *
  * Gets storage entry by key
  *
@@ -1791,9 +1812,9 @@ app.store.has = function(key, value) {
 
 
 /**
- * app.memory.del
+ * app.store.del
  *
- * Remove storage entry by key
+ * Removes storage entry by key
  *
  * @param <String> key
  * @return
@@ -1821,6 +1842,7 @@ app.store.reset = function() {
  * Launcher functions
  */
 app.start = {};
+
 
 /**
  * app.start.progress
@@ -1855,7 +1877,8 @@ app.start.progress = function(phase) {
  * Attemps to load files and scripts, returns to callback
  *
  * @global <Object> appe__config
- * @global <Object> appe__store
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <Function> callback
  * @param <String> fn
  * @param <String> file
@@ -1996,6 +2019,8 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
  * Fires on "start" load complete
  *
  * @global <Object> appe__config
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <String> session_resume
  * @return
  */
@@ -2071,11 +2096,11 @@ app.start.redirect = function(loaded) {
 /**
  * app.start.alternative
  *
+ * Display messages with info and alternatives to help to execute app 
+ *
  * //TODO hook
  * //TODO translate
  * //TODO test hta
- *
- * Display messages with info and alternatives to help to execute app 
  *
  * @global <Object> appe__config
  * @return
@@ -2089,8 +2114,8 @@ app.start.alternative = function() {
 
 
   var alt = [
-    'Purtroppo non è possibile eseguire l\'applicazione per via di restrizioni nel programma {browser}.',
-    'VAI NELLA CARTELLA "{alt_exec_folder}" E APRI "{alt_exec_platform}".'
+    'This application cannot be run due to restrictions into the software {browser}.',
+    'GO TO FOLDER "{alt_exec_folder}" AND OPEN "{alt_exec_platform}".'
   ];
 
 
@@ -2130,6 +2155,8 @@ app.start.alternative = function() {
  * app.start.load
  *
  * Default "start" load function
+ *
+ * //TODO hook?
  *
  * @global <Object> appe__config
  * @return
@@ -2191,7 +2218,7 @@ app.start.load = function() {
   app.utils.addEvent('click', new_action, app.newSession);
 
 
-  var _loaded = true;
+  var loaded = true;
 
   // try to load extensions
   var routine = (config.auxs && typeof config.auxs === 'object') ? config.auxs : {};
@@ -2200,16 +2227,16 @@ app.start.load = function() {
     for (var i = 0; i < routine.length; i++) {
       app.start.loadAttempt(function(aux_loaded) {
         if (! aux_loaded) {
-          _loaded = false;
+          loaded = false;
         }
       }, routine[i].fn, routine[i].file, routine[i].schema, routine[i].memoize);
     }
   }
 
-  if (_loaded) {
+  if (loaded) {
     app.start.loadComplete(session_resume);
   } else {
-    return app.error('app.start.alternative', 'aux_loaded');
+    return app.error('app.start.alternative', 'auxs');
   }
 }
 
@@ -2220,6 +2247,7 @@ app.start.load = function() {
  * "main" functions
  */
 app.main = {};
+
 
 /**
  * app.main.control
@@ -2349,7 +2377,7 @@ app.main.control = function(loc) {
  *  - delete () <=> prevent ()
  *  - close () <=> prevent ()
  *  - history ()
- *  - receive ()
+ *  - receiver ()
  *
  * @global <Object> appe__config
  * @global <Object> appe__main
@@ -2513,6 +2541,10 @@ app.main.handle.prototype.selection = function() {
 }
 
 app.main.handle.prototype.export = function() {
+  if (! Blob || ! saveAs) {
+    return app.error('app.main.handle.prototype.export', 'FileSaver');
+  }
+
   if (! this.ctl.data || ! (this.ctl.file && typeof this.ctl.file === 'object')) {
     return app.error('app.main.handle.prototype.export', 'ctl');
   }
@@ -2521,13 +2553,13 @@ app.main.handle.prototype.export = function() {
     return app.error('app.main.handle.prototype.export', 'file');
   }
 
-  var file = new File(
-    [ this.ctl.data ],
-    this.ctl.file.name,
-    (this.ctl.file.options || {})
-  );
+  try {
+    var blob = new Blob([ this.ctl.data ], (this.ctl.file.options || {}));
 
-  saveAs(file);
+    saveAs(blob, this.ctl.file.name);
+  } catch (err) {
+    return app.error('app.main.handle.prototype.export', err);
+  }
 }
 
 // generic method for all actions
@@ -2541,7 +2573,7 @@ app.main.handle.prototype.prepare = function() {
     this.history();
   }
 
-  this.receive();
+  this.receiver();
 }
 
 // generic method for prevented actions like delete
@@ -2559,7 +2591,7 @@ app.main.handle.prototype.prevent = function() {
     return;
   }
 
-  this.receive();
+  this.receiver();
 }
 
 app.main.handle.prototype.open = app.main.handle.prototype.prepare;
@@ -2581,17 +2613,17 @@ app.main.handle.prototype.history = function() {
   app.controller.history(title, url);
 }
 
-app.main.handle.prototype.receive = function() {
+app.main.handle.prototype.receiver = function() {
   var config = window.appe__config;
 
   if (! config) {
-    return app.stop('app.main.handle.prototype.receive');
+    return app.stop('app.main.handle.prototype.receiver');
   }
 
   var schema = config.schema;
 
   if (typeof schema !== 'object') {
-    return app.error('app.main.handle.prototype.receive', 'schema');
+    return app.error('app.main.handle.prototype.receiver', 'schema');
   }
 
   var _app_name = app._runtime.name.toString();
@@ -2623,7 +2655,7 @@ app.main.handle.prototype.receive = function() {
       }
     }, _app_name, schema, data);
   } catch (err) {
-    return app.error('app.main.handle.prototype.receive', err);
+    return app.error('app.main.handle.prototype.receiver', err);
   }
 }
 
@@ -2697,11 +2729,13 @@ app.main.action.prototype.menu = function(element) {
     element.setAttribute('data-is-visible', true);
     element.setAttribute('aria-expanded', false);
     menu.setAttribute('aria-expanded', false);
+
+    app.utils.addEvent('click', document.body, app.layout.collapse('close', element, menu));
   }
 
   app.layout.collapse('toggle', element, menu)();
 
-  app.utils.addEvent('click', document.body, app.layout.collapse('close', element, menu));
+  window.scrollTo(0, 0);
 }
 
 
@@ -2821,6 +2855,7 @@ app.main.unload = function() {
  */
 app.view = {};
 
+
 /**
  * app.view.spoof
  *
@@ -2859,7 +2894,7 @@ app.view.spoof = function() {
  * Control "view" function, returns object constructor
  *
  * avalaible methods:
- *  - uninitialized (funcName <String>)
+ *  - isInitialized (funcName <String>)
  *  - begin ()
  *  - end ()
  *  - setID (id <Number>)
@@ -3253,7 +3288,7 @@ app.view.control.prototype.fillCTA = function(id) {
  * Actions "view", returns object constructor
  *
  * avalaible methods:
- *  - uninitialized (funcName <String>)
+ *  - isInitialized (funcName <String>)
  *  - begin ()
  *  - end ()
  *  - getID ()
@@ -3266,7 +3301,7 @@ app.view.control.prototype.fillCTA = function(id) {
  *  - update (data <Object>, submit <Boolean>)<=> prepare ()
  *  - delete (data <Object>, submit <Boolean>, title <String>, name) <=> prevent ()
  *  - close (data <Object>, submit <Boolean>, title <String>, name) <=> prevent ()
- *  - selection
+ *  - selection ()
  *  - print ()
  *
  * @global <Object> appe__config
@@ -3609,8 +3644,13 @@ app.view.sub.prototype.toggler = function(element) {
 
   var dropdown = element.parentNode.parentNode.parentNode;
 
+  if (! element.getAttribute('data-is-visible')) {
+    element.setAttribute('data-is-visible', true);
+
+    app.utils.addEvent('click', document.body, app.layout.dropdown('close', element, dropdown));
+  }
+
   app.layout.dropdown('toggle', element, dropdown)();
-  app.utils.addEvent('click', document.body, app.layout.dropdown('close', element, dropdown));
 }
 
 
@@ -3857,6 +3897,8 @@ app.view.convertTableCSV = function(table) {
  *
  * Helper to copy to the system clipboard
  *
+ * @link https://gist.github.com/rproenca/64781c6a1329b48a455b645d361a9aa3
+ *
  * @param <String> source
  * @return
  */
@@ -3872,8 +3914,19 @@ app.view.copyToClipboard = function(source) {
 
   document.body.appendChild(_clipboard);
 
-  _clipboard.focus();
-  _clipboard.select();
+  if (app._runtime.system.platform !== 'ios') {
+    _clipboard.focus();
+    _clipboard.select();
+  } else {
+    var _range = document.createRange();
+    _range.selectNodeContents(_clipboard);
+
+    var _selection = window.getSelection();
+    _selection.removeAllRanges();
+    _selection.addRange(_range);
+
+    _clipboard.setSelectionRange(0, 999999);
+  }
 
   document.execCommand('copy');
 
@@ -3948,6 +4001,7 @@ app.view.unload = function() {
  * Handles layout functions
  */
 app.layout = {};
+
 
 /**
  * app.layout.renderElement
@@ -5013,37 +5067,66 @@ app.utils.cookie.prototype.reset = function() {
 
 
 /**
+ * app.utils.numberFormat
+ *
+ * Formats number float within decimal and thousand groups
+ *
+ * @param <Number> number
+ * @param <Number> decimals
+ * @param <String> decimals_separator
+ * @param <String> thousands_separator
+ * @return <String>
+ */
+app.utils.numberFormat = function(number, decimals, decimals_separator, thousands_separator) {
+  if (typeof number != 'number') {
+    return app.error('app.utils.numberFormat', arguments);
+  }
+
+  decimals = decimals != undefined ? parseInt(decimals) : 0;
+  decimals_separator = !! decimals_separator ? decimals_separator.toString() : '.';
+  thousands_separator = !! thousands_separator ? thousands_separator.toString() : '';
+
+  var _number = parseFloat(number);
+
+  _number = _number.toFixed(decimals).replace('.', decimals_separator)
+    .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + thousands_separator);
+
+  return _number;
+}
+
+
+/**
  * app.utils.dateFormat
  *
  * Formats date, supported format specifiers are like them used in strftime() C library function, 
  * it accepts Date time format or true for 'now'
  *
  * format specifiers:
- *  - d  <Number> Day of the month, digits preceded by zero (01-31)
- *  - J  <Number> Day of the month (1-31)
- *  - w  <Number> Day of the week (1 Mon - 7 Sun)
- *  - m  <Number> Month, digits preceded by zero (01-12)
- *  - n  <Number> Month (1-12)
- *  - N  <Number> Month, start from zero (0-11)
- *  - Y  <Number> Year, four digits (1970)
- *  - y  <Number> Year, two digits (70)
- *  - H  <Number> Hours, digits preceded by zero (00-23)
- *  - G  <Number> Hours (0-23)
- *  - M  <Number> Minutes, digits preceded by zero (00-59)
- *  - I  <Number> Minutes (0-59)
- *  - S  <Number> Seconds, digits preceded by zero (00-59)
- *  - K  <Number> Seconds (0-59)
- *  - v  <Number> Milliseconds, three digits
- *  - a  <String> Abbreviated day of the week name (Thu)
- *  - b  <String> Abbreviated month name (Jan)
- *  - x  <String> Date representation (1970/01/01)
- *  - X  <String> Time representation (01:00:00)
- *  - s  <Number> Seconds since the Unix Epoch
- *  - V  <Number> Milliseconds since the Unix Epoch
- *  - O  <String> Difference to Greenwich time GMT in hours (+0100)
- *  - z  <String> Time zone offset (+0100 (CEST))
- *  - C  <String> Date and time representation (Thu, 01 Jan 1970 00:00:00 GMT)
- *  - Q  <String> ISO 8601 date representation (1970-01-01T00:00:00.000Z)
+ *  - d  <Number> // Day of the month, digits preceded by zero (01-31)
+ *  - J  <Number> // Day of the month (1-31)
+ *  - w  <Number> // Day of the week (1 Mon - 7 Sun)
+ *  - m  <Number> // Month, digits preceded by zero (01-12)
+ *  - n  <Number> // Month (1-12)
+ *  - N  <Number> // Month, start from zero (0-11)
+ *  - Y  <Number> // Year, four digits (1970)
+ *  - y  <Number> // Year, two digits (70)
+ *  - H  <Number> // Hours, digits preceded by zero (00-23)
+ *  - G  <Number> // Hours (0-23)
+ *  - M  <Number> // Minutes, digits preceded by zero (00-59)
+ *  - I  <Number> // Minutes (0-59)
+ *  - S  <Number> // Seconds, digits preceded by zero (00-59)
+ *  - K  <Number> // Seconds (0-59)
+ *  - v  <Number> // Milliseconds, three digits
+ *  - a  <String> // Abbreviated day of the week name (Thu)
+ *  - b  <String> // Abbreviated month name (Jan)
+ *  - x  <String> // Date representation (1970/01/01)
+ *  - X  <String> // Time representation (01:00:00)
+ *  - s  <Number> // Seconds since the Unix Epoch
+ *  - V  <Number> // Milliseconds since the Unix Epoch
+ *  - O  <String> // Difference to Greenwich time GMT in hours (+0100)
+ *  - z  <String> // Time zone offset (+0100 (CEST))
+ *  - C  <String> // Date and time representation (Thu, 01 Jan 1970 00:00:00 GMT)
+ *  - Q  <String> // ISO 8601 date representation (1970-01-01T00:00:00.000Z)
  *
  * @param <Date> | <Boolean> time
  * @return <String> formatted_date
@@ -5143,16 +5226,6 @@ app.utils.base64 = function(method, data) {
   return self[method](data);
 }
 
-
-/**
- * app.utils.base64.prototype.encode
- *
- * Alias to btoa (base64) function with URI encoding
- *
- * @global <Function> btoa
- * @param to_encode
- * @return
- */
 app.utils.base64.prototype.encode = function(to_encode) {
   var _btoa = window.btoa;
 
@@ -5166,16 +5239,6 @@ app.utils.base64.prototype.encode = function(to_encode) {
   return to_encode;
 }
 
-
-/**
- * app.utils.base64.prototype.decode
- *
- * Alias to atob (base64) function with URI encoding
- *
- * @global <Function> atob
- * @param to_decode
- * @return
- */
 app.utils.base64.prototype.decode = function(to_decode) {
   var _atob = window.atob;
 
@@ -5188,3 +5251,7 @@ app.utils.base64.prototype.decode = function(to_decode) {
 
   return to_decode;
 }
+
+
+
+Object.freeze(app);

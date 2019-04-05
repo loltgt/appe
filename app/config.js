@@ -61,12 +61,12 @@ window.appe__config = {
   "auxs": [],
   "license": {
     "text": "LGPL-3.0-or-later",
-    "file": "../LICENSE"
+    "file": "../LICENSE.txt"
   },
-  "file": {
-    "compress": false
-    //"heads": "e"
-  }
+  //"file": {
+  //  "compress": false
+  //  "heads": "e"
+  //}
   /**
   "file": {
     "binary": true,

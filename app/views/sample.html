@@ -41,7 +41,7 @@
         <th class="text-nowrap">Vehicle Type</th>
         <th class="text-nowrap">Manufactured</th>
         <th class="text-nowrap">Value Price</th>
-        <th class="hidden-print">Buy</th>
+        <th class="hidden-print">Custom</th>
       </tr>
     </thead>
     <tbody>
@@ -111,8 +111,8 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
     .replace(/\{id\}/g, data_row.id)
     .replace('{title}', data_row.title)
     .replace('{type}', data_row.type)
-    .replace('{date}', app.utils.dateFormat(data_row.date))
-    .replace('{amount}', data_row.amount) //TODO app.utils.numberFormat
+    .replace('{date}', app.utils.dateFormat(data_row.date, 'd/m/Y'))
+    .replace('{amount}', app.utils.numberFormat(data_row.amount, 2, ',', '.') + ' coin')
     .replace('{status}', data_row.status)
 
   return row;

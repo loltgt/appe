@@ -91,7 +91,7 @@ function pcbbl($line, $args = null) {
 	else if ($line === '...')
 		$lc = 'type';
 
-	$line = preg_replace('/^([\t]+|[\']+|\{|\})/', '', $line);
+	$line = preg_replace('/^([\t]+|\{|\})/', '', $line);
 
 	if ($lc) {
 		$line = explode(' ', $line);
@@ -142,8 +142,11 @@ function pcbbl($line, $args = null) {
 			}
 		break;
 
+		//TODO empty return
 		case 'return':
-			if (! empty($line[1]))
+			if (empty($line[1]))
+				$r = "";
+			else
 				$r = str_replace("|", " or ", $line[1]);
 
 			if (! empty($line[2]))
@@ -162,7 +165,7 @@ function pcbbl($line, $args = null) {
 
 
 function pcom($comment, $node = null) {
-	$comm = str_replace(["/**", " */", " * ", " *", "// ", "\t"], "", $comment);
+	$comm = str_replace(["/**", " */", " * ", " *", "\t"], "", $comment);
 	$comm = explode(PHP_EOL, $comm);
 
 	$args = null;
@@ -218,7 +221,7 @@ function pcom($comment, $node = null) {
 			} elseif ($needsh && is_int(strpos($line, " "))) {
 				$doc['comment_sh'][1] .= $bbl[1] . "\n";
 			} else {
-				$doc['comment'] .= ($doc['comment'] ? "\n" : "") . $bbl[1];
+				$doc['comment'] .= ($doc['comment'] ? "\n" : "") . str_replace("&#34;", "\"", $bbl[1]);
 				$needsh = false;
 			}
 		}
@@ -276,9 +279,9 @@ foreach ($diri as $brs) {
 	$file = realpath(__DIR__ . '/../' . $path . '/' . $filename);
 
 	$source = file_get_contents($file);
-	$source = "<?php\r\n" . str_replace("/**!", "/**", $source);
+	$source = "<?php\r\n" . $source;
 
-	$tokens = token_get_all($source);
+	$tokens = token_get_all(str_replace("\"", "&#34;", $source));
 	$source = explode(PHP_EOL, $source);
 
 
@@ -290,7 +293,6 @@ foreach ($diri as $brs) {
 
 		if ($token_name !== 'T_DOC_COMMENT') continue;
 
-
 		extract(fndlci($source, $token, $token_name));
 
 
@@ -300,7 +302,7 @@ foreach ($diri as $brs) {
 
 		$f = explode('/', $filename);
 		$f[0] = slugify($f[0]);
-		$f[1] = slugify(substr($f[1], 0, -3));
+		$f[1] = slugify(substr($f[3], 0, -3));
 
 		$sth = explode('.', $doc['line']);
 
@@ -325,9 +327,11 @@ foreach ($diri as $brs) {
 		if (! isset($docs[$three][$subthree][$i]))
 			$docs[$three][$subthree][$i] = $doc;
 
-		$file_url = "https://github.com/loltgt/appe/blob/master/{$path}/{$filename}";
 
-		$l = $index + 1;
+		//TODO TEMP
+		$file_url = "https://github.com/leolweb/appe/blob/master/{$path}/{$filename}";
+
+		$l = $index;
 		$line_url = "{$file_url}#L{$l}";
 
 
@@ -353,7 +357,7 @@ $menu = [];
 foreach ($docs as $three => $branch) {
 
 	$node = $name = $three;
-	$file = $base . '/wiki/' . $node . '.md';
+	$file = $base . '/docs/wiki/' . $node . '.md';
 
 	$body = "";
 	$header = "";
@@ -371,15 +375,11 @@ foreach ($docs as $three => $branch) {
 			if (! $header) {
 				$parent = $text['parent'];
 
-				$header .= "\n\n";
-				$header .= "# {$parent}\n";
-				$header .= "\n\n";
-
-				$node = slugify($text['child']);
-				$name = ($node ? $three . '-' . $node : slugify($text['parent']));
+				$name = $text['child'] ? $three . '.' . slugify($text['child']) : $text['parent'];
 
 				$file = $base . '/docs/wiki/' . $name . '.md';
 
+				$header = "\n";
 
 				$list[$text['priority']][] = "";
 				$list[$text['priority']][] = "## [[{$parent}|{$name}]]";
@@ -390,7 +390,8 @@ foreach ($docs as $three => $branch) {
 
 
 			$node = $text['sth'];
-			$anchor = str_replace('$', '', $text['name']);
+
+			$anchor = str_replace(array('$', '.'), '', $text['name']);
 			$anchor = urlencode($anchor);
 
 			if (! $text['descriptor']) {
@@ -407,6 +408,8 @@ foreach ($docs as $three => $branch) {
 				$text['comment'] = explode("\n", $text['comment']);
 
 				foreach ($text['comment'] as $line) {
+					if (empty($line)) continue;
+
 					$depth = preg_match('/^[\s]+/', $line);
 					$depth = $depth ? str_pad('#', $depth) : '';
 					$line = trim($line);
@@ -416,7 +419,7 @@ foreach ($docs as $three => $branch) {
 			}
 
 			if (isset($text['todo'])) {
-				$text['todo'] = "{$comment_heading} TODO: *" . $text['todo'] . "*";
+				$text['todo'] = "###### TODO: *" . $text['todo'] . "*";
 				$body .= "{$text['todo']}\n\n";
 			}
 
@@ -457,7 +460,7 @@ foreach ($docs as $three => $branch) {
 				$body .= "{$text['comment_sh']}\n\n";
 			}
 
-			if (isset($text['position'])) {
+			if (! $text['descriptor'] && isset($text['position'])) {
 				$text['position'] = "position: \n" . implode("\n", $text['position']);
 				$body .= "{$text['position']}\n\n";
 			}
@@ -477,14 +480,10 @@ foreach ($docs as $three => $branch) {
 		$node = $name = $three;
 		$file = $base . '/docs/wiki/' . $node . '.md';
 
-		$header = "";
+		$header = "\n";
 		$body = "";
 
 		ksort($list);
-
-		$header .= "\n\n";
-		$header .= "# {$three}\n";
-		$header .= "\n\n";
 
 		foreach ($list as $items) $body .= implode("\n", $items) . "\n";
 	}
@@ -499,17 +498,17 @@ ksort($menu);
 
 
 $text  = "\n";
+$text .= "* #### [[Configure|Configure]]\n";
+$text .= "* #### [[app. functions and hooks|app]]\n";
+$text .= "\n  \n";
 foreach ($menu as $item) $text .= implode("\n", $item) . "\n";
 $text .= "\n";
 
 
 file_put_contents($base . '/docs/wiki/_Sidebar.md', $text);
 
-
-$home_text = file_get_contents($base . '/docs/_Home.md');
-
-file_put_contents($base . '/docs/wiki/Home.md', $home_text . $text);
-
+copy($base . '/docs/_Configure.md', $base . '/docs/wiki/Configure.md');
+copy($base . '/docs/_Home.md', $base . '/docs/wiki/Home.md');
 
 
 file_put_contents($base . '/docs.tmp', print_r($docs, true));

@@ -57,7 +57,7 @@
         <th>Specimen</th>
         <th>Family</th>
         <th>Discovered</th>
-        <th>Fantasy</th>
+        <th>Fantastic</th>
         <th></th>
         <th>AVG</th>
         <th>Movies</th>
@@ -296,6 +296,14 @@ control.action = function(element, event, extra) {
     if (! (extra && typeof extra === 'object')) {
       return app.error('control.action().update', 'extra');
     }
+
+    if (app.memory.has('demo_updated')) {
+      if ((app.utils.dateFormat(true, 'V') - app.memory.get('demo_updated')) < 3000) {
+        return;
+      }
+    }
+
+    app.memory.set('demo_updated', app.utils.dateFormat(true, 'V'));
 
     _data_updated = extra;
 

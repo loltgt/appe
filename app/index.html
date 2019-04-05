@@ -158,13 +158,13 @@ main.setup = function(data) {
       archive_items[id].pop = {};
     }
 
-    archive_items[id].custom['1'] = (Math.round(Math.random() * 10) < 5 ? true : false);
-    archive_items[id].custom['2'] = (Math.round(Math.random() * 10) > 5 ? true : false);
-    archive_items[id].pop['avg'] = Math.round(Math.random(0).toExponential() * 10);
-    archive_items[id].pop['movies'] = Math.floor(Math.random(1).toExponential() * 100);
-    archive_items[id].pop['toyes'] = Math.floor(Math.random(2).toExponential() * 100);
-    archive_items[id].pop['books'] = Math.floor(Math.random(3).toExponential() * 100);
-    archive_items[id].awards = Math.ceil(Math.random(new Date(archive_items[id].date).getTime()) * 1000);
+    archive_items[id].custom['1'] = archive_items[id].custom['1'] != undefined ? archive_items[id].custom['1'] : (Math.round(Math.random() * 10) < 5 ? true : false);
+    archive_items[id].custom['2'] = archive_items[id].custom['2'] != undefined ? archive_items[id].custom['2'] : (Math.round(Math.random() * 10) > 5 ? true : false);
+    archive_items[id].pop['avg'] = archive_items[id].pop['avg'] != undefined ? archive_items[id].pop['avg'] : Math.round(Math.random(0).toExponential() * 10);
+    archive_items[id].pop['movies'] = archive_items[id].pop['movies'] != undefined ? archive_items[id].pop['movies'] : Math.floor(Math.random(1).toExponential() * 100);
+    archive_items[id].pop['toyes'] = archive_items[id].pop['toyes'] != undefined ? archive_items[id].pop['toyes'] : Math.floor(Math.random(2).toExponential() * 100);
+    archive_items[id].pop['books'] = archive_items[id].pop['books'] != undefined ? archive_items[id].pop['books'] : Math.floor(Math.random(3).toExponential() * 100);
+    archive_items[id].awards = archive_items[id].awards != undefined ? archive_items[id].awards : Math.ceil(Math.random(new Date(archive_items[id].date).getTime()) * 1000);
 
     if (! archive_items[id].pop.total) {
       archive_items[id].pop.total  = 0;

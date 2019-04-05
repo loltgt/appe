@@ -5,6 +5,7 @@
  */
 app.view = {};
 
+
 /**
  * app.view.spoof
  *
@@ -43,7 +44,7 @@ app.view.spoof = function() {
  * Control "view" function, returns object constructor
  *
  * avalaible methods:
- *  - uninitialized (funcName <String>)
+ *  - isInitialized (funcName <String>)
  *  - begin ()
  *  - end ()
  *  - setID (id <Number>)
@@ -437,7 +438,7 @@ app.view.control.prototype.fillCTA = function(id) {
  * Actions "view", returns object constructor
  *
  * avalaible methods:
- *  - uninitialized (funcName <String>)
+ *  - isInitialized (funcName <String>)
  *  - begin ()
  *  - end ()
  *  - getID ()
@@ -450,7 +451,7 @@ app.view.control.prototype.fillCTA = function(id) {
  *  - update (data <Object>, submit <Boolean>)<=> prepare ()
  *  - delete (data <Object>, submit <Boolean>, title <String>, name) <=> prevent ()
  *  - close (data <Object>, submit <Boolean>, title <String>, name) <=> prevent ()
- *  - selection
+ *  - selection ()
  *  - print ()
  *
  * @global <Object> appe__config
@@ -793,8 +794,13 @@ app.view.sub.prototype.toggler = function(element) {
 
   var dropdown = element.parentNode.parentNode.parentNode;
 
+  if (! element.getAttribute('data-is-visible')) {
+    element.setAttribute('data-is-visible', true);
+
+    app.utils.addEvent('click', document.body, app.layout.dropdown('close', element, dropdown));
+  }
+
   app.layout.dropdown('toggle', element, dropdown)();
-  app.utils.addEvent('click', document.body, app.layout.dropdown('close', element, dropdown));
 }
 
 
@@ -1041,6 +1047,8 @@ app.view.convertTableCSV = function(table) {
  *
  * Helper to copy to the system clipboard
  *
+ * @link https://gist.github.com/rproenca/64781c6a1329b48a455b645d361a9aa3
+ *
  * @param <String> source
  * @return
  */
@@ -1056,8 +1064,19 @@ app.view.copyToClipboard = function(source) {
 
   document.body.appendChild(_clipboard);
 
-  _clipboard.focus();
-  _clipboard.select();
+  if (app._runtime.system.platform !== 'ios') {
+    _clipboard.focus();
+    _clipboard.select();
+  } else {
+    var _range = document.createRange();
+    _range.selectNodeContents(_clipboard);
+
+    var _selection = window.getSelection();
+    _selection.removeAllRanges();
+    _selection.addRange(_range);
+
+    _clipboard.setSelectionRange(0, 999999);
+  }
 
   document.execCommand('copy');
 

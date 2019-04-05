@@ -28,7 +28,7 @@ app.store.set = function(key, value) {
 
 
 /**
- * app.store.set
+ * app.store.get
  *
  * Gets storage entry by key
  *
@@ -55,9 +55,9 @@ app.store.has = function(key, value) {
 
 
 /**
- * app.memory.del
+ * app.store.del
  *
- * Remove storage entry by key
+ * Removes storage entry by key
  *
  * @param <String> key
  * @return

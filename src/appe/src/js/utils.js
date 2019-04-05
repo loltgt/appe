@@ -607,37 +607,66 @@ app.utils.cookie.prototype.reset = function() {
 
 
 /**
+ * app.utils.numberFormat
+ *
+ * Formats number float within decimal and thousand groups
+ *
+ * @param <Number> number
+ * @param <Number> decimals
+ * @param <String> decimals_separator
+ * @param <String> thousands_separator
+ * @return <String>
+ */
+app.utils.numberFormat = function(number, decimals, decimals_separator, thousands_separator) {
+  if (typeof number != 'number') {
+    return app.error('app.utils.numberFormat', arguments);
+  }
+
+  decimals = decimals != undefined ? parseInt(decimals) : 0;
+  decimals_separator = !! decimals_separator ? decimals_separator.toString() : '.';
+  thousands_separator = !! thousands_separator ? thousands_separator.toString() : '';
+
+  var _number = parseFloat(number);
+
+  _number = _number.toFixed(decimals).replace('.', decimals_separator)
+    .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + thousands_separator);
+
+  return _number;
+}
+
+
+/**
  * app.utils.dateFormat
  *
  * Formats date, supported format specifiers are like them used in strftime() C library function, 
  * it accepts Date time format or true for 'now'
  *
  * format specifiers:
- *  - d  <Number> Day of the month, digits preceded by zero (01-31)
- *  - J  <Number> Day of the month (1-31)
- *  - w  <Number> Day of the week (1 Mon - 7 Sun)
- *  - m  <Number> Month, digits preceded by zero (01-12)
- *  - n  <Number> Month (1-12)
- *  - N  <Number> Month, start from zero (0-11)
- *  - Y  <Number> Year, four digits (1970)
- *  - y  <Number> Year, two digits (70)
- *  - H  <Number> Hours, digits preceded by zero (00-23)
- *  - G  <Number> Hours (0-23)
- *  - M  <Number> Minutes, digits preceded by zero (00-59)
- *  - I  <Number> Minutes (0-59)
- *  - S  <Number> Seconds, digits preceded by zero (00-59)
- *  - K  <Number> Seconds (0-59)
- *  - v  <Number> Milliseconds, three digits
- *  - a  <String> Abbreviated day of the week name (Thu)
- *  - b  <String> Abbreviated month name (Jan)
- *  - x  <String> Date representation (1970/01/01)
- *  - X  <String> Time representation (01:00:00)
- *  - s  <Number> Seconds since the Unix Epoch
- *  - V  <Number> Milliseconds since the Unix Epoch
- *  - O  <String> Difference to Greenwich time GMT in hours (+0100)
- *  - z  <String> Time zone offset (+0100 (CEST))
- *  - C  <String> Date and time representation (Thu, 01 Jan 1970 00:00:00 GMT)
- *  - Q  <String> ISO 8601 date representation (1970-01-01T00:00:00.000Z)
+ *  - d  <Number> // Day of the month, digits preceded by zero (01-31)
+ *  - J  <Number> // Day of the month (1-31)
+ *  - w  <Number> // Day of the week (1 Mon - 7 Sun)
+ *  - m  <Number> // Month, digits preceded by zero (01-12)
+ *  - n  <Number> // Month (1-12)
+ *  - N  <Number> // Month, start from zero (0-11)
+ *  - Y  <Number> // Year, four digits (1970)
+ *  - y  <Number> // Year, two digits (70)
+ *  - H  <Number> // Hours, digits preceded by zero (00-23)
+ *  - G  <Number> // Hours (0-23)
+ *  - M  <Number> // Minutes, digits preceded by zero (00-59)
+ *  - I  <Number> // Minutes (0-59)
+ *  - S  <Number> // Seconds, digits preceded by zero (00-59)
+ *  - K  <Number> // Seconds (0-59)
+ *  - v  <Number> // Milliseconds, three digits
+ *  - a  <String> // Abbreviated day of the week name (Thu)
+ *  - b  <String> // Abbreviated month name (Jan)
+ *  - x  <String> // Date representation (1970/01/01)
+ *  - X  <String> // Time representation (01:00:00)
+ *  - s  <Number> // Seconds since the Unix Epoch
+ *  - V  <Number> // Milliseconds since the Unix Epoch
+ *  - O  <String> // Difference to Greenwich time GMT in hours (+0100)
+ *  - z  <String> // Time zone offset (+0100 (CEST))
+ *  - C  <String> // Date and time representation (Thu, 01 Jan 1970 00:00:00 GMT)
+ *  - Q  <String> // ISO 8601 date representation (1970-01-01T00:00:00.000Z)
  *
  * @param <Date> | <Boolean> time
  * @return <String> formatted_date
@@ -737,16 +766,6 @@ app.utils.base64 = function(method, data) {
   return self[method](data);
 }
 
-
-/**
- * app.utils.base64.prototype.encode
- *
- * Alias to btoa (base64) function with URI encoding
- *
- * @global <Function> btoa
- * @param to_encode
- * @return
- */
 app.utils.base64.prototype.encode = function(to_encode) {
   var _btoa = window.btoa;
 
@@ -760,16 +779,6 @@ app.utils.base64.prototype.encode = function(to_encode) {
   return to_encode;
 }
 
-
-/**
- * app.utils.base64.prototype.decode
- *
- * Alias to atob (base64) function with URI encoding
- *
- * @global <Function> atob
- * @param to_decode
- * @return
- */
 app.utils.base64.prototype.decode = function(to_decode) {
   var _atob = window.atob;
 

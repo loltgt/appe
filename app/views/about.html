@@ -24,8 +24,8 @@
 
 <div id="appe" class="page-block">
   <p><strong>&#123;appe&#125;</strong> &nbsp; {release}</p>
-  <p>2019 &copy; Leonardo Laureti</p>
-  <p>Website: <a href="https://loltgt.ga" class="btn btn-link btn-sm" target="_blank">loltgt.ga</a> &nbsp; Github page: <a href="https://github.com/loltgt/appe/" class="btn btn-link btn-sm" target="_blank">github.com/loltgt/appe/</a></p>
+  <p>{copyright_year} &copy; Leonardo Laureti</p>
+  <p>Website: <a href="https://loltgt.ga" class="btn btn-link btn-sm" target="_blank">loltgt.ga</a> &nbsp; GitHub page: <a href="https://github.com/loltgt/appe/" class="btn btn-link btn-sm" target="_blank">github.com/loltgt/appe/</a></p>
 </div>
 </section>
 
@@ -34,7 +34,7 @@
 <section class="page-section">
 <h5>Running application</h5>
 
-<p id="app-name" class="lead">{app}</p>
+<p id="app-name" class="lead">{app_name}</p>
 
 <table id="table" class="table table-bordered table-auto">
   <tbody>
@@ -81,7 +81,8 @@ control.handle = function(data) {
   var appe = document.getElementById('appe');
 
   appe.innerHTML = appe.innerHTML
-    .replace('{release}', app.getVersion('release'));
+    .replace('{release}', app.getVersion('release'))
+    .replace('{copyright_year}', new Date().getFullYear());
 
 
   var app_name = document.getElementById('app-name');

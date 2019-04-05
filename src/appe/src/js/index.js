@@ -41,12 +41,12 @@ app.load = function(func) {
     return app.stop('app.load');
   }
 
-  var _loaded = false;
+  var loaded = false;
 
   var _func = function() {
-    _loaded = true;
+    loaded = true;
 
-    if (! _loaded) {
+    if (! loaded) {
       func();
     }
   }
@@ -57,7 +57,7 @@ app.load = function(func) {
     document.addEventListener('DOMContentLoaded', _func);
   }
 
-  if (! _loaded) {
+  if (! loaded) {
     app.utils.addEvent('load', window, func);
   }
 }
@@ -95,15 +95,15 @@ app.redirect = function() {
     return app.stop('app.redirect');
   }
 
-  var _base = config.basePath.toString();
-  var _filename = 'index';
+  var base = config.basePath.toString();
+  var filename = 'index';
 
-  if (window.location.href.indexOf(_base + '/') != -1) {
-    _base = '..';
-    _filename = config.launcherName.toString();
+  if (window.location.href.indexOf(base + '/') != -1) {
+    base = '..';
+    filename = config.launcherName.toString();
   }
 
-  window.location.href = _base + '/' + _filename + '.html';
+  window.location.href = base + '/' + filename + '.html';
 }
 
 
@@ -138,6 +138,8 @@ app.position = function() {
  * Starts the session
  *
  * @global <Object> appe__store
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <Object> config
  * @param <String> target
  * @return
@@ -301,7 +303,8 @@ app.resume = function(config, target) {
       return app.redirect();
     }
 
-    if (session_resume) {
+    //TODO location.protocol
+    if (!! session_resume) {
       session_resume = app.utils.base64('decode', session_resume) + '.js';
     }
 
@@ -375,16 +378,16 @@ app.checkConfig = function(config) {
     return app.stop('app.checkConfig');
   }
 
-  var _error = false;
+  var error = false;
   var _required_keys = [ 'app', 'launcherName', 'name', 'language', 'debug', 'schema', 'events', 'routes', 'defaultRoute', 'defaultEvent', 'verifyFileChecksum', 'basePath', 'savePath', 'openAttempts' ];
 
   Array.prototype.forEach.call(_required_keys, function(key) {
     if (key in config === false) {
-      _error = true;
+      error = true;
     } else if ((key == 'schema' || key == 'events' || key == 'routes') && typeof config[key] != 'object') {
-      _error = true;
+      error = true;
     } else if (typeof config[key] != 'object' && typeof config[key] != 'string' && typeof config[key] != 'number' && typeof config[key] != 'boolean') {
-      _error = true;
+      error = true;
     }
   });
 
@@ -393,10 +396,10 @@ app.checkConfig = function(config) {
     (config.file && typeof config.file != 'object') ||
     (config.csv && typeof config.csv != 'object')
   ) {
-    _error = true;
+    error = true;
   }
 
-  return !! _error && app.stop('app.checkConfig');
+  return !! error && app.stop('app.checkConfig');
 }
 
 
@@ -696,13 +699,15 @@ app.stop = function() {
  *
  * Helper to debug and display error messages
  *
+ * //TODO test avoid too much recursions
+ *
  * @return <Boolean>
  */
 app.error = function() {
   var fnn = null;
   var msg = null;
   var dbg = null;
-console.log(arguments);
+
   if (arguments.length == 3) {
     fnn = arguments[0];
     msg = arguments[1];
@@ -727,7 +732,7 @@ console.log(arguments);
   }
 
   if (! msg) {
-    msg = 'There is an error while executing.';
+    msg = 'There was an error while executing.';
 
     if (! app._runtime.exec) {
       msg += '\n\nPlease reload the application.';
@@ -735,7 +740,9 @@ console.log(arguments);
   }
 
   // avoid too much recursions
-  if (!! app._runtime.hangs++) {
+  app._runtime.hangs++;
+
+  if (!! app._runtime.hangs) {
     return;
   }
 

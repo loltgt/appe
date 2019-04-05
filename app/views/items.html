@@ -41,6 +41,7 @@
         <th>Title</th>
         <th class="text-nowrap">Type</th>
         <th class="text-nowrap">Date</th>
+        <th class="separator"></th>
         <th>Status</th>
       </tr>
     </thead>
@@ -55,6 +56,7 @@
         <td>{title}</td>
         <td>{type}</td>
         <td class="text-nowrap">{date}</td>
+        <td class="separator"></td>
         <td>{status}</td>
       </tr>
     </tbody>
@@ -126,7 +128,7 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
     .replace('{name}', data_row.name)
     .replace('{title}', data_row.title)
     .replace('{type}', data_categories_extra.types[data_row.type])
-    .replace('{date}', app.utils.dateFormat(data_row.date))
+    .replace('{date}', app.utils.dateFormat(data_row.date, 'Y'))
     .replace('{amount}', data_row.amount)
     .replace('{status}', (data_row.status ? '<span class="badge status-on">&nbsp;</span> enabled' : '<span class="badge status-off">&nbsp;</span> disabled'))
 

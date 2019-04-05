@@ -7,7 +7,7 @@ Array
                     [app-load] => Array
                         (
                             [line] => app.load
-                            [comment] => Helper document unload event
+                            [comment] => Helper document load event
                             [params] => Array
                                 (
                                     [5] => <Function> func
@@ -17,13 +17,13 @@ Array
                             [descriptor] => 
                             [name] => app.load
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => load
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [40](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L40)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [39](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L39)
                                 )
 
                             [priority] => 0
@@ -42,13 +42,13 @@ Array
                             [descriptor] => 
                             [name] => app.unload
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => unload
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [75](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L75)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [74](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L74)
                                 )
 
                             [priority] => 0
@@ -67,13 +67,13 @@ Array
                             [descriptor] => 
                             [name] => app.redirect
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => redirect
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [92](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L92)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [91](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L91)
                                 )
 
                             [priority] => 0
@@ -87,13 +87,13 @@ Array
                             [descriptor] => 
                             [name] => app.position
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => position
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [118](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L118)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [117](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L117)
                                 )
 
                             [priority] => 0
@@ -106,25 +106,27 @@ Array
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__store
+                                    [6] => <Object> pako
+                                    [7] => <Object> CryptoJS
                                 )
 
                             [params] => Array
                                 (
-                                    [6] => <Object> config
-                                    [7] => <String> target
+                                    [8] => <Object> config
+                                    [9] => <String> target
                                 )
 
                             [return] => 
                             [descriptor] => 
                             [name] => app.session
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => session
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [146](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L146)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [147](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L147)
                                 )
 
                             [priority] => 0
@@ -144,13 +146,13 @@ Array
                             [descriptor] => 
                             [name] => app.resume
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => resume
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [270](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L270)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [269](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L269)
                                 )
 
                             [priority] => 0
@@ -174,13 +176,13 @@ Array
                             [descriptor] => 
                             [name] => app.data
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => data
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [341](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L341)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [342](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L342)
                                 )
 
                             [priority] => 0
@@ -199,13 +201,13 @@ Array
                             [descriptor] => 
                             [name] => app.checkConfig
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => checkConfig
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [375](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L375)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [376](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L376)
                                 )
 
                             [priority] => 0
@@ -229,13 +231,13 @@ Array
                             [descriptor] => 
                             [name] => app.checkFile
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => checkFile
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [414](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L414)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [415](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L415)
                                 )
 
                             [priority] => 0
@@ -255,13 +257,13 @@ Array
                             [descriptor] => 
                             [name] => app.newSession
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => newSession
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [455](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L455)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [456](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L456)
                                 )
 
                             [priority] => 0
@@ -286,13 +288,13 @@ Array
                             [descriptor] => 
                             [name] => app.openSession
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => openSession
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [525](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L525)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [526](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L526)
                                 )
 
                             [priority] => 0
@@ -317,13 +319,13 @@ Array
                             [descriptor] => 
                             [name] => app.saveSession
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => saveSession
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [611](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L611)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [612](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L612)
                                 )
 
                             [priority] => 0
@@ -342,13 +344,13 @@ Array
                             [descriptor] => 
                             [name] => app.debug
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => debug
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [662](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L662)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [663](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L663)
                                 )
 
                             [priority] => 0
@@ -362,13 +364,13 @@ Array
                             [descriptor] => 
                             [name] => app.stop
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => stop
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [674](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L674)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [675](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L675)
                                 )
 
                             [priority] => 0
@@ -378,17 +380,19 @@ Array
                         (
                             [line] => app.error
                             [comment] => Helper to debug and display error messages
+
                             [return] => <Boolean>
+                            [todo] => test avoid too much recursions
                             [descriptor] => 
                             [name] => app.error
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => error
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [702](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L702)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [706](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L706)
                                 )
 
                             [priority] => 0
@@ -402,13 +406,13 @@ Array
                             [descriptor] => 
                             [name] => app.blind
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => blind
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [762](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L762)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [768](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L768)
                                 )
 
                             [priority] => 0
@@ -433,13 +437,13 @@ Array
                             [descriptor] => 
                             [name] => app.getInfo
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => getInfo
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [786](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L786)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [792](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L792)
                                 )
 
                             [priority] => 0
@@ -453,13 +457,13 @@ Array
                             [descriptor] => 
                             [name] => app.getName
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => getName
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [834](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L834)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [840](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L840)
                                 )
 
                             [priority] => 0
@@ -478,13 +482,13 @@ Array
                             [descriptor] => 
                             [name] => app.getVersion
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => getVersion
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [847](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L847)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [853](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L853)
                                 )
 
                             [priority] => 0
@@ -498,215 +502,41 @@ Array
                             [descriptor] => 
                             [name] => app.getLicense
                             [parent] => app
-                            [child] => 
+                            [child] => index
                             [sth] => getLicense
                             [category] => Function
-                            [file] => appe/src/index.js
+                            [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js)   line: [866](https://github.com/loltgt/appe/blob/master/src/appe/src/index.js#L866)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [872](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L872)
                                 )
 
                             [priority] => 0
-                        )
-
-                    [app-os] => Array
-                        (
-                            [line] => app.os
-                            [comment] => Handles filesystem functions
-                            [descriptor] => 
-                            [name] => app.os
-                            [parent] => app
-                            [child] => 
-                            [sth] => os
-                            [category] => Function
-                            [file] => appe/src/os.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js)   line: [7](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js#L7)
-                                )
-
-                            [priority] => 10
-                        )
-
-                    [app-controller] => Array
-                        (
-                            [line] => app.controller
-                            [comment] => Controller functions
-                            [descriptor] => 
-                            [name] => app.controller
-                            [parent] => app
-                            [child] => 
-                            [sth] => controller
-                            [category] => Function
-                            [file] => appe/src/controller.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js)   line: [7](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js#L7)
-                                )
-
-                            [priority] => 20
-                        )
-
-                    [app-memory] => Array
-                        (
-                            [line] => app.memory
-                            [comment] => Handles persistent storage entries
-                            [comment_sh] => Array
-                                (
-                                    [0] => available methods:
-                                    [1] =>  - set (key <String>, value)
- - get (key <String>)
- - has (has <String>, value)
- - del (key <String>)
- - reset ()
-
-                                )
-
-                            [descriptor] => 
-                            [name] => app.memory
-                            [parent] => app
-                            [child] => 
-                            [sth] => memory
-                            [category] => Function
-                            [file] => appe/src/memory.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js)   line: [14](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js#L14)
-                                )
-
-                            [priority] => 30
-                        )
-
-                    [app-store] => Array
-                        (
-                            [line] => app.store
-                            [comment] => Handles storage entries
-                            [comment_sh] => Array
-                                (
-                                    [0] => available methods:
-                                    [1] =>  - set (key <String>, value)
- - get (key <String>)
- - has (has <String>, value)
- - del (key <String>)
- - reset ()
-
-                                )
-
-                            [descriptor] => 
-                            [name] => app.store
-                            [parent] => app
-                            [child] => 
-                            [sth] => store
-                            [category] => Function
-                            [file] => appe/src/store.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js)   line: [14](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js#L14)
-                                )
-
-                            [priority] => 40
-                        )
-
-                    [app-start] => Array
-                        (
-                            [line] => app.start
-                            [comment] => Launcher functions
-                            [descriptor] => 
-                            [name] => app.start
-                            [parent] => app
-                            [child] => 
-                            [sth] => start
-                            [category] => Function
-                            [file] => appe/src/start.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/start.js](https://github.com/loltgt/appe/blob/master/src/appe/src/start.js)   line: [7](https://github.com/loltgt/appe/blob/master/src/appe/src/start.js#L7)
-                                )
-
-                            [priority] => 50
-                        )
-
-                    [app-main] => Array
-                        (
-                            [line] => app.main
-                            [comment] => "main" functions
-                            [descriptor] => 
-                            [name] => app.main
-                            [parent] => app
-                            [child] => 
-                            [sth] => main
-                            [category] => Function
-                            [file] => appe/src/main.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js)   line: [7](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js#L7)
-                                )
-
-                            [priority] => 60
-                        )
-
-                    [app-view] => Array
-                        (
-                            [line] => app.view
-                            [comment] => "view" functions
-                            [descriptor] => 
-                            [name] => app.view
-                            [parent] => app
-                            [child] => 
-                            [sth] => view
-                            [category] => Function
-                            [file] => appe/src/view.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [7](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L7)
-                                )
-
-                            [priority] => 70
-                        )
-
-                    [app-layout] => Array
-                        (
-                            [line] => app.layout
-                            [comment] => Handles layout functions
-                            [descriptor] => 
-                            [name] => app.layout
-                            [parent] => app
-                            [child] => 
-                            [sth] => layout
-                            [category] => Function
-                            [file] => appe/src/layout.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/layout.js](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js)   line: [7](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js#L7)
-                                )
-
-                            [priority] => 80
-                        )
-
-                    [app-utils] => Array
-                        (
-                            [line] => app.utils
-                            [comment] => Utils functions
-                            [descriptor] => 
-                            [name] => app.utils
-                            [parent] => app
-                            [child] => 
-                            [sth] => utils
-                            [category] => Function
-                            [file] => appe/src/utils.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [7](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L7)
-                                )
-
-                            [priority] => 90
                         )
 
                 )
 
             [os] => Array
                 (
+                    [0] => Array
+                        (
+                            [line] => app.os
+                            [comment] => Handles filesystem functions
+                            [descriptor] => 1
+                            [name] => app.os
+                            [parent] => app.os
+                            [child] => os
+                            [sth] => 1
+                            [category] => Function
+                            [file] => appe/src/js/os.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [6](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L6)
+                                )
+
+                            [priority] => 10
+                        )
+
                     [app-os-fileOpen] => Array
                         (
                             [line] => app.os.fileOpen
@@ -714,25 +544,60 @@ Array
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
-                                    [6] => <Object> FileReader
+                                    [6] => <Object> pako
+                                    [7] => <Object> CryptoJS
                                 )
 
                             [params] => Array
                                 (
-                                    [7] => <Function> callback
+                                    [8] => <Function> callback
                                 )
 
                             [return] => 
                             [descriptor] => 
                             [name] => app.os.fileOpen
                             [parent] => app.os
-                            [child] => 
+                            [child] => os
                             [sth] => fileOpen
                             [category] => Function
-                            [file] => appe/src/os.js
+                            [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js)   line: [20](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js#L20)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [20](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L20)
+                                )
+
+                            [priority] => 10
+                        )
+
+                    [app-os-fileSave] => Array
+                        (
+                            [line] => app.os.fileSave
+                            [comment] => Sends a file to the browser, returns to callback
+                            [globals] => Array
+                                (
+                                    [5] => <Object> appe__config
+                                    [6] => <Object> pako
+                                    [7] => <Object> CryptoJS
+                                )
+
+                            [params] => Array
+                                (
+                                    [8] => <Function> callback
+                                    [9] => <Object> source
+                                    [10] => <Date> timestamp
+                                )
+
+                            [return] => 
+                            [descriptor] => 
+                            [name] => app.os.fileSave
+                            [parent] => app.os
+                            [child] => os
+                            [sth] => fileSave
+                            [category] => Function
+                            [file] => appe/src/js/os.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [156](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L156)
                                 )
 
                             [priority] => 10
@@ -753,13 +618,13 @@ Array
                             [descriptor] => 
                             [name] => app.os.scriptOpen
                             [parent] => app.os
-                            [child] => 
+                            [child] => os
                             [sth] => scriptOpen
                             [category] => Function
-                            [file] => appe/src/os.js
+                            [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js)   line: [277](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js#L277)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [290](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L290)
                                 )
 
                             [priority] => 10
@@ -784,13 +649,13 @@ Array
                             [descriptor] => 
                             [name] => app.os.generateFileHead
                             [parent] => app.os
-                            [child] => 
+                            [child] => os
                             [sth] => generateFileHead
                             [category] => Function
-                            [file] => appe/src/os.js
+                            [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js)   line: [329](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js#L329)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [342](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L342)
                                 )
 
                             [priority] => 10
@@ -809,13 +674,13 @@ Array
                             [descriptor] => 
                             [name] => app.os.getLastFileName
                             [parent] => app.os
-                            [child] => 
+                            [child] => os
                             [sth] => getLastFileName
                             [category] => Function
-                            [file] => appe/src/os.js
+                            [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js)   line: [360](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js#L360)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [373](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L373)
                                 )
 
                             [priority] => 10
@@ -834,13 +699,13 @@ Array
                             [descriptor] => 
                             [name] => app.os.getLastFileVersion
                             [parent] => app.os
-                            [child] => 
+                            [child] => os
                             [sth] => getLastFileVersion
                             [category] => Function
-                            [file] => appe/src/os.js
+                            [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js)   line: [394](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js#L394)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [407](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L407)
                                 )
 
                             [priority] => 10
@@ -859,13 +724,13 @@ Array
                             [descriptor] => 
                             [name] => app.os.getLastFileChecksum
                             [parent] => app.os
-                            [child] => 
+                            [child] => os
                             [sth] => getLastFileChecksum
                             [category] => Function
-                            [file] => appe/src/os.js
+                            [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js)   line: [427](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js#L427)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [440](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L440)
                                 )
 
                             [priority] => 10
@@ -879,13 +744,13 @@ Array
                             [descriptor] => 
                             [name] => app.os.getLastFileHead
                             [parent] => app.os
-                            [child] => 
+                            [child] => os
                             [sth] => getLastFileHead
                             [category] => Function
-                            [file] => appe/src/os.js
+                            [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js)   line: [459](https://github.com/loltgt/appe/blob/master/src/appe/src/os.js#L459)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [472](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L472)
                                 )
 
                             [priority] => 10
@@ -895,6 +760,25 @@ Array
 
             [controller] => Array
                 (
+                    [0] => Array
+                        (
+                            [line] => app.controller
+                            [comment] => Controller functions
+                            [descriptor] => 1
+                            [name] => app.controller
+                            [parent] => app.controller
+                            [child] => controller
+                            [sth] => 1
+                            [category] => Function
+                            [file] => appe/src/js/controller.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [6](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L6)
+                                )
+
+                            [priority] => 20
+                        )
+
                     [app-controller-cursor] => Array
                         (
                             [line] => app.controller.cursor
@@ -909,13 +793,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.controller.cursor
                             [parent] => app.controller
-                            [child] => 
+                            [child] => controller
                             [sth] => cursor
                             [category] => Function
-                            [file] => appe/src/controller.js
+                            [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js)   line: [19](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js#L19)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [18](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L18)
                                 )
 
                             [priority] => 20
@@ -933,13 +817,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.controller.spoof
                             [parent] => app.controller
-                            [child] => 
+                            [child] => controller
                             [sth] => spoof
                             [category] => Function
-                            [file] => appe/src/controller.js
+                            [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js)   line: [43](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js#L43)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [42](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L42)
                                 )
 
                             [priority] => 20
@@ -958,13 +842,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.controller.history
                             [parent] => app.controller
-                            [child] => 
+                            [child] => controller
                             [sth] => history
                             [category] => Function
-                            [file] => appe/src/controller.js
+                            [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js)   line: [78](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js#L78)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [77](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L77)
                                 )
 
                             [priority] => 20
@@ -983,13 +867,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.controller.setTitle
                             [parent] => app.controller
-                            [child] => 
+                            [child] => controller
                             [sth] => setTitle
                             [category] => Function
-                            [file] => appe/src/controller.js
+                            [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js)   line: [106](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js#L106)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [105](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L105)
                                 )
 
                             [priority] => 20
@@ -1003,13 +887,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.controller.getTitle
                             [parent] => app.controller
-                            [child] => 
+                            [child] => controller
                             [sth] => getTitle
                             [category] => Function
-                            [file] => appe/src/controller.js
+                            [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js)   line: [122](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js#L122)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [121](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L121)
                                 )
 
                             [priority] => 20
@@ -1034,13 +918,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.controller.retrieve
                             [parent] => app.controller
-                            [child] => 
+                            [child] => controller
                             [sth] => retrieve
                             [category] => Function
-                            [file] => appe/src/controller.js
+                            [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js)   line: [137](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js#L137)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [136](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L136)
                                 )
 
                             [priority] => 20
@@ -1067,13 +951,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.controller.store
                             [parent] => app.controller
-                            [child] => 
+                            [child] => controller
                             [sth] => store
                             [category] => Function
-                            [file] => appe/src/controller.js
+                            [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js)   line: [213](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js#L213)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [212](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L212)
                                 )
 
                             [priority] => 20
@@ -1093,13 +977,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.controller.clear
                             [parent] => app.controller
-                            [child] => 
+                            [child] => controller
                             [sth] => clear
                             [category] => Function
-                            [file] => appe/src/controller.js
+                            [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js)   line: [282](https://github.com/loltgt/appe/blob/master/src/appe/src/controller.js#L282)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [281](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L281)
                                 )
 
                             [priority] => 20
@@ -1109,6 +993,36 @@ it contains current position in the app { view, action, index }
 
             [memory] => Array
                 (
+                    [0] => Array
+                        (
+                            [line] => app.memory
+                            [comment] => Handles persistent storage entries
+                            [comment_sh] => Array
+                                (
+                                    [0] => available methods:
+                                    [1] =>  - set (key <String>, value)
+ - get (key <String>)
+ - has (has <String>, value)
+ - del (key <String>)
+ - reset ()
+
+                                )
+
+                            [descriptor] => 1
+                            [name] => app.memory
+                            [parent] => app.memory
+                            [child] => memory
+                            [sth] => 1
+                            [category] => Function
+                            [file] => appe/src/js/memory.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [13](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L13)
+                                )
+
+                            [priority] => 30
+                        )
+
                     [app-memory-set] => Array
                         (
                             [line] => app.memory.set
@@ -1123,13 +1037,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.memory.set
                             [parent] => app.memory
-                            [child] => 
+                            [child] => memory
                             [sth] => set
                             [category] => Function
-                            [file] => appe/src/memory.js
+                            [file] => appe/src/js/memory.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js)   line: [26](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js#L26)
+                                    [0] => - [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [25](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L25)
                                 )
 
                             [priority] => 30
@@ -1149,13 +1063,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.memory.get
                             [parent] => app.memory
-                            [child] => 
+                            [child] => memory
                             [sth] => get
                             [category] => Function
-                            [file] => appe/src/memory.js
+                            [file] => appe/src/js/memory.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js)   line: [40](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js#L40)
+                                    [0] => - [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [39](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L39)
                                 )
 
                             [priority] => 30
@@ -1175,13 +1089,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.memory.has
                             [parent] => app.memory
-                            [child] => 
+                            [child] => memory
                             [sth] => has
                             [category] => Function
-                            [file] => appe/src/memory.js
+                            [file] => appe/src/js/memory.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js)   line: [54](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js#L54)
+                                    [0] => - [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [53](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L53)
                                 )
 
                             [priority] => 30
@@ -1190,7 +1104,7 @@ it contains current position in the app { view, action, index }
                     [app-memory-del] => Array
                         (
                             [line] => app.memory.del
-                            [comment] => Remove persistent storage entry by key
+                            [comment] => Removes persistent storage entry by key
                             [params] => Array
                                 (
                                     [5] => <String> key
@@ -1200,17 +1114,16 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.memory.del
                             [parent] => app.memory
-                            [child] => 
+                            [child] => memory
                             [sth] => del
                             [category] => Function
-                            [file] => appe/src/store.js
+                            [file] => appe/src/js/memory.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js)   line: [67](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js#L67)
-                                    [1] => - [src/appe/src/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js)   line: [66](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js#L66)
+                                    [0] => - [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [66](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L66)
                                 )
 
-                            [priority] => 40
+                            [priority] => 30
                         )
 
                     [app-memory-reset] => Array
@@ -1221,13 +1134,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.memory.reset
                             [parent] => app.memory
-                            [child] => 
+                            [child] => memory
                             [sth] => reset
                             [category] => Function
-                            [file] => appe/src/memory.js
+                            [file] => appe/src/js/memory.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js)   line: [79](https://github.com/loltgt/appe/blob/master/src/appe/src/memory.js#L79)
+                                    [0] => - [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [78](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L78)
                                 )
 
                             [priority] => 30
@@ -1237,6 +1150,36 @@ it contains current position in the app { view, action, index }
 
             [store] => Array
                 (
+                    [0] => Array
+                        (
+                            [line] => app.store
+                            [comment] => Handles storage entries
+                            [comment_sh] => Array
+                                (
+                                    [0] => available methods:
+                                    [1] =>  - set (key <String>, value)
+ - get (key <String>)
+ - has (has <String>, value)
+ - del (key <String>)
+ - reset ()
+
+                                )
+
+                            [descriptor] => 1
+                            [name] => app.store
+                            [parent] => app.store
+                            [child] => store
+                            [sth] => 1
+                            [category] => Function
+                            [file] => appe/src/js/store.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [13](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L13)
+                                )
+
+                            [priority] => 40
+                        )
+
                     [app-store-set] => Array
                         (
                             [line] => app.store.set
@@ -1251,14 +1194,38 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.store.set
                             [parent] => app.store
-                            [child] => 
+                            [child] => store
                             [sth] => set
                             [category] => Function
-                            [file] => appe/src/store.js
+                            [file] => appe/src/js/store.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js)   line: [26](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js#L26)
-                                    [1] => - [src/appe/src/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js)   line: [39](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js#L39)
+                                    [0] => - [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [25](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L25)
+                                )
+
+                            [priority] => 40
+                        )
+
+                    [app-store-get] => Array
+                        (
+                            [line] => app.store.get
+                            [comment] => Gets storage entry by key
+                            [params] => Array
+                                (
+                                    [5] => <String> key
+                                )
+
+                            [return] => 
+                            [descriptor] => 
+                            [name] => app.store.get
+                            [parent] => app.store
+                            [child] => store
+                            [sth] => get
+                            [category] => Function
+                            [file] => appe/src/js/store.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [38](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L38)
                                 )
 
                             [priority] => 40
@@ -1278,13 +1245,38 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.store.has
                             [parent] => app.store
-                            [child] => 
+                            [child] => store
                             [sth] => has
                             [category] => Function
-                            [file] => appe/src/store.js
+                            [file] => appe/src/js/store.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js)   line: [53](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js#L53)
+                                    [0] => - [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [52](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L52)
+                                )
+
+                            [priority] => 40
+                        )
+
+                    [app-store-del] => Array
+                        (
+                            [line] => app.store.del
+                            [comment] => Removes storage entry by key
+                            [params] => Array
+                                (
+                                    [5] => <String> key
+                                )
+
+                            [return] => 
+                            [descriptor] => 
+                            [name] => app.store.del
+                            [parent] => app.store
+                            [child] => store
+                            [sth] => del
+                            [category] => Function
+                            [file] => appe/src/js/store.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [65](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L65)
                                 )
 
                             [priority] => 40
@@ -1298,13 +1290,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.store.reset
                             [parent] => app.store
-                            [child] => 
+                            [child] => store
                             [sth] => reset
                             [category] => Function
-                            [file] => appe/src/store.js
+                            [file] => appe/src/js/store.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js)   line: [78](https://github.com/loltgt/appe/blob/master/src/appe/src/store.js#L78)
+                                    [0] => - [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [77](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L77)
                                 )
 
                             [priority] => 40
@@ -1314,6 +1306,25 @@ it contains current position in the app { view, action, index }
 
             [start] => Array
                 (
+                    [0] => Array
+                        (
+                            [line] => app.start
+                            [comment] => Launcher functions
+                            [descriptor] => 1
+                            [name] => app.start
+                            [parent] => app.start
+                            [child] => start
+                            [sth] => 1
+                            [category] => Function
+                            [file] => appe/src/js/start.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [6](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L6)
+                                )
+
+                            [priority] => 50
+                        )
+
                     [app-start-progress] => Array
                         (
                             [line] => app.start.progress
@@ -1326,13 +1337,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.start.progress
                             [parent] => app.start
-                            [child] => 
+                            [child] => start
                             [sth] => progress
                             [category] => Function
-                            [file] => appe/src/start.js
+                            [file] => appe/src/js/start.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/start.js](https://github.com/loltgt/appe/blob/master/src/appe/src/start.js)   line: [16](https://github.com/loltgt/appe/blob/master/src/appe/src/start.js#L16)
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [16](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L16)
                                 )
 
                             [priority] => 50
@@ -1345,29 +1356,113 @@ it contains current position in the app { view, action, index }
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
-                                    [6] => <Object> appe__store
+                                    [6] => <Object> pako
+                                    [7] => <Object> CryptoJS
                                 )
 
                             [params] => Array
                                 (
-                                    [7] => <Function> callback
-                                    [8] => <String> fn
-                                    [9] => <String> file
-                                    [10] => <Object> schema
-                                    [11] => <Boolean> memoize
+                                    [8] => <Function> callback
+                                    [9] => <String> fn
+                                    [10] => <String> file
+                                    [11] => <Object> schema
+                                    [12] => <Boolean> memoize
                                 )
 
                             [return] => 
                             [descriptor] => 
                             [name] => app.start.loadAttempt
                             [parent] => app.start
-                            [child] => 
+                            [child] => start
                             [sth] => loadAttempt
                             [category] => Function
-                            [file] => appe/src/start.js
+                            [file] => appe/src/js/start.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/start.js](https://github.com/loltgt/appe/blob/master/src/appe/src/start.js)   line: [50](https://github.com/loltgt/appe/blob/master/src/appe/src/start.js#L50)
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [51](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L51)
+                                )
+
+                            [priority] => 50
+                        )
+
+                    [app-start-loadComplete] => Array
+                        (
+                            [line] => app.start.loadComplete
+                            [comment] => Fires on "start" load complete
+                            [globals] => Array
+                                (
+                                    [5] => <Object> appe__config
+                                    [6] => <Object> pako
+                                    [7] => <Object> CryptoJS
+                                )
+
+                            [params] => Array
+                                (
+                                    [8] => <String> session_resume
+                                )
+
+                            [return] => 
+                            [descriptor] => 
+                            [name] => app.start.loadComplete
+                            [parent] => app.start
+                            [child] => start
+                            [sth] => loadComplete
+                            [category] => Function
+                            [file] => appe/src/js/start.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [189](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L189)
+                                )
+
+                            [priority] => 50
+                        )
+
+                    [app-start-redirect] => Array
+                        (
+                            [line] => app.start.redirect
+                            [comment] => Tries to redirect after a delay
+                            [params] => Array
+                                (
+                                    [5] => <Boolean> loaded
+                                )
+
+                            [descriptor] => 
+                            [name] => app.start.redirect
+                            [parent] => app.start
+                            [child] => start
+                            [sth] => redirect
+                            [category] => Function
+                            [file] => appe/src/js/start.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [245](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L245)
+                                )
+
+                            [priority] => 50
+                        )
+
+                    [app-start-alternative] => Array
+                        (
+                            [line] => app.start.alternative
+                            [comment] => Display messages with info and alternatives to help to execute app 
+
+                            [globals] => Array
+                                (
+                                    [9] => <Object> appe__config
+                                )
+
+                            [return] => 
+                            [todo] => hook
+                            [descriptor] => 
+                            [name] => app.start.alternative
+                            [parent] => app.start
+                            [child] => start
+                            [sth] => alternative
+                            [category] => Function
+                            [file] => appe/src/js/start.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [270](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L270)
                                 )
 
                             [priority] => 50
@@ -1377,22 +1472,24 @@ it contains current position in the app { view, action, index }
                         (
                             [line] => app.start.load
                             [comment] => Default "start" load function
+
                             [globals] => Array
                                 (
-                                    [5] => <Object> appe__config
+                                    [7] => <Object> appe__config
                                 )
 
                             [return] => 
+                            [todo] => hook?
                             [descriptor] => 
                             [name] => app.start.load
                             [parent] => app.start
-                            [child] => 
+                            [child] => start
                             [sth] => load
                             [category] => Function
-                            [file] => appe/src/start.js
+                            [file] => appe/src/js/start.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/start.js](https://github.com/loltgt/appe/blob/master/src/appe/src/start.js)   line: [318](https://github.com/loltgt/appe/blob/master/src/appe/src/start.js#L318)
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [326](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L326)
                                 )
 
                             [priority] => 50
@@ -1402,6 +1499,25 @@ it contains current position in the app { view, action, index }
 
             [main] => Array
                 (
+                    [0] => Array
+                        (
+                            [line] => app.main
+                            [comment] => "main" functions
+                            [descriptor] => 1
+                            [name] => app.main
+                            [parent] => app.main
+                            [child] => main
+                            [sth] => 1
+                            [category] => Function
+                            [file] => appe/src/js/main.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [6](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L6)
+                                )
+
+                            [priority] => 60
+                        )
+
                     [app-main-control] => Array
                         (
                             [line] => app.main.control
@@ -1420,13 +1536,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.main.control
                             [parent] => app.main
-                            [child] => 
+                            [child] => main
                             [sth] => control
                             [category] => Function
-                            [file] => appe/src/main.js
+                            [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js)   line: [18](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js#L18)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [18](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L18)
                                 )
 
                             [priority] => 60
@@ -1461,7 +1577,7 @@ it contains current position in the app { view, action, index }
  - delete () <=> prevent ()
  - close () <=> prevent ()
  - history ()
- - receive ()
+ - receiver ()
 
                                 )
 
@@ -1480,13 +1596,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.main.handle
                             [parent] => app.main
-                            [child] => 
+                            [child] => main
                             [sth] => handle
                             [category] => Function
-                            [file] => appe/src/main.js
+                            [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js)   line: [144](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js#L144)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [144](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L144)
                                 )
 
                             [priority] => 60
@@ -1520,13 +1636,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.main.action
                             [parent] => app.main
-                            [child] => 
+                            [child] => main
                             [sth] => action
                             [category] => Function
-                            [file] => appe/src/main.js
+                            [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js)   line: [431](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js#L431)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [435](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L435)
                                 )
 
                             [priority] => 60
@@ -1544,13 +1660,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.main.setup
                             [parent] => app.main
-                            [child] => 
+                            [child] => main
                             [sth] => setup
                             [category] => Function
-                            [file] => appe/src/main.js
+                            [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js)   line: [500](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js#L500)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [506](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L506)
                                 )
 
                             [priority] => 60
@@ -1569,13 +1685,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.main.load
                             [parent] => app.main
-                            [child] => 
+                            [child] => main
                             [sth] => load
                             [category] => Function
-                            [file] => appe/src/main.js
+                            [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js)   line: [524](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js#L524)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [530](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L530)
                                 )
 
                             [priority] => 60
@@ -1589,13 +1705,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.main.unload
                             [parent] => app.main
-                            [child] => 
+                            [child] => main
                             [sth] => unload
                             [category] => Function
-                            [file] => appe/src/main.js
+                            [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js)   line: [591](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js#L591)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [597](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L597)
                                 )
 
                             [priority] => 60
@@ -1621,10 +1737,10 @@ it contains current position in the app { view, action, index }
                             [child] => 
                             [sth] => main.handle
                             [category] => Function
-                            [file] => appe/src/main.js
+                            [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js)   line: [200](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js#L200)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [200](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L200)
                                 )
 
                             [priority] => 9999
@@ -1644,10 +1760,10 @@ it contains current position in the app { view, action, index }
                             [child] => 
                             [sth] => main.setup
                             [category] => Function
-                            [file] => appe/src/main.js
+                            [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js)   line: [508](https://github.com/loltgt/appe/blob/master/src/appe/src/main.js#L508)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [514](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L514)
                                 )
 
                             [priority] => 9999
@@ -1670,10 +1786,10 @@ it contains current position in the app { view, action, index }
                             [child] => 
                             [sth] => control.renderRow
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [344](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L344)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [344](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L344)
                                 )
 
                             [priority] => 9999
@@ -1694,10 +1810,10 @@ it contains current position in the app { view, action, index }
                             [child] => 
                             [sth] => control.fillForm
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [378](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L378)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [378](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L378)
                                 )
 
                             [priority] => 9999
@@ -1717,10 +1833,10 @@ it contains current position in the app { view, action, index }
                             [child] => 
                             [sth] => control.openView
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [829](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L829)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [834](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L834)
                                 )
 
                             [priority] => 9999
@@ -1730,6 +1846,25 @@ it contains current position in the app { view, action, index }
 
             [view] => Array
                 (
+                    [0] => Array
+                        (
+                            [line] => app.view
+                            [comment] => "view" functions
+                            [descriptor] => 1
+                            [name] => app.view
+                            [parent] => app.view
+                            [child] => view
+                            [sth] => 1
+                            [category] => Function
+                            [file] => appe/src/js/view.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [6](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L6)
+                                )
+
+                            [priority] => 70
+                        )
+
                     [app-view-spoof] => Array
                         (
                             [line] => app.view.spoof
@@ -1738,13 +1873,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.spoof
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => spoof
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [16](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L16)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [16](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L16)
                                 )
 
                             [priority] => 70
@@ -1757,7 +1892,7 @@ it contains current position in the app { view, action, index }
                             [comment_sh] => Array
                                 (
                                     [0] => avalaible methods:
-                                    [1] =>  - uninitialized (funcName <String>)
+                                    [1] =>  - isInitialized (funcName <String>)
  - begin ()
  - end ()
  - setID (id <Number>)
@@ -1792,13 +1927,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.control
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => control
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [70](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L70)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [70](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L70)
                                 )
 
                             [priority] => 70
@@ -1811,7 +1946,7 @@ it contains current position in the app { view, action, index }
                             [comment_sh] => Array
                                 (
                                     [0] => avalaible methods:
-                                    [1] =>  - uninitialized (funcName <String>)
+                                    [1] =>  - isInitialized (funcName <String>)
  - begin ()
  - end ()
  - getID ()
@@ -1824,7 +1959,7 @@ it contains current position in the app { view, action, index }
  - update (data <Object>, submit <Boolean>)<=> prepare ()
  - delete (data <Object>, submit <Boolean>, title <String>, name) <=> prevent ()
  - close (data <Object>, submit <Boolean>, title <String>, name) <=> prevent ()
- - selection
+ - selection ()
  - print ()
 
                                 )
@@ -1847,13 +1982,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.action
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => action
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [465](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L465)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [465](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L465)
                                 )
 
                             [priority] => 70
@@ -1888,13 +2023,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.sub
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => sub
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [704](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L704)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [704](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L704)
                                 )
 
                             [priority] => 70
@@ -1914,13 +2049,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.handle
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => handle
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [811](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L811)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [816](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L816)
                                 )
 
                             [priority] => 70
@@ -1939,13 +2074,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.resize
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => resize
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [846](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L846)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [851](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L851)
                                 )
 
                             [priority] => 70
@@ -1970,13 +2105,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.send
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => send
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [878](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L878)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [883](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L883)
                                 )
 
                             [priority] => 70
@@ -1995,13 +2130,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.getFormData
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => getFormData
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [934](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L934)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [939](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L939)
                                 )
 
                             [priority] => 70
@@ -2020,13 +2155,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.convertTableCSV
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => convertTableCSV
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [997](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L997)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1002](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1002)
                                 )
 
                             [priority] => 70
@@ -2036,22 +2171,23 @@ it contains current position in the app { view, action, index }
                         (
                             [line] => app.view.copyToClipboard
                             [comment] => Helper to copy to the system clipboard
+                            [link] => link to: [https://gist.github.com/rproenca/64781c6a1329b48a455b645d361a9aa3](https://gist.github.com/rproenca/64781c6a1329b48a455b645d361a9aa3)
                             [params] => Array
                                 (
-                                    [5] => <String> source
+                                    [7] => <String> source
                                 )
 
                             [return] => 
                             [descriptor] => 
                             [name] => app.view.copyToClipboard
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => copyToClipboard
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [1048](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L1048)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1055](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1055)
                                 )
 
                             [priority] => 70
@@ -2070,13 +2206,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.load
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => load
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [1072](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L1072)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1095](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1095)
                                 )
 
                             [priority] => 70
@@ -2095,13 +2231,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.view.unload
                             [parent] => app.view
-                            [child] => 
+                            [child] => view
                             [sth] => unload
                             [category] => Function
-                            [file] => appe/src/view.js
+                            [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js)   line: [1101](https://github.com/loltgt/appe/blob/master/src/appe/src/view.js#L1101)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1124](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1124)
                                 )
 
                             [priority] => 70
@@ -2111,6 +2247,25 @@ it contains current position in the app { view, action, index }
 
             [layout] => Array
                 (
+                    [0] => Array
+                        (
+                            [line] => app.layout
+                            [comment] => Handles layout functions
+                            [descriptor] => 1
+                            [name] => app.layout
+                            [parent] => app.layout
+                            [child] => layout
+                            [sth] => 1
+                            [category] => Function
+                            [file] => appe/src/js/layout.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [6](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L6)
+                                )
+
+                            [priority] => 80
+                        )
+
                     [app-layout-renderElement] => Array
                         (
                             [line] => app.layout.renderElement
@@ -2126,13 +2281,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.layout.renderElement
                             [parent] => app.layout
-                            [child] => 
+                            [child] => layout
                             [sth] => renderElement
                             [category] => Function
-                            [file] => appe/src/layout.js
+                            [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/layout.js](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js)   line: [19](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js#L19)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [19](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L19)
                                 )
 
                             [priority] => 80
@@ -2153,13 +2308,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.layout.renderSelect
                             [parent] => app.layout
-                            [child] => 
+                            [child] => layout
                             [sth] => renderSelect
                             [category] => Function
-                            [file] => appe/src/layout.js
+                            [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/layout.js](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js)   line: [59](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js#L59)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [59](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L59)
                                 )
 
                             [priority] => 80
@@ -2180,13 +2335,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.layout.renderSelectOption
                             [parent] => app.layout
-                            [child] => 
+                            [child] => layout
                             [sth] => renderSelectOption
                             [category] => Function
-                            [file] => appe/src/layout.js
+                            [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/layout.js](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js)   line: [85](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js#L85)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [85](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L85)
                                 )
 
                             [priority] => 80
@@ -2206,13 +2361,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.layout.renderSelectOptionGroup
                             [parent] => app.layout
-                            [child] => 
+                            [child] => layout
                             [sth] => renderSelectOptionGroup
                             [category] => Function
-                            [file] => appe/src/layout.js
+                            [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/layout.js](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js)   line: [103](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js#L103)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [103](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L103)
                                 )
 
                             [priority] => 80
@@ -2225,9 +2380,9 @@ it contains current position in the app { view, action, index }
                             [comment_sh] => Array
                                 (
                                     [0] => example:
-                                    [1] => [ {"optgroup_label": [ {"option_name": "option_value"}, ... ]} ]
-[ {"option_name": "option_value"}, ... ]
-[ "option_value", ... ]
+                                    [1] => [ {&#34;optgroup_label&#34;: [ {&#34;option_name&#34;: &#34;option_value&#34;}, ... ]} ]
+[ {&#34;option_name&#34;: &#34;option_value&#34;}, ... ]
+[ &#34;option_value&#34;, ... ]
 
                                 )
 
@@ -2241,13 +2396,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.layout.renderSelectOptions
                             [parent] => app.layout
-                            [child] => 
+                            [child] => layout
                             [sth] => renderSelectOptions
                             [category] => Function
-                            [file] => appe/src/layout.js
+                            [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/layout.js](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js)   line: [127](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js#L127)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [127](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L127)
                                 )
 
                             [priority] => 80
@@ -2280,13 +2435,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.layout.draggable
                             [parent] => app.layout
-                            [child] => 
+                            [child] => layout
                             [sth] => draggable
                             [category] => Function
-                            [file] => appe/src/layout.js
+                            [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/layout.js](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js)   line: [180](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js#L180)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [180](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L180)
                                 )
 
                             [priority] => 80
@@ -2316,13 +2471,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.layout.dropdown
                             [parent] => app.layout
-                            [child] => 
+                            [child] => layout
                             [sth] => dropdown
                             [category] => Function
-                            [file] => appe/src/layout.js
+                            [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/layout.js](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js)   line: [315](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js#L315)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [315](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L315)
                                 )
 
                             [priority] => 80
@@ -2352,13 +2507,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.layout.collapse
                             [parent] => app.layout
-                            [child] => 
+                            [child] => layout
                             [sth] => collapse
                             [category] => Function
-                            [file] => appe/src/layout.js
+                            [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/layout.js](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js)   line: [396](https://github.com/loltgt/appe/blob/master/src/appe/src/layout.js#L396)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [396](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L396)
                                 )
 
                             [priority] => 80
@@ -2368,6 +2523,25 @@ it contains current position in the app { view, action, index }
 
             [utils] => Array
                 (
+                    [0] => Array
+                        (
+                            [line] => app.utils
+                            [comment] => Utils functions
+                            [descriptor] => 1
+                            [name] => app.utils
+                            [parent] => app.utils
+                            [child] => utils
+                            [sth] => 1
+                            [category] => Function
+                            [file] => appe/src/js/utils.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [6](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L6)
+                                )
+
+                            [priority] => 90
+                        )
+
                     [app-utils-isPlainObject] => Array
                         (
                             [line] => app.utils.isPlainObject
@@ -2386,13 +2560,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.utils.isPlainObject
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => isPlainObject
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [25](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L25)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [24](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L24)
                                 )
 
                             [priority] => 90
@@ -2411,13 +2585,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.utils.extendObject
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => extendObject
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [62](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L62)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [61](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L61)
                                 )
 
                             [priority] => 90
@@ -2427,17 +2601,22 @@ it contains current position in the app { view, action, index }
                         (
                             [line] => app.utils.system
                             [comment] => Detects browser and system environments
+                            [params] => Array
+                                (
+                                    [5] => <String> purpose
+                                )
+
                             [return] => <Object> system
                             [descriptor] => 
                             [name] => app.utils.system
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => system
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [139](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L139)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [139](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L139)
                                 )
 
                             [priority] => 90
@@ -2458,13 +2637,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.utils.addEvent
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => addEvent
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [230](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L230)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [234](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L234)
                                 )
 
                             [priority] => 90
@@ -2485,13 +2664,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.utils.removeEvent
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => removeEvent
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [253](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L253)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [257](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L257)
                                 )
 
                             [priority] => 90
@@ -2511,13 +2690,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.utils.transform
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => transform
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [275](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L275)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [279](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L279)
                                 )
 
                             [priority] => 90
@@ -2537,13 +2716,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.utils.sanitize
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => sanitize
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [306](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L306)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [308](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L308)
                                 )
 
                             [priority] => 90
@@ -2566,7 +2745,7 @@ it contains current position in the app { view, action, index }
 
                             [params] => Array
                                 (
-                                    [12] => <String> fn
+                                    [12] => <String> persists
                                     [13] => <String> method
                                     [14] => <String> key
                                     [15] => value
@@ -2576,13 +2755,13 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.utils.storage
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => storage
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [372](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L372)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [368](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L368)
                                 )
 
                             [priority] => 90
@@ -2615,13 +2794,41 @@ it contains current position in the app { view, action, index }
                             [descriptor] => 
                             [name] => app.utils.cookie
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => cookie
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [495](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L495)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [491](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L491)
+                                )
+
+                            [priority] => 90
+                        )
+
+                    [app-utils-numberFormat] => Array
+                        (
+                            [line] => app.utils.numberFormat
+                            [comment] => Formats number float within decimal and thousand groups
+                            [params] => Array
+                                (
+                                    [5] => <Number> number
+                                    [6] => <Number> decimals
+                                    [7] => <String> decimals_separator
+                                    [8] => <String> thousands_separator
+                                )
+
+                            [return] => <String>
+                            [descriptor] => 
+                            [name] => app.utils.numberFormat
+                            [parent] => app.utils
+                            [child] => utils
+                            [sth] => numberFormat
+                            [category] => Function
+                            [file] => appe/src/js/utils.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [620](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L620)
                                 )
 
                             [priority] => 90
@@ -2635,31 +2842,31 @@ it accepts Date time format or true for 'now'
                             [comment_sh] => Array
                                 (
                                     [0] => format specifiers:
-                                    [1] =>  - d  <Number> Day of the month, digits preceded by zero (01-31)
- - J  <Number> Day of the month (1-31)
- - w  <Number> Day of the week (1 Mon - 7 Sun)
- - m  <Number> Month, digits preceded by zero (01-12)
- - n  <Number> Month (1-12)
- - N  <Number> Month, start from zero (0-11)
- - Y  <Number> Year, four digits (1970)
- - y  <Number> Year, two digits (70)
- - H  <Number> Hours, digits preceded by zero (00-23)
- - G  <Number> Hours (0-23)
- - M  <Number> Minutes, digits preceded by zero (00-59)
- - I  <Number> Minutes (0-59)
- - S  <Number> Seconds, digits preceded by zero (00-59)
- - K  <Number> Seconds (0-59)
- - v  <Number> Milliseconds, three digits
- - a  <String> Abbreviated day of the week name (Thu)
- - b  <String> Abbreviated month name (Jan)
- - x  <String> Date representation (1970/01/01)
- - X  <String> Time representation (01:00:00)
- - s  <Number> Seconds since the Unix Epoch
- - V  <Number> Milliseconds since the Unix Epoch
- - O  <String> Difference to Greenwich time GMT in hours (+0100)
- - z  <String> Time zone offset (+0100 (CEST))
- - C  <String> Date and time representation (Thu, 01 Jan 1970 00:00:00 GMT)
- - Q  <String> ISO 8601 date representation (1970-01-01T00:00:00.000Z)
+                                    [1] =>  - d  <Number> // Day of the month, digits preceded by zero (01-31)
+ - J  <Number> // Day of the month (1-31)
+ - w  <Number> // Day of the week (1 Mon - 7 Sun)
+ - m  <Number> // Month, digits preceded by zero (01-12)
+ - n  <Number> // Month (1-12)
+ - N  <Number> // Month, start from zero (0-11)
+ - Y  <Number> // Year, four digits (1970)
+ - y  <Number> // Year, two digits (70)
+ - H  <Number> // Hours, digits preceded by zero (00-23)
+ - G  <Number> // Hours (0-23)
+ - M  <Number> // Minutes, digits preceded by zero (00-59)
+ - I  <Number> // Minutes (0-59)
+ - S  <Number> // Seconds, digits preceded by zero (00-59)
+ - K  <Number> // Seconds (0-59)
+ - v  <Number> // Milliseconds, three digits
+ - a  <String> // Abbreviated day of the week name (Thu)
+ - b  <String> // Abbreviated month name (Jan)
+ - x  <String> // Date representation (1970/01/01)
+ - X  <String> // Time representation (01:00:00)
+ - s  <Number> // Seconds since the Unix Epoch
+ - V  <Number> // Milliseconds since the Unix Epoch
+ - O  <String> // Difference to Greenwich time GMT in hours (+0100)
+ - z  <String> // Time zone offset (+0100 (CEST))
+ - C  <String> // Date and time representation (Thu, 01 Jan 1970 00:00:00 GMT)
+ - Q  <String> // ISO 8601 date representation (1970-01-01T00:00:00.000Z)
 
                                 )
 
@@ -2672,13 +2879,13 @@ it accepts Date time format or true for 'now'
                             [descriptor] => 
                             [name] => app.utils.dateFormat
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => dateFormat
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [647](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L647)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [674](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L674)
                                 )
 
                             [priority] => 90
@@ -2697,73 +2904,52 @@ it accepts Date time format or true for 'now'
                             [descriptor] => 
                             [name] => app.utils.numberLendingZero
                             [parent] => app.utils
-                            [child] => 
+                            [child] => utils
                             [sth] => numberLendingZero
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [709](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L709)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [736](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L736)
                                 )
 
                             [priority] => 90
                         )
 
-                    [app-utils-btoa] => Array
+                    [app-utils-base64] => Array
                         (
-                            [line] => app.utils.btoa
-                            [comment] => Alias to btoa (base64) browser implementation with URI encoding
+                            [line] => app.utils.base64
+                            [comment] => Alias to base64 browser implementation with URI encoding
+                            [comment_sh] => Array
+                                (
+                                    [0] => available methods:
+                                    [1] =>  - encode (to_encode <String>)
+ - decode (to_decode <String>)
+
+                                )
+
                             [globals] => Array
                                 (
-                                    [5] => <Function> atob
+                                    [9] => <Function> btoa
+                                    [10] => <Function> atob
                                 )
 
                             [params] => Array
                                 (
-                                    [6] => to_encode
+                                    [11] => to_encode
                                 )
 
                             [return] => 
                             [descriptor] => 
-                            [name] => app.utils.btoa
+                            [name] => app.utils.base64
                             [parent] => app.utils
-                            [child] => 
-                            [sth] => btoa
+                            [child] => utils
+                            [sth] => base64
                             [category] => Function
-                            [file] => appe/src/utils.js
+                            [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [723](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L723)
-                                )
-
-                            [priority] => 90
-                        )
-
-                    [app-utils-atob] => Array
-                        (
-                            [line] => app.utils.atob
-                            [comment] => Alias to atob (base64) browser implementation with URI encoding
-                            [globals] => Array
-                                (
-                                    [5] => <Function> atob
-                                )
-
-                            [params] => Array
-                                (
-                                    [6] => to_decode
-                                )
-
-                            [return] => 
-                            [descriptor] => 
-                            [name] => app.utils.atob
-                            [parent] => app.utils
-                            [child] => 
-                            [sth] => atob
-                            [category] => Function
-                            [file] => appe/src/utils.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js)   line: [746](https://github.com/loltgt/appe/blob/master/src/appe/src/utils.js#L746)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [755](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L755)
                                 )
 
                             [priority] => 90

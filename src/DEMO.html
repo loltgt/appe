@@ -62,11 +62,8 @@ start.load = function() {
   }
 
 
-  config.savePath = '../' + config.savePath;
-
-  app.redirect = function() {
-    window.location.href = '../app/index.html';
-  }
+  config.basePath = '../' + config.basePath.toString();
+  config.savePath = '../' + config.savePath.toString();
 
   if ('localStorage' in window === false) {
     app._runtime.storage = 'sessionStorage';
@@ -82,11 +79,16 @@ start.load = function() {
     ! (app.utils.cookie('has', 'last_opened_file') || app.memory.has('last_opened_file')) ||
     ! (app.utils.cookie('has', 'last_session') || app.memory.has('last_session'))
   ) {
-    var _demo = app.utils.base64('encode', 'demo_save_2019-04-01_21-49-08_1');
+    var _demo_file = app.utils.base64('encode', 'demo_save_2019-04-05_13-31-11_1');
+    var _demo_session = app.utils.base64('encode', app.utils.dateFormat(true, 'Q'));
 
-    app.utils.cookie('set', 'last_opened_file', _demo);
-    app.memory.set('last_opened_file', _demo);
+    app.utils.cookie('set', 'last_opened_file', _demo_file);
+    app.utils.cookie('set', 'last_session', _demo_session);
+
+    app.memory.set('last_opened_file', _demo_file);
+    app.memory.set('last_session', _demo_session);
   }
+
 
   app.start.load();
 }

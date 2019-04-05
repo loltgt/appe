@@ -12,7 +12,8 @@ app.os = {};
  * Opens a file through FileReader api, stores it, returns to callback
  *
  * @global <Object> appe__config
- * @global <Object> FileReader
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <Function> callback
  * @return
  */
@@ -27,16 +28,16 @@ app.os.fileOpen = function(callback) {
     return app.error('app.os.fileOpen', 'config');
   }
 
+  if (! FileReader) {
+    return app.error('app.os.fileOpen', 'FileReader');
+  }
+
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
     return app.error('app.os.fileOpen', 'pako');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
     return app.error('app.os.fileSave', 'CryptoJS');
-  }
-
-  if (! FileReader) {
-    return app.error('app.os.fileOpen', 'FileReader');
   }
 
   if (! (callback && typeof callback === 'function')) {
@@ -51,8 +52,12 @@ app.os.fileOpen = function(callback) {
 
   var file = this.files[0];
 
-  if (file.type.indexOf('javascript') === -1) {
-    return app.error('app.os.fileOpen', 'The file format is not correct.', arguments);
+  //TODO custom file extension
+  //:WORKAROUND temp ios
+  if (app._runtime.system.platform !== 'ios') {
+    if (file.type.indexOf('javascript') === -1) {
+      return app.error('app.os.fileOpen', 'This file format cannot be open.', arguments);
+    }
   }
 
   var schema = config.schema;
@@ -80,8 +85,10 @@ app.os.fileOpen = function(callback) {
 
     // try to restore file source
     try {
-      source = source.replace(new RegExp(file_heads + '\=(?![^"]+)'), '')
+      source = source.replace(new RegExp(file_heads + '\=(?![^"\{\}]+)'), '')
         .replace(/(^"|"$)/g, '');
+
+      console.log(source);
 
       if (file_binary) {
         source = source.replace(/\"/g, '"'); //TODO test
@@ -139,6 +146,8 @@ app.os.fileOpen = function(callback) {
  * Sends a file to the browser, returns to callback
  *
  * @global <Object> appe__config
+ * @global <Object> pako
+ * @global <Object> CryptoJS
  * @param <Function> callback
  * @param <Object> source
  * @param <Date> timestamp
@@ -153,6 +162,10 @@ app.os.fileSave = function(callback, source, timestamp) {
 
   if (config.file && typeof config.file !== 'object') {
     return app.error('app.os.fileSave', 'config');
+  }
+
+  if (! Blob || ! saveAs) {
+    return app.error('app.os.fileSave', 'FileSaver');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
@@ -245,19 +258,20 @@ app.os.fileSave = function(callback, source, timestamp) {
   filename += filename_separator + file_saves;
 
 
-  var file = new File(
-    [ source ],
-    filename + '.js', //TODO custom file type
-    { type: 'application/x-javascript;charset=utf-8' } //TODO custom mime type
-  );
-
   try {
-    saveAs(file);
+    var blob = new Blob(
+      [ source ],
+      { type: 'application/x-javascript;charset=utf-8' } //TODO custom mime type
+    );
+
+    saveAs(blob, filename + '.js'); //TODO custom file extension
 
     app.memory.set('file_saves', file_saves);
 
     callback(filename);
   } catch (err) {
+    app.error('app.os.fileSave', err);
+
     callback(false);
   }
 }
