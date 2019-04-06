@@ -30,19 +30,21 @@ app.main.control = function(loc) {
 
   var _routes = config.routes;
   var _events = config.events;
+  var _events_keys = Object.keys(_events);
 
-  var actions = {};
+  var event = null, i = 0, actions = {};
 
-  Array.prototype.forEach.call(Object.keys(_events), function(event) {
+  while ((event = _events_keys[i++])) {
     actions[_events[event]] = event;
-  });
+  }
 
   if (! loc) {
     loc = app.controller.spoof();
   }
 
-  var default_route = config.defaultRoute.toString();
+  var default_route = config.default_route.toString();
   var route = default_route + '.html';
+
   var step = true;
 
   if (loc && typeof loc === 'object') {
@@ -83,7 +85,7 @@ app.main.control = function(loc) {
     view.setAttribute('src', _view_src);
 
     // view layout (list|wide)
-    if (actions[loc.action] === 'list') {
+    if (actions[loc.action] == 'list') {
       document.body.classList.add('full-width');
     } else {
       document.body.classList.remove('full-width');
@@ -379,7 +381,7 @@ app.main.handle.prototype.receiver = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.main.handle.prototype.receiver', 'schema');
   }
 
@@ -544,12 +546,12 @@ app.main.load = function() {
   app.resume(config, true);
 
 
-  var routine = (config.auxs && typeof config.auxs === 'object') ? config.auxs : {};
-  routine.push({ file: '', fn: config.app, schema: config.schema });
+  var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
+  routine.push({ file: '', fn: app._runtime.name, schema: config.schema });
 
   app.controller.retrieve(app.main.setup, routine);
 
-  app.controller.setTitle(config.name);
+  app.controller.setTitle(config.app_name);
 
 
   var navbar_brand = document.getElementById('brand');

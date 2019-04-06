@@ -21,6 +21,7 @@ app._runtime = {
   title: '',
   name: '',
   storage: false,
+  binary: false,
   compression: false,
   encryption: false,
   debug: false,
@@ -37,7 +38,7 @@ app._runtime = {
  * @return
  */
 app.load = function(func) {
-  if (typeof func !== 'function') {
+  if (typeof func != 'function') {
     return app.stop('app.load');
   }
 
@@ -51,7 +52,7 @@ app.load = function(func) {
     }
   }
 
-  if (document.readyState === 'complete') {
+  if (document.readyState == 'complete') {
     _func();
   } else {
     document.addEventListener('DOMContentLoaded', _func);
@@ -72,7 +73,7 @@ app.load = function(func) {
  * @return
  */
 app.unload = function(func) {
-  if (typeof func !== 'function') {
+  if (typeof func != 'function') {
     return app.stop('app.unload');
   }
 
@@ -95,12 +96,12 @@ app.redirect = function() {
     return app.stop('app.redirect');
   }
 
-  var base = config.basePath.toString();
+  var base = config.base_path.toString();
   var filename = 'index';
 
   if (window.location.href.indexOf(base + '/') != -1) {
     base = '..';
-    filename = config.launcherName.toString();
+    filename = config.launcher_name.toString();
   }
 
   window.location.href = base + '/' + filename + '.html';
@@ -151,10 +152,15 @@ app.session = function(config, target) {
 
   window.appe__store = {};
 
-  app._runtime.name = config.app.toString();
+  app._runtime.name = config.app_ns.toString();
   app._runtime.debug = !! config.debug ? true : false;
-  app._runtime.encryption = !! config.encryption ? true : false;
-  app._runtime.compression = !! config.compression || !! (config.file && config.file.binary) ? app._runtime.encryption : false;
+  app._runtime.encryption = !! config.encryption || (config.file.crypt && config.file.crypt) ? true : false;
+  app._runtime.compression = !! config.compression || !! (config.file && config.file.compress) ? true : false;
+  app._runtime.binary = !! config.binary || !! (config.file && config.file.binary) ? app._runtime.binary : false;
+
+  if (app._runtime.binary && ! (app._runtime.compression || app._runtime.encryption)) {
+    app.error('app.session', 'binary');
+  }
 
 
   // only main
@@ -185,11 +191,11 @@ app.session = function(config, target) {
   var _secret_passphrase = null;
 
   var loaded = false;
-  var max_attempts = config.openAttempts;
+  var max_attempts = parseInt(config.open_attempts);
 
 
   var _loadAttempt = function(callback, fn) {
-    var max = parseInt(max_attempts) || 5;
+    var max = max_attempts || 5;
     var attempts = 0;
 
     var interr = setInterval(function() {
@@ -203,19 +209,19 @@ app.session = function(config, target) {
     }, 1000);
   }
 
-  var _binary = function() {
+  var _compress = function() {
     if (! (pako && pako.inflate && pako.deflate)) {
       return app.error('app.session', 'pako');
     }
   }
 
-  var _doBinary = function() {
+  var _doCompress = function() {
     if ('pako' in window === false) {
       loaded = false;
 
-      _loadAttempt(_binary, 'pako');
+      _loadAttempt(_compress, 'pako');
     } else {
-      _binary();
+      _compress();
     }
   }
 
@@ -250,10 +256,8 @@ app.session = function(config, target) {
     }
   }
 
-  if (!! app._runtime.compression || !! app._runtime.encryption) {
-    app._runtime.compression && _doBinary();
-    app._runtime.encryption && _doCrypto();
-  }
+  app._runtime.encryption && _doCrypto();
+  app._runtime.compression && _doCompress();
 }
 
 
@@ -277,11 +281,13 @@ app.resume = function(config, target) {
     var session_last = '';
 
 
-    if (app.utils.cookie('has', 'last_opened_file')) {
-      session_resume = app.utils.cookie('get', 'last_opened_file');
-    }
-    if (! session_resume) {
-      session_resume = app.memory.get('last_opened_file');
+    if (! app._runtime.binary) {
+      if (app.utils.cookie('has', 'last_opened_file')) {
+        session_resume = app.utils.cookie('get', 'last_opened_file');
+      }
+      if (! session_resume) {
+        session_resume = app.memory.get('last_opened_file');
+      }
     }
 
 
@@ -295,8 +301,6 @@ app.resume = function(config, target) {
 
     if (target === undefined && !! (! session_resume || session_last)) {
       // there's nothing to do
-      //TODO implement no resume, custom file type .appe
-      //session_resume = false;
     } else if (!! app._runtime.debug && target !== undefined) {
       return (! session_last) && app.newSession();
     } else if (! session_last) {
@@ -305,7 +309,7 @@ app.resume = function(config, target) {
 
     //TODO location.protocol
     if (!! session_resume) {
-      session_resume = app.utils.base64('decode', session_resume) + '.js';
+      session_resume = app.utils.base64('decode', session_resume);
     }
 
     return session_resume;
@@ -318,7 +322,7 @@ app.resume = function(config, target) {
     app._runtime.storage = 'sessionStorage';
   } else if ('sessionStorage' in window === false) {
     app._runtime.storage = 'localStorage';
-  } else if (app._runtime.system.navigator === 'safari') {
+  } else if (app._runtime.system.navigator == 'safari') {
     app._runtime.storage = 'sessionStorage';
   } else {
     app._runtime.storage = 'localStorage';
@@ -379,9 +383,11 @@ app.checkConfig = function(config) {
   }
 
   var error = false;
-  var _required_keys = [ 'app', 'launcherName', 'name', 'language', 'debug', 'schema', 'events', 'routes', 'defaultRoute', 'defaultEvent', 'verifyFileChecksum', 'basePath', 'savePath', 'openAttempts' ];
 
-  Array.prototype.forEach.call(_required_keys, function(key) {
+  var _required_keys = [ 'app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'base_path', 'save_path' ];
+  var key = null, i = 0;
+
+  while ((key = _required_keys[i++])) {
     if (key in config === false) {
       error = true;
     } else if ((key == 'schema' || key == 'events' || key == 'routes') && typeof config[key] != 'object') {
@@ -389,10 +395,11 @@ app.checkConfig = function(config) {
     } else if (typeof config[key] != 'object' && typeof config[key] != 'string' && typeof config[key] != 'number' && typeof config[key] != 'boolean') {
       error = true;
     }
-  });
+  }
 
   if (
     (config.encryption && ! (config.secret_passphrase && typeof config.secret_passphrase == 'string')) ||
+    (config.alt && typeof config.alt != 'object') ||
     (config.file && typeof config.file != 'object') ||
     (config.csv && typeof config.csv != 'object')
   ) {
@@ -429,7 +436,7 @@ app.checkFile = function(source) {
     return app.error('app.checkFile', 'This file is incompatible with running version: ' + _app_version + '.', source.file);
   }
 
-  if (!! config.verifyFileChecksum) {
+  if (!! config.verify_file_checksum) {
     try {
       source = JSON.stringify(source);
 
@@ -472,7 +479,7 @@ app.newSession = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.openSession', 'schema');
   }
 
@@ -496,7 +503,7 @@ app.newSession = function() {
     app.memory.set('last_session', _current_timestamp_enc);
 
 
-    for (var i = 0; i < schema.length; i++) {
+    for (var i in schema) {
       app.store.set(_app_name + '_' + schema[i], {});
     }
 
@@ -534,7 +541,7 @@ app.openSession = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.openSession', 'schema');
   }
 
@@ -560,8 +567,7 @@ app.openSession = function() {
     app.utils.cookie('del', 'last_session');
 
 
-    var _filename = filename.replace('.js', '');
-    _filename = app.utils.base64('encode', _filename);
+    var _filename = app.utils.base64('encode', filename);
 
 
     app.utils.cookie('set', 'last_opened_file', _filename);
@@ -628,7 +634,7 @@ app.saveSession = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.saveSession', 'schema');
   }
 
@@ -673,7 +679,6 @@ app.debug = function() {
  * @return <Boolean>
  */
 app.stop = function() {
-  console.log(arguments);
   if (! app._runtime.exec) {
     return false;
   }
@@ -740,9 +745,7 @@ app.error = function() {
   }
 
   // avoid too much recursions
-  app._runtime.hangs++;
-
-  if (!! app._runtime.hangs) {
+  if (!! app._runtime.hangs++) {
     return;
   }
 
@@ -802,9 +805,9 @@ app.getInfo = function(from, info) {
     case 'config':
       _available_infos = {
         'debug': !! config.debug ? true : false,
-        'name': config.name.toString(),
+        'app_name': config.app_name.toString(),
         'language': config.language.toString(),
-        'schema': typeof config.schema === 'object' ? config.schema : {},
+        'schema': typeof config.schema === 'object' ? config.schema : [],
         'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': config.license.file.toString() } : config.license.toString()) || false
       };
     break;
@@ -838,7 +841,7 @@ app.getInfo = function(from, info) {
  * @return <String>
  */
 app.getName = function() {
-  return app.getInfo('config', 'name');
+  return app.getInfo('config', 'app_name');
 }
 
 

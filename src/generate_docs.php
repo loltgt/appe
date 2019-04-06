@@ -498,7 +498,8 @@ ksort($menu);
 
 
 $text  = "\n";
-$text .= "* #### [[Configure|Configure]]\n";
+$text .= "* #### [[{appe}|Home]]\n";
+$text .= "* #### [[Configure]]\n";
 $text .= "* #### [[app. functions and hooks|app]]\n";
 $text .= "\n  \n";
 foreach ($menu as $item) $text .= implode("\n", $item) . "\n";

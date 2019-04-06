@@ -1,13 +1,20 @@
 window.appe__config = {
-  "app": "demo",
-  "launcherName": "LAUNCH",
-  "name": "{appe} demo app",
+  "app_ns": "demo",
+  "launcher_name": "LAUNCH",
+  "app_name": "{appe} demo app",
   "language": "en",
   "compression": false,
   "encryption": true,
+  "binary": false,
   "secret_passphrase": "test",
   "debug": true,
-  "schema": [ "file", "archive", "categories", "items", "sample" ],
+  "schema": [
+    "file",
+    "archive",
+    "categories",
+    "items",
+    "sample"
+  ],
   "events": {
     "selection": "selection",
     "update": "update",
@@ -46,19 +53,20 @@ window.appe__config = {
     },
     "about": {}
   },
-  "defaultRoute": "demo",
-  "defaultEvent": "add",
-  "verifyFileChecksum": true,
-  "basePath": "app",
-  "savePath": "save",
-  "openAttempts": 10,
-  "altExecFolder": "alt",
-  "altExecPlatform": {
-    "win": "LAUNCH.win.exe",
-    "mac": "LAUNCH.mac.app",
-    "hta": "LAUNCH.hta"
+  "default_route": "demo",
+  "default_event": "add",
+  "verify_file_checksum": true,
+  "base_path": "app",
+  "save_path": "save",
+  "open_attempts": 10,
+  "alt": {
+    "exec_folder": "alt",
+    "exec_platform": {
+      "win": "LAUNCH.win.exe",
+      "mac": "LAUNCH.mac.app",
+      "hta": "LAUNCH.hta"
+    }
   },
-  "auxs": [],
   "license": {
     "text": "LGPL-3.0-or-later",
     "file": "../LICENSE.txt"

@@ -24,56 +24,82 @@ app.os.fileOpen = function(callback) {
     return app.stop('app.os.fileOpen');
   }
 
-  if (config.file && typeof config.file !== 'object') {
-    return app.error('app.os.fileOpen', 'config');
+  var step = true;
+
+  if (config.file && typeof config.file != 'object') {
+    step = app.error('app.os.fileOpen', 'config');
   }
 
   if (! FileReader) {
-    return app.error('app.os.fileOpen', 'FileReader');
+    step = app.error('app.os.fileOpen', 'FileReader');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.os.fileOpen', 'pako');
+    step = app.error('app.os.fileOpen', 'pako');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    return app.error('app.os.fileSave', 'CryptoJS');
+    step = app.error('app.os.fileSave', 'CryptoJS');
   }
 
   if (! (callback && typeof callback === 'function')) {
-    return app.error('app.os.fileOpen', arguments);
+    step = app.error('app.os.fileOpen', arguments);
   }
 
-  if (! this.files.length) {
-    return; // silent fail
+  if (! step || ! this.files.length) {
+    return callback(false); // silent fail
   }
 
   var _app_name = app._runtime.name.toString();
 
   var file = this.files[0];
 
-  //TODO custom file extension
+
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+  var file_extension = 'js';
+  var file_mime = 'application/x-javascript';
+
+  if (_binary) {
+    file_extension = 'appe';
+    file_mime = '';
+  }
+
+  if (!! app._runtime.debug) {
+    console.info('app.os.fileOpen', 'file', file, config.file);
+  }
+
   //:WORKAROUND temp ios
-  if (app._runtime.system.platform !== 'ios') {
-    if (file.type.indexOf('javascript') === -1) {
-      return app.error('app.os.fileOpen', 'This file format cannot be open.', arguments);
+  if (app._runtime.system.platform != 'ios') {
+    if (file.name.indexOf(file_extension) === -1) {
+      app.error('app.os.fileOpen', 'This file format cannot be open.', 'mime');
+
+      return callback(false);
     }
   }
 
   var schema = config.schema;
 
-  var file_binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.compression;
-  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
-  var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  var _binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var _compress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var _crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  if (_binary && ! (_compress || _crypt)) {
+    app.error('app.os.fileOpen', 'binary');
+
+    return callback(false);
+  }
 
 
   var _secret = null;
 
-  if (file_crypt) {
+  if (_crypt) {
     if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
       _secret = document[app._runtime.secret];
     } else {
-      return app.error('app.os.fileOpen', 'runtime');
+      app.error('app.os.fileOpen', 'runtime');
+
+      return callback(false);
     }
   }
 
@@ -85,43 +111,56 @@ app.os.fileOpen = function(callback) {
 
     // try to restore file source
     try {
-      source = source.replace(new RegExp(file_heads + '\=(?![^"\{\}]+)'), '')
-        .replace(/(^"|"$)/g, '');
+      // source JavaScript JSON file
+      if (! _binary) {
+        // base is much human readable
+        if (source.indexOf('\r\n') != -1)  {
+          source = source.replace(/[\r\n]([\s]+){2}/g, '');
+        }
 
-      console.log(source);
+        source = source.replace(new RegExp(file_heads + '\=(?![^"\{\}]+)'), '')
+          .replace(/(^"|"$)/g, '');
+      }
 
-      if (file_binary) {
-        source = source.replace(/\"/g, '"'); //TODO test
-        //source = app.utils.base64('decode', source);
+      // source compression
+      if (_compress) {
         source = pako.inflate(source, { level: 9, to: 'string' });
 
         if (! source) {
-          throw 'binary';
+          throw 'compression';
         }
       }
-
-      //source = source.replace(/[\r\n]([\s]+){2}/g, '');
-
-      if (file_crypt && !! _secret) {
+      
+      // source encrypted
+      if (_crypt && !! _secret) {
         source = CryptoJS.AES.decrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
-        source = source.toString(CryptoJS.enc.Utf8);
+
+        if (! _binary) {
+          source = source.toString(CryptoJS.enc.Utf8);
+        }
 
         if (! source) {
-          throw 'crypt';
+          throw 'encryption';
         }
       }
 
       source = JSON.parse(source);
     } catch (err) {
-      return app.error('app.os.fileOpen', err);
+      app.error('app.os.fileOpen', err);
+
+      return callback(false);
     }
 
     // check file source before store
-    app.checkFile(source);
+    if (! app.checkFile(source)) {
+      return callback(false);
+    }
 
-    for (var i = 0; i < schema.length; i++) {
+    for (var i in schema) {
       if (schema[i] in source === false) {
-        return app.error('app.os.fileOpen', 'schema[i]');
+        app.error('app.os.fileOpen', 'schema');
+
+        return callback(false);
       }
 
       app.store.set(_app_name + '_' + schema[i], source[schema[i]]);
@@ -160,86 +199,115 @@ app.os.fileSave = function(callback, source, timestamp) {
     return app.stop('app.os.fileSave');
   }
 
-  if (config.file && typeof config.file !== 'object') {
-    return app.error('app.os.fileSave', 'config');
+  var step = true;
+
+  if (config.file && typeof config.file != 'object') {
+    step = app.error('app.os.fileSave', 'config');
   }
 
   if (! Blob || ! saveAs) {
-    return app.error('app.os.fileSave', 'FileSaver');
+    step = app.error('app.os.fileSave', 'FileSaver');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.os.fileSave', 'pako');
+    step = app.error('app.os.fileSave', 'pako');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    return app.error('app.os.fileSave', 'CryptoJS');
+    step = app.error('app.os.fileSave', 'CryptoJS');
   }
 
   if (! (callback && typeof callback === 'function') || ! (timestamp && timestamp instanceof Date)) {
-    return app.error('app.os.fileSave', arguments);
+    step = app.error('app.os.fileSave', arguments);
   }
 
-  if (! (source && typeof source === 'object')) {
+  if (! step || ! (source && typeof source === 'object')) {
     return callback(false);
   }
 
   var _app_name = app._runtime.name.toString();
 
-  var file_binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.compression;
-  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
-  var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
+  var _binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var _compress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var _crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
-  var _binary = null;
+  if (_binary && ! (_compress || _crypt)) {
+    app.error('app.os.fileSave', 'binary');
 
-  if (file_binary) {
-    _binary = true;
+    return callback(false);
   }
+
+
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+  var file_extension = 'js';
+  var file_mime = 'application/x-javascript';
+  var file_type = '';
+
+  if (_binary) {
+    file_extension = 'appe';
+    file_mime = '';
+  }
+
+  file_extension = config.file && config.file.extension ? '.' + config.file.extension.toString() : file_extension;
+  file_mime = config.file && config.file.mime_type ? config.file.mime_type.toString() : file_mime;
+  file_type = file_mime;
+
 
   var _secret = null;
 
-  if (file_crypt) {
+  if (_crypt) {
     if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
       _secret = document[app._runtime.secret];
     } else {
-      return app.error('app.session', 'runtime');
+      app.error('app.session', 'runtime');
+
+      return callback(false);
     }
   }
 
-
-  var wrapped = !! ((file_crypt && _secret) || (file_binary && _binary));
 
   // prepare file source
   try {
     source = JSON.stringify(source);
-    source = source.replace(/\"/g, '"');
 
-    if (file_crypt && !! _secret) {
+    // source to encrypted blob
+    if (_crypt && !! _secret) {
       source = CryptoJS.AES.encrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
-      source = source.toString();
+
+      if (! _binary) {
+        source = source.toString();
+      }
 
       if (! source) {
-        throw 'crypt';
+        throw 'encryption';
       }
     }
-    if (file_binary) {
+
+    // source compression
+    if (_compress) {
       source = pako.deflate(source, { level: 9, to: 'string' });
-      //source = app.utils.base64('encode', source);
-      source = source.replace(/"/g, '\"'); //TODO test
 
       if (! source) {
-        throw 'binary';
+        throw 'compression';
       }
     }
 
-    if (wrapped) {
-      source = '"' + source + '"';
-    }
+    // source to JavaScript JSON file format
+    if (! _binary) {
+      file_type += ';charset=utf-8';
 
-    source = file_heads + '=' + source;
+      // should wrap source in double quotes
+      if (!! _crypt && _secret) {
+        source = '"' + source + '"';
+      }
+
+      source = _heads + '=' + source;
+    }
   } catch (err) {
-    return app.error('app.os.fileSave', err);
+    app.error('app.os.fileSave', err);
+
+    return callback(false);
   }
 
 
@@ -247,28 +315,32 @@ app.os.fileSave = function(callback, source, timestamp) {
 
   file_saves++;
 
-  var filename_prefix = config.file && config.file.filename_prefix ? config.file.filename_prefix.toString() : _app_name + '_save';
-  var filename_separator = config.file && config.file.filename_separator ? config.file.filename_separator.toString() : '_';
-  var filename_date_format = config.file && config.file.filename_date_format ? config.file.filename_date_format.toString() : 'Y-m-d_H-M-S';
+  var file_name_prefix = config.file && config.file.filename_prefix ? config.file.filename_prefix.toString() : _app_name + '_save';
+  var file_name_separator = config.file && config.file.filename_separator ? config.file.filename_separator.toString() : '_';
+  var file_name_date_format = config.file && config.file.filename_date_format ? config.file.filename_date_format.toString() : 'Y-m-d_H-M-S';
 
-  var filename = filename_prefix;
-  var filename_date = app.utils.dateFormat(timestamp, filename_date_format);
+  var file_name = file_name_prefix;
+  var file_name_date = app.utils.dateFormat(timestamp, file_name_date_format);
 
-  filename += filename_separator + filename_date;
-  filename += filename_separator + file_saves;
+  file_name += file_name_separator + file_name_date;
+  file_name += file_name_separator + file_saves;
 
 
   try {
     var blob = new Blob(
       [ source ],
-      { type: 'application/x-javascript;charset=utf-8' } //TODO custom mime type
+      { type: file_type }
     );
 
-    saveAs(blob, filename + '.js'); //TODO custom file extension
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileSave', 'file', { name: file_name + file_extension, type: file_type }, config.file);
+    }
+
+    saveAs(blob, file_name + file_extension);
 
     app.memory.set('file_saves', file_saves);
 
-    callback(filename);
+    callback(file_name);
   } catch (err) {
     app.error('app.os.fileSave', err);
 
@@ -288,7 +360,7 @@ app.os.fileSave = function(callback, source, timestamp) {
  * @param <Number> max_attempts
  */
 app.os.scriptOpen = function(callback, file, fn, max_attempts) {
-  if (typeof callback !== 'function' || typeof file !== 'string' || (fn && typeof fn !== 'string')) {
+  if (typeof callback != 'function' || typeof file != 'string' || (fn && typeof fn != 'string')) {
     return app.error('app.os.scriptOpen', arguments);
   }
 
@@ -390,7 +462,7 @@ app.os.getLastFileName = function() {
   }
 
 
-  filename = filename ? app.utils.base64('decode', filename) + '.js' : null;
+  filename = filename ? app.utils.base64('decode', filename) : null;
 
   return filename;
 }

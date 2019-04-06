@@ -25,19 +25,18 @@ app.layout.renderElement = function(node, content, attributes) {
   var _element = '<' + _node;
 
   if (attributes) {
-    var _names = Object.keys(attributes);
-    var _length = _names.length;
+    var attrs = Object.keys(attributes);
 
-    for (var i = 0; i < _length; i++) {
-      if (attributes[_names[i]] === null) {
+    for (var i in attrs) {
+      if (attributes[attrs[i]] === null) {
         continue;
       }
 
-      if (_length != i) {
+      if (i != attrs.length) {
         _element += ' ';
       }
 
-      _element += attributes[_names[i]] ? (_names[i] + '="' + attributes[_names[i]].toString() + '"') : _names[i];
+      _element += attributes[attrs[i]] ? (attrs[i] + '="' + attributes[attrs[i]].toString() + '"') : attrs[i];
     }
   }
 
@@ -163,6 +162,8 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
  * app.layout.draggable
  *
  * Helper for draggable table, returns requested object method
+ *
+ * //TODO fix droid
  *
  * available methods:
  *  - start (e <Object>)

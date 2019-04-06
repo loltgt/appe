@@ -62,8 +62,8 @@ start.load = function() {
   }
 
 
-  config.basePath = '../' + config.basePath.toString();
-  config.savePath = '../' + config.savePath.toString();
+  config.base_path = '../' + config.base_path.toString();
+  config.save_path = '../' + config.save_path.toString();
 
   if ('localStorage' in window === false) {
     app._runtime.storage = 'sessionStorage';
@@ -79,7 +79,7 @@ start.load = function() {
     ! (app.utils.cookie('has', 'last_opened_file') || app.memory.has('last_opened_file')) ||
     ! (app.utils.cookie('has', 'last_session') || app.memory.has('last_session'))
   ) {
-    var _demo_file = app.utils.base64('encode', 'demo_save_2019-04-05_13-31-11_1');
+    var _demo_file = app.utils.base64('encode', 'demo_save_2019-04-05_13-31-11_1.js');
     var _demo_session = app.utils.base64('encode', app.utils.dateFormat(true, 'Q'));
 
     app.utils.cookie('set', 'last_opened_file', _demo_file);

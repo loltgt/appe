@@ -552,7 +552,6 @@ fieldset[disabled] .btn-secondary.focus {
 }
 
 .table {
-  max-width: 480px; /* //:WORKAROUND */
   border-bottom: 1px solid #ddd;
 }
 .table > thead > tr > td,

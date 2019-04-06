@@ -55,7 +55,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.stop('app.start.loadAttempt');
   }
 
-  if (config.file && typeof config.file !== 'object') {
+  if (config.file && typeof config.file != 'object') {
     return app.error('app.start.loadAttemp', 'config');
   }
 
@@ -63,7 +63,6 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.error('app.start.loadAttemp', 'pako');
   }
 
-  //TODO implement binary = no session resume
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
     return app.error('app.start.loadAttemp', 'CryptoJS');
   }
@@ -72,19 +71,25 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.stop('app.start.loadAttemp', arguments);
   }
 
-  if (typeof callback !== 'function' || typeof fn !== 'string' || typeof file !== 'string' || typeof schema !== 'object') {
+  if (typeof callback != 'function' || typeof fn != 'string' || typeof file != 'string' || typeof schema != 'object') {
     return app.stop('app.start.loadAttemp', arguments);
   }
 
   fn = fn.toString();
 
-  var file_binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.compression;
-  var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  var _binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var _compress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var _crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  if (_binary || _compress) {
+    return app.stop('app.start.loadAttempt', 'binary');
+  }
 
 
   var _secret = null;
 
-  if (file_crypt) {
+  if (_crypt) {
     if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
       _secret = document[app._runtime.secret];
     } else {
@@ -93,29 +98,30 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
   }
 
 
-  var _binary = function(source) {
+  var _compress = function(source) {
     try {
-      source = source.replace(/\"/g, '"'); //TODO test
-      //source = app.utils.base64('decode', source);
       source = pako.inflate(source, { level: 9, to: 'string' });
 
       if (! source) {
-        throw 'binary';
+        throw 'compression';
       }
 
       return source;
     } catch (err) {
-      return app.error('app.start.loadAttempt() > _binary', err);
+      return app.error('app.start.loadAttempt() > _compress', err);
     }
   }
 
   var _crypto = function(source) {
     try {
       source = CryptoJS.AES.decrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
-      source = source.toString(CryptoJS.enc.Utf8);
+
+      if (! _binary) {
+        source = source.toString(CryptoJS.enc.Utf8);
+      }
 
       if (! source) {
-        throw 'crypt';
+        throw 'encryption';
       }
 
       return source;
@@ -136,16 +142,11 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     }
 
     try {
-      if (file_binary || file_crypt) {
-        if (file_binary) {
-          source = _binary(source);
-        }
-        if (file_crypt && !! _secret) {
-          source = _crypto(source);
-        }
-
-        source = JSON.parse(source);
+      if (_crypt && !! _secret) {
+        source = _crypto(source);
       }
+
+      source = JSON.parse(source);
     } catch (err) {
       return app.error('app.start.loadAttemp', err);
     }
@@ -154,7 +155,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
       return callback(false);
     }
 
-    for (var i = 0; i < schema.length; i++) {
+    for (var i in schema) {
       var key = schema[i].toString();
 
       if (key in source === false) {
@@ -169,7 +170,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
 
 
   var loaded = false;
-  var max_attempts = parseInt(config.openAttempts);
+  var max_attempts = parseInt(config.open_attempts);
 
   app.os.scriptOpen(_try, file, fn, max_attempts);
 }
@@ -193,7 +194,7 @@ app.start.loadComplete = function(session_resume) {
     return app.stop('app.start.loadComplete');
   }
 
-  if (config.file && typeof config.file !== 'object') {
+  if (config.file && typeof config.file != 'object') {
     return app.error('app.start.loadComplete', 'config');
   }
 
@@ -213,11 +214,11 @@ app.start.loadComplete = function(session_resume) {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.start.loadComplete', 'schema');
   }
 
-  session_resume = config.savePath.toString() + '/' + session_resume; 
+  session_resume = config.save_path.toString() + '/' + session_resume; 
 
 
   var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
@@ -274,6 +275,10 @@ app.start.alternative = function() {
     return app.stop('app.start.alternative');
   }
 
+  if (typeof config.alt != 'object' || ! config.alt.exec_folder || ! config.alt.exec_platform) {
+    return app.error('app.start.alternative', 'config');
+  }
+
 
   var alt = [
     'This application cannot be run due to restrictions into the software {browser}.',
@@ -282,6 +287,7 @@ app.start.alternative = function() {
 
 
   var system = app.utils.system();
+
   var navigators = {
     'chrome': 'Chrome',
     'safari': 'Safari',
@@ -292,12 +298,11 @@ app.start.alternative = function() {
   };
 
   var browser = navigators[system.navigator];
-  //TODO check config.altExecPlatform before
-  var exec_platform = (system.platform in config.altExecPlatform ? system.platform : null);
+  var exec_platform = system.platform in config.alt.exec_platform ? system.platform : null;
 
-  if (exec_platform && config.altExecFolder && config.altExecFolder) {
-    var alt_exec_folder = config.altExecFolder;
-    var alt_exec_platform = config.altExecPlatform[exec_platform];
+  if (exec_platform && config.alt.exec_folder && config.alt.exec_folder) {
+    var alt_exec_folder = config.alt.exec_folder.toString();
+    var alt_exec_platform = exec_platform in config.alt.exec_platform ? config.alt.exec_platform[exec_platform].toString() : '';
 
     alt = alt[0] + '\n\n' + alt[1];
     alt = alt.replace('{alt_exec_folder}', alt_exec_folder).replace('{alt_exec_platform}', alt_exec_platform);
@@ -305,11 +310,11 @@ app.start.alternative = function() {
     alt = alt[0];
   }
 
-  alt_electron = alt.replace('{browser}', browser);
+  alt = alt.replace('{browser}', browser);
 
   app.start.progress(1);
 
-  return app.error(alt_electron);
+  return app.error(alt);
 }
 
 
@@ -357,7 +362,7 @@ app.start.load = function() {
 
 
   if (! exec) {
-    app.start.alternative();
+    !! config.alt && app.start.alternative();
 
     setTimeout(function() {
       app.stop('app.start.load');
@@ -371,7 +376,7 @@ app.start.load = function() {
 
   var session_resume = app.resume(config);
 
-  app.controller.setTitle(config.name);
+  app.controller.setTitle(config.app_name);
 
   var open_action = document.getElementById('start-action-open');
   app.utils.addEvent('click', open_action, app.openSession);
@@ -383,10 +388,12 @@ app.start.load = function() {
   var loaded = true;
 
   // try to load extensions
-  var routine = (config.auxs && typeof config.auxs === 'object') ? config.auxs : {};
+  var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
 
   if (routine.length) {
-    for (var i = 0; i < routine.length; i++) {
+    var i = routine.length;
+
+    while (i--) {
       app.start.loadAttempt(function(aux_loaded) {
         if (! aux_loaded) {
           loaded = false;
@@ -398,6 +405,6 @@ app.start.load = function() {
   if (loaded) {
     app.start.loadComplete(session_resume);
   } else {
-    return app.error('app.start.alternative', 'auxs');
+    return app.error('app.start.alternative', 'aux');
   }
 }

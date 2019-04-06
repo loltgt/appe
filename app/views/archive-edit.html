@@ -94,7 +94,7 @@
 <fieldset class="form-submit">
   <input type="hidden" id="index" name="id" value="{id}" data-transform="integer">
   <input type="submit" id="real-submit" hidden class="hide">
-  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, '{event}')">Update Archive</button>
+  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, '{action_event}')">Update Archive</button>
 </fieldset>
 </form>
 
@@ -222,7 +222,7 @@ control.fillForm = function(data_form, extra) {
 }
 
 
-
+/* //TODO fix drop in droid */
 control.draggable = function(element, event, items, disallow) {
   var data_items = app.data('items');
 
@@ -421,6 +421,8 @@ control.draggable = function(element, event, items, disallow) {
 
 
 control.action = function(element, event, extra) {
+  var form = document.getElementById('form-data');
+
   if (! element || typeof event !== 'string') {
     return app.error('control.action', arguments);
   }

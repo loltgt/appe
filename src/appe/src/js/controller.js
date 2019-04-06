@@ -16,11 +16,11 @@ app.controller = {};
  * @return <Object> loc
  */
 app.controller.cursor = function(loc) {
-  if (loc) {
-    if (typeof loc !== 'object') {
-      return app.error('app.controller.cursor', arguments);
-    }
+  if (loc && typeof loc != 'object') {
+    return app.error('app.controller.cursor', arguments);
+  }
 
+  if (loc) {
     app.memory.set('cursor', loc);
 
     return loc;
@@ -43,23 +43,25 @@ app.controller.spoof = function() {
   var loc = { view: null, action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') != -1) {
-    var ref = location.href.split('?')[1];
+  if (location.href.indexOf('?') == -1) {
+    return loc;
+  }
 
-    // querystring
-    if (ref.indexOf('&') != -1) {
-      ref = ref.split('&');
+  var ref = location.href.split('?')[1];
 
-      // values
-      if (ref[1].indexOf('=') != -1) {
-        var sub = ref[1].split('=');
-        loc = { view: ref[0], action: sub[0], index: parseInt(sub[1]) };
-      } else {
-        loc = { view: ref[0], action: ref[1] };
-      }
+  // querystring
+  if (ref.indexOf('&') != -1) {
+    ref = ref.split('&');
+
+    // values
+    if (ref[1].indexOf('=') != -1) {
+      var sub = ref[1].split('=');
+      loc = { view: ref[0], action: sub[0], index: parseInt(sub[1]) };
     } else {
-      loc.view = ref;
+      loc = { view: ref[0], action: ref[1] };
     }
+  } else {
+    loc.view = ref;
   }
 
   return loc;
@@ -83,7 +85,7 @@ app.controller.history = function(title, url) {
     title = _title;
   }
 
-  if (app._runtime.system.navigator === 'safari') {
+  if (app._runtime.system.navigator == 'safari') {
     location.href = url;
     return;
   } else {
@@ -146,19 +148,19 @@ app.controller.retrieve = function(callback, routine) {
     return app.stop('app.controller.retrieve', 'store');
   }
 
-  if (typeof callback !== 'function' || typeof routine !== 'object') {
+  if (typeof callback != 'function' || typeof routine != 'object') {
     return app.stop('app.controller.retrieve', arguments);
   }
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.controller.retrieve', 'schema');
   }
 
 
   var _retrieve = function(fn, schema) {
-    if (typeof fn !== 'string' || typeof schema !== 'object') {
+    if (typeof fn != 'string' || typeof schema != 'object') {
       return app.stop('app.controller.retrieve() > _retrieve', arguments);
     }
 
@@ -168,12 +170,12 @@ app.controller.retrieve = function(callback, routine) {
 
     store = {};
 
-    for (var i = 0; i < schema.length; i++) {
+    for (var i in schema) {
       var key = schema[i].toString();
       var obj = app.store.get(fn + '_' + key);
 
       if (! obj) {
-        return app.stop('app.controller.retrieve() > _retrieve', 'obj');
+        return app.stop('app.controller.retrieve() > _retrieve', 'schema');
       }
 
       store[key] = obj;
@@ -183,7 +185,9 @@ app.controller.retrieve = function(callback, routine) {
   }
 
 
-  for (var i = 0; i < routine.length; i++) {
+  var i = routine.length;
+
+  while (i--) {
     var fn = routine[i].fn.toString();
 
     if (routine[i].file) {
@@ -216,7 +220,7 @@ app.controller.store = function(callback, fn, schema, data) {
     return app.stop('app.controller.store', 'store');
   }
 
-  if (typeof callback !== 'function' || typeof fn !== 'string' || typeof schema !== 'object' || typeof data !== 'object') {
+  if (typeof callback != 'function' || typeof fn != 'string' || typeof schema != 'object' || typeof data != 'object') {
     return app.stop('app.controller.store', arguments);
   }
 
@@ -228,12 +232,12 @@ app.controller.store = function(callback, fn, schema, data) {
 
 
   var _store = function(key, values) {
-    if (typeof key !== 'string' || typeof values !== 'object') {
+    if (typeof key != 'string' || typeof values != 'object') {
       return app.stop('app.controller.store() > _store', arguments);
     }
 
     if (! source[key]) {
-      return app.stop('app.controller.store() > _store', 'source[key]');
+      return app.stop('app.controller.store() > _store', 'source');
     }
 
     var _data = values;
@@ -250,12 +254,12 @@ app.controller.store = function(callback, fn, schema, data) {
 
   var keys = Object.keys(data);
 
-  for (var i = 0; i < keys.length; i++) {
+  for (var i in keys) {
     var key = keys[i];
     var values = data[key];
 
     if (schema.indexOf(key) === -1 || ! Object.keys(values).length) {
-      return app.stop('app.controller.store', 'keys');
+      return app.stop('app.controller.store', 'data');
     }
 
     store[fn][key] = _store(key, values);
@@ -295,11 +299,11 @@ app.controller.clear = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.controller.clear', 'schema');
   }
 
-  for (var i = 0; i < schema.length; i++) {
+  for (var i in schema) {
     var key = schema[i].toString();
 
     app.store.del(_app_name + '_' + key);

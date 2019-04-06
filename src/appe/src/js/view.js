@@ -17,20 +17,22 @@ app.view.spoof = function() {
   var loc = { action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') != -1) {
-    var ref = location.href.split('?')[1];
+  if (location.href.indexOf('?') == -1) {
+    return loc;
+  }
 
-    // querystring
-    if (ref.indexOf('&') != -1) {
-      ref = ref.split('&');
+  var ref = location.href.split('?')[1];
 
-      // values
-      if (ref[1].indexOf('=') != -1) {
-        var sub = ref[1].split('=');
-        loc = { action: ref[0], index: parseInt(sub[1]) };
-      } else {
-        loc = { action: ref[1] };
-      }
+  // querystring
+  if (ref.indexOf('&') != -1) {
+    ref = ref.split('&');
+
+    // values
+    if (ref[1].indexOf('=') != -1) {
+      var sub = ref[1].split('=');
+      loc = { action: ref[0], index: parseInt(sub[1]) };
+    } else {
+      loc = { action: ref[1] };
     }
   }
 
@@ -82,7 +84,7 @@ app.view.control = function(events, data, form) {
 
   var self = app.view.control.prototype;
 
-  if ((events && events instanceof Array === false) || (data && typeof data !== 'object')) {
+  if ((events && events instanceof Array === false) || (data && typeof data != 'object')) {
     return app.error('app.view.control', arguments);
   }
 
@@ -136,7 +138,8 @@ app.view.control.prototype.begin = function() {
 
   var loc = app.view.spoof();
 
-  var default_event = config.defaultEvent.toString();  
+  var default_event = config.default_event.toString();  
+
   var step = true;
 
   if (loc && typeof loc === 'object') {
@@ -579,7 +582,7 @@ app.view.action.prototype.validateForm = function() {
 app.view.action.prototype.prepare = function(data, submit) {
   this.isInitialized(this.event);
 
-  if (data && typeof data !== 'object') {
+  if (data && typeof data != 'object') {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
@@ -631,11 +634,11 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
 
   var _events = config.events;
 
-  if (data && typeof data !== 'object') {
+  if (data && typeof data != 'object') {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
-  if (typeof title !== 'string') {
+  if (typeof title != 'string') {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
@@ -897,7 +900,7 @@ app.view.send = function(ctl) {
     return; //silent fail
   }
 
-  if (typeof ctl !== 'object') {
+  if (typeof ctl != 'object') {
     return app.error('app.view.send', arguments);
   }
 
@@ -943,22 +946,21 @@ app.view.getFormData = function(elements) {
 
   var data = {};
 
-  for (var i = 0; i < elements.length; i++) {
-    if (elements[i].nodeName == 'FIELDSET') {
+  var element = {}, i = 0;
+
+  while ((element = elements[i++])) {
+    if (element.nodeName == 'FIELDSET') {
       continue;
     }
 
-    var name = elements[i].name;
-    var value = elements[i].value.trim();
-    var transform = elements[i].getAttribute('data-transform') || false;
-    var sanitize = elements[i].getAttribute('data-sanitize') || false;
+    var name = element.name;
+    var value = element.value.trim();
+    var transform = element.getAttribute('data-transform') || false;
+    var sanitize = element.getAttribute('data-sanitize') || false;
 
-    if (elements[i].type) {
-      if (elements[i].type === 'date') {
-      }
-
-      if (elements[i].type === 'checkbox' || elements[i].type === 'radio') {
-        value = elements[i].checked ? true : false;
+    if (element.type) {
+      if (element.type == 'checkbox' || element.type == 'radio') {
+        value = element.checked ? true : false;
       }
     }
 
@@ -1064,7 +1066,7 @@ app.view.copyToClipboard = function(source) {
 
   document.body.appendChild(_clipboard);
 
-  if (app._runtime.system.platform !== 'ios') {
+  if (app._runtime.system.platform != 'ios') {
     _clipboard.focus();
     _clipboard.select();
   } else {
@@ -1106,8 +1108,8 @@ app.view.load = function() {
   app.resume(config, false);
 
 
-  var routine = config.auxs || {};
-  routine.push({ fn: config.app, schema: config.schema });
+  var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
+  routine.push({ fn: app._runtime.name, schema: config.schema });
 
   app.controller.retrieve(app.view.handle, routine);
 }

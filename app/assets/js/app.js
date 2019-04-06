@@ -21,6 +21,7 @@ app._runtime = {
   title: '',
   name: '',
   storage: false,
+  binary: false,
   compression: false,
   encryption: false,
   debug: false,
@@ -37,7 +38,7 @@ app._runtime = {
  * @return
  */
 app.load = function(func) {
-  if (typeof func !== 'function') {
+  if (typeof func != 'function') {
     return app.stop('app.load');
   }
 
@@ -51,7 +52,7 @@ app.load = function(func) {
     }
   }
 
-  if (document.readyState === 'complete') {
+  if (document.readyState == 'complete') {
     _func();
   } else {
     document.addEventListener('DOMContentLoaded', _func);
@@ -72,7 +73,7 @@ app.load = function(func) {
  * @return
  */
 app.unload = function(func) {
-  if (typeof func !== 'function') {
+  if (typeof func != 'function') {
     return app.stop('app.unload');
   }
 
@@ -95,12 +96,12 @@ app.redirect = function() {
     return app.stop('app.redirect');
   }
 
-  var base = config.basePath.toString();
+  var base = config.base_path.toString();
   var filename = 'index';
 
   if (window.location.href.indexOf(base + '/') != -1) {
     base = '..';
-    filename = config.launcherName.toString();
+    filename = config.launcher_name.toString();
   }
 
   window.location.href = base + '/' + filename + '.html';
@@ -151,10 +152,15 @@ app.session = function(config, target) {
 
   window.appe__store = {};
 
-  app._runtime.name = config.app.toString();
+  app._runtime.name = config.app_ns.toString();
   app._runtime.debug = !! config.debug ? true : false;
-  app._runtime.encryption = !! config.encryption ? true : false;
-  app._runtime.compression = !! config.compression || !! (config.file && config.file.binary) ? app._runtime.encryption : false;
+  app._runtime.encryption = !! config.encryption || (config.file.crypt && config.file.crypt) ? true : false;
+  app._runtime.compression = !! config.compression || !! (config.file && config.file.compress) ? true : false;
+  app._runtime.binary = !! config.binary || !! (config.file && config.file.binary) ? app._runtime.binary : false;
+
+  if (app._runtime.binary && ! (app._runtime.compression || app._runtime.encryption)) {
+    app.error('app.session', 'binary');
+  }
 
 
   // only main
@@ -185,11 +191,11 @@ app.session = function(config, target) {
   var _secret_passphrase = null;
 
   var loaded = false;
-  var max_attempts = config.openAttempts;
+  var max_attempts = parseInt(config.open_attempts);
 
 
   var _loadAttempt = function(callback, fn) {
-    var max = parseInt(max_attempts) || 5;
+    var max = max_attempts || 5;
     var attempts = 0;
 
     var interr = setInterval(function() {
@@ -203,19 +209,19 @@ app.session = function(config, target) {
     }, 1000);
   }
 
-  var _binary = function() {
+  var _compress = function() {
     if (! (pako && pako.inflate && pako.deflate)) {
       return app.error('app.session', 'pako');
     }
   }
 
-  var _doBinary = function() {
+  var _doCompress = function() {
     if ('pako' in window === false) {
       loaded = false;
 
-      _loadAttempt(_binary, 'pako');
+      _loadAttempt(_compress, 'pako');
     } else {
-      _binary();
+      _compress();
     }
   }
 
@@ -250,10 +256,8 @@ app.session = function(config, target) {
     }
   }
 
-  if (!! app._runtime.compression || !! app._runtime.encryption) {
-    app._runtime.compression && _doBinary();
-    app._runtime.encryption && _doCrypto();
-  }
+  app._runtime.encryption && _doCrypto();
+  app._runtime.compression && _doCompress();
 }
 
 
@@ -277,11 +281,13 @@ app.resume = function(config, target) {
     var session_last = '';
 
 
-    if (app.utils.cookie('has', 'last_opened_file')) {
-      session_resume = app.utils.cookie('get', 'last_opened_file');
-    }
-    if (! session_resume) {
-      session_resume = app.memory.get('last_opened_file');
+    if (! app._runtime.binary) {
+      if (app.utils.cookie('has', 'last_opened_file')) {
+        session_resume = app.utils.cookie('get', 'last_opened_file');
+      }
+      if (! session_resume) {
+        session_resume = app.memory.get('last_opened_file');
+      }
     }
 
 
@@ -295,8 +301,6 @@ app.resume = function(config, target) {
 
     if (target === undefined && !! (! session_resume || session_last)) {
       // there's nothing to do
-      //TODO implement no resume, custom file type .appe
-      //session_resume = false;
     } else if (!! app._runtime.debug && target !== undefined) {
       return (! session_last) && app.newSession();
     } else if (! session_last) {
@@ -305,7 +309,7 @@ app.resume = function(config, target) {
 
     //TODO location.protocol
     if (!! session_resume) {
-      session_resume = app.utils.base64('decode', session_resume) + '.js';
+      session_resume = app.utils.base64('decode', session_resume);
     }
 
     return session_resume;
@@ -318,7 +322,7 @@ app.resume = function(config, target) {
     app._runtime.storage = 'sessionStorage';
   } else if ('sessionStorage' in window === false) {
     app._runtime.storage = 'localStorage';
-  } else if (app._runtime.system.navigator === 'safari') {
+  } else if (app._runtime.system.navigator == 'safari') {
     app._runtime.storage = 'sessionStorage';
   } else {
     app._runtime.storage = 'localStorage';
@@ -379,9 +383,11 @@ app.checkConfig = function(config) {
   }
 
   var error = false;
-  var _required_keys = [ 'app', 'launcherName', 'name', 'language', 'debug', 'schema', 'events', 'routes', 'defaultRoute', 'defaultEvent', 'verifyFileChecksum', 'basePath', 'savePath', 'openAttempts' ];
 
-  Array.prototype.forEach.call(_required_keys, function(key) {
+  var _required_keys = [ 'app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'base_path', 'save_path' ];
+  var key = null, i = 0;
+
+  while ((key = _required_keys[i++])) {
     if (key in config === false) {
       error = true;
     } else if ((key == 'schema' || key == 'events' || key == 'routes') && typeof config[key] != 'object') {
@@ -389,10 +395,11 @@ app.checkConfig = function(config) {
     } else if (typeof config[key] != 'object' && typeof config[key] != 'string' && typeof config[key] != 'number' && typeof config[key] != 'boolean') {
       error = true;
     }
-  });
+  }
 
   if (
     (config.encryption && ! (config.secret_passphrase && typeof config.secret_passphrase == 'string')) ||
+    (config.alt && typeof config.alt != 'object') ||
     (config.file && typeof config.file != 'object') ||
     (config.csv && typeof config.csv != 'object')
   ) {
@@ -429,7 +436,7 @@ app.checkFile = function(source) {
     return app.error('app.checkFile', 'This file is incompatible with running version: ' + _app_version + '.', source.file);
   }
 
-  if (!! config.verifyFileChecksum) {
+  if (!! config.verify_file_checksum) {
     try {
       source = JSON.stringify(source);
 
@@ -472,7 +479,7 @@ app.newSession = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.openSession', 'schema');
   }
 
@@ -496,7 +503,7 @@ app.newSession = function() {
     app.memory.set('last_session', _current_timestamp_enc);
 
 
-    for (var i = 0; i < schema.length; i++) {
+    for (var i in schema) {
       app.store.set(_app_name + '_' + schema[i], {});
     }
 
@@ -534,7 +541,7 @@ app.openSession = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.openSession', 'schema');
   }
 
@@ -560,8 +567,7 @@ app.openSession = function() {
     app.utils.cookie('del', 'last_session');
 
 
-    var _filename = filename.replace('.js', '');
-    _filename = app.utils.base64('encode', _filename);
+    var _filename = app.utils.base64('encode', filename);
 
 
     app.utils.cookie('set', 'last_opened_file', _filename);
@@ -628,7 +634,7 @@ app.saveSession = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.saveSession', 'schema');
   }
 
@@ -673,7 +679,6 @@ app.debug = function() {
  * @return <Boolean>
  */
 app.stop = function() {
-  console.log(arguments);
   if (! app._runtime.exec) {
     return false;
   }
@@ -740,9 +745,7 @@ app.error = function() {
   }
 
   // avoid too much recursions
-  app._runtime.hangs++;
-
-  if (!! app._runtime.hangs) {
+  if (!! app._runtime.hangs++) {
     return;
   }
 
@@ -802,9 +805,9 @@ app.getInfo = function(from, info) {
     case 'config':
       _available_infos = {
         'debug': !! config.debug ? true : false,
-        'name': config.name.toString(),
+        'app_name': config.app_name.toString(),
         'language': config.language.toString(),
-        'schema': typeof config.schema === 'object' ? config.schema : {},
+        'schema': typeof config.schema === 'object' ? config.schema : [],
         'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': config.license.file.toString() } : config.license.toString()) || false
       };
     break;
@@ -838,7 +841,7 @@ app.getInfo = function(from, info) {
  * @return <String>
  */
 app.getName = function() {
-  return app.getInfo('config', 'name');
+  return app.getInfo('config', 'app_name');
 }
 
 
@@ -901,56 +904,82 @@ app.os.fileOpen = function(callback) {
     return app.stop('app.os.fileOpen');
   }
 
-  if (config.file && typeof config.file !== 'object') {
-    return app.error('app.os.fileOpen', 'config');
+  var step = true;
+
+  if (config.file && typeof config.file != 'object') {
+    step = app.error('app.os.fileOpen', 'config');
   }
 
   if (! FileReader) {
-    return app.error('app.os.fileOpen', 'FileReader');
+    step = app.error('app.os.fileOpen', 'FileReader');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.os.fileOpen', 'pako');
+    step = app.error('app.os.fileOpen', 'pako');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    return app.error('app.os.fileSave', 'CryptoJS');
+    step = app.error('app.os.fileSave', 'CryptoJS');
   }
 
   if (! (callback && typeof callback === 'function')) {
-    return app.error('app.os.fileOpen', arguments);
+    step = app.error('app.os.fileOpen', arguments);
   }
 
-  if (! this.files.length) {
-    return; // silent fail
+  if (! step || ! this.files.length) {
+    return callback(false); // silent fail
   }
 
   var _app_name = app._runtime.name.toString();
 
   var file = this.files[0];
 
-  //TODO custom file extension
+
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+  var file_extension = 'js';
+  var file_mime = 'application/x-javascript';
+
+  if (_binary) {
+    file_extension = 'appe';
+    file_mime = '';
+  }
+
+  if (!! app._runtime.debug) {
+    console.info('app.os.fileOpen', 'file', file, config.file);
+  }
+
   //:WORKAROUND temp ios
-  if (app._runtime.system.platform !== 'ios') {
-    if (file.type.indexOf('javascript') === -1) {
-      return app.error('app.os.fileOpen', 'This file format cannot be open.', arguments);
+  if (app._runtime.system.platform != 'ios') {
+    if (file.name.indexOf(file_extension) === -1) {
+      app.error('app.os.fileOpen', 'This file format cannot be open.', 'mime');
+
+      return callback(false);
     }
   }
 
   var schema = config.schema;
 
-  var file_binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.compression;
-  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
-  var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  var _binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var _compress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var _crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  if (_binary && ! (_compress || _crypt)) {
+    app.error('app.os.fileOpen', 'binary');
+
+    return callback(false);
+  }
 
 
   var _secret = null;
 
-  if (file_crypt) {
+  if (_crypt) {
     if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
       _secret = document[app._runtime.secret];
     } else {
-      return app.error('app.os.fileOpen', 'runtime');
+      app.error('app.os.fileOpen', 'runtime');
+
+      return callback(false);
     }
   }
 
@@ -962,43 +991,56 @@ app.os.fileOpen = function(callback) {
 
     // try to restore file source
     try {
-      source = source.replace(new RegExp(file_heads + '\=(?![^"\{\}]+)'), '')
-        .replace(/(^"|"$)/g, '');
+      // source JavaScript JSON file
+      if (! _binary) {
+        // base is much human readable
+        if (source.indexOf('\r\n') != -1)  {
+          source = source.replace(/[\r\n]([\s]+){2}/g, '');
+        }
 
-      console.log(source);
+        source = source.replace(new RegExp(file_heads + '\=(?![^"\{\}]+)'), '')
+          .replace(/(^"|"$)/g, '');
+      }
 
-      if (file_binary) {
-        source = source.replace(/\"/g, '"'); //TODO test
-        //source = app.utils.base64('decode', source);
+      // source compression
+      if (_compress) {
         source = pako.inflate(source, { level: 9, to: 'string' });
 
         if (! source) {
-          throw 'binary';
+          throw 'compression';
         }
       }
-
-      //source = source.replace(/[\r\n]([\s]+){2}/g, '');
-
-      if (file_crypt && !! _secret) {
+      
+      // source encrypted
+      if (_crypt && !! _secret) {
         source = CryptoJS.AES.decrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
-        source = source.toString(CryptoJS.enc.Utf8);
+
+        if (! _binary) {
+          source = source.toString(CryptoJS.enc.Utf8);
+        }
 
         if (! source) {
-          throw 'crypt';
+          throw 'encryption';
         }
       }
 
       source = JSON.parse(source);
     } catch (err) {
-      return app.error('app.os.fileOpen', err);
+      app.error('app.os.fileOpen', err);
+
+      return callback(false);
     }
 
     // check file source before store
-    app.checkFile(source);
+    if (! app.checkFile(source)) {
+      return callback(false);
+    }
 
-    for (var i = 0; i < schema.length; i++) {
+    for (var i in schema) {
       if (schema[i] in source === false) {
-        return app.error('app.os.fileOpen', 'schema[i]');
+        app.error('app.os.fileOpen', 'schema');
+
+        return callback(false);
       }
 
       app.store.set(_app_name + '_' + schema[i], source[schema[i]]);
@@ -1037,86 +1079,115 @@ app.os.fileSave = function(callback, source, timestamp) {
     return app.stop('app.os.fileSave');
   }
 
-  if (config.file && typeof config.file !== 'object') {
-    return app.error('app.os.fileSave', 'config');
+  var step = true;
+
+  if (config.file && typeof config.file != 'object') {
+    step = app.error('app.os.fileSave', 'config');
   }
 
   if (! Blob || ! saveAs) {
-    return app.error('app.os.fileSave', 'FileSaver');
+    step = app.error('app.os.fileSave', 'FileSaver');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.os.fileSave', 'pako');
+    step = app.error('app.os.fileSave', 'pako');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    return app.error('app.os.fileSave', 'CryptoJS');
+    step = app.error('app.os.fileSave', 'CryptoJS');
   }
 
   if (! (callback && typeof callback === 'function') || ! (timestamp && timestamp instanceof Date)) {
-    return app.error('app.os.fileSave', arguments);
+    step = app.error('app.os.fileSave', arguments);
   }
 
-  if (! (source && typeof source === 'object')) {
+  if (! step || ! (source && typeof source === 'object')) {
     return callback(false);
   }
 
   var _app_name = app._runtime.name.toString();
 
-  var file_binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.compression;
-  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
-  var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
+  var _binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var _compress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var _crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
-  var _binary = null;
+  if (_binary && ! (_compress || _crypt)) {
+    app.error('app.os.fileSave', 'binary');
 
-  if (file_binary) {
-    _binary = true;
+    return callback(false);
   }
+
+
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+  var file_extension = 'js';
+  var file_mime = 'application/x-javascript';
+  var file_type = '';
+
+  if (_binary) {
+    file_extension = 'appe';
+    file_mime = '';
+  }
+
+  file_extension = config.file && config.file.extension ? '.' + config.file.extension.toString() : file_extension;
+  file_mime = config.file && config.file.mime_type ? config.file.mime_type.toString() : file_mime;
+  file_type = file_mime;
+
 
   var _secret = null;
 
-  if (file_crypt) {
+  if (_crypt) {
     if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
       _secret = document[app._runtime.secret];
     } else {
-      return app.error('app.session', 'runtime');
+      app.error('app.session', 'runtime');
+
+      return callback(false);
     }
   }
 
-
-  var wrapped = !! ((file_crypt && _secret) || (file_binary && _binary));
 
   // prepare file source
   try {
     source = JSON.stringify(source);
-    source = source.replace(/\"/g, '"');
 
-    if (file_crypt && !! _secret) {
+    // source to encrypted blob
+    if (_crypt && !! _secret) {
       source = CryptoJS.AES.encrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
-      source = source.toString();
+
+      if (! _binary) {
+        source = source.toString();
+      }
 
       if (! source) {
-        throw 'crypt';
+        throw 'encryption';
       }
     }
-    if (file_binary) {
+
+    // source compression
+    if (_compress) {
       source = pako.deflate(source, { level: 9, to: 'string' });
-      //source = app.utils.base64('encode', source);
-      source = source.replace(/"/g, '\"'); //TODO test
 
       if (! source) {
-        throw 'binary';
+        throw 'compression';
       }
     }
 
-    if (wrapped) {
-      source = '"' + source + '"';
-    }
+    // source to JavaScript JSON file format
+    if (! _binary) {
+      file_type += ';charset=utf-8';
 
-    source = file_heads + '=' + source;
+      // should wrap source in double quotes
+      if (!! _crypt && _secret) {
+        source = '"' + source + '"';
+      }
+
+      source = _heads + '=' + source;
+    }
   } catch (err) {
-    return app.error('app.os.fileSave', err);
+    app.error('app.os.fileSave', err);
+
+    return callback(false);
   }
 
 
@@ -1124,28 +1195,32 @@ app.os.fileSave = function(callback, source, timestamp) {
 
   file_saves++;
 
-  var filename_prefix = config.file && config.file.filename_prefix ? config.file.filename_prefix.toString() : _app_name + '_save';
-  var filename_separator = config.file && config.file.filename_separator ? config.file.filename_separator.toString() : '_';
-  var filename_date_format = config.file && config.file.filename_date_format ? config.file.filename_date_format.toString() : 'Y-m-d_H-M-S';
+  var file_name_prefix = config.file && config.file.filename_prefix ? config.file.filename_prefix.toString() : _app_name + '_save';
+  var file_name_separator = config.file && config.file.filename_separator ? config.file.filename_separator.toString() : '_';
+  var file_name_date_format = config.file && config.file.filename_date_format ? config.file.filename_date_format.toString() : 'Y-m-d_H-M-S';
 
-  var filename = filename_prefix;
-  var filename_date = app.utils.dateFormat(timestamp, filename_date_format);
+  var file_name = file_name_prefix;
+  var file_name_date = app.utils.dateFormat(timestamp, file_name_date_format);
 
-  filename += filename_separator + filename_date;
-  filename += filename_separator + file_saves;
+  file_name += file_name_separator + file_name_date;
+  file_name += file_name_separator + file_saves;
 
 
   try {
     var blob = new Blob(
       [ source ],
-      { type: 'application/x-javascript;charset=utf-8' } //TODO custom mime type
+      { type: file_type }
     );
 
-    saveAs(blob, filename + '.js'); //TODO custom file extension
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileSave', 'file', { name: file_name + file_extension, type: file_type }, config.file);
+    }
+
+    saveAs(blob, file_name + file_extension);
 
     app.memory.set('file_saves', file_saves);
 
-    callback(filename);
+    callback(file_name);
   } catch (err) {
     app.error('app.os.fileSave', err);
 
@@ -1165,7 +1240,7 @@ app.os.fileSave = function(callback, source, timestamp) {
  * @param <Number> max_attempts
  */
 app.os.scriptOpen = function(callback, file, fn, max_attempts) {
-  if (typeof callback !== 'function' || typeof file !== 'string' || (fn && typeof fn !== 'string')) {
+  if (typeof callback != 'function' || typeof file != 'string' || (fn && typeof fn != 'string')) {
     return app.error('app.os.scriptOpen', arguments);
   }
 
@@ -1267,7 +1342,7 @@ app.os.getLastFileName = function() {
   }
 
 
-  filename = filename ? app.utils.base64('decode', filename) + '.js' : null;
+  filename = filename ? app.utils.base64('decode', filename) : null;
 
   return filename;
 }
@@ -1373,11 +1448,11 @@ app.controller = {};
  * @return <Object> loc
  */
 app.controller.cursor = function(loc) {
-  if (loc) {
-    if (typeof loc !== 'object') {
-      return app.error('app.controller.cursor', arguments);
-    }
+  if (loc && typeof loc != 'object') {
+    return app.error('app.controller.cursor', arguments);
+  }
 
+  if (loc) {
     app.memory.set('cursor', loc);
 
     return loc;
@@ -1400,23 +1475,25 @@ app.controller.spoof = function() {
   var loc = { view: null, action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') != -1) {
-    var ref = location.href.split('?')[1];
+  if (location.href.indexOf('?') == -1) {
+    return loc;
+  }
 
-    // querystring
-    if (ref.indexOf('&') != -1) {
-      ref = ref.split('&');
+  var ref = location.href.split('?')[1];
 
-      // values
-      if (ref[1].indexOf('=') != -1) {
-        var sub = ref[1].split('=');
-        loc = { view: ref[0], action: sub[0], index: parseInt(sub[1]) };
-      } else {
-        loc = { view: ref[0], action: ref[1] };
-      }
+  // querystring
+  if (ref.indexOf('&') != -1) {
+    ref = ref.split('&');
+
+    // values
+    if (ref[1].indexOf('=') != -1) {
+      var sub = ref[1].split('=');
+      loc = { view: ref[0], action: sub[0], index: parseInt(sub[1]) };
     } else {
-      loc.view = ref;
+      loc = { view: ref[0], action: ref[1] };
     }
+  } else {
+    loc.view = ref;
   }
 
   return loc;
@@ -1440,7 +1517,7 @@ app.controller.history = function(title, url) {
     title = _title;
   }
 
-  if (app._runtime.system.navigator === 'safari') {
+  if (app._runtime.system.navigator == 'safari') {
     location.href = url;
     return;
   } else {
@@ -1503,19 +1580,19 @@ app.controller.retrieve = function(callback, routine) {
     return app.stop('app.controller.retrieve', 'store');
   }
 
-  if (typeof callback !== 'function' || typeof routine !== 'object') {
+  if (typeof callback != 'function' || typeof routine != 'object') {
     return app.stop('app.controller.retrieve', arguments);
   }
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.controller.retrieve', 'schema');
   }
 
 
   var _retrieve = function(fn, schema) {
-    if (typeof fn !== 'string' || typeof schema !== 'object') {
+    if (typeof fn != 'string' || typeof schema != 'object') {
       return app.stop('app.controller.retrieve() > _retrieve', arguments);
     }
 
@@ -1525,12 +1602,12 @@ app.controller.retrieve = function(callback, routine) {
 
     store = {};
 
-    for (var i = 0; i < schema.length; i++) {
+    for (var i in schema) {
       var key = schema[i].toString();
       var obj = app.store.get(fn + '_' + key);
 
       if (! obj) {
-        return app.stop('app.controller.retrieve() > _retrieve', 'obj');
+        return app.stop('app.controller.retrieve() > _retrieve', 'schema');
       }
 
       store[key] = obj;
@@ -1540,7 +1617,9 @@ app.controller.retrieve = function(callback, routine) {
   }
 
 
-  for (var i = 0; i < routine.length; i++) {
+  var i = routine.length;
+
+  while (i--) {
     var fn = routine[i].fn.toString();
 
     if (routine[i].file) {
@@ -1573,7 +1652,7 @@ app.controller.store = function(callback, fn, schema, data) {
     return app.stop('app.controller.store', 'store');
   }
 
-  if (typeof callback !== 'function' || typeof fn !== 'string' || typeof schema !== 'object' || typeof data !== 'object') {
+  if (typeof callback != 'function' || typeof fn != 'string' || typeof schema != 'object' || typeof data != 'object') {
     return app.stop('app.controller.store', arguments);
   }
 
@@ -1585,12 +1664,12 @@ app.controller.store = function(callback, fn, schema, data) {
 
 
   var _store = function(key, values) {
-    if (typeof key !== 'string' || typeof values !== 'object') {
+    if (typeof key != 'string' || typeof values != 'object') {
       return app.stop('app.controller.store() > _store', arguments);
     }
 
     if (! source[key]) {
-      return app.stop('app.controller.store() > _store', 'source[key]');
+      return app.stop('app.controller.store() > _store', 'source');
     }
 
     var _data = values;
@@ -1607,12 +1686,12 @@ app.controller.store = function(callback, fn, schema, data) {
 
   var keys = Object.keys(data);
 
-  for (var i = 0; i < keys.length; i++) {
+  for (var i in keys) {
     var key = keys[i];
     var values = data[key];
 
     if (schema.indexOf(key) === -1 || ! Object.keys(values).length) {
-      return app.stop('app.controller.store', 'keys');
+      return app.stop('app.controller.store', 'data');
     }
 
     store[fn][key] = _store(key, values);
@@ -1652,11 +1731,11 @@ app.controller.clear = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.controller.clear', 'schema');
   }
 
-  for (var i = 0; i < schema.length; i++) {
+  for (var i in schema) {
     var key = schema[i].toString();
 
     app.store.del(_app_name + '_' + key);
@@ -1893,7 +1972,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.stop('app.start.loadAttempt');
   }
 
-  if (config.file && typeof config.file !== 'object') {
+  if (config.file && typeof config.file != 'object') {
     return app.error('app.start.loadAttemp', 'config');
   }
 
@@ -1901,7 +1980,6 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.error('app.start.loadAttemp', 'pako');
   }
 
-  //TODO implement binary = no session resume
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
     return app.error('app.start.loadAttemp', 'CryptoJS');
   }
@@ -1910,19 +1988,25 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     return app.stop('app.start.loadAttemp', arguments);
   }
 
-  if (typeof callback !== 'function' || typeof fn !== 'string' || typeof file !== 'string' || typeof schema !== 'object') {
+  if (typeof callback != 'function' || typeof fn != 'string' || typeof file != 'string' || typeof schema != 'object') {
     return app.stop('app.start.loadAttemp', arguments);
   }
 
   fn = fn.toString();
 
-  var file_binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.compression;
-  var file_crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  var _binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var _compress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var _crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  if (_binary || _compress) {
+    return app.stop('app.start.loadAttempt', 'binary');
+  }
 
 
   var _secret = null;
 
-  if (file_crypt) {
+  if (_crypt) {
     if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
       _secret = document[app._runtime.secret];
     } else {
@@ -1931,29 +2015,30 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
   }
 
 
-  var _binary = function(source) {
+  var _compress = function(source) {
     try {
-      source = source.replace(/\"/g, '"'); //TODO test
-      //source = app.utils.base64('decode', source);
       source = pako.inflate(source, { level: 9, to: 'string' });
 
       if (! source) {
-        throw 'binary';
+        throw 'compression';
       }
 
       return source;
     } catch (err) {
-      return app.error('app.start.loadAttempt() > _binary', err);
+      return app.error('app.start.loadAttempt() > _compress', err);
     }
   }
 
   var _crypto = function(source) {
     try {
       source = CryptoJS.AES.decrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
-      source = source.toString(CryptoJS.enc.Utf8);
+
+      if (! _binary) {
+        source = source.toString(CryptoJS.enc.Utf8);
+      }
 
       if (! source) {
-        throw 'crypt';
+        throw 'encryption';
       }
 
       return source;
@@ -1974,16 +2059,11 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
     }
 
     try {
-      if (file_binary || file_crypt) {
-        if (file_binary) {
-          source = _binary(source);
-        }
-        if (file_crypt && !! _secret) {
-          source = _crypto(source);
-        }
-
-        source = JSON.parse(source);
+      if (_crypt && !! _secret) {
+        source = _crypto(source);
       }
+
+      source = JSON.parse(source);
     } catch (err) {
       return app.error('app.start.loadAttemp', err);
     }
@@ -1992,7 +2072,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
       return callback(false);
     }
 
-    for (var i = 0; i < schema.length; i++) {
+    for (var i in schema) {
       var key = schema[i].toString();
 
       if (key in source === false) {
@@ -2007,7 +2087,7 @@ app.start.loadAttempt = function(callback, fn, file, schema, memoize) {
 
 
   var loaded = false;
-  var max_attempts = parseInt(config.openAttempts);
+  var max_attempts = parseInt(config.open_attempts);
 
   app.os.scriptOpen(_try, file, fn, max_attempts);
 }
@@ -2031,7 +2111,7 @@ app.start.loadComplete = function(session_resume) {
     return app.stop('app.start.loadComplete');
   }
 
-  if (config.file && typeof config.file !== 'object') {
+  if (config.file && typeof config.file != 'object') {
     return app.error('app.start.loadComplete', 'config');
   }
 
@@ -2051,11 +2131,11 @@ app.start.loadComplete = function(session_resume) {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.start.loadComplete', 'schema');
   }
 
-  session_resume = config.savePath.toString() + '/' + session_resume; 
+  session_resume = config.save_path.toString() + '/' + session_resume; 
 
 
   var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
@@ -2112,6 +2192,10 @@ app.start.alternative = function() {
     return app.stop('app.start.alternative');
   }
 
+  if (typeof config.alt != 'object' || ! config.alt.exec_folder || ! config.alt.exec_platform) {
+    return app.error('app.start.alternative', 'config');
+  }
+
 
   var alt = [
     'This application cannot be run due to restrictions into the software {browser}.',
@@ -2120,6 +2204,7 @@ app.start.alternative = function() {
 
 
   var system = app.utils.system();
+
   var navigators = {
     'chrome': 'Chrome',
     'safari': 'Safari',
@@ -2130,12 +2215,11 @@ app.start.alternative = function() {
   };
 
   var browser = navigators[system.navigator];
-  //TODO check config.altExecPlatform before
-  var exec_platform = (system.platform in config.altExecPlatform ? system.platform : null);
+  var exec_platform = system.platform in config.alt.exec_platform ? system.platform : null;
 
-  if (exec_platform && config.altExecFolder && config.altExecFolder) {
-    var alt_exec_folder = config.altExecFolder;
-    var alt_exec_platform = config.altExecPlatform[exec_platform];
+  if (exec_platform && config.alt.exec_folder && config.alt.exec_folder) {
+    var alt_exec_folder = config.alt.exec_folder.toString();
+    var alt_exec_platform = exec_platform in config.alt.exec_platform ? config.alt.exec_platform[exec_platform].toString() : '';
 
     alt = alt[0] + '\n\n' + alt[1];
     alt = alt.replace('{alt_exec_folder}', alt_exec_folder).replace('{alt_exec_platform}', alt_exec_platform);
@@ -2143,11 +2227,11 @@ app.start.alternative = function() {
     alt = alt[0];
   }
 
-  alt_electron = alt.replace('{browser}', browser);
+  alt = alt.replace('{browser}', browser);
 
   app.start.progress(1);
 
-  return app.error(alt_electron);
+  return app.error(alt);
 }
 
 
@@ -2195,7 +2279,7 @@ app.start.load = function() {
 
 
   if (! exec) {
-    app.start.alternative();
+    !! config.alt && app.start.alternative();
 
     setTimeout(function() {
       app.stop('app.start.load');
@@ -2209,7 +2293,7 @@ app.start.load = function() {
 
   var session_resume = app.resume(config);
 
-  app.controller.setTitle(config.name);
+  app.controller.setTitle(config.app_name);
 
   var open_action = document.getElementById('start-action-open');
   app.utils.addEvent('click', open_action, app.openSession);
@@ -2221,10 +2305,12 @@ app.start.load = function() {
   var loaded = true;
 
   // try to load extensions
-  var routine = (config.auxs && typeof config.auxs === 'object') ? config.auxs : {};
+  var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
 
   if (routine.length) {
-    for (var i = 0; i < routine.length; i++) {
+    var i = routine.length;
+
+    while (i--) {
       app.start.loadAttempt(function(aux_loaded) {
         if (! aux_loaded) {
           loaded = false;
@@ -2236,7 +2322,7 @@ app.start.load = function() {
   if (loaded) {
     app.start.loadComplete(session_resume);
   } else {
-    return app.error('app.start.alternative', 'auxs');
+    return app.error('app.start.alternative', 'aux');
   }
 }
 
@@ -2273,19 +2359,21 @@ app.main.control = function(loc) {
 
   var _routes = config.routes;
   var _events = config.events;
+  var _events_keys = Object.keys(_events);
 
-  var actions = {};
+  var event = null, i = 0, actions = {};
 
-  Array.prototype.forEach.call(Object.keys(_events), function(event) {
+  while ((event = _events_keys[i++])) {
     actions[_events[event]] = event;
-  });
+  }
 
   if (! loc) {
     loc = app.controller.spoof();
   }
 
-  var default_route = config.defaultRoute.toString();
+  var default_route = config.default_route.toString();
   var route = default_route + '.html';
+
   var step = true;
 
   if (loc && typeof loc === 'object') {
@@ -2326,7 +2414,7 @@ app.main.control = function(loc) {
     view.setAttribute('src', _view_src);
 
     // view layout (list|wide)
-    if (actions[loc.action] === 'list') {
+    if (actions[loc.action] == 'list') {
       document.body.classList.add('full-width');
     } else {
       document.body.classList.remove('full-width');
@@ -2622,7 +2710,7 @@ app.main.handle.prototype.receiver = function() {
 
   var schema = config.schema;
 
-  if (typeof schema !== 'object') {
+  if (typeof schema != 'object') {
     return app.error('app.main.handle.prototype.receiver', 'schema');
   }
 
@@ -2787,12 +2875,12 @@ app.main.load = function() {
   app.resume(config, true);
 
 
-  var routine = (config.auxs && typeof config.auxs === 'object') ? config.auxs : {};
-  routine.push({ file: '', fn: config.app, schema: config.schema });
+  var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
+  routine.push({ file: '', fn: app._runtime.name, schema: config.schema });
 
   app.controller.retrieve(app.main.setup, routine);
 
-  app.controller.setTitle(config.name);
+  app.controller.setTitle(config.app_name);
 
 
   var navbar_brand = document.getElementById('brand');
@@ -2867,20 +2955,22 @@ app.view.spoof = function() {
   var loc = { action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') != -1) {
-    var ref = location.href.split('?')[1];
+  if (location.href.indexOf('?') == -1) {
+    return loc;
+  }
 
-    // querystring
-    if (ref.indexOf('&') != -1) {
-      ref = ref.split('&');
+  var ref = location.href.split('?')[1];
 
-      // values
-      if (ref[1].indexOf('=') != -1) {
-        var sub = ref[1].split('=');
-        loc = { action: ref[0], index: parseInt(sub[1]) };
-      } else {
-        loc = { action: ref[1] };
-      }
+  // querystring
+  if (ref.indexOf('&') != -1) {
+    ref = ref.split('&');
+
+    // values
+    if (ref[1].indexOf('=') != -1) {
+      var sub = ref[1].split('=');
+      loc = { action: ref[0], index: parseInt(sub[1]) };
+    } else {
+      loc = { action: ref[1] };
     }
   }
 
@@ -2932,7 +3022,7 @@ app.view.control = function(events, data, form) {
 
   var self = app.view.control.prototype;
 
-  if ((events && events instanceof Array === false) || (data && typeof data !== 'object')) {
+  if ((events && events instanceof Array === false) || (data && typeof data != 'object')) {
     return app.error('app.view.control', arguments);
   }
 
@@ -2986,7 +3076,8 @@ app.view.control.prototype.begin = function() {
 
   var loc = app.view.spoof();
 
-  var default_event = config.defaultEvent.toString();  
+  var default_event = config.default_event.toString();  
+
   var step = true;
 
   if (loc && typeof loc === 'object') {
@@ -3429,7 +3520,7 @@ app.view.action.prototype.validateForm = function() {
 app.view.action.prototype.prepare = function(data, submit) {
   this.isInitialized(this.event);
 
-  if (data && typeof data !== 'object') {
+  if (data && typeof data != 'object') {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
@@ -3481,11 +3572,11 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
 
   var _events = config.events;
 
-  if (data && typeof data !== 'object') {
+  if (data && typeof data != 'object') {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
-  if (typeof title !== 'string') {
+  if (typeof title != 'string') {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
@@ -3747,7 +3838,7 @@ app.view.send = function(ctl) {
     return; //silent fail
   }
 
-  if (typeof ctl !== 'object') {
+  if (typeof ctl != 'object') {
     return app.error('app.view.send', arguments);
   }
 
@@ -3793,22 +3884,21 @@ app.view.getFormData = function(elements) {
 
   var data = {};
 
-  for (var i = 0; i < elements.length; i++) {
-    if (elements[i].nodeName == 'FIELDSET') {
+  var element = {}, i = 0;
+
+  while ((element = elements[i++])) {
+    if (element.nodeName == 'FIELDSET') {
       continue;
     }
 
-    var name = elements[i].name;
-    var value = elements[i].value.trim();
-    var transform = elements[i].getAttribute('data-transform') || false;
-    var sanitize = elements[i].getAttribute('data-sanitize') || false;
+    var name = element.name;
+    var value = element.value.trim();
+    var transform = element.getAttribute('data-transform') || false;
+    var sanitize = element.getAttribute('data-sanitize') || false;
 
-    if (elements[i].type) {
-      if (elements[i].type === 'date') {
-      }
-
-      if (elements[i].type === 'checkbox' || elements[i].type === 'radio') {
-        value = elements[i].checked ? true : false;
+    if (element.type) {
+      if (element.type == 'checkbox' || element.type == 'radio') {
+        value = element.checked ? true : false;
       }
     }
 
@@ -3914,7 +4004,7 @@ app.view.copyToClipboard = function(source) {
 
   document.body.appendChild(_clipboard);
 
-  if (app._runtime.system.platform !== 'ios') {
+  if (app._runtime.system.platform != 'ios') {
     _clipboard.focus();
     _clipboard.select();
   } else {
@@ -3956,8 +4046,8 @@ app.view.load = function() {
   app.resume(config, false);
 
 
-  var routine = config.auxs || {};
-  routine.push({ fn: config.app, schema: config.schema });
+  var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
+  routine.push({ fn: app._runtime.name, schema: config.schema });
 
   app.controller.retrieve(app.view.handle, routine);
 }
@@ -4022,19 +4112,18 @@ app.layout.renderElement = function(node, content, attributes) {
   var _element = '<' + _node;
 
   if (attributes) {
-    var _names = Object.keys(attributes);
-    var _length = _names.length;
+    var attrs = Object.keys(attributes);
 
-    for (var i = 0; i < _length; i++) {
-      if (attributes[_names[i]] === null) {
+    for (var i in attrs) {
+      if (attributes[attrs[i]] === null) {
         continue;
       }
 
-      if (_length != i) {
+      if (i != attrs.length) {
         _element += ' ';
       }
 
-      _element += attributes[_names[i]] ? (_names[i] + '="' + attributes[_names[i]].toString() + '"') : _names[i];
+      _element += attributes[attrs[i]] ? (attrs[i] + '="' + attributes[attrs[i]].toString() + '"') : attrs[i];
     }
   }
 
@@ -4160,6 +4249,8 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
  * app.layout.draggable
  *
  * Helper for draggable table, returns requested object method
+ *
+ * //TODO fix droid
  *
  * available methods:
  *  - start (e <Object>)
