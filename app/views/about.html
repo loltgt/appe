@@ -68,7 +68,7 @@
 
 
 <script type="text/javascript">
-var control = window.appe__control = {};
+var control = appe__control = {};
 
 
 
@@ -88,9 +88,9 @@ control.handle = function(data) {
   var app_name = document.getElementById('app-name');
   app_name.innerHTML = app.getName();
 
-  var app_file_name = app.os.getLastFileName() || '?';
-  var app_file_version = app.os.getLastFileVersion('version') || '?';
-  var app_file_checksum = app.os.getLastFileChecksum() || '?';
+  var app_file_name = app.os.getLastFileName() || '&mdash;';
+  var app_file_version = app.os.getLastFileVersion('version') || '&mdash;';
+  var app_file_checksum = app.os.getLastFileChecksum() || '&mdash;';
 
 
   var table = document.getElementById('table');

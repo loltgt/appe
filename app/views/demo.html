@@ -44,7 +44,6 @@
         <th>ID</th>
         <th class="text-nowrap">Name</th>
         <th>Specimen</th>
-        <th class="text-nowrap">Family</th>
         <th class="text-center text-nowrap">Discovered</th>
         <th class="text-center">Fantastic</th>
         <th class="separator"></th>
@@ -55,10 +54,9 @@
         <th>ID</th>
         <th>Name</th>
         <th>Specimen</th>
-        <th>Family</th>
         <th>Discovered</th>
         <th>Fantastic</th>
-        <th></th>
+        <th class="separator"></th>
         <th>AVG</th>
         <th>Movies</th>
         <th>Toyes</th>
@@ -67,7 +65,8 @@
         <th>AWARDS</th>
       </tr>
       <tr class="hidden-csv">
-        <td colspan="8"></td>
+        <td class="hidden-print"></td>
+        <td colspan="6"></td>
         <td class="text-center text-nowrap">AVG</td>
         <td class="text-center text-nowrap">Movies</td>
         <td class="text-center text-nowrap">Toyes</td>
@@ -84,7 +83,6 @@
         <td>{id}</td>
         <td class="text-nowrap text-uppercase">{name}</td>
         <td>{title}</td>
-        <td class="text-nowrap"><em>{type}</em></td>
         <td class="text-center">{date}</td>
         <td class="text-center">{checked}</td>
         <td class="separator"></td>
@@ -100,13 +98,13 @@
 </div>
 
 
-<script type="text/javascript" src="../assets/js/app.min.js"></script>
+<script type="text/javascript" src="../assets/js/app.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
 
 
 <script type="text/javascript">
-var control = window.appe__control = {};
+var control = appe__control = {};
 
 
 
@@ -218,7 +216,7 @@ control.handle = function(data) {
 
 
 
-  _control.fillTable(table, _archive_items_join, _ordered_keys, categories_data);
+  _control.fillTable(table, _archive_items_join, _ordered_keys);
 
 
   if (_data_updated && Object.keys(_data_updated).length) {
@@ -237,9 +235,6 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
   }
 
 
-  var categories_data_extra = extra[0];
-
-
   var row = tpl_row.cloneNode(true);
 
   row.setAttribute('data-index', data_row.id);
@@ -248,7 +243,6 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
     .replace(/\{id\}/g, data_row.id)
     .replace('{name}', data_row.name)
     .replace('{title}', data_row.title)
-    .replace('{type}', categories_data_extra.types[data_row.type])
     .replace('{date}', app.utils.dateFormat(data_row.date, 'Y'))
     .replace('{checked}', (data_row.checked ? 'yes' : 'no'))
     .replace('{pop_avg}', data_row.pop['avg'])

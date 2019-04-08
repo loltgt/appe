@@ -9,14 +9,14 @@ app.main = {};
 /**
  * app.main.control
  *
- * Init "main" function that fires when "main" document is ready
+ * Init "main" function that fires when "main" is ready
  *
  * @global <Object> appe__config
  * @param <Object> loc
  * @return
  */
 app.main.control = function(loc) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.main.control');
@@ -26,38 +26,36 @@ app.main.control = function(loc) {
     return app.error('app.main.control', 'config');
   }
 
-  var view = document.getElementById('view');
-
-  var _routes = config.routes;
-  var _events = config.events;
-  var _events_keys = Object.keys(_events);
+  var cfg_routes = config.routes;
+  var cfg_events = config.events;
+  var cfg_events_keys = Object.keys(cfg_events);
 
   var event = null, i = 0, actions = {};
 
-  while ((event = _events_keys[i++])) {
-    actions[_events[event]] = event;
+  while ((event = cfg_events_keys[i++])) {
+    actions[cfg_events[event]] = event;
   }
 
   if (! loc) {
     loc = app.controller.spoof();
   }
 
-  var default_route = config.default_route.toString();
-  var route = default_route + '.html';
+  var cfg_default_route = config.default_route.toString();
+  var route = cfg_default_route + '.html';
 
   var step = true;
 
   if (loc && typeof loc === 'object') {
     if (loc.view) {
-      if (!! _routes[loc.view]) {
+      if (!! cfg_routes[loc.view]) {
         route = encodeURIComponent(loc.view) + '.html';
       } else {
         step = false;
       }
 
       if (loc.action) {
-        if (!! _routes[loc.view][loc.action]) {
-          route = _routes[loc.view][loc.action].toString() + '.html';
+        if (!! cfg_routes[loc.view][loc.action]) {
+          route = cfg_routes[loc.view][loc.action].toString() + '.html';
           route += '?' + encodeURIComponent(loc.action);
         } else {
           step = false;
@@ -69,7 +67,7 @@ app.main.control = function(loc) {
         }
       }
     } else {
-      loc = { 'view': default_route };
+      loc = { 'view': cfg_default_route };
     }
   } else {
     step = false;
@@ -78,21 +76,27 @@ app.main.control = function(loc) {
   if (step && typeof route === 'string') {
     app.controller.cursor(loc);
 
+    if (!! app._root.document.native) {
+      return;
+    }
+
     // set view
-    var _view_src = 'views/' + route;
+    var view_src = 'views/' + route;
+
+    var view = app._root.document.getElementById('view');
 
     view.removeAttribute('height');
-    view.setAttribute('src', _view_src);
+    view.setAttribute('src', view_src);
 
     // view layout (list|wide)
     if (actions[loc.action] == 'list') {
-      document.body.classList.add('full-width');
+      app._root.document.body.classList.add('full-width');
     } else {
-      document.body.classList.remove('full-width');
+      app._root.document.body.classList.remove('full-width');
     }
 
     // main navigation
-    var nav = document.getElementById('master-navigation');
+    var nav = app._root.document.getElementById('master-navigation');
     var nav_selector_active = nav.querySelector('li.active');
     var nav_selector_current = nav.querySelector('a[data-view="' + loc.view + '"]');
 
@@ -144,7 +148,7 @@ app.main.control = function(loc) {
  * @return
  */
 app.main.handle = function(e) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.main.handle');
@@ -154,7 +158,7 @@ app.main.handle = function(e) {
     return app.error('app.main.handle', 'config');
   }
 
-  var main = window.appe__main;
+  var main = app._root.window.appe__main;
 
   var self = app.main.handle.prototype;
 
@@ -172,9 +176,9 @@ app.main.handle = function(e) {
   // standard events
   var _s_events = { 'resize': 'resize', 'refresh': 'refresh', 'export': 'export' };
 
-  var _events = config.events;
+  var cfg_events = config.events;
 
-  self.events = app.utils.extendObject(_events, _s_events);
+  self.events = app.utils.extendObject(cfg_events, _s_events);
 
   self.event = null;
 
@@ -184,6 +188,8 @@ app.main.handle = function(e) {
   } else {
     return app.error('app.main.handle', self.ctl);
   }
+
+  self._initialized = true;
 
   self.loc = app.utils.extendObject({}, self.ctl);
 
@@ -289,7 +295,7 @@ app.main.handle.prototype.resize = function() {
   }
 
   var height = parseInt(this.ctl.height);
-  var view = document.getElementById('view');
+  var view = app._root.document.getElementById('view');
 
   view.height = height;
   view.scrolling = 'no';
@@ -346,7 +352,7 @@ app.main.handle.prototype.prevent = function() {
 
   this.setURL(null, action);
 
-  if (! window.confirm(msg)) {
+  if (! confirm(msg)) {
     return;
   }
 
@@ -368,12 +374,12 @@ app.main.handle.prototype.close = app.main.handle.prototype.prevent;
 app.main.handle.prototype.history = function() {
   var title = this.getTitle();
   var url = this.getURL();
-
+console.log(title);
   app.controller.history(title, url);
 }
 
 app.main.handle.prototype.receiver = function() {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.main.handle.prototype.receiver');
@@ -435,13 +441,13 @@ app.main.handle.prototype.receiver = function() {
  * @return
  */
 app.main.action = function(events, event, element) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.main.action');
   }
 
-  var main = window.appe__main;
+  var main = app._root.window.appe__main;
 
   var self = app.main.action.prototype;
 
@@ -474,7 +480,7 @@ app.main.action.prototype.end = function() {
 app.main.action.prototype.menu = function(element) {
   this.isInitialized('menu');
 
-  if ('jQuery' in window && 'collapse' in jQuery.fn) {
+  if ('jQuery' in app._root.window && 'collapse' in jQuery.fn) {
     return;
   }
 
@@ -482,19 +488,20 @@ app.main.action.prototype.menu = function(element) {
     return app.error('app.main.action.prototype.menu', arguments);
   }
 
-  var menu = document.querySelector(element.getAttribute('data-target'));
+  var menu = app._root.document.querySelector(element.getAttribute('data-target'));
 
   if (! element.getAttribute('data-is-visible')) {
     element.setAttribute('data-is-visible', true);
     element.setAttribute('aria-expanded', false);
     menu.setAttribute('aria-expanded', false);
 
-    app.utils.addEvent('click', document.body, app.layout.collapse('close', element, menu));
+    //TODO FIX
+    app.utils.addEvent('click', app._root.document.documentElement, app.layout.collapse('close', element, menu));
   }
 
   app.layout.collapse('toggle', element, menu)();
 
-  window.scrollTo(0, 0);
+  scrollTo(0, 0);
 }
 
 
@@ -506,7 +513,7 @@ app.main.action.prototype.menu = function(element) {
  * @global <Object> appe__main
  */
 app.main.setup = function() {
-  var main = window.appe__main;
+  var main = appe__main;
 
   /**
    * main.setup hook
@@ -530,7 +537,7 @@ app.main.setup = function() {
  * @return
  */
 app.main.load = function() {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.main.load');
@@ -540,52 +547,55 @@ app.main.load = function() {
   app.checkConfig(config);
 
 
-  app.session(config, true);
+  var _layout = function() {
+    var navbar_brand = app._root.document.getElementById('brand');
+    brand.innerHTML = app.controller.getTitle();
+
+    var open_actions = app._root.document.querySelectorAll('.main-action-open');
+    var new_actions = app._root.document.querySelectorAll('.main-action-new');
+    var save_actions = app._root.document.querySelectorAll('.main-action-save');
+
+    if (open_actions.length) {
+      Array.prototype.forEach.call(open_actions, function(element) {
+        app.utils.addEvent('click', element, app.openSession);
+      });
+    }
+
+    if (new_actions.length) {
+      Array.prototype.forEach.call(new_actions, function(element) {
+        app.utils.addEvent('click', element, app.newSession);
+      });
+    }
+
+    if (save_actions.length) {
+      Array.prototype.forEach.call(save_actions, function(element) {
+        app.utils.addEvent('click', element, app.saveSession);
+      });
+    }
+  }
+
+  var _session = function() {
+    app.resume(config, true);
 
 
-  app.resume(config, true);
+    var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
+    routine.push({ file: '', fn: app._runtime.name, schema: config.schema });
+
+    app.controller.retrieve(app.main.setup, routine);
+
+    app.controller.setTitle(config.app_name);
 
 
-  var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
-  routine.push({ file: '', fn: app._runtime.name, schema: config.schema });
-
-  app.controller.retrieve(app.main.setup, routine);
-
-  app.controller.setTitle(config.app_name);
+    app.utils.addEvent('message', app._root.window, app.main.handle);
 
 
-  var navbar_brand = document.getElementById('brand');
-  brand.innerHTML = app.controller.getTitle();
-
-
-  var open_actions = document.querySelectorAll('.main-action-open');
-
-  if (open_actions.length) {
-    Array.prototype.forEach.call(open_actions, function(element) {
-      app.utils.addEvent('click', element, app.openSession);
-    });
+    if (!!! app._root.document.native) {
+      _layout();
+    }
   }
 
 
-  var new_actions = document.querySelectorAll('.main-action-new');
-
-  if (new_actions.length) {
-    Array.prototype.forEach.call(new_actions, function(element) {
-      app.utils.addEvent('click', element, app.newSession);
-    });
-  }
-
-
-  var save_actions = document.querySelectorAll('.main-action-save');
-
-  if (save_actions.length) {
-    Array.prototype.forEach.call(save_actions, function(element) {
-      app.utils.addEvent('click', element, app.saveSession);
-    });
-  }
-
-
-  app.utils.addEvent('message', window, app.main.handle);
+  app.session(_session, config, true);
 }
 
 

@@ -48,6 +48,7 @@
         <th class="hidden-print">Actions</th>
         <th>ID</th>
         <th class="text-nowrap">Name</th>
+        <th class="text-nowrap">Family</th>
         <th class="text-center text-nowrap">New samples</th>
         <th class="text-center text-nowrap">New finds</th>
         <th class="separator"></th>
@@ -56,6 +57,7 @@
       <tr class="visible-csv hidden">
         <th>ID</th>
         <th>Name</th>
+        <th>Family</th>
         <th>New samples</th>
         <th>New finds</th>
         <th></th>
@@ -66,7 +68,7 @@
       </tr>
       <tr class="hidden-csv">
         <td class="hidden-print"></td>
-        <td colspan="5"></td>
+        <td colspan="6"></td>
         <td class="text-center text-nowrap">Movies</td>
         <td class="text-center text-nowrap">Toyes</td>
         <td class="text-center text-nowrap">Books</td>
@@ -80,6 +82,7 @@
         </td>
         <td>{id}</td>
         <td class="text-uppercase text-nowrap">{name}</td>
+        <td class="text-nowrap"><em>{type}</em></td>
         <td class="text-center text-nowrap">{custom_1}</td>
         <td class="text-center text-nowrap">{custom_2}</td>
         <td class="separator"></td>
@@ -146,7 +149,7 @@
 
 
 <script type="text/javascript">
-var control = window.appe__control = {};
+var control = appe__control = {};
 
 
 
@@ -249,7 +252,7 @@ control.handle = function(data) {
 
 
 
-  _control.fillTable(table, _archive_items_join, _ordered_keys, archive_items);
+  _control.fillTable(table, _archive_items_join, _ordered_keys, archive_items, categories_data);
 
 
 
@@ -285,6 +288,7 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
 
 
   var archive_items_extra = extra[0];
+  var categories_data_extra = extra[1];
 
   archive_items_extra[data_row.id] = archive_items_extra[data_row.id] || {};
   archive_items_extra[data_row.id].custom = archive_items_extra[data_row.id].custom || { '1': false, '2': false };
@@ -298,6 +302,7 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
   row.innerHTML = row.innerHTML
     .replace(/\{id\}/g, data_row.id)
     .replace('{name}', data_row.name)
+    .replace('{type}', categories_data_extra.types[data_row.type])
     .replace('{custom_1}', (archive_items_extra[data_row.id].custom['1'] ? 'yes' : 'no'))
     .replace('{custom_2}', (archive_items_extra[data_row.id].custom['2'] ? 'yes' : 'no'))
     .replace('{pop_movies}', data_row.pop['movies'])

@@ -19,7 +19,7 @@
       <div class="start-progress">
         <div id="start-progress-open" class="start-progress-open" style="visibility: hidden;">
           <p class="lead">Open latest file save</p>
-          <input id="start-action-open-session" type="file" accept="application/x-javascript" style="display: none;" hidden>
+          <input id="start-action-open-session" type="file" style="display: none;" hidden>
           <button id="start-action-open" class="btn btn-lg btn-big btn-start-action-open start-action-open" data-open-input="#start-action-open-session">Open</button>
           <p><button id="start-action-new" class="btn btn-mini btn-start-action-new start-action-new">New Session</button>
         </div>
@@ -34,8 +34,8 @@
 
 <script type="text/javascript" src="../app/assets/js/app.min.js"></script>
 <script type="text/javascript" src="../app/assets/js/lib/file-saver/FileSaver.min.js" async defer></script>
-<script type="text/javascript" src="../app/assets/js/lib/pako/pako.min.js" async defer></script>
 <script type="text/javascript" src="../app/assets/js/lib/crypto-js/crypto-js.min.js" async defer></script>
+<script type="text/javascript" src="../app/assets/js/lib/pako/pako.min.js" async defer></script>
 
 <script type="text/javascript" src="../app/config.js"></script>
 
@@ -50,24 +50,28 @@
 
 
 <script type="text/javascript">
-var start = window.appe__start = {};
+var start = appe__start = {};
 
 
 // DEMO
 start.load = function() {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('start.load');
   }
 
 
+  config.compression = false;
+  config.encryption = false;
+  config.binary = false;
+
   config.base_path = '../' + config.base_path.toString();
   config.save_path = '../' + config.save_path.toString();
 
-  if ('localStorage' in window === false) {
+  if ('localStorage' in app._root.window === false) {
     app._runtime.storage = 'sessionStorage';
-  } else if ('sessionStorage' in window === false) {
+  } else if ('sessionStorage' in app._root.window === false) {
     app._runtime.storage = 'localStorage';
   } else if (app.utils.system('navigator') === 'safari') {
     app._runtime.storage = 'sessionStorage';
@@ -75,19 +79,15 @@ start.load = function() {
     app._runtime.storage = 'localStorage';
   }
 
-  if (
-    ! (app.utils.cookie('has', 'last_opened_file') || app.memory.has('last_opened_file')) ||
-    ! (app.utils.cookie('has', 'last_session') || app.memory.has('last_session'))
-  ) {
-    var _demo_file = app.utils.base64('encode', 'demo_save_2019-04-05_13-31-11_1.js');
-    var _demo_session = app.utils.base64('encode', app.utils.dateFormat(true, 'Q'));
 
-    app.utils.cookie('set', 'last_opened_file', _demo_file);
-    app.utils.cookie('set', 'last_session', _demo_session);
+  var _demo_file = app.utils.base64('encode', 'demo_save_2019-03-29_14-29-42_1.js');
+  var _demo_session = app.utils.base64('encode', app.utils.dateFormat(true, 'Q'));
 
-    app.memory.set('last_opened_file', _demo_file);
-    app.memory.set('last_session', _demo_session);
-  }
+  app.utils.cookie('set', 'last_opened_file', _demo_file);
+  app.utils.cookie('set', 'last_session', _demo_session);
+
+  app.memory.set('last_opened_file', _demo_file);
+  app.memory.set('last_session', _demo_session);
 
 
   app.start.load();

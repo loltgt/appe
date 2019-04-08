@@ -22,7 +22,7 @@
     <span id="brand" class="navbar-brand hidden-xs">{appe}</span>
     <div class="navbar-form navbar-right">
       <div class="form-group">
-        <input id="main-action-open-session-header" type="file" accept="application/x-javascript" style="display: none;" hidden>
+        <input id="main-action-open-session-header" type="file" style="display: none;" hidden>
         <button type="button" id="main-action-new-header" class="btn btn-action-new main-action-new">New</button>
         <button type="button" id="main-action-open-header" class="btn btn-action-open main-action-open" data-open-input="#main-action-open-session-header">Open</button>
         <button type="button" id="main-action-save-header" class="btn btn-action-save main-action-save">Save</button>
@@ -47,7 +47,7 @@
       </ul>
     </nav>
     <div id="master-content" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 content">
-      <iframe id="view" class="content-view" scrolling="yes" frameborder="no" onload="window.parent.parent.scrollTo(0, 0)"></iframe>
+      <iframe id="view" class="content-view" scrolling="yes" frameborder="no" onload="parent.parent.scrollTo(0, 0)"></iframe>
     </div>
   </div>
 </main>
@@ -62,13 +62,13 @@
 
 <script type="text/javascript" src="assets/js/app.min.js"></script>
 <script type="text/javascript" src="assets/js/lib/file-saver/FileSaver.min.js" async defer></script>
-<script type="text/javascript" src="assets/js/lib/pako/pako.min.js" async defer></script>
 <script type="text/javascript" src="assets/js/lib/crypto-js/crypto-js.min.js" async defer></script>
+<script type="text/javascript" src="assets/js/lib/pako/pako.min.js" async defer></script>
 <script type="text/javascript" src="config.js"></script>
 
 
 <script type="text/javascript">
-var main = window.appe__main = {};
+var main = appe__main = {};
 
 
 

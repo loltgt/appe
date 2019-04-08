@@ -12,13 +12,13 @@ app.os = {};
  * Opens a file through FileReader api, stores it, returns to callback
  *
  * @global <Object> appe__config
- * @global <Object> pako
  * @global <Object> CryptoJS
+ * @global <Function> pako
  * @param <Function> callback
  * @return
  */
 app.os.fileOpen = function(callback) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.os.fileOpen');
@@ -34,12 +34,16 @@ app.os.fileOpen = function(callback) {
     step = app.error('app.os.fileOpen', 'FileReader');
   }
 
-  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    step = app.error('app.os.fileOpen', 'pako');
+  if (! (CryptoJS && CryptoJS.MD5)) {
+    step = app.error('app.os.fileOpen', 'CryptoJS');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    step = app.error('app.os.fileSave', 'CryptoJS');
+    step = app.error('app.os.fileOpen', 'CryptoJS');
+  }
+
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    step = app.error('app.os.fileOpen', 'pako');
   }
 
   if (! (callback && typeof callback === 'function')) {
@@ -52,17 +56,46 @@ app.os.fileOpen = function(callback) {
 
   var _app_name = app._runtime.name.toString();
 
+  var schema = config.schema;
+
+  if (typeof schema != 'object') {
+    app.error('app.os.fileOpen', 'schema');
+
+    return callback(false);
+  }
+
+
+  var fbinary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var fcompress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  if (fbinary && ! (fcompress && fcrypt)) {
+    app.error('app.os.fileOpen', 'binary');
+
+    return callback(false);
+  }
+
+
   var file = this.files[0];
+  var source = null;
 
 
   var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
   var file_extension = 'js';
   var file_mime = 'application/x-javascript';
+  var file_type = null;
+  var file_json_checksum = null;
 
-  if (_binary) {
+  if (fbinary) {
     file_extension = 'appe';
-    file_mime = '';
+    file_mime = 'application/octet-stream';
+    file_type = file_mime;
+  } else {
+    file_type = file_mime + ';charset=utf-8';
   }
+
+  file_extension = config.file && config.file.extension ? config.file.extension.toString() : file_extension;
+
 
   if (!! app._runtime.debug) {
     console.info('app.os.fileOpen', 'file', file, config.file);
@@ -71,33 +104,156 @@ app.os.fileOpen = function(callback) {
   //:WORKAROUND temp ios
   if (app._runtime.system.platform != 'ios') {
     if (file.name.indexOf(file_extension) === -1) {
-      app.error('app.os.fileOpen', 'This file format cannot be open.', 'mime');
+      app.error('app.os.fileOpen', app.L10n('This file format cannot be open.'), 'file');
 
       return callback(false);
     }
   }
 
-  var schema = config.schema;
 
+  var _prepare = function(source, cb) {
+    if (! source) {
+      return cb(false);
+    }
 
-  var _binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
-  var _compress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
-  var _crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+    // source binary file
 
-  if (_binary && ! (_compress || _crypt)) {
-    app.error('app.os.fileOpen', 'binary');
+    if (fbinary) {
+      return cb(false, source);
+    }
 
-    return callback(false);
+    // source JavaScript JSON file
+
+    // base is much human readable
+    if (source.indexOf('\r\n') != -1)  {
+      source = source.replace(/[\r\n]([\s]+){2}/g, '');
+    }
+
+    var _file_heads_regex = new RegExp(file_heads + '\=(?![^"\{\}]+)');
+    source = source.replace(_file_heads_regex, '').replace(/(^"|"$)/g, '');
   }
 
+  var _decompress = function(source, cb) {
+    try {
+      source = pako.inflate(source, { raw: true, to: 'string' });
 
-  var _secret = null;
+      if (! source) { throw 'decompression'; }
 
-  if (_crypt) {
-    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
-      _secret = document[app._runtime.secret];
+      cb(false, source);
+    } catch (err) {
+      cb(err);
+    }
+  }
+
+  var _decrypt = function(source, cb) {
+    var secret = null;
+
+    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in app._root.document) {
+      secret = app._root.document[app._runtime.secret];
     } else {
-      app.error('app.os.fileOpen', 'runtime');
+      return cb('runtime');
+    }
+
+    try {
+      source = CryptoJS.AES.decrypt(source, secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+      source = source.toString(CryptoJS.enc.Utf8);
+
+      if (! source) { throw 'decryption'; }
+
+      cb(false, source);
+    } catch (err) {
+      cb(err);
+    }
+  }
+
+  var _complete = function(source, cb) {
+    try {
+      source = JSON.parse(source);
+    } catch (err) {
+      return cb(err);
+    }
+
+    // check file source before store
+    if (! app.checkFile(source, file_json_checksum)) {
+      return cb('check');
+    }
+
+    for (var i in schema) {
+      if (schema[i] in source === false) {
+        return cb('schema');
+      }
+
+      app.store.set(_app_name + '_' + schema[i], source[schema[i]]);
+    }
+
+    cb(false, file.name);
+  }
+
+  var _init = function(blob) {
+    try {
+      if (fcompress && fcrypt) {
+        _prepare(blob, function(err, source) {
+          if (err) { throw err; }
+
+          _decompress(source, function(err, source) {
+            if (err) { throw err; }
+
+            _decrypt(source, function(err, source) {
+              if (err) { throw err; }
+
+              app.os.generateJsonChecksum(function(checksum) {
+                if (! checksum) { throw null; }
+
+                file_json_checksum = checksum;
+
+                _complete(source, function(err, filename) {
+                  if (err) { throw err; }
+
+                  callback(filename);
+                });
+              }, source);
+            });
+          });
+        });
+      } else if (fcrypt) {
+        _prepare(blob, function(err, source) {
+          if (err) { throw err; }
+
+          _decrypt(source, function(err, source) {
+            if (err) { throw err; }
+
+            app.os.generateJsonChecksum(function(checksum) {
+              if (! checksum) { throw null; }
+
+              file_json_checksum = checksum;
+
+              _complete(source, function(err, filename) {
+                if (err) { throw err; }
+
+                callback(filename);
+              });
+            }, source);
+          });
+        });
+      } else {
+        _prepare(blob, function(err, source) {
+          if (err) { throw err; }
+
+          app.os.generateJsonChecksum(function(checksum) {
+            if (! checksum) { throw null; }
+
+            file_json_checksum = checksum;
+
+            _complete(source, function(err, filename) {
+              if (err) { throw err; }
+
+              callback(filename);
+            });
+          }, source);
+        });
+      }
+    } catch (err) {
+      app.error('app.os.fileOpen', err);
 
       return callback(false);
     }
@@ -107,66 +263,7 @@ app.os.fileOpen = function(callback) {
   var reader = new FileReader();
 
   reader.onload = (function() {
-    var source = this.result;
-
-    // try to restore file source
-    try {
-      // source JavaScript JSON file
-      if (! _binary) {
-        // base is much human readable
-        if (source.indexOf('\r\n') != -1)  {
-          source = source.replace(/[\r\n]([\s]+){2}/g, '');
-        }
-
-        source = source.replace(new RegExp(file_heads + '\=(?![^"\{\}]+)'), '')
-          .replace(/(^"|"$)/g, '');
-      }
-
-      // source compression
-      if (_compress) {
-        source = pako.inflate(source, { level: 9, to: 'string' });
-
-        if (! source) {
-          throw 'compression';
-        }
-      }
-      
-      // source encrypted
-      if (_crypt && !! _secret) {
-        source = CryptoJS.AES.decrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
-
-        if (! _binary) {
-          source = source.toString(CryptoJS.enc.Utf8);
-        }
-
-        if (! source) {
-          throw 'encryption';
-        }
-      }
-
-      source = JSON.parse(source);
-    } catch (err) {
-      app.error('app.os.fileOpen', err);
-
-      return callback(false);
-    }
-
-    // check file source before store
-    if (! app.checkFile(source)) {
-      return callback(false);
-    }
-
-    for (var i in schema) {
-      if (schema[i] in source === false) {
-        app.error('app.os.fileOpen', 'schema');
-
-        return callback(false);
-      }
-
-      app.store.set(_app_name + '_' + schema[i], source[schema[i]]);
-    }
-
-    callback(file.name);
+    _init(this.result);
   });
 
   reader.onerror = (function(err) {
@@ -175,7 +272,11 @@ app.os.fileOpen = function(callback) {
     callback(false);
   });
 
-  reader.readAsText(file);
+  if (fbinary) {
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.readAsText(file);
+  }
 }
 
 
@@ -185,15 +286,15 @@ app.os.fileOpen = function(callback) {
  * Sends a file to the browser, returns to callback
  *
  * @global <Object> appe__config
- * @global <Object> pako
  * @global <Object> CryptoJS
+ * @global <Function> pako
  * @param <Function> callback
  * @param <Object> source
  * @param <Date> timestamp
  * @return
  */
 app.os.fileSave = function(callback, source, timestamp) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.os.fileSave');
@@ -205,16 +306,20 @@ app.os.fileSave = function(callback, source, timestamp) {
     step = app.error('app.os.fileSave', 'config');
   }
 
-  if (! Blob || ! saveAs) {
+  if (! saveAs) {
     step = app.error('app.os.fileSave', 'FileSaver');
   }
 
-  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    step = app.error('app.os.fileSave', 'pako');
+  if (! (CryptoJS && CryptoJS.MD5)) {
+    step = app.error('app.os.fileOpen', 'CryptoJS');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
     step = app.error('app.os.fileSave', 'CryptoJS');
+  }
+
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    step = app.error('app.os.fileSave', 'pako');
   }
 
   if (! (callback && typeof callback === 'function') || ! (timestamp && timestamp instanceof Date)) {
@@ -228,11 +333,11 @@ app.os.fileSave = function(callback, source, timestamp) {
   var _app_name = app._runtime.name.toString();
 
 
-  var _binary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
-  var _compress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
-  var _crypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+  var fbinary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var fcompress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
-  if (_binary && ! (_compress || _crypt)) {
+  if (fbinary && ! (fcompress && fcrypt)) {
     app.error('app.os.fileSave', 'binary');
 
     return callback(false);
@@ -242,110 +347,197 @@ app.os.fileSave = function(callback, source, timestamp) {
   var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
   var file_extension = 'js';
   var file_mime = 'application/x-javascript';
-  var file_type = '';
+  var file_type = null;
+  var file_json_checksum = null;
 
-  if (_binary) {
+  if (fbinary) {
     file_extension = 'appe';
-    file_mime = '';
+    file_mime = 'application/octet-stream';
+    file_type = file_mime;
+  } else {
+    file_type = file_mime + ';charset=utf-8';
   }
 
-  file_extension = config.file && config.file.extension ? '.' + config.file.extension.toString() : file_extension;
-  file_mime = config.file && config.file.mime_type ? config.file.mime_type.toString() : file_mime;
-  file_type = file_mime;
+  file_extension = config.file && config.file.extension ? config.file.extension.toString() : file_extension;
 
 
-  var _secret = null;
+  var _prepare = function(source, cb) {
+    source.file.checksum = '';
 
-  if (_crypt) {
-    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in document) {
-      _secret = document[app._runtime.secret];
+    var p = 32;
+
+    while (p--) {
+      source.file.checksum += ' ';
+    }
+
+    try {
+      var source = JSON.stringify(source);
+
+      app.os.generateJsonChecksum(function(checksum) {
+        if (! checksum) { throw null; }
+
+        file_json_checksum = checksum;
+
+        source = source.replace(/"file":{"checksum":"[\s]{32}"/, '"file":{"checksum":"' + checksum + '"');
+
+        cb(false, source);
+      }, source);
+    } catch (err) {
+      cb(err);
+    }
+  }
+
+  var _crypt = function(source, cb) {
+    var secret = null;
+
+    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in app._root.document) {
+      secret = app._root.document[app._runtime.secret];
     } else {
-      app.error('app.session', 'runtime');
+      return cb('runtime');
+    }
 
-      return callback(false);
+    try {
+      source = CryptoJS.AES.encrypt(source, secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+      source = source.toString();
+
+      if (! source) { throw 'encryption'; }
+
+      cb(false, source);
+    } catch (err) {
+      cb(err);
     }
   }
 
+  var _compress = function(source, cb) {
+    try {
+      source = pako.deflate(source, { raw: true, level: 9 });
 
-  // prepare file source
-  try {
-    source = JSON.stringify(source);
+      if (! source) { throw 'compression'; }
 
-    // source to encrypted blob
-    if (_crypt && !! _secret) {
-      source = CryptoJS.AES.encrypt(source, _secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
-
-      if (! _binary) {
-        source = source.toString();
-      }
-
-      if (! source) {
-        throw 'encryption';
-      }
+      cb(false, source);
+    } catch (err) {
+      cb(err);
     }
+  }
 
-    // source compression
-    if (_compress) {
-      source = pako.deflate(source, { level: 9, to: 'string' });
-
-      if (! source) {
-        throw 'compression';
-      }
-    }
-
+  var _complete = function(source, cb) {
     // source to JavaScript JSON file format
-    if (! _binary) {
-      file_type += ';charset=utf-8';
-
+    if (! fbinary) {
       // should wrap source in double quotes
-      if (!! _crypt && _secret) {
+      if (fcrypt) {
         source = '"' + source + '"';
       }
 
-      source = _heads + '=' + source;
+      source = file_heads + '=' + source;
     }
-  } catch (err) {
-    app.error('app.os.fileSave', err);
 
-    return callback(false);
+    try {
+      var blob = new Blob([ source ], { type: file_type });
+
+      if (! blob) { throw 'blob'; }
+
+      cb(false, blob);
+    } catch (err) {
+      cb(err);
+    }
   }
 
+  var _save = function(blob, cb) {
+    var file_saves = app.memory.has('file_saves') ? parseInt(app.memory.get('file_saves')) : 0;
 
-  var file_saves = app.memory.has('file_saves') ? parseInt(app.memory.get('file_saves')) : 0;
+    file_saves++;
 
-  file_saves++;
+    var file_name_prefix = config.file && config.file.filename_prefix ? config.file.filename_prefix.toString() : _app_name + '_save';
+    var file_name_separator = config.file && config.file.filename_separator ? config.file.filename_separator.toString() : '_';
+    var file_name_date_format = config.file && config.file.filename_date_format ? config.file.filename_date_format.toString() : 'Y-m-d_H-M-S';
 
-  var file_name_prefix = config.file && config.file.filename_prefix ? config.file.filename_prefix.toString() : _app_name + '_save';
-  var file_name_separator = config.file && config.file.filename_separator ? config.file.filename_separator.toString() : '_';
-  var file_name_date_format = config.file && config.file.filename_date_format ? config.file.filename_date_format.toString() : 'Y-m-d_H-M-S';
+    var file_name = file_name_prefix;
+    var file_name_date = app.utils.dateFormat(timestamp, file_name_date_format);
 
-  var file_name = file_name_prefix;
-  var file_name_date = app.utils.dateFormat(timestamp, file_name_date_format);
-
-  file_name += file_name_separator + file_name_date;
-  file_name += file_name_separator + file_saves;
-
-
-  try {
-    var blob = new Blob(
-      [ source ],
-      { type: file_type }
-    );
+    file_name += file_name_separator + file_name_date;
+    file_name += file_name_separator + file_saves;
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileSave', 'file', { name: file_name + file_extension, type: file_type }, config.file);
+      console.info('app.os.fileSave', 'file', { name: file_name + '.' + file_extension, type: file_type }, config.file);
     }
 
-    saveAs(blob, file_name + file_extension);
+    try {
+      saveAs(blob, file_name + '.' + file_extension);
 
-    app.memory.set('file_saves', file_saves);
+      app.memory.set('file_saves', file_saves);
 
-    callback(file_name);
-  } catch (err) {
-    app.error('app.os.fileSave', err);
-
-    callback(false);
+      cb(false, file_name + '.' + file_extension);
+    } catch (err) {
+      cb(err);
+    }
   }
+
+  var _init = function(source) {
+    try {
+      if (fcompress && fcrypt) {
+        _prepare(source, function(err, source) {
+          if (err) { throw err; }
+
+          _crypt(source, function(err, source) {
+            if (err) { throw err; }
+
+            _compress(source, function(err, source) {
+              if (err) { throw err; }
+
+              _complete(source, function(err, blob) {
+                if (err) { throw err; }
+
+                _save(blob, function(err, filename) {
+                  if (err) { throw err; }
+
+                  callback(filename);
+                });
+              });
+            });
+          });
+        });
+      } else if (fcrypt) {
+        _prepare(source, function(err, source) {
+          if (err) { throw err; }
+
+          _crypt(source, function(err, source) {
+            if (err) { throw err; }
+
+            _complete(source, function(err, blob) {
+              if (err) { throw err; }
+
+              _save(blob, function(err, filename) {
+                if (err) { throw err; }
+
+                callback(filename);
+              });
+            });
+          });
+        });
+      } else {
+        _prepare(source, function(err, source) {
+          if (err) { throw err; }
+
+          _complete(source, function(err, blob) {
+            if (err) { throw err; }
+
+            _save(blob, function(err, filename) {
+              if (err) { throw err; }
+
+              callback(filename);
+            });
+          });
+        });
+      }
+    } catch (err) {
+      app.error('app.os.fileSave', err);
+
+      callback(false);
+    }
+  }
+
+
+  _init(source);
 }
 
 
@@ -358,45 +550,53 @@ app.os.fileSave = function(callback, source, timestamp) {
  * @param <String> file
  * @param <String> fn
  * @param <Number> max_attempts
+ * @return
  */
 app.os.scriptOpen = function(callback, file, fn, max_attempts) {
   if (typeof callback != 'function' || typeof file != 'string' || (fn && typeof fn != 'string')) {
-    return app.error('app.os.scriptOpen', arguments);
+    app.error('app.os.scriptOpen', arguments);
+
+    return callback(false);
   }
 
   fn = fn.toString();
 
 
   var _load = function(file) {
-    var script = document.createElement('script');
+    var script = app._root.document.createElement('script');
     script.src = file;
     script.async = true;
     script.defer = true;
 
-    document.head.appendChild(script);
+    app._root.document.head.appendChild(script);
   }
 
-  var _check = function(callback, fn) {
-    var max = parseInt(max_attempts) || 5;
+  var _check = function(fn, cb) {
+    var max = parseInt(max_attempts) || 50;
     var attempts = 0;
 
     var interr = setInterval(function() {
       attempts++;
 
-      if (!! window[fn] || max === attempts) {
+      if (fn in app._root.window === true || max === attempts) {
         clearInterval(interr);
 
-        callback();        
+        cb(true);
       }
-    }, 1000);
+    }, 10);
+  }
+
+
+  if (!! app._root.window.native) {
+    return callback(true);
   }
 
   _load(file);
 
-  if (fn in window === false) {
-    _check(callback, fn);
+  if (fn in app._root.window === false) {
+    _check(fn, callback);
   } else {
-    callback();
+    callback(true);
   }
 }
 
@@ -404,25 +604,25 @@ app.os.scriptOpen = function(callback, file, fn, max_attempts) {
 /**
  * app.os.generateFileHead
  *
- * Generates a file header with file ?
+ * Generates a JSON head
  *
  * @global <Object> appe__config
  * @param <Object> source
  * @param <Date> timestamp
  * @return <Object>
  */
-app.os.generateFileHead = function(source, timestamp) {
-  var config = window.appe__config;
+app.os.generateJsonHead = function(source, timestamp) {
+  var config = app._root.window.appe__config;
 
   if (! config) {
-    return app.stop('app.os.generateFileHead');
+    return app.stop('app.os.generateJsonHead');
   }
 
   if (! (source && typeof source === 'object') && ! (timestamp && timestamp instanceof Date)) {
-    return app.error('app.os.generateFileHead', arguments);
+    return app.error('app.os.generateJsonHead', arguments);
   }
 
-  var checksum = ''; //TODO
+  var checksum = '';
   var timestamp = app.utils.dateFormat(timestamp, 'Q');
 
   return {
@@ -435,15 +635,48 @@ app.os.generateFileHead = function(source, timestamp) {
 
 
 /**
+ * app.os.generateJsonChecksum
+ *
+ * Generates a JSON checksum
+ *
+ * @param <Function> callback
+ * @param <String> source
+ * @return
+ */
+app.os.generateJsonChecksum = function(callback, source) {
+  if (typeof callback != 'function' && typeof source != 'string') {
+    app.error('app.os.generateJsonChecksum', arguments);
+
+    return callback(false);
+  }
+
+  if (! (CryptoJS && CryptoJS.MD5)) {
+    step = app.error('app.os.generateJsonChecksum', 'CryptoJS');
+  }
+
+  try {
+    var checksum = CryptoJS.MD5(source.length.toString());
+    checksum = checksum.toString();
+
+    callback(checksum);
+  } catch (err) {
+    app.error('app.os.generateJsonChecksum', err);
+
+    callback(false);
+  }
+}
+
+
+/**
  * app.os.getLastFileName
  *
- * Gets the last opened file name
+ * Gets the file name of last opened file
  *
  * @global <Object> appe__config
  * @return <String>
  */
 app.os.getLastFileName = function() {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.os.getLastFileName');
@@ -471,13 +704,13 @@ app.os.getLastFileName = function() {
 /**
  * app.os.getLastFileVersion
  *
- * Gets the last opened file version
+ * Gets the runtime version of last opened file 
  *
  * @global <Object> appe__store
  * @return <String>
  */
 app.os.getLastFileVersion = function() {
-  var store = window.appe__store;
+  var store = app._root.window.appe__store;
 
   if (! store) {
     return app.stop('app.os.getLastFileVersion', 'store');
@@ -488,7 +721,7 @@ app.os.getLastFileVersion = function() {
   var data_file = store[_app_name]['file'];
 
   if (! data_file) {
-    return app.error('app.os.getLastFileVersion', 'data_file');
+    return app.error('app.os.getLastFileVersion', 'data');
   }
 
   var file_version = null;
@@ -504,13 +737,13 @@ app.os.getLastFileVersion = function() {
 /**
  * app.os.getLastFileChecksum
  *
- * Gets the last opened file checksum
+ * Gets the JSON checksum of last opened file 
  *
  * @global <Object> appe__store
  * @return <String>
  */
 app.os.getLastFileChecksum = function() {
-  var store = window.appe__store;
+  var store = app._root.window.appe__store;
 
   if (! store) {
     return app.stop('app.os.getLastFileChecksum', 'store');
@@ -521,16 +754,16 @@ app.os.getLastFileChecksum = function() {
   var data_file = store[_app_name]['file'];
 
   if (! data_file) {
-    return app.error('app.os.getLastFileChecksum', 'data_file');
+    return app.error('app.os.getLastFileChecksum', 'data');
   }
 
-  var file_checksum = null;
+  var file_json_checksum = null;
 
   if (data_file.checksum) {
-    file_checksum = data_file.checksum;
+    file_json_checksum = data_file.checksum;
   }
 
-  return file_checksum;
+  return file_json_checksum;
 }
 
 

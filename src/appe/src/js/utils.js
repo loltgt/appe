@@ -139,8 +139,8 @@ app.utils.extendObject = function() {
 app.utils.system = function(purpose) {
   var system = { 'platform': null, 'architecture': null, 'navigator': null, 'release': null };
 
-  var _platform = window.navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
-  var _navigator = window.navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
+  var _platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
+  var _navigator = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
   var _release = null;
 
   if (_platform) {
@@ -158,13 +158,13 @@ app.utils.system = function(purpose) {
       system.model = 'iphone';
     }
   } else {
-    _platform = window.navigator.userAgent.match(/(Win|Mac|Linux)/i)
+    _platform = navigator.userAgent.match(/(Win|Mac|Linux)/i)
 
     if (_platform) {
       _platform = _platform[0].substring(0, 3).toLowerCase();
 
       if (_platform === 'win') {
-        if (window.navigator.userAgent.indexOf('WOW64') != -1 || window.navigator.userAgent.indexOf('Win64') != -1) {
+        if (navigator.userAgent.indexOf('WOW64') != -1 || navigator.userAgent.indexOf('Win64') != -1) {
           system.architecture = 64;
         } else {
           system.architecture = 32;
@@ -191,7 +191,7 @@ app.utils.system = function(purpose) {
 
       if (_navigator.indexOf('ie') != -1 || _navigator == 'trident') {
         if (_navigator === 'trident') {
-          _release = window.navigator.userAgent.match(/rv:([\d]+)/i);
+          _release = navigator.userAgent.match(/rv:([\d]+)/i);
 
           if (_release) {
             _navigator = 'ie';
@@ -264,6 +264,322 @@ app.utils.removeEvent = function(event, element, func) {
   } else if (element.attachEvent) {
     element.detachEvent('on' + event, func);
   }
+}
+
+
+/**
+ * app.utils.storage
+ *
+ * Storage utility, it memorizes persistent and non-persistent data using localStorage and sessionStorage
+ *
+ * available methods:
+ *  - set (key <String>, value)
+ *  - get (key <String>)
+ *  - has (key <String>, value)
+ *  - del (key <String>)
+ *  - reset ()
+ *
+ * @param <String> persists
+ * @param <String> method
+ * @param <String> key
+ * @param value
+ * @return
+ */
+app.utils.storage = function(persists, method, key, value) {
+  if (persists === undefined || method === undefined) {
+    return app.error('app.utils.storage', arguments);
+  }
+
+  if (! app._runtime.storage) {
+    return app.stop('app.utils.storage', 'runtime', arguments);
+  }
+
+  var self = app.utils.storage.prototype;
+
+  var _storage = app._runtime.storage.toString();
+
+  self._prefix = 'appe.';
+  self._fn = persists ? _storage : 'sessionStorage';
+  self._persist = persists;
+
+  if (self._fn in app._root.window === false) {
+    return app.error('app.utils.storage', self._fn);
+  }
+
+  return self[method].apply(self, [ key, value ]);
+}
+
+app.utils.storage.prototype.set = function(key, value) {
+
+  if (key === undefined  || typeof key !== 'string' || value === undefined) {
+    return app.error('app.utils.storage.prototype.set', arguments);
+  }
+
+  var _key = app.utils.base64('encode', this._prefix + key);
+
+  if (typeof value == 'object') {
+    try {
+      value = JSON.stringify(value);
+    } catch (err) {
+      return app.error('app.utils.storage.prototype.set', err);
+    }
+  }
+
+  value = value.toString();
+
+  app._root.window[this._fn].setItem(_key, value);
+
+  return true;
+}
+
+app.utils.storage.prototype.get = function(key) {
+  if (key === undefined || typeof key !== 'string') {
+    return app.error('app.utils.storage.prototype.get', arguments);
+  }
+
+  var _key = app.utils.base64('encode', this._prefix + key);
+
+  var value = app._root.window[this._fn].getItem(_key);
+
+  try {
+    var _value = value;
+    value = JSON.parse(_value);
+  } catch (err) {
+    value = _value;
+  }
+
+  return value;
+}
+
+app.utils.storage.prototype.has = function(key, value) {
+  if (key === undefined || typeof key !== 'string') {
+    return app.error('app.utils.storage.prototype.has', arguments);
+  }
+
+  if (value != undefined) {
+    if (typeof value == 'object') {
+      try {
+        value = JSON.stringify(value);
+      } catch (err) {
+        return app.error('app.utils.storage.prototype.has', err);
+      }
+    }
+
+    value = value.toString();
+
+    return (this.constructor.call(this, this._persist, 'get', key) === value) ? true : false;
+  }
+
+  return this.constructor.call(this, this._persist, 'get', key) ? true : false;
+}
+
+app.utils.storage.prototype.del = function(key) {
+  if (key === undefined || typeof key !== 'string') {
+    return app.error('app.utils.storage.prototype.del', arguments);
+  }
+
+  var _key = app.utils.base64('encode', this._prefix + key);
+
+  app._root.window[this._fn].removeItem(_key);
+
+  return true;
+}
+
+app.utils.storage.prototype.reset = function() {
+  app._root.window[this._fn].clear();
+
+  return true;
+}
+
+
+/**
+ * app.utils.cookie
+ *
+ * Helper to handle cookie
+ *
+ * available methods:
+ *  - set (key <String>, value, expire_time <Date>)
+ *  - get (key <String>)
+ *  - has (key <String>, value)
+ *  - del (key <String>)
+ *  - reset ()
+ *
+ * @param <String> method
+ * @param <String> key
+ * @param value
+ * @param <Date> expire_time
+ * @return
+ */
+app.utils.cookie = function(method, key, value, expire_time) {
+  if (method === undefined) {
+    return app.error('app.utils.cookie', arguments);
+  }
+
+  var self = app.utils.cookie.prototype;
+
+  self._prefix = 'appe.';
+
+  return self[method].apply(self, [ key, value, expire_time ]);
+}
+
+app.utils.cookie.prototype.set = function(key, value, expire_time) {
+  if (key === undefined || typeof key !== 'string' || value === undefined) {
+    return app.error('app.utils.cookie.prototype.set', arguments);
+  }
+
+  var _time = 'Fri, 31 Dec 9999 23:59:59 GMT';
+
+  if (expire_time && expire_time instanceof Date) {
+    _time = expire_time.toUTCString(); 
+  }
+
+  var _key = app.utils.base64('encode', this._prefix + key);
+  _key = encodeURIComponent(_key);
+
+  if (typeof value == 'object') {
+    try {
+      value = JSON.stringify(value);
+    } catch (err) {
+      return app.error('app.utils.cookie().set', err);
+    }
+  }
+
+  value = value.toString();
+  value = encodeURIComponent(value);
+
+  app._root.document.cookie = _key + '=' + value + '; expires=' + _time;
+
+  return true;
+}
+
+app.utils.cookie.prototype.get = function(key) {
+  if (key === undefined || typeof key !== 'string') {
+    return app.error('app.utils.cookie.prototype.get', arguments);
+  }
+
+  var _key = app.utils.base64('encode', this._prefix + key);
+  _key = encodeURIComponent(_key);
+
+  var value = null;
+
+  if (app._root.document.cookie.indexOf(_key) != -1) {
+    var _key_regex = new RegExp(_key + '\=([^\;]+)');
+    var _value_match = app._root.document.cookie.match(_key_regex);
+
+    value = _value_match.length ? _value_match[1] : null;
+  }
+
+  if (! value) {
+    return null;
+  }
+
+  try {
+    var _value = value;
+    value = JSON.parse(_value);
+  } catch (err) {
+    value = _value;
+  }
+
+  value = decodeURIComponent(value);
+
+  return value;
+}
+
+app.utils.cookie.prototype.has = function(key, value) {
+  if (key === undefined || typeof key !== 'string') {
+    return app.error('app.utils.cookie.prototype.has', arguments);
+  }
+
+  if (value != undefined) {
+    if (typeof value == 'object') {
+      try {
+        value = JSON.stringify(value);
+      } catch (err) {
+        return app.error('app.utils.cookie.prototype.has', err);
+      }
+    }
+
+    value = value.toString();
+    value = encodeURIComponent(value);
+
+    return (this.constructor.call(this, 'get', key) === value) ? true : false;
+  }
+
+  return this.constructor.call(this, 'get', key) ? true : false;
+}
+
+app.utils.cookie.prototype.del = function(key) {
+  if (key === undefined || typeof key !== 'string') {
+    return app.error('app.utils.cookie.prototype.del', arguments);
+  }
+
+  var _key = app.utils.base64('encode', this._prefix + key);
+  _key = encodeURIComponent(_key);
+
+  app._root.document.cookie = _key + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+  return true;
+}
+
+app.utils.cookie.prototype.reset = function() {
+  app._root.document.cookie = '';
+
+  return true;
+}
+
+
+/**
+ * app.utils.base64
+ *
+ * Alias to base64 browser implementation with URI encoding
+ *
+ * available methods:
+ *  - encode (to_encode <String>)
+ *  - decode (to_decode <String>)
+ *
+ * @global <Function> btoa
+ * @global <Function> atob
+ * @param to_encode
+ * @return
+ */
+app.utils.base64 = function(method, data) {
+  var self = app.utils.base64.prototype;
+
+  if ('btoa' in app._root.window == false || 'atob' in app._root.window == false) {
+    return app.stop('app.utils.base64');
+  }
+
+  if (method === undefined || ! data) {
+    return app.error('app.utils.base64', arguments);
+  }
+
+  return self[method](data);
+}
+
+app.utils.base64.prototype.encode = function(to_encode) {
+  var _btoa = app._root.window.btoa;
+
+  if (typeof to_encode !== 'string') {
+    return app.error('app.utils.base64.prototype.encode', arguments);
+  }
+
+  to_encode = encodeURIComponent(to_encode);
+  to_encode = _btoa(to_encode);
+
+  return to_encode;
+}
+
+app.utils.base64.prototype.decode = function(to_decode) {
+  var _atob = app._root.window.atob;
+
+  if (typeof to_decode !== 'string') {
+    return app.error('app.utils.base64.prototype.decode', arguments);
+  }
+
+  to_decode = _atob(to_decode);
+  to_decode = decodeURIComponent(to_decode);
+
+  return to_decode;
 }
 
 
@@ -348,261 +664,40 @@ app.utils.sanitize = function(purpose, value) {
 
 
 /**
- * app.utils.storage
+ * app.utils.classify
  *
- * Storage utility, it memorizes persistent and non-persistent data using localStorage and sessionStorage
+ * Transforms object to classnames
  *
- * available methods:
- *  - set (key <String>, value)
- *  - get (key <String>)
- *  - has (key <String>, value)
- *  - del (key <String>)
- *  - reset ()
- *
- * @param <String> persists
- * @param <String> method
- * @param <String> key
- * @param value
- * @return
+ * @param <Object> data
+ * @param <String> prefix
+ * @param <Boolean> to_array
+ * @return value
  */
-app.utils.storage = function(persists, method, key, value) {
-  if (persists === undefined || method === undefined) {
-    return app.error('app.utils.storage', arguments);
+app.utils.classify = function(data, prefix, to_array) {
+  if (! (data && typeof data === 'object') || (prefix && typeof prefix != 'string')) {
+    return app.error('app.utils.classify', arguments);
   }
 
-  if (! app._runtime.storage) {
-    return app.stop('app.utils.storage', 'runtime');
-  }
+  prefix = prefix || '';
 
-  var self = app.utils.storage.prototype;
+  var classname = data instanceof Array || true;
+  var classes = '';
 
-  var _storage = app._runtime.storage.toString();
-
-  self._prefix = 'appe.';
-  self._fn = persists ? _storage : 'sessionStorage';
-
-  if (self._fn in window === false) {
-    return app.error('app.utils.storage', self._fn);
-  }
-
-  return self[method].apply(self, [ key, value ]);
-}
-
-app.utils.storage.prototype.set = function(key, value) {
-  if (key === undefined  || typeof key !== 'string' || value === undefined) {
-    return app.error('app.utils.storage.prototype.set', arguments);
-  }
-
-  var _key = app.utils.base64('encode', this._prefix + key);
-
-  if (typeof value == 'object') {
-    try {
-      value = JSON.stringify(value);
-    } catch (err) {
-      return app.error('app.utils.storage.prototype.set', err);
-    }
-  }
-
-  value = value.toString();
-
-  window[this._fn].setItem(_key, value);
-
-  return true;
-}
-
-app.utils.storage.prototype.get = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.storage.prototype.get', arguments);
-  }
-
-  var _key = app.utils.base64('encode', this._prefix + key);
-
-  var value = window[this._fn].getItem(_key);
-
-  try {
-    var _value = value;
-    value = JSON.parse(_value);
-  } catch (err) {
-    value = _value;
-  }
-
-  return value;
-}
-
-app.utils.storage.prototype.has = function(key, value) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.storage.prototype.has', arguments);
-  }
-
-  if (value != undefined) {
-    if (typeof value == 'object') {
-      try {
-        value = JSON.stringify(value);
-      } catch (err) {
-        return app.error('app.utils.storage.prototype.has', err);
-      }
+  for (var name in data) {
+    if (! data[name]) {
+      continue;
     }
 
-    value = value.toString();
-
-    return (this.get(key) === value) ? true : false;
+    classes += prefix + (classname && name + '-' || '') + data[name].toString().replace(/[^\d\D-_]/i, '-') + ' ';
   }
 
-  return this.get(key) ? true : false;
-}
+  classes = classes.trim();
 
-app.utils.storage.prototype.del = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.storage.prototype.del', arguments);
+  if (!! to_array) {
+    classes = classes.split(' ');
   }
 
-  var _key = app.utils.base64('encode', this._prefix + key);
-
-  window[this._fn].removeItem(_key);
-
-  return true;
-}
-
-app.utils.storage.prototype.reset = function() {
-  window[this._fn].clear();
-
-  return true;
-}
-
-
-/**
- * app.utils.cookie
- *
- * Helper to handle cookie
- *
- * available methods:
- *  - set (key <String>, value, expire_time <Date>)
- *  - get (key <String>)
- *  - has (key <String>, value)
- *  - del (key <String>)
- *  - reset ()
- *
- * @param <String> method
- * @param <String> key
- * @param value
- * @param <Date> expire_time
- * @return
- */
-app.utils.cookie = function(method, key, value, expire_time) {
-  if (method === undefined) {
-    return app.error('app.utils.cookie', arguments);
-  }
-
-  var self = app.utils.cookie.prototype;
-
-  self._prefix = 'appe.';
-
-  return self[method].apply(self, [ key, value, expire_time ]);
-}
-
-app.utils.cookie.prototype.set = function(key, value, expire_time) {
-  if (key === undefined || typeof key !== 'string' || value === undefined) {
-    return app.error('app.utils.cookie.prototype.set', arguments);
-  }
-
-  var _time = 'Fri, 31 Dec 9999 23:59:59 GMT';
-
-  if (expire_time && expire_time instanceof Date) {
-    _time = expire_time.toUTCString(); 
-  }
-
-  var _key = app.utils.base64('encode', this._prefix + key);
-  _key = encodeURIComponent(_key);
-
-  if (typeof value == 'object') {
-    try {
-      value = JSON.stringify(value);
-    } catch (err) {
-      return app.error('app.utils.cookie().set', err);
-    }
-  }
-
-  value = value.toString();
-  value = encodeURIComponent(value);
-
-  document.cookie = _key + '=' + value + '; expires=' + _time;
-
-  return true;
-}
-
-app.utils.cookie.prototype.get = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.cookie.prototype.get', arguments);
-  }
-
-  var _key = app.utils.base64('encode', this._prefix + key);
-  _key = encodeURIComponent(_key);
-
-  var value = null;
-
-  if (document.cookie.indexOf(_key) != -1) {
-    var _key_regex = new RegExp(_key + '\=([^\;]+)');
-    var _value_match = document.cookie.match(_key_regex);
-
-    value = _value_match.length ? _value_match[1] : null;
-  }
-
-  if (! value) {
-    return null;
-  }
-
-  try {
-    var _value = value;
-    value = JSON.parse(_value);
-  } catch (err) {
-    value = _value;
-  }
-
-  value = decodeURIComponent(value);
-
-  return value;
-}
-
-app.utils.cookie.prototype.has = function(key, value) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.cookie.prototype.has', arguments);
-  }
-
-  if (value != undefined) {
-    if (typeof value == 'object') {
-      try {
-        value = JSON.stringify(value);
-      } catch (err) {
-        return app.error('app.utils.cookie.prototype.has', err);
-      }
-    }
-
-    value = value.toString();
-    value = encodeURIComponent(value);
-
-    return (this.get(key) === value) ? true : false;
-  }
-
-  return this.get(key) ? true : false;
-}
-
-app.utils.cookie.prototype.del = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.cookie.prototype.del', arguments);
-  }
-
-  var _key = app.utils.base64('encode', this._prefix + key);
-  _key = encodeURIComponent(_key);
-
-  document.cookie = _key + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-
-  return true;
-}
-
-app.utils.cookie.prototype.reset = function() {
-  document.cookie = '';
-
-  return true;
+  return classes;
 }
 
 
@@ -735,59 +830,4 @@ app.utils.dateFormat = function(time, format) {
  */
 app.utils.numberLendingZero = function(number) {
   return number < 10 ? '0' + number : number.toString();
-}
-
-
-/**
- * app.utils.base64
- *
- * Alias to base64 browser implementation with URI encoding
- *
- * available methods:
- *  - encode (to_encode <String>)
- *  - decode (to_decode <String>)
- *
- * @global <Function> btoa
- * @global <Function> atob
- * @param to_encode
- * @return
- */
-app.utils.base64 = function(method, data) {
-  var self = app.utils.base64.prototype;
-
-  if ('btoa' in window == false || 'atob' in window == false) {
-    return app.stop('app.utils.base64');
-  }
-
-  if (method === undefined || ! data) {
-    return app.error('app.utils.base64', arguments);
-  }
-
-  return self[method](data);
-}
-
-app.utils.base64.prototype.encode = function(to_encode) {
-  var _btoa = window.btoa;
-
-  if (typeof to_encode !== 'string') {
-    return app.error('app.utils.base64.prototype.encode', arguments);
-  }
-
-  to_encode = encodeURIComponent(to_encode);
-  to_encode = _btoa(to_encode);
-
-  return to_encode;
-}
-
-app.utils.base64.prototype.decode = function(to_decode) {
-  var _atob = window.atob;
-
-  if (typeof to_decode !== 'string') {
-    return app.error('app.utils.base64.prototype.decode', arguments);
-  }
-
-  to_decode = _atob(to_decode);
-  to_decode = decodeURIComponent(to_decode);
-
-  return to_decode;
 }

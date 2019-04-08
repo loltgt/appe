@@ -11,6 +11,7 @@ window.appe__config = {
   "encryption": true,
   "binary": true, // save to binary file
   "secret_passphrase": "test",
+  "verify_checksum": true, // (required)
   "debug": true,
   "schema": [ // (required)
     "file",
@@ -31,7 +32,6 @@ window.appe__config = {
   },
   "default_route": "action-1", // default route (required)
   "default_event": "event", // default event (required)
-  "verify_file_checksum": true, // (required)
   "base_path": "app", // where is located app folder (required)
   "save_path": "save", // where is located save folder (required)
   "open_attempts": 10, // how many attempts to resume file session and load extensions (required)

@@ -1,12 +1,13 @@
-window.appe__config = {
+appe__config = {
   "app_ns": "demo",
   "launcher_name": "LAUNCH",
   "app_name": "{appe} demo app",
   "language": "en",
-  "compression": false,
+  "compression": true,
   "encryption": true,
-  "binary": false,
+  "binary": true,
   "secret_passphrase": "test",
+  "verify_checksum": true,
   "debug": true,
   "schema": [
     "file",
@@ -55,10 +56,9 @@ window.appe__config = {
   },
   "default_route": "demo",
   "default_event": "add",
-  "verify_file_checksum": true,
   "base_path": "app",
   "save_path": "save",
-  "open_attempts": 10,
+  "open_attempts": 20,
   "alt": {
     "exec_folder": "alt",
     "exec_platform": {

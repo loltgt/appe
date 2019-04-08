@@ -19,7 +19,7 @@
       <div class="start-progress">
         <div id="start-progress-open" class="start-progress-open" style="visibility: hidden;">
           <p class="lead">Open latest file save</p>
-          <input id="start-action-open-session" type="file" accept="application/x-javascript" style="display: none;" hidden>
+          <input id="start-action-open-session" type="file" style="display: none;" hidden>
           <button id="start-action-open" class="btn btn-lg btn-big btn-start-action-open start-action-open" data-open-input="#start-action-open-session">Open</button>
           <p><button id="start-action-new" class="btn btn-mini btn-start-action-new start-action-new">New Session</button>
         </div>
@@ -34,14 +34,14 @@
 
 <script type="text/javascript" src="app/assets/js/app.min.js"></script>
 <script type="text/javascript" src="app/assets/js/lib/file-saver/FileSaver.min.js" async defer></script>
-<script type="text/javascript" src="app/assets/js/lib/pako/pako.min.js" async defer></script>
 <script type="text/javascript" src="app/assets/js/lib/crypto-js/crypto-js.min.js" async defer></script>
+<script type="text/javascript" src="app/assets/js/lib/pako/pako.min.js" async defer></script>
 
 <script type="text/javascript" src="app/config.js"></script>
 
 
 <script type="text/javascript">
-var start = window.appe__start = true;
+var start = appe__start = true;
 
 app.load(app.start.load);
 </script>

@@ -26,7 +26,7 @@ app.controller.cursor = function(loc) {
     return loc;
   }
 
-  loc = app.memory.get('cursor');
+  loc = app.memory.get('cursor', loc);
 
   return loc;
 }
@@ -87,7 +87,6 @@ app.controller.history = function(title, url) {
 
   if (app._runtime.system.navigator == 'safari') {
     location.href = url;
-    return;
   } else {
     history.replaceState(null, title, url);
   }
@@ -107,7 +106,7 @@ app.controller.history = function(title, url) {
 app.controller.setTitle = function(title) {
   app._runtime.title = title.toString();
 
-  document.title = app._runtime.title;
+  app._root.document.title = app._runtime.title;
 
   return app._runtime.title;
 }
@@ -136,13 +135,13 @@ app.controller.getTitle = function() {
  * @return
  */
 app.controller.retrieve = function(callback, routine) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.controller.retrieve');
   }
 
-  var store = window.appe__store;
+  var store = app._root.window.appe__store;
 
   if (! store) {
     return app.stop('app.controller.retrieve', 'store');
@@ -214,7 +213,7 @@ app.controller.retrieve = function(callback, routine) {
  * @return
  */
 app.controller.store = function(callback, fn, schema, data) {
-  var store = window.appe__store;
+  var store = app._root.window.appe__store;
 
   if (! store) {
     return app.stop('app.controller.store', 'store');
@@ -283,13 +282,13 @@ app.controller.store = function(callback, fn, schema, data) {
  * @return <Boolean>
  */
 app.controller.clear = function() {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.controller.clear');
   }
 
-  var store = window.appe__store;
+  var store = app._root.window.appe__store;
 
   if (! store) {
     return app.stop('app.controller.clear', 'store');

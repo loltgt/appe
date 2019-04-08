@@ -582,7 +582,11 @@ fieldset[disabled] .btn-secondary.focus {
 .table-responsive {
   display: block;
   width: 100%;
+  border: 0;
   -webkit-overflow-scrolling: touch;
+}
+.system--platform-ios .table-responsive .table {
+  max-width: 480px;
 }
 .table-auto {
   width: auto;

@@ -70,13 +70,13 @@ app.view.spoof = function() {
  * @return <Object> __construct
  */
 app.view.control = function(events, data, form) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.view.control');
   }
 
-  var control = window.appe__control;
+  var control = app._root.window.appe__control;
 
   if (! control) {
     return app.error('app.view.control', 'control');
@@ -107,7 +107,7 @@ app.view.control.prototype.isInitialized = function(funcName) {
 }
 
 app.view.control.prototype.begin = function() {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.view.control.prototype.begin');
@@ -254,14 +254,14 @@ app.view.control.prototype.setTitle = function(section_title, view_title, id) {
 
   var event = this.getEvent();
 
-  var _view_title = document.getElementById('view-title');
-  var _section_title = document.getElementById('section-title');
-
   id = parseInt(id) || app.view.control.prototype.getID();
 
   if (event === 'edit') {
     section_title += ' # ' + id;
   }
+
+  var _view_title = app._root.document.getElementById('view-title');
+  var _section_title = app._root.document.getElementById('section-title');
 
   if (view_title != undefined) {
     _view_title.innerHTML = view_title;
@@ -278,13 +278,13 @@ app.view.control.prototype.setActionHandler = function(label, id) {
 
   id = parseInt(id) || this.getID();
 
-  var action_handler = document.getElementById('submit');
-  var action_index = document.getElementById('index');
+  var action_handler = app._root.document.getElementById('submit');
+  var action_index = app._root.document.getElementById('index');
 
   if (action_index) {
     action_index.setAttribute('value', id);
   } else {
-    return app.error('app.view.control.prototype.setActionHandler', null, 'action_index');
+    return app.error('app.view.control.prototype.setActionHandler', 'action_index');
   }
 
   if (action_handler) {
@@ -301,7 +301,7 @@ app.view.control.prototype.setActionHandler = function(label, id) {
 app.view.control.prototype.denySubmit = function() {
   this.isInitialized('denySubmit');
 
-  var action_handler = document.getElementById('submit');
+  var action_handler = app._root.document.getElementById('submit');
 
   if (action_handler) {
     action_handler.removeAttribute('onclick');
@@ -392,7 +392,7 @@ app.view.control.prototype.fillSelection = function(data, id) {
     return app.error('app.view.control.prototype.fillSelection', arguments);
   }
 
-  var selection = document.getElementById('selection');
+  var selection = app._root.document.getElementById('selection');
 
   id = id || null;
 
@@ -410,8 +410,8 @@ app.view.control.prototype.fillCTA = function(id) {
 
   id = parseInt(id) || null;
 
-  var section_actions_top = document.getElementById('section-actions-top');
-  var section_actions_bottom = document.getElementById('section-actions-bottom');
+  var section_actions_top = app._root.document.getElementById('section-actions-top');
+  var section_actions_bottom = app._root.document.getElementById('section-actions-bottom');
 
   if (section_actions_top) {
     if (id) {
@@ -466,13 +466,13 @@ app.view.control.prototype.fillCTA = function(id) {
  * @return <Object> __construct
  */
 app.view.action = function(events, event, element, form) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.view.action');
   }
 
-  var control = window.appe__control;
+  var control = app._root.window.appe__control;
 
   if (! control) {
     return app.error('app.view.action', 'control');
@@ -486,7 +486,11 @@ app.view.action = function(events, event, element, form) {
 
   self._initialized = false;
 
+  if (! (config.events && typeof config.events === 'object')) {
+    return app.error('app.view.action', 'config');
+  }
 
+  self.cfg_events = config.events;
   self.events = events;
   self.event = event.toString();
   self.element = element;
@@ -543,7 +547,7 @@ app.view.action.prototype.validateForm = function() {
     return app.error('app.view.action.prototype.validateForm', 'form');
   }
 
-  var action_submit = document.getElementById('real-submit');
+  var action_submit = app._root.document.getElementById('real-submit');
 
   if (! action_submit) {
     return app.error('app.view.action.prototype.validateForm', 'action_submit');
@@ -587,6 +591,7 @@ app.view.action.prototype.prepare = function(data, submit) {
   }
 
   var id = this.getID();
+  var event_label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
 
   try {
     this.ctl.action = this.event;
@@ -597,6 +602,10 @@ app.view.action.prototype.prepare = function(data, submit) {
       // event update no needs history
       if (this.event != 'update') {
         this.ctl.history = true;
+
+        //TODO <Number> | <String>
+        this.ctl.title = event_label + ' ';
+        this.ctl.title += (typeof this.ctl.index === 'number' ? '#' + this.ctl.index : '"' + this.ctl.index + '"');
       }
     }
 
@@ -620,19 +629,13 @@ app.view.action.prototype.prepare = function(data, submit) {
 }
 
 app.view.action.prototype.prevent = function(data, submit, title, name) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.view.action.prototype.prevent');
   }
 
   this.isInitialized(this.event);
-
-  if (! (config.events && typeof config.events === 'object')) {
-    return app.error('app.view.control.prototype.begin', 'config');
-  }
-
-  var _events = config.events;
 
   if (data && typeof data != 'object') {
     return app.error('app.view.action.prototype.' + this.event, arguments);
@@ -642,7 +645,7 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
-  var event_label = _events ? _events[this.event].toString() : this.event;
+  var event_label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
 
   if (title && (typeof name === 'number' || typeof name === 'string')) {
     this.ctl.msg  = 'Are you sure to ' + event_label + ' ' + title + ' ';
@@ -684,7 +687,7 @@ app.view.action.prototype.selection = function() {
 app.view.action.prototype.print = function() {
   this.isInitialized('print');
 
-  window.print();
+  print();
 }
 
 
@@ -705,7 +708,7 @@ app.view.action.prototype.print = function() {
  * @return <Function>
  */
 app.view.sub = function(method, element, table) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.view.sub');
@@ -721,7 +724,7 @@ app.view.sub = function(method, element, table) {
 }
 
 app.view.sub.prototype.csv = function(element, table) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.view.sub.prototype.csv');
@@ -787,7 +790,7 @@ app.view.sub.prototype.clipboard = function(element, table) {
 }
 
 app.view.sub.prototype.toggler = function(element) {
-  if ('jQuery' in window && 'dropdown' in jQuery.fn) {
+  if ('jQuery' in app._root.window && 'dropdown' in jQuery.fn) {
     return;
   }
 
@@ -800,7 +803,8 @@ app.view.sub.prototype.toggler = function(element) {
   if (! element.getAttribute('data-is-visible')) {
     element.setAttribute('data-is-visible', true);
 
-    app.utils.addEvent('click', document.body, app.layout.dropdown('close', element, dropdown));
+    //TODO FIX
+    app.utils.addEvent('click', app._root.document.documentElement, app.layout.dropdown('close', element, dropdown));
   }
 
   app.layout.dropdown('toggle', element, dropdown)();
@@ -810,20 +814,20 @@ app.view.sub.prototype.toggler = function(element) {
 /**
  * app.view.handle
  *
- * Fires when "view" document is loaded
+ * Fires when "view" is loaded
  *
  * @global <Object> appe__config
  * @global <Object> appe__control
  * @return
  */
 app.view.handle = function() {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.view.handle');
   }
 
-  var control = window.appe__control;
+  var control = app._root.window.appe__control;
 
   if (! control) {
     return app.error('app.view.handle', 'control');
@@ -838,21 +842,21 @@ app.view.handle = function() {
     control.handle(app.data());
   }
 
-  app.utils.addEvent('resize', window, app.view.resize);
-  app.utils.addEvent('orientationchange', window, app.view.resize);
+  app.utils.addEvent('resize', app._root.window, app.view.resize);
+  app.utils.addEvent('orientationchange', app._root.window, app.view.resize);
 }
 
 
 /**
  * app.view.resize
  *
- * Fires when "view" frame is resized
+ * Fires when "view" is resized
  *
  * @global <Object> appe__control
  * @return
  */
 app.view.resize = function(check_time) {
-  var control = window.appe__control;
+  var control = app._root.window.appe__control;
 
   if (! (control && control.temp)) {
     return; // silent fail
@@ -867,7 +871,7 @@ app.view.resize = function(check_time) {
   }
 
 
-  var ctl = { action: 'resize', height: document.documentElement.scrollHeight };
+  var ctl = { action: 'resize', height: app._root.document.documentElement.scrollHeight };
 
   return app.view.send(ctl);
 }
@@ -876,7 +880,7 @@ app.view.resize = function(check_time) {
 /**
  * app.view.send
  *
- * Sends control messages to parent "main" window
+ * Sends control messages to "main"
  *
  * @global <Object> appe__config
  * @global <Object> appe__control
@@ -884,13 +888,13 @@ app.view.resize = function(check_time) {
  * @return
  */
 app.view.send = function(ctl) {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.view.action');
   }
 
-  var control = window.appe__control;
+  var control = app._root.window.appe__control;
 
   if (! control) {
     return app.error('app.view.action', 'control');
@@ -923,8 +927,8 @@ app.view.send = function(ctl) {
 
     ctl = JSON.stringify(ctl);
 
-    // send control submission to parent "main" window
-    window.parent.postMessage(ctl, '*');
+    // send control submission to parent "main"
+    app._root.window.parent.postMessage(ctl, '*');
   } catch (err) {
     return app.error('app.view.send', err);
   }
@@ -1059,30 +1063,30 @@ app.view.copyToClipboard = function(source) {
     return app.error('app.view.copyToClipboard', arguments);
   }
 
-  var _clipboard = document.createElement('TEXTAREA');
+  var _clipboard = app._root.document.createElement('TEXTAREA');
 
   _clipboard.style = 'position: absolute; top: 0; right: 0; width: 0; height: 0; z-index: -1; overflow: hidden;';
   _clipboard.value = source;
 
-  document.body.appendChild(_clipboard);
+  app._root.document.body.appendChild(_clipboard);
 
   if (app._runtime.system.platform != 'ios') {
     _clipboard.focus();
     _clipboard.select();
   } else {
-    var _range = document.createRange();
+    var _range = app._root.document.createRange();
     _range.selectNodeContents(_clipboard);
 
-    var _selection = window.getSelection();
+    var _selection = getSelection();
     _selection.removeAllRanges();
     _selection.addRange(_range);
 
     _clipboard.setSelectionRange(0, 999999);
   }
 
-  document.execCommand('copy');
+  app._root.document.execCommand('copy');
 
-  document.body.removeChild(_clipboard);
+  app._root.document.body.removeChild(_clipboard);
 }
 
 
@@ -1095,23 +1099,25 @@ app.view.copyToClipboard = function(source) {
  * @return
  */
 app.view.load = function() {
-  var config = window.appe__config;
+  var config = app._root.window.appe__config;
 
   if (! config) {
     return app.stop('app.view.load');
   }
 
 
-  app.session(config, false);
+  var _session = function() {
+    app.resume(config, false);
 
 
-  app.resume(config, false);
+    var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
+    routine.push({ fn: app._runtime.name, schema: config.schema });
+
+    app.controller.retrieve(app.view.handle, routine);
+  }
 
 
-  var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
-  routine.push({ fn: app._runtime.name, schema: config.schema });
-
-  app.controller.retrieve(app.view.handle, routine);
+  app.session(_session, config, false);
 }
 
 
@@ -1124,7 +1130,7 @@ app.view.load = function() {
  * @return <Boolean>
  */
 app.view.unload = function() {
-  var control = window.appe__control;
+  var control = app._root.window.appe__control;
 
   if (! control) {
     return app.error('app.view.unload', 'control');

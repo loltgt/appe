@@ -7,10 +7,11 @@ Array
                     [app-load] => Array
                         (
                             [line] => app.load
-                            [comment] => Helper document load event
+                            [comment] => Helper app load function DOM
                             [params] => Array
                                 (
                                     [5] => <Function> func
+                                    [6] => <Boolean>
                                 )
 
                             [return] => 
@@ -23,7 +24,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [39](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L39)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [48](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L48)
                                 )
 
                             [priority] => 0
@@ -32,7 +33,7 @@ Array
                     [app-unload] => Array
                         (
                             [line] => app.unload
-                            [comment] => Helper document load event
+                            [comment] => Helper app unload function DOM
                             [params] => Array
                                 (
                                     [5] => <Function> func
@@ -48,7 +49,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [74](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L74)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [85](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L85)
                                 )
 
                             [priority] => 0
@@ -73,7 +74,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [91](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L91)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [106](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L106)
                                 )
 
                             [priority] => 0
@@ -93,7 +94,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [117](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L117)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [134](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L134)
                                 )
 
                             [priority] => 0
@@ -106,14 +107,15 @@ Array
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__store
-                                    [6] => <Object> pako
-                                    [7] => <Object> CryptoJS
+                                    [6] => <Object> CryptoJS
+                                    [7] => <Object> pako
                                 )
 
                             [params] => Array
                                 (
-                                    [8] => <Object> config
-                                    [9] => <String> target
+                                    [8] => <Function> callback
+                                    [9] => <Object> config
+                                    [10] => <String> target
                                 )
 
                             [return] => 
@@ -126,7 +128,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [147](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L147)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [168](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L168)
                                 )
 
                             [priority] => 0
@@ -152,7 +154,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [269](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L269)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [328](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L328)
                                 )
 
                             [priority] => 0
@@ -182,7 +184,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [342](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L342)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [380](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L380)
                                 )
 
                             [priority] => 0
@@ -207,7 +209,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [376](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L376)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [414](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L414)
                                 )
 
                             [priority] => 0
@@ -225,6 +227,7 @@ Array
                             [params] => Array
                                 (
                                     [6] => <Object> source
+                                    [7] => <Object> checksum
                                 )
 
                             [return] => <Boolean>
@@ -237,7 +240,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [415](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L415)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [457](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L457)
                                 )
 
                             [priority] => 0
@@ -263,7 +266,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [456](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L456)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [500](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L500)
                                 )
 
                             [priority] => 0
@@ -277,11 +280,13 @@ Array
                                 (
                                     [5] => <Object> appe__config
                                     [6] => <Object> appe__start
+                                    [7] => <Object> CryptoJS
+                                    [8] => <Function> pako
                                 )
 
                             [params] => Array
                                 (
-                                    [7] => <Object> source
+                                    [9] => <Object> source
                                 )
 
                             [return] => 
@@ -294,7 +299,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [526](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L526)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [572](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L572)
                                 )
 
                             [priority] => 0
@@ -309,11 +314,13 @@ Array
                                     [5] => <Object> appe__config
                                     [6] => <Object> appe__store
                                     [7] => <Object> appe__start
+                                    [8] => <Object> CryptoJS
+                                    [9] => <Function> pako
                                 )
 
                             [params] => Array
                                 (
-                                    [8] => <Object> source
+                                    [10] => <Object> source
                                 )
 
                             [descriptor] => 
@@ -325,7 +332,33 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [612](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L612)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [693](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L693)
+                                )
+
+                            [priority] => 0
+                        )
+
+                    [app-L10n] => Array
+                        (
+                            [line] => app.L10n
+                            [comment] => App localizazion
+                            [params] => Array
+                                (
+                                    [5] => <String> to_translate
+                                    [6] => to_replace
+                                    [7] => <String> context
+                                )
+
+                            [descriptor] => 
+                            [name] => app.L10n
+                            [parent] => app
+                            [child] => index
+                            [sth] => L10n
+                            [category] => Function
+                            [file] => appe/src/js/index.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [755](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L755)
                                 )
 
                             [priority] => 0
@@ -350,7 +383,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [663](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L663)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [823](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L823)
                                 )
 
                             [priority] => 0
@@ -360,6 +393,11 @@ Array
                         (
                             [line] => app.stop
                             [comment] => Stops app execution
+                            [globals] => Array
+                                (
+                                    [5] => <Object> appe__main
+                                )
+
                             [return] => <Boolean>
                             [descriptor] => 
                             [name] => app.stop
@@ -370,7 +408,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [675](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L675)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [836](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L836)
                                 )
 
                             [priority] => 0
@@ -380,9 +418,20 @@ Array
                         (
                             [line] => app.error
                             [comment] => Helper to debug and display error messages
+                            [globals] => Array
+                                (
+                                    [5] => <Object> appe__control
+                                )
 
-                            [return] => <Boolean>
-                            [todo] => test avoid too much recursions
+                            [params] => Array
+                                (
+                                    [6] => <String> msg   reference: fn
+                                    [7] => log |
+                                    [8] => log |
+                                    [9] => <Boolean> soft
+                                )
+
+                            [return] => <undefined>
                             [descriptor] => 
                             [name] => app.error
                             [parent] => app
@@ -392,7 +441,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [706](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L706)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [873](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L873)
                                 )
 
                             [priority] => 0
@@ -401,7 +450,12 @@ Array
                     [app-blind] => Array
                         (
                             [line] => app.blind
-                            [comment] => Helper to freeze document "main" screen
+                            [comment] => Helper to freeze "main" screen
+                            [globals] => Array
+                                (
+                                    [5] => <Object> appe__main
+                                )
+
                             [return] => 
                             [descriptor] => 
                             [name] => app.blind
@@ -412,7 +466,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [768](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L768)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [937](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L937)
                                 )
 
                             [priority] => 0
@@ -443,7 +497,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [792](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L792)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [961](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L961)
                                 )
 
                             [priority] => 0
@@ -463,7 +517,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [840](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L840)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1009](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1009)
                                 )
 
                             [priority] => 0
@@ -488,7 +542,7 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [853](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L853)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1022](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1022)
                                 )
 
                             [priority] => 0
@@ -508,7 +562,27 @@ Array
                             [file] => appe/src/js/index.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [872](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L872)
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1041](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1041)
+                                )
+
+                            [priority] => 0
+                        )
+
+                    [app-getLocale] => Array
+                        (
+                            [line] => app.getLocale
+                            [comment] => Gets app locale language
+                            [return] => <String>
+                            [descriptor] => 
+                            [name] => app.getLocale
+                            [parent] => app
+                            [child] => index
+                            [sth] => getLocale
+                            [category] => Function
+                            [file] => appe/src/js/index.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1053](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1053)
                                 )
 
                             [priority] => 0
@@ -544,8 +618,8 @@ Array
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
-                                    [6] => <Object> pako
-                                    [7] => <Object> CryptoJS
+                                    [6] => <Object> CryptoJS
+                                    [7] => <Function> pako
                                 )
 
                             [params] => Array
@@ -576,8 +650,8 @@ Array
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
-                                    [6] => <Object> pako
-                                    [7] => <Object> CryptoJS
+                                    [6] => <Object> CryptoJS
+                                    [7] => <Function> pako
                                 )
 
                             [params] => Array
@@ -597,7 +671,7 @@ Array
                             [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [156](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L156)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [296](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L296)
                                 )
 
                             [priority] => 10
@@ -615,6 +689,7 @@ Array
                                     [8] => <Number> max_attempts
                                 )
 
+                            [return] => 
                             [descriptor] => 
                             [name] => app.os.scriptOpen
                             [parent] => app.os
@@ -624,7 +699,7 @@ Array
                             [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [290](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L290)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [555](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L555)
                                 )
 
                             [priority] => 10
@@ -633,7 +708,7 @@ Array
                     [app-os-generateFileHead] => Array
                         (
                             [line] => app.os.generateFileHead
-                            [comment] => Generates a file header with file ?
+                            [comment] => Generates a JSON head
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
@@ -655,7 +730,33 @@ Array
                             [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [342](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L342)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [614](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L614)
+                                )
+
+                            [priority] => 10
+                        )
+
+                    [app-os-generateJsonChecksum] => Array
+                        (
+                            [line] => app.os.generateJsonChecksum
+                            [comment] => Generates a JSON checksum
+                            [params] => Array
+                                (
+                                    [5] => <Function> callback
+                                    [6] => <String> source
+                                )
+
+                            [return] => 
+                            [descriptor] => 
+                            [name] => app.os.generateJsonChecksum
+                            [parent] => app.os
+                            [child] => os
+                            [sth] => generateJsonChecksum
+                            [category] => Function
+                            [file] => appe/src/js/os.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [646](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L646)
                                 )
 
                             [priority] => 10
@@ -664,7 +765,7 @@ Array
                     [app-os-getLastFileName] => Array
                         (
                             [line] => app.os.getLastFileName
-                            [comment] => Gets the last opened file name
+                            [comment] => Gets the file name of last opened file
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
@@ -680,7 +781,7 @@ Array
                             [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [373](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L373)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [678](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L678)
                                 )
 
                             [priority] => 10
@@ -689,7 +790,7 @@ Array
                     [app-os-getLastFileVersion] => Array
                         (
                             [line] => app.os.getLastFileVersion
-                            [comment] => Gets the last opened file version
+                            [comment] => Gets the runtime version of last opened file 
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__store
@@ -705,7 +806,7 @@ Array
                             [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [407](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L407)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [712](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L712)
                                 )
 
                             [priority] => 10
@@ -714,7 +815,7 @@ Array
                     [app-os-getLastFileChecksum] => Array
                         (
                             [line] => app.os.getLastFileChecksum
-                            [comment] => Gets the last opened file checksum
+                            [comment] => Gets the JSON checksum of last opened file 
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__store
@@ -730,7 +831,7 @@ Array
                             [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [440](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L440)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [745](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L745)
                                 )
 
                             [priority] => 10
@@ -750,7 +851,7 @@ Array
                             [file] => appe/src/js/os.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [472](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L472)
+                                    [0] => - [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [777](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L777)
                                 )
 
                             [priority] => 10
@@ -848,7 +949,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [77](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L77)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [79](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L79)
                                 )
 
                             [priority] => 20
@@ -873,7 +974,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [105](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L105)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [106](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L106)
                                 )
 
                             [priority] => 20
@@ -893,7 +994,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [121](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L121)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [122](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L122)
                                 )
 
                             [priority] => 20
@@ -924,7 +1025,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [136](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L136)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [137](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L137)
                                 )
 
                             [priority] => 20
@@ -957,7 +1058,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [212](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L212)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [215](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L215)
                                 )
 
                             [priority] => 20
@@ -983,7 +1084,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/controller.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [281](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L281)
+                                    [0] => - [src/appe/src/js/controller.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js)   line: [284](https://github.com/leolweb/appe/blob/master/src/appe/src/js/controller.js#L284)
                                 )
 
                             [priority] => 20
@@ -1349,42 +1450,6 @@ it contains current position in the app { view, action, index }
                             [priority] => 50
                         )
 
-                    [app-start-loadAttempt] => Array
-                        (
-                            [line] => app.start.loadAttempt
-                            [comment] => Attemps to load files and scripts, returns to callback
-                            [globals] => Array
-                                (
-                                    [5] => <Object> appe__config
-                                    [6] => <Object> pako
-                                    [7] => <Object> CryptoJS
-                                )
-
-                            [params] => Array
-                                (
-                                    [8] => <Function> callback
-                                    [9] => <String> fn
-                                    [10] => <String> file
-                                    [11] => <Object> schema
-                                    [12] => <Boolean> memoize
-                                )
-
-                            [return] => 
-                            [descriptor] => 
-                            [name] => app.start.loadAttempt
-                            [parent] => app.start
-                            [child] => start
-                            [sth] => loadAttempt
-                            [category] => Function
-                            [file] => appe/src/js/start.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [51](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L51)
-                                )
-
-                            [priority] => 50
-                        )
-
                     [app-start-loadComplete] => Array
                         (
                             [line] => app.start.loadComplete
@@ -1392,13 +1457,11 @@ it contains current position in the app { view, action, index }
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
-                                    [6] => <Object> pako
-                                    [7] => <Object> CryptoJS
                                 )
 
                             [params] => Array
                                 (
-                                    [8] => <String> session_resume
+                                    [6] => <String> session_resume
                                 )
 
                             [return] => 
@@ -1411,7 +1474,42 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/start.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [189](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L189)
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [45](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L45)
+                                )
+
+                            [priority] => 50
+                        )
+
+                    [app-start-attemptLoad] => Array
+                        (
+                            [line] => app.start.attemptLoad
+                            [comment] => Attemps to load files and scripts, returns to callback
+                            [globals] => Array
+                                (
+                                    [5] => <Object> appe__config
+                                    [6] => <Object> CryptoJS
+                                )
+
+                            [params] => Array
+                                (
+                                    [7] => <Function> callback
+                                    [8] => <String> fn
+                                    [9] => <String> file
+                                    [10] => <Object> schema
+                                    [11] => <Boolean> memoize
+                                )
+
+                            [return] => 
+                            [descriptor] => 
+                            [name] => app.start.attemptLoad
+                            [parent] => app.start
+                            [child] => start
+                            [sth] => attemptLoad
+                            [category] => Function
+                            [file] => appe/src/js/start.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [102](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L102)
                                 )
 
                             [priority] => 50
@@ -1435,7 +1533,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/start.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [245](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L245)
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [265](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L265)
                                 )
 
                             [priority] => 50
@@ -1448,7 +1546,7 @@ it contains current position in the app { view, action, index }
 
                             [globals] => Array
                                 (
-                                    [9] => <Object> appe__config
+                                    [8] => <Object> appe__config
                                 )
 
                             [return] => 
@@ -1462,7 +1560,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/start.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [270](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L270)
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [289](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L289)
                                 )
 
                             [priority] => 50
@@ -1489,7 +1587,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/start.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [326](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L326)
+                                    [0] => - [src/appe/src/js/start.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js)   line: [347](https://github.com/leolweb/appe/blob/master/src/appe/src/js/start.js#L347)
                                 )
 
                             [priority] => 50
@@ -1521,7 +1619,7 @@ it contains current position in the app { view, action, index }
                     [app-main-control] => Array
                         (
                             [line] => app.main.control
-                            [comment] => Init "main" function that fires when "main" document is ready
+                            [comment] => Init "main" function that fires when "main" is ready
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
@@ -1602,7 +1700,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [144](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L144)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [150](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L150)
                                 )
 
                             [priority] => 60
@@ -1642,7 +1740,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [435](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L435)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [443](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L443)
                                 )
 
                             [priority] => 60
@@ -1666,7 +1764,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [506](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L506)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [515](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L515)
                                 )
 
                             [priority] => 60
@@ -1691,7 +1789,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [530](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L530)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [539](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L539)
                                 )
 
                             [priority] => 60
@@ -1711,7 +1809,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [597](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L597)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [609](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L609)
                                 )
 
                             [priority] => 60
@@ -1740,7 +1838,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [200](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L200)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [208](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L208)
                                 )
 
                             [priority] => 9999
@@ -1763,7 +1861,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/main.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [514](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L514)
+                                    [0] => - [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [523](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L523)
                                 )
 
                             [priority] => 9999
@@ -1789,7 +1887,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [344](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L344)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [347](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L347)
                                 )
 
                             [priority] => 9999
@@ -1813,7 +1911,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [378](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L378)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [381](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L381)
                                 )
 
                             [priority] => 9999
@@ -1836,7 +1934,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [834](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L834)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [841](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L841)
                                 )
 
                             [priority] => 9999
@@ -1933,7 +2031,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [70](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L70)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [72](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L72)
                                 )
 
                             [priority] => 70
@@ -1988,7 +2086,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [465](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L465)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [468](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L468)
                                 )
 
                             [priority] => 70
@@ -2029,7 +2127,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [704](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L704)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [710](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L710)
                                 )
 
                             [priority] => 70
@@ -2038,7 +2136,7 @@ it contains current position in the app { view, action, index }
                     [app-view-handle] => Array
                         (
                             [line] => app.view.handle
-                            [comment] => Fires when "view" document is loaded
+                            [comment] => Fires when "view" is loaded
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
@@ -2055,7 +2153,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [816](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L816)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [823](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L823)
                                 )
 
                             [priority] => 70
@@ -2064,7 +2162,7 @@ it contains current position in the app { view, action, index }
                     [app-view-resize] => Array
                         (
                             [line] => app.view.resize
-                            [comment] => Fires when "view" frame is resized
+                            [comment] => Fires when "view" is resized
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__control
@@ -2080,7 +2178,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [851](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L851)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [858](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L858)
                                 )
 
                             [priority] => 70
@@ -2089,7 +2187,7 @@ it contains current position in the app { view, action, index }
                     [app-view-send] => Array
                         (
                             [line] => app.view.send
-                            [comment] => Sends control messages to parent "main" window
+                            [comment] => Sends control messages to "main"
                             [globals] => Array
                                 (
                                     [5] => <Object> appe__config
@@ -2111,7 +2209,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [883](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L883)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [890](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L890)
                                 )
 
                             [priority] => 70
@@ -2136,7 +2234,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [939](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L939)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [946](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L946)
                                 )
 
                             [priority] => 70
@@ -2161,7 +2259,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1002](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1002)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1008](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1008)
                                 )
 
                             [priority] => 70
@@ -2187,7 +2285,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1055](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1055)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1061](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1061)
                                 )
 
                             [priority] => 70
@@ -2212,7 +2310,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1095](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1095)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1101](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1101)
                                 )
 
                             [priority] => 70
@@ -2237,7 +2335,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/view.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1124](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1124)
+                                    [0] => - [src/appe/src/js/view.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js)   line: [1132](https://github.com/leolweb/appe/blob/master/src/appe/src/js/view.js#L1132)
                                 )
 
                             [priority] => 70
@@ -2314,7 +2412,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [59](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L59)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [58](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L58)
                                 )
 
                             [priority] => 80
@@ -2341,7 +2439,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [85](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L85)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [84](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L84)
                                 )
 
                             [priority] => 80
@@ -2367,7 +2465,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [103](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L103)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [102](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L102)
                                 )
 
                             [priority] => 80
@@ -2402,7 +2500,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [127](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L127)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [126](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L126)
                                 )
 
                             [priority] => 80
@@ -2412,6 +2510,7 @@ it contains current position in the app { view, action, index }
                         (
                             [line] => app.layout.draggable
                             [comment] => Helper for draggable table, returns requested object method
+
                             [comment_sh] => Array
                                 (
                                     [0] => available methods:
@@ -2426,12 +2525,13 @@ it contains current position in the app { view, action, index }
 
                             [params] => Array
                                 (
-                                    [13] => <String> event
-                                    [14] => <ElementNode> table
-                                    [15] => <ElementNode> field
+                                    [15] => <String> event
+                                    [16] => <ElementNode> table
+                                    [17] => <ElementNode> field
                                 )
 
                             [return] => <Function>
+                            [todo] => fix droid
                             [descriptor] => 
                             [name] => app.layout.draggable
                             [parent] => app.layout
@@ -2441,7 +2541,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [180](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L180)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [181](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L181)
                                 )
 
                             [priority] => 80
@@ -2477,7 +2577,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [315](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L315)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [316](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L316)
                                 )
 
                             [priority] => 80
@@ -2513,7 +2613,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/layout.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [396](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L396)
+                                    [0] => - [src/appe/src/js/layout.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js)   line: [397](https://github.com/leolweb/appe/blob/master/src/appe/src/js/layout.js#L397)
                                 )
 
                             [priority] => 80
@@ -2676,58 +2776,6 @@ it contains current position in the app { view, action, index }
                             [priority] => 90
                         )
 
-                    [app-utils-transform] => Array
-                        (
-                            [line] => app.utils.transform
-                            [comment] => Transforms type of passed value
-                            [params] => Array
-                                (
-                                    [5] => <String> purpose
-                                    [6] => value
-                                )
-
-                            [return] => value
-                            [descriptor] => 
-                            [name] => app.utils.transform
-                            [parent] => app.utils
-                            [child] => utils
-                            [sth] => transform
-                            [category] => Function
-                            [file] => appe/src/js/utils.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [279](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L279)
-                                )
-
-                            [priority] => 90
-                        )
-
-                    [app-utils-sanitize] => Array
-                        (
-                            [line] => app.utils.sanitize
-                            [comment] => Sanitizes passed value
-                            [params] => Array
-                                (
-                                    [5] => <String> purpose
-                                    [6] => value
-                                )
-
-                            [return] => value
-                            [descriptor] => 
-                            [name] => app.utils.sanitize
-                            [parent] => app.utils
-                            [child] => utils
-                            [sth] => sanitize
-                            [category] => Function
-                            [file] => appe/src/js/utils.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [308](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L308)
-                                )
-
-                            [priority] => 90
-                        )
-
                     [app-utils-storage] => Array
                         (
                             [line] => app.utils.storage
@@ -2761,7 +2809,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [368](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L368)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [288](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L288)
                                 )
 
                             [priority] => 90
@@ -2800,7 +2848,125 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [491](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L491)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [413](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L413)
+                                )
+
+                            [priority] => 90
+                        )
+
+                    [app-utils-base64] => Array
+                        (
+                            [line] => app.utils.base64
+                            [comment] => Alias to base64 browser implementation with URI encoding
+                            [comment_sh] => Array
+                                (
+                                    [0] => available methods:
+                                    [1] =>  - encode (to_encode <String>)
+ - decode (to_decode <String>)
+
+                                )
+
+                            [globals] => Array
+                                (
+                                    [9] => <Function> btoa
+                                    [10] => <Function> atob
+                                )
+
+                            [params] => Array
+                                (
+                                    [11] => to_encode
+                                )
+
+                            [return] => 
+                            [descriptor] => 
+                            [name] => app.utils.base64
+                            [parent] => app.utils
+                            [child] => utils
+                            [sth] => base64
+                            [category] => Function
+                            [file] => appe/src/js/utils.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [545](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L545)
+                                )
+
+                            [priority] => 90
+                        )
+
+                    [app-utils-transform] => Array
+                        (
+                            [line] => app.utils.transform
+                            [comment] => Transforms type of passed value
+                            [params] => Array
+                                (
+                                    [5] => <String> purpose
+                                    [6] => value
+                                )
+
+                            [return] => value
+                            [descriptor] => 
+                            [name] => app.utils.transform
+                            [parent] => app.utils
+                            [child] => utils
+                            [sth] => transform
+                            [category] => Function
+                            [file] => appe/src/js/utils.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [595](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L595)
+                                )
+
+                            [priority] => 90
+                        )
+
+                    [app-utils-sanitize] => Array
+                        (
+                            [line] => app.utils.sanitize
+                            [comment] => Sanitizes passed value
+                            [params] => Array
+                                (
+                                    [5] => <String> purpose
+                                    [6] => value
+                                )
+
+                            [return] => value
+                            [descriptor] => 
+                            [name] => app.utils.sanitize
+                            [parent] => app.utils
+                            [child] => utils
+                            [sth] => sanitize
+                            [category] => Function
+                            [file] => appe/src/js/utils.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [624](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L624)
+                                )
+
+                            [priority] => 90
+                        )
+
+                    [app-utils-classify] => Array
+                        (
+                            [line] => app.utils.classify
+                            [comment] => Transforms object to classnames
+                            [params] => Array
+                                (
+                                    [5] => <Object> data
+                                    [6] => <String> prefix
+                                    [7] => <Boolean> to_array
+                                )
+
+                            [return] => value
+                            [descriptor] => 
+                            [name] => app.utils.classify
+                            [parent] => app.utils
+                            [child] => utils
+                            [sth] => classify
+                            [category] => Function
+                            [file] => appe/src/js/utils.js
+                            [position] => Array
+                                (
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [676](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L676)
                                 )
 
                             [priority] => 90
@@ -2828,7 +2994,7 @@ it contains current position in the app { view, action, index }
                             [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [620](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L620)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [715](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L715)
                                 )
 
                             [priority] => 90
@@ -2885,7 +3051,7 @@ it accepts Date time format or true for 'now'
                             [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [674](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L674)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [769](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L769)
                                 )
 
                             [priority] => 90
@@ -2910,46 +3076,7 @@ it accepts Date time format or true for 'now'
                             [file] => appe/src/js/utils.js
                             [position] => Array
                                 (
-                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [736](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L736)
-                                )
-
-                            [priority] => 90
-                        )
-
-                    [app-utils-base64] => Array
-                        (
-                            [line] => app.utils.base64
-                            [comment] => Alias to base64 browser implementation with URI encoding
-                            [comment_sh] => Array
-                                (
-                                    [0] => available methods:
-                                    [1] =>  - encode (to_encode <String>)
- - decode (to_decode <String>)
-
-                                )
-
-                            [globals] => Array
-                                (
-                                    [9] => <Function> btoa
-                                    [10] => <Function> atob
-                                )
-
-                            [params] => Array
-                                (
-                                    [11] => to_encode
-                                )
-
-                            [return] => 
-                            [descriptor] => 
-                            [name] => app.utils.base64
-                            [parent] => app.utils
-                            [child] => utils
-                            [sth] => base64
-                            [category] => Function
-                            [file] => appe/src/js/utils.js
-                            [position] => Array
-                                (
-                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [755](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L755)
+                                    [0] => - [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [831](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L831)
                                 )
 
                             [priority] => 90
