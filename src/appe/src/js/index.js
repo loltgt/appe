@@ -25,6 +25,8 @@ app._runtime = {
   session: false,
   title: '',
   name: '',
+  locale: 'en',
+  locale_dir: 'ltr',
   storage: false,
   binary: false,
   compression: false,
@@ -33,7 +35,6 @@ app._runtime = {
   hangs: 0
 };
 
-app._L10n = {};
 
 
 /**
@@ -98,7 +99,7 @@ app.unload = function(func) {
 /**
  * app.redirect
  *
- * Performs app redirects
+ * Performs app redirect
  *
  * @global <Object> appe__config
  * @return
@@ -127,7 +128,7 @@ app.redirect = function() {
 /**
  * app.position
  *
- * Returns serialized app position
+ * Returns JSON serialized app position
  *
  * @return <String> position
  */
@@ -155,9 +156,10 @@ app.position = function() {
 /**
  * app.session
  *
- * Starts the session
+ * Initializes the session
  *
  * @global <Object> appe__store
+ * @global <Object> appe__locale
  * @global <Object> CryptoJS
  * @global <Object> pako
  * @param <Function> callback
@@ -195,7 +197,38 @@ app.session = function(callback, config, target) {
   }
 
   app._runtime.session = true;
-  app._runtime.locale = config.language.toString();
+
+
+  var _has_locale = ! (app._root.window.appe__locale === undefined);
+
+
+  // auto-select language locale
+  if (_has_locale && config.language === null) {
+    var locale = app._root.window.appe__locale;
+
+    if (typeof locale != 'object') {
+      return app.error('app.session', 'locale');
+    }
+
+    if (navigator && navigator.languages && typeof navigator.languages === 'object') {
+      var found_locale = false;
+
+      for (lang in navigator.languages) {
+        if (! found_locale && navigator.languages[lang] in locale) {
+          app._runtime.locale = navigator.languages[lang].toString();
+
+          found_locale = true;
+        }
+      }
+
+      if (! found_locale && navigator.languages.length) {
+        app._runtime.locale = navigator.languages[lang].split('-')[0] || app._runtime.locale;
+      }
+    }
+  }
+
+  app._runtime.locale = !! config.language ? config.language.toString() : app._runtime.locale;
+  app._runtime.locale_dir = !! config.language_direction ? config.language_direction.toString() : app._runtime.locale_dir;
 
 
   if (!!! app._root.document.native) {
@@ -319,7 +352,7 @@ app.session = function(callback, config, target) {
 /**
  * app.resume
  *
- * Resumes session, return last opened file
+ * Resumes session, returns last opened file
  *
  * @param <Object> config
  * @param <Boolean> target
@@ -371,7 +404,7 @@ app.resume = function(config, target) {
 /**
  * app.data
  *
- * Get data store
+ * Gets data store
  *
  * @global <Object> appe__store
  * @param <String> key
@@ -468,7 +501,7 @@ app.checkFile = function(source, checksum) {
   var _app_version = app._runtime.version.toString();
 
   if (_app_version !== source.file.version) {
-    return app.error('app.checkFile', app.L10n('This file is incompatible with running version: {{_app_version}}.',  _app_version), source.file);
+    return app.error('app.checkFile', app.i18n('This file is incompatible with running version: {{_app_version}}.', null, _app_version), source.file);
   }
 
   if (!! config.verify_checksum && !! checksum) {
@@ -491,7 +524,7 @@ app.checkFile = function(source, checksum) {
 /**
  * app.newSession
  *
- * Create a new empty session
+ * Creates a new empty session
  *
  * @global <Object> appe__config
  * @global <Object> appe__start
@@ -560,7 +593,7 @@ app.newSession = function() {
 /**
  * app.openSession
  *
- * Opens session from an app js file
+ * Opens session from an app session file
  *
  * @global <Object> appe__config
  * @global <Object> appe__start
@@ -681,7 +714,7 @@ app.openSession = function() {
 /**
  * app.saveSession
  *
- * Saves session to app js file
+ * Saves session to app session file
  *
  * @global <Object> appe__config
  * @global <Object> appe__store
@@ -744,71 +777,131 @@ app.saveSession = function() {
 
 
 /**
- * app.L10n
+ * app.i18n
  *
- * App localizazion
+ * App localization
  *
+ * @global <Object> appe__locale
  * @param <String> to_translate
- * @param to_replace
  * @param <String> context
+ * @param to_replace
  */
-app.L10n = function(to_translate, to_replace, context) {
+app.i18n = function(to_translate, context, to_replace) {
   var locale = app._root.window.appe__locale;
 
   if (! locale) {
     return to_translate;
   } else if (typeof locale != 'object') {
-    return app.stop('app.L10n', 'locale');
+    return app.stop('app.i18n', 'locale');
   }
 
-  var L10n = app._L10n;
-  var _current_locale = app._runtime.language.toString();
+  var _current_locale = app._runtime.locale.toString();
+  var _current_locale_direction = app._runtime.locale_dir.toString();
 
-  if (typeof to_translate != 'string' || (to_replace && (typeof to_replace != 'string' || typeof to_replace != 'object')) || (context && typeof context != 'string')) {
-    return app.error('app.L10n', arguments);
+  if (typeof to_translate != 'string' || (to_replace && (typeof to_replace != 'string' && typeof to_replace != 'object')) || (context && typeof context != 'string')) {
+    return app.error('app.i18n', arguments);
   }
 
-  context = context || 0;
+  context = !! context ? context.toString() : '0';
 
-  if (! (L10n[_current_locale] && L10n[_current_locale][context] && to_translate in L10n[_current_locale][context])) {
-    return to_translate;
+
+  var lstring = null;
+
+  if (! (locale[_current_locale] && locale[_current_locale][context] && to_translate in locale[_current_locale][context] && locale[_current_locale][context][to_translate])) {
+
+    // no locale but have replacement with placeholder
+    if (/\{\{|\|\|/.test(to_translate)) {
+
+      lstring = to_translate;
+
+    // no locale skip
+    } else {
+      return to_translate;
+    }
+  } else {
+    lstring = locale[_current_locale][context][to_translate].toString();
   }
 
-  var _lstring = L10N[_current_locale][context][to_translate].toString();
 
   // no replacement
   if (! to_replace) {
-    return _lstring;
+    return lstring;
+  }
+
   // single string replacement
-  } else if (typeof to_replace == 'string') {
-    return _lstring.replace(/\{\{[\w]+\}\}/, to_replace);
-  } else if (to_replace == 'object') {
-    //TODO _runtime.dir reverse order
-    // multiple string replacement in ltr order
-    if (to_replace instanceof Array) {
-      for (var tr in to_replace) {
-        _lstring = _lstring.replace(/\{\{[\w]+\}\}/, tr.toString());
+  if (typeof to_replace == 'string') {
+
+    // replacement with placeholder
+    if (to_replace.indexOf('{{') != -1) {
+
+      var lsstring_placeholder = to_replace.indexOf('[[') != -1 ? to_replace.match(/\{\{(.+)(?:\[\[([\w]+)\]\])\}\}/) : to_replace.match(/\{\{(.+)\}\}/);
+      var lsstring_replacement = null;
+
+      if (lsstring_placeholder[1].indexOf('%%') != -1) {
+        lsstring_replacement = lsstring_placeholder[1].split('%%');
+
+        if (!! lsstring_replacement[0]) {
+          lsstring_placeholder = [null, lsstring_replacement[0], lsstring_placeholder[2]];
+        } else {
+          lstring = '{{placeholder}}';
+          lsstring_placeholder = [null, to_translate.toString(), context];
+        }
+
+        lsstring_replacement = lsstring_replacement[1];
+
+        if (lsstring_replacement.length) {
+          if (! /\D/.test(lsstring_replacement[0])) {
+            //TODO nest
+            lsstring_replacement = [[lsstring_replacement[0]]];
+          } else {
+            lsstring_replacement = lsstring_replacement.split(',');
+          }
+        }
       }
 
-      return _lstring;
+      to_replace = app.i18n(lsstring_placeholder[1], lsstring_placeholder[2], lsstring_replacement);
+    }
+
+    lstring = lstring.replace(/\{\{[\w]+\}\}/, to_replace);
+
+  } else if (typeof to_replace == 'object') {
+
     // singular/plural replacement
-    } else if (to_replace.singular_plural && to_replace.digits) {
-      _lstring = _lstring.replace(/([.]+)\|\|([.]+)/, !! to_replace.digits ? '$1' : '$2');
+    if (to_replace[0] instanceof Array) {
+      var quantitative = ['$1', '$2'];
 
-      if (!! to_replace.digits) {
-        _lstring = _lstring.replace(/\{\{[\w]+\}\}/, to_replace.digits.toString());
+      // "rtl" locale order
+      if (_current_locale_direction == 'rtl') {
+        quantitative.reverse();
       }
 
-      return _lstring;
+      lstring = lstring.replace(/(.+)\|\|(.+)/, parseInt(to_replace[0][0]) > 1 ? quantitative[1] : quantitative[0]);
+
+      //TODO nest replacement
+
+    // multiple string replacement in locale order
+    } else if (to_replace instanceof Array) {
+
+      // "rtl" locale order
+      if (_current_locale_direction == 'rtl') {
+        to_replace.reverse();
+      }
+
+      for (var i in to_replace) {
+        lstring = lstring.replace(/\{\{[\w]+\}\}/, to_replace[i].toString());
+      }
+
     // multiple string replacement exact match
     } else {
+
       for (var tr in to_replace) {
-        _lstring = _lstring.replace(new RegExp('{{' + tr.toString() + '}}'), to_replace[tr]);
+        lstring = lstring.replace(new RegExp('{{' + tr.toString() + '}}'), to_replace[tr]);
       }
 
-      return _lstring;
     }
   }
+
+  return lstring;
 }
 
 
@@ -898,6 +991,10 @@ app.error = function() {
     return undefined;
   }
 
+  if (! document.documentElement.lang) {
+    document.documentElement.lang = app._runtime.language.toString();
+  }
+
   if (app._runtime.debug) {
     if (app._runtime.exec) {
       console.error('ERR', fn, msg, app.position() || '');
@@ -911,10 +1008,10 @@ app.error = function() {
   }
 
   if (! msg) {
-    msg = app.L10n('There was an error while executing.');
+    msg = app.i18n('There was an error while executing.');
 
     if (! app._runtime.exec) {
-      msg += '\n\n' + app.L10n('Please reload the application.');
+      msg += '\n\n' + app.i18n('Please reload the application.');
     }
   }
 
@@ -970,15 +1067,15 @@ app.getInfo = function(from, info) {
   switch (from) {
     case 'config':
       _available_infos = {
-        'debug': !! config.debug ? true : false,
         'app_name': config.app_name.toString(),
-        'locale': config.language.toString(),
         'schema': typeof config.schema === 'object' ? config.schema : [],
         'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': config.license.file.toString() } : config.license.toString()) || false
       };
     break;
     case 'runtime':
       _available_infos = {
+        'debug': !! app._runtime.debug ? true : false,
+        'locale': app._runtime.locale.toString(),
         'version': app._runtime.version.toString(),
         'release': app._runtime.release.toString()
       };

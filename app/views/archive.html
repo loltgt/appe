@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,32 +10,32 @@
 </head>
 
 <body class="view view_list">
-<h1 id="view-title" class="page-header">Archive</h1>
+<h1 id="view-title" class="page-header" data-localize="page">Archive</h1>
 <h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
   <div class="pull-left">
-    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block">Select archive</label>
+    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Select {{placeholder}}</label>
     <select id="selection" onchange="control.action(this, 'selection')"></select>
   </div>
   <div class="pull-right">
     <div class="btn-group">
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')">Export <span class="caret"></span></button>
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')"><span class="button-label" data-localize="action">Export</span> <span class="caret"></span></button>
       <ul class="dropdown-menu">
-        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;">Export CSV</a></li>
-        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;">Copy to clipboard</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;" data-localize="action">Export CSV</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;" data-localize="action">Copy to clipboard</a></li>
       </ul>
     </div>
-    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
+    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')" data-localize="action">Print</button>
   </div>
   <div class="clearfix"></div>
   <div>
-    <a class="btn btn-gray-light" href="../index.html?archive&add" target="_parent">Create New Archive &raquo;</a>
+    <a class="btn btn-gray-light" href="../index.html?archive&add" target="_parent"><span class="link-label" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Create New {{placeholder}}</span> &raquo;</a>
     <div class="clearfix visible-xs-block visible-sm-block visible-md-block"></div>
-    <a class="action btn btn-gray-lighter" href="../index.html?archive&close={id}" onclick="control.action(this, 'close'); return false;" target="_parent">Close Archive</a>
-    <a class="action btn btn-secondary" href="../index.html?archive&edit={id}" onclick="control.action(this, 'edit'); return false;" target="_parent">Edit Archive</a>
-    <a class="action btn btn-danger" href="../index.html?archive&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent">Delete Archive</a>
+    <a class="action btn btn-gray-lighter" href="../index.html?archive&close={id}" onclick="control.action(this, 'close'); return false;" target="_parent" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Close {{placeholder}}</a>
+    <a class="action btn btn-secondary" href="../index.html?archive&edit={id}" onclick="control.action(this, 'edit'); return false;" target="_parent" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Edit {{placeholder}}</a>
+    <a class="action btn btn-danger" href="../index.html?archive&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Delete {{placeholder}}</a>
   </div>
 </div>
 
@@ -45,9 +45,9 @@
   <table id="table-data" class="table table-data">
     <thead>
       <tr class="hidden-csv">
-        <th class="hidden-print">Actions</th>
-        <th>ID</th>
-        <th class="text-nowrap">Name</th>
+        <th class="hidden-print" data-localize="page">Actions</th>
+        <th data-localize="page">ID</th>
+        <th class="text-nowrap" data-localize="page">Name</th>
         <th class="text-nowrap">Family</th>
         <th class="text-center text-nowrap">New samples</th>
         <th class="text-center text-nowrap">New finds</th>
@@ -55,8 +55,8 @@
         <th colspan="4" class="text-center">Popularity</th>
       </tr>
       <tr class="visible-csv hidden">
-        <th>ID</th>
-        <th>Name</th>
+        <th data-localize="page">ID</th>
+        <th data-localize="page">Name</th>
         <th>Family</th>
         <th>New samples</th>
         <th>New finds</th>
@@ -78,7 +78,7 @@
     <tbody>
       <tr class="tpl">
         <td class="hidden-print">
-          <a class="action btn btn-gray" href="../index.html?archive&open={id}" onclick="control.action(this, 'open'); return false;" target="_parent">Open</a>
+          <a class="action btn btn-gray" href="../index.html?archive&open={id}" onclick="control.action(this, 'open'); return false;" target="_parent" data-localize="action">Open</a>
         </td>
         <td>{id}</td>
         <td class="text-uppercase text-nowrap">{name}</td>
@@ -98,7 +98,7 @@
 
 
 <div id="table-wrap-2">
-<h4>Summary</h4>
+<h4 data-localize="page">Summary</h4>
 
 <table id="table-2" class="table table-bordered table-auto table-inline">
   <thead>
@@ -129,9 +129,9 @@
 
 
 <div id="section-actions-bottom" class="section-actions section-actions-bottom">
-  <a class="action btn btn-gray-lighter" href="../index.html?archive&close={id}" onclick="control.action(this, 'close'); return false;" target="_parent">Close Archive</a>
-  <a class="action btn btn-secondary" href="../index.html?archive&edit={id}" onclick="control.action(this, 'edit'); return false;" target="_parent">Edit Archive</a>
-  <a class="action btn btn-danger" href="../index.html?archive&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent">Delete Archive</a>
+  <a class="action btn btn-gray-lighter" href="../index.html?archive&close={id}" onclick="control.action(this, 'close'); return false;" target="_parent" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Close {{placeholder}}</a>
+  <a class="action btn btn-secondary" href="../index.html?archive&edit={id}" onclick="control.action(this, 'edit'); return false;" target="_parent" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Edit {{placeholder}}</a>
+  <a class="action btn btn-danger" href="../index.html?archive&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Delete {{placeholder}}</a>
 </div>
 
 
@@ -146,6 +146,7 @@
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../locale.js"></script>
 
 
 <script type="text/javascript">
@@ -303,8 +304,8 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
     .replace(/\{id\}/g, data_row.id)
     .replace('{name}', data_row.name)
     .replace('{type}', categories_data_extra.types[data_row.type])
-    .replace('{custom_1}', (archive_items_extra[data_row.id].custom['1'] ? 'yes' : 'no'))
-    .replace('{custom_2}', (archive_items_extra[data_row.id].custom['2'] ? 'yes' : 'no'))
+    .replace('{custom_1}', '<span class="text-label" data-localize="page">' + (archive_items_extra[data_row.id].custom['1'] ? 'yes' : 'no') + '</span>')
+    .replace('{custom_2}', '<span class="text-label" data-localize="page">' + (archive_items_extra[data_row.id].custom['2'] ? 'yes' : 'no') + '</span>')
     .replace('{pop_movies}', data_row.pop['movies'])
     .replace('{pop_toyes}', data_row.pop['toyes'])
     .replace('{pop_books}', data_row.pop['books'])
@@ -357,14 +358,21 @@ control.action = function(element, event, extra) {
 
     var category_id = app.memory.get('category_id');
 
-    var _title = 'Are you sure to delete "' + data_archive[id][category_id].title + '" archive?';
-    _title += '\n\nCAUTION! IRREVERSIBLE ACTION, ALL DATA\'S ARCHIVE WILL BE ERASED PERMANENTLY, BE CAREFULL.';
+    var title = app.i18n('Are you sure to {{placeholder}} {{name}} {{title}}?', 'action', {
+      'placeholder': app.i18n('delete', 'event'),
+      'name': app.i18n('Archive||Archives', 'page', [[1]]),
+      'title': '"' + data_archive[id][category_id].title + '"'
+    });
+
+    title += '\n\n';
+
+    title += app.i18n('CAUTION! Irreversible action, all data\'s {{placeholder}} will be erased permanently, be carefull.', 'action', app.i18n('Archive', 'page')).toUpperCase();
 
     _data_updated['archive'] = data_archive;
 
     delete _data_updated[id];
 
-    return _action.delete(_data_updated, true, _title);
+    return _action.delete(_data_updated, true, title);
   }
 
   _events.close = function() {
@@ -376,12 +384,16 @@ control.action = function(element, event, extra) {
 
     var category_id = app.memory.get('category_id');
 
-    var _title = 'Are you sure to close "' + data_archive[id][category_id].title + '" archive?';
+    var title = app.i18n('Are you sure to {{placeholder}} {{name}} {{title}}?', 'action', {
+      'placeholder': app.i18n('close', 'event'),
+      'name': app.i18n('Archive||Archives', 'page', [[1]]),
+      'title': '"' + data_archive[id][category_id].title + '"'
+    });
 
     _data_updated['archive'] = data_archive;
     _data_updated['archive'][id][category_id].status = 0;
 
-    return _action.close(_data_updated, true, _title);
+    return _action.close(_data_updated, true, title);
   }
 
   _events.export = function(method) {

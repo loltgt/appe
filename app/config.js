@@ -2,7 +2,7 @@ appe__config = {
   "app_ns": "demo",
   "launcher_name": "LAUNCH",
   "app_name": "{appe} demo app",
-  "language": "en",
+  "language": null,
   "compression": true,
   "encryption": true,
   "binary": true,

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -18,13 +18,13 @@
     <div class="vcontent-centered-inner">
       <div class="start-progress">
         <div id="start-progress-open" class="start-progress-open" style="visibility: hidden;">
-          <p class="lead">Open latest file save</p>
+          <p class="lead" data-localize="session">Open latest file save</p>
           <input id="start-action-open-session" type="file" style="display: none;" hidden>
-          <button id="start-action-open" class="btn btn-lg btn-big btn-start-action-open start-action-open" data-open-input="#start-action-open-session">Open</button>
-          <p><button id="start-action-new" class="btn btn-mini btn-start-action-new start-action-new">New Session</button>
+          <button id="start-action-open" class="btn btn-lg btn-big btn-start-action-open start-action-open" data-open-input="#start-action-open-session" data-localize="session">Open</button>
+          <p><button id="start-action-new" class="btn btn-mini btn-start-action-new start-action-new" data-localize="session">New Session</button>
         </div>
         <div id="start-progress-wait" class="start-progress-wait" style="visibility: visible;">
-          <p class="lead">loading . . .</p>
+          <p class="lead"><span class="text-label" data-localize>loading</span> . . .</p>
         </div>
       </div>
     </div>
@@ -33,10 +33,11 @@
 
 
 <script type="text/javascript" src="../app/assets/js/app.min.js"></script>
-<script type="text/javascript" src="../app/assets/js/lib/file-saver/FileSaver.min.js" async defer></script>
+
 <script type="text/javascript" src="../app/assets/js/lib/crypto-js/crypto-js.min.js" async defer></script>
 <script type="text/javascript" src="../app/assets/js/lib/pako/pako.min.js" async defer></script>
 
+<script type="text/javascript" src="../app/locale.js"></script>
 <script type="text/javascript" src="../app/config.js"></script>
 
 
@@ -50,6 +51,7 @@
 
 
 <script type="text/javascript">
+//TODO firefox storage
 var start = appe__start = {};
 
 

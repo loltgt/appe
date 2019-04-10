@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,7 +14,7 @@
 <nav id="master-header" class="master-header navbar navbar-inverse navbar-fixed-top">
   <div class="container-fluid">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#master-navigation" aria-expanded="true" aria-controls="master-navigation" onclick="main.action(this, 'menu')">
-      <span class="sr-only">Menu</span>
+      <span class="sr-only" data-localize="action">Menu</span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
@@ -23,9 +23,9 @@
     <div class="navbar-form navbar-right">
       <div class="form-group">
         <input id="main-action-open-session-header" type="file" style="display: none;" hidden>
-        <button type="button" id="main-action-new-header" class="btn btn-action-new main-action-new">New</button>
-        <button type="button" id="main-action-open-header" class="btn btn-action-open main-action-open" data-open-input="#main-action-open-session-header">Open</button>
-        <button type="button" id="main-action-save-header" class="btn btn-action-save main-action-save">Save</button>
+        <button type="button" id="main-action-new-header" class="btn btn-action-new main-action-new" data-localize="session">New</button>
+        <button type="button" id="main-action-open-header" class="btn btn-action-open main-action-open" data-open-input="#main-action-open-session-header" data-localize="session">Open</button>
+        <button type="button" id="main-action-save-header" class="btn btn-action-save main-action-save" data-localize="session">Save</button>
       </div>
     </div>
   </div>
@@ -35,15 +35,15 @@
   <div class="row">
     <nav id="master-navigation" class="col-sm-3 col-md-2 sidebar">
       <ul class="nav nav-sidebar">
-        <li><a href="index.html?demo" data-view="demo">Demo</a></li>
-        <li><a href="index.html?archive" data-view="archive">Archive</a></li>
-        <li><a href="index.html?average" data-view="average">Average</a></li>
-        <li><a href="index.html?items" data-view="items">Items</a></li>
+        <li><a href="index.html?demo" data-view="demo" data-localize="custom">Demo</a></li>
+        <li><a href="index.html?archive" data-view="archive" data-localize="page">Archive</a></li>
+        <li><a href="index.html?average" data-view="average" data-localize="custom">Average</a></li>
+        <li><a href="index.html?items" data-view="items" data-localize="page">Items</a></li>
         <li class="nav-divider"></li>
         <li><a href="index.html?sample" data-view="sample">Sample</a></li>
       </ul>
       <ul class="nav nav-sidebar">
-        <li><a href="index.html?about" data-view="about">About</a></li>
+        <li><a href="index.html?about" data-view="about" data-localize="action">About</a></li>
       </ul>
     </nav>
     <div id="master-content" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 content">
@@ -54,17 +54,19 @@
 
 <footer id="master-footer" class="master-footer footer">
   <div class="container-fluid text-center">
-    <p class="visible-md-inline-block visible-lg-inline-block">Should save before close the application!</p>
-    <button type="button" id="main-action-save-footer" class="btn btn-lg btn-big btn-action-save main-action-save">Save</a>
+    <p class="visible-md-inline-block visible-lg-inline-block" data-localize="session">Should save before close the application!</p>
+    <button type="button" id="main-action-save-footer" class="btn btn-lg btn-big btn-action-save main-action-save" data-localize="session">Save</button>
   </div>
 </footer>
 
 
 <script type="text/javascript" src="assets/js/app.min.js"></script>
-<script type="text/javascript" src="assets/js/lib/file-saver/FileSaver.min.js" async defer></script>
+
 <script type="text/javascript" src="assets/js/lib/crypto-js/crypto-js.min.js" async defer></script>
 <script type="text/javascript" src="assets/js/lib/pako/pako.min.js" async defer></script>
+
 <script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="locale.js"></script>
 
 
 <script type="text/javascript">

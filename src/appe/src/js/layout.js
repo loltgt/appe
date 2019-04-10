@@ -289,7 +289,6 @@ app.layout.draggable.prototype.drop = function(table, e) {
 
     this.setAttribute('data-index', table._draggable.next_index);
     this.innerHTML = e.dataTransfer.getData('text/html');
-    this.querySelector('meta').remove();
   } else {
     table._draggable.next_index = null;
   }
@@ -459,4 +458,38 @@ app.layout.collapse.prototype.toggle = function() {
   } else {
     this.close();
   }
+}
+
+
+/**
+ * app.layout.localize
+ *
+ * Helper to localize layout
+ *
+ * @global <Object> appe__locale
+ * @param <ElementNode> element
+ * @return
+ */
+app.layout.localize = function(element) {
+  var locale = app._root.window.appe__locale;
+
+  if (! locale) {
+    return; // silent fail
+  }
+
+  if (! element) {
+    return app.error('app.layout.localize', arguments);
+  }
+
+  if (element.localized) {
+    return; // silent fail
+  }
+
+  var to_translate = element.innerHTML.toString();
+  var to_replace = element.getAttribute('data-localize-replacement');
+  var context = element.getAttribute('data-localize');
+
+  element.innerHTML = app.i18n(to_translate, context, to_replace);
+
+  element.localized = true;
 }

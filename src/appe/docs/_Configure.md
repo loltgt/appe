@@ -6,7 +6,7 @@ window.appe__config = {
   "app_ns": "demo", // the namespace of the app (required)
   "launcher_name": "LAUNCH", // the name of the launcher (required)
   "app_name": "App name", // the name of the app (required)
-  "language": "en", // default language (required)
+  "language": "en", // default language – null to auto-select (required)
   "compression": false,
   "encryption": true,
   "binary": true, // save to binary file

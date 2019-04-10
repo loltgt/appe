@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -16,7 +16,7 @@
 
 <div id="section-actions-top" class="section-actions section-actions-top">
   <div>
-    <a class="btn btn-sm btn-gray-lighter" href="../index.html?demo" target="_parent">&laquo; Return Back</a>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?demo" target="_parent">&laquo; <span class="link-label" data-localize="action">Return Back</span></a>
   </div>
 </div>
 
@@ -62,7 +62,7 @@
 <fieldset class="form-submit">
   <input type="hidden" id="index" name="id" value="{id}" data-transform="integer">
   <input type="submit" id="real-submit" hidden class="hide">
-  <p class="help-block">Auto-save on change.</p>
+  <p class="help-block" data-localize="page">Auto-save on change.</p>
 </fieldset>
 </form>
 
@@ -70,6 +70,7 @@
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../locale.js"></script>
 
 
 <script type="text/javascript">
@@ -113,11 +114,14 @@ control.handle = function(data) {
   var title = '';
 
   if (data_archive[archive_id][category_id].title) {
-    title += 'Item "' + data_items[id].name.toUpperCase() + '"';
-    title += ' – ' + data_archive[archive_id][category_id].title;
+    title = app.i18n('Edit {{placeholder}} "{{title}}"', 'action', [
+      app.i18n('Item||Items', 'page', [[1]]),
+      data_items[id].name.toUpperCase(),
+      data_archive[archive_id][category_id].title
+    ]);
   }
 
-  _control.setTitle(title, 'Demo');
+  _control.setTitle(title, app.i18n('Demo', 'custom'));
 
   _control.setActionHandler();
 

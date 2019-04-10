@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,37 +10,37 @@
 </head>
 
 <body class="view view_edit">
-<h1 id="view-title" class="page-header">Items</h1>
+<h1 id="view-title" class="page-header" data-localize="page">Items</h1>
 <h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top">
   <div>
-    <a class="btn btn-sm btn-gray-lighter" href="../index.html?items" target="_parent">&laquo; Return Back</a>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?items" target="_parent">&laquo; <span class="link-label" data-localize="action">Return Back</span></a>
   </div>
 </div>
 
 <form id="form-data" class="form form-data" autocomplete="off" validate>
 <fieldset>
-<legend>Entry</legend>
+<legend data-localize="page">Entry</legend>
 
 <div class="row">
 <div class="form-group col-12 col-lg-6">
-  <label for="items_name">Name</label>
+  <label for="items_name" data-localize="page">Name</label>
   <input type="text" id="items_name" name="name" class="form-control text-uppercase" data-transform="uppercase" required>
 </div>
 
 <div class="clearfix visible-lg-block"></div>
 
 <div class="form-group col-12 col-lg-6">
-  <label for="items_title">Title</label>
+  <label for="items_title" data-localize="page">Title</label>
   <input type="text" id="items_title" name="title" class="form-control" required>
 </div>
 
 <div class="clearfix visible-lg-block"></div>
 
 <div class="form-group col-8 col-lg-4">
-  <label for="items_type">Type</label>
+  <label for="items_type" data-localize="page">Type</label>
   <select id="items_type" name="type" class="form-control" required></select>
 </div>
 </div>
@@ -48,11 +48,11 @@
 
 
 <fieldset>
-<legend>Details</legend>
+<legend data-localize="page">Details</legend>
 
 <div class="row">
 <div class="form-group col-12 col-lg-3">
-  <label for="items_date">Date</label>
+  <label for="items_date" data-localize="page">Date</label>
   <input type="date" id="items_date" name="date" class="form-control" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" data-sanitize="date" required>
 </div>
 
@@ -60,7 +60,7 @@
 
 <div class="form-group col-12 col-lg-3">
   <div class="checkbox">
-    <label for="items_checked"><input type="checkbox" id="items_checked" name="checked"> Checked</label>
+    <label for="items_checked"><input type="checkbox" id="items_checked" name="checked"> <span class="input-label" data-localize="action">Check</span></label>
   </div>
 </div>
 </div>
@@ -70,7 +70,7 @@
 <fieldset>
 <div class="form-group">
   <div class="checkbox">
-    <label for="items_status"><input type="checkbox" id="items_status" name="status"> Enable</label>
+    <label for="items_status"><input type="checkbox" id="items_status" name="status"> <span class="input-label" data-localize="action">Enable</span></label>
   </div>
 </div>
 </fieldset>
@@ -87,6 +87,7 @@
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../locale.js"></script>
 
 
 <script type="text/javascript">
@@ -128,15 +129,15 @@ control.handle = function(data) {
   var _events = {};
 
   _events.add = function() {
-    _control.setTitle('Add New Item');
+    _control.setTitle(app.i18n('Add {{placeholder}}', 'action', '{{Item||Items%%1[[page]]}}'));
 
-    _control.setActionHandler('Add Item');
+    _control.setActionHandler(app.i18n('Add {{placeholder}}', 'action', '{{Item||Items%%1[[page]]}}'));
   }
 
   _events.edit = function() {
-    _control.setTitle('Edit Item');
+    _control.setTitle(app.i18n('Edit {{placeholder}}', 'action', '{{Item||Items%%1[[page]]}}'));
 
-    _control.setActionHandler('Update Item');
+    _control.setActionHandler(app.i18n('Edit {{placeholder}}', 'action', '{{Item||Items%%1[[page]]}}'));
 
 
     control.fillForm(data_items[id]);

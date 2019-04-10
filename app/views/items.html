@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,23 +10,23 @@
 </head>
 
 <body class="view view_list">
-<h1 class="page-header">Items</h1>
-<h2 class="sub-header">Items list</h2>
+<h1 class="page-header" data-localize="page">Items</h1>
+<h2 class="sub-header" data-localize="action" data-localize-replacement="{{Item||Items%%2[[page]]}}">{{placeholder}} list</h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
   <div class="pull-right">
     <div class="btn-group">
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')">Export <span class="caret"></span></button>
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')"><span class="button-label" data-localize="action">Export</span> <span class="caret"></span></button>
       <ul class="dropdown-menu">
-        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;">Export CSV</a></li>
-        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;">Copy to clipboard</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;" data-localize="action">Export CSV</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;" data-localize="action">Copy to clipboard</a></li>
       </ul>
     </div>
-    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
+    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')" data-localize="action">Print</button>
   </div>
   <div>
-    <a class="btn btn-gray" href="../index.html?items&add" target="_parent">Add item &raquo;</a>
+    <a class="btn btn-gray" href="../index.html?items&add" target="_parent"><span class="link-label" data-localize="action" data-localize-replacement="{{Item||Items%%1[[page]]}}">Add {{placeholder}}</span> &raquo;</a>
   </div>
 </div>
 
@@ -35,21 +35,21 @@
   <table id="table-data" class="table table-data">
     <thead>
       <tr>
-        <th class="hidden-print">Actions</th>
-        <th>ID</th>
-        <th class="text-nowrap">Name</th>
-        <th>Title</th>
-        <th class="text-nowrap">Type</th>
-        <th class="text-nowrap">Date</th>
+        <th class="hidden-print" data-localize="page">Actions</th>
+        <th data-localize="page">ID</th>
+        <th class="text-nowrap" data-localize="page">Name</th>
+        <th data-localize="page">Title</th>
+        <th class="text-nowrap" data-localize="page">Type</th>
+        <th class="text-nowrap" data-localize="page">Date</th>
         <th class="separator"></th>
-        <th>Status</th>
+        <th data-localize="page">Status</th>
       </tr>
     </thead>
     <tbody>
       <tr class="tpl">
         <td class="hidden-print">
-          <a class="action btn btn-secondary" href="../index.html?items&edit={id}" onclick="control.action(this, 'edit'); return false;" target="_parent">edit</a>
-          <a class="action btn btn-danger" href="../index.html?items&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent">delete</a>
+          <a class="action btn btn-secondary" href="../index.html?items&edit={id}" onclick="control.action(this, 'edit'); return false;" target="_parent" data-localize="action">Edit</a>
+          <a class="action btn btn-danger" href="../index.html?items&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent" data-localize="action">Delete</a>
         </td>
         <td>{id}</td>
         <td class="text-uppercase">{name}</td>
@@ -68,6 +68,7 @@
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../locale.js"></script>
 
 
 <script type="text/javascript">
@@ -130,7 +131,7 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
     .replace('{type}', data_categories_extra.types[data_row.type])
     .replace('{date}', app.utils.dateFormat(data_row.date, 'Y'))
     .replace('{amount}', data_row.amount)
-    .replace('{status}', (data_row.status ? '<span class="badge status-on">&nbsp;</span> enabled' : '<span class="badge status-off">&nbsp;</span> disabled'))
+    .replace('{status}', (data_row.status ? '<span class="badge status-on">&nbsp;</span> <span class="text-label" data-localize="page">enabled</span>' : '<span class="badge status-off">&nbsp;</span> <span class="text-label" data-localize="page">disabled</span>'))
 
   return row;
 }

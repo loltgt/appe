@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,24 +10,24 @@
 </head>
 
 <body class="view view_list">
-<h1 id="view-title" class="page-header">Average</h1>
+<h1 id="view-title" class="page-header" data-localize="custom">Average</h1>
 <h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
   <div class="pull-left">
-    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block">Select archive</label>
+    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Select {{placeholder}}</label>
     <select id="selection" onchange="control.action(this, 'selection')"></select>
   </div>
   <div class="pull-right">
     <div class="btn-group">
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')">Export <span class="caret"></span></button>
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')"><span class="button-label" data-localize="action">Export</span> <span class="caret"></span></button>
       <ul class="dropdown-menu">
-        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;">Export CSV</a></li>
-        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;">Copy to clipboard</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;" data-localize="action">Export CSV</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;" data-localize="action">Copy to clipboard</a></li>
       </ul>
     </div>
-    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
+    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')" data-localize="action">Print</button>
   </div>
 </div>
 
@@ -37,8 +37,8 @@
   <table id="table-data" class="table table-data">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Name</th>
+        <th data-localize="page">ID</th>
+        <th data-localize="page">Name</th>
         <th>AVG</th>
       </tr>
     </thead>
@@ -57,7 +57,7 @@
 
 <fieldset class="form-submit">
   <input type="submit" id="real-submit" class="hide" hidden>
-  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, 'update')">Update Average</button>
+  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, 'update')" data-localize="action" data-localize-replacement="{{Average[[custom]]}}">Update {{placeholder}}</button>
 </fieldset>
 </form>
 
@@ -70,6 +70,7 @@
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../locale.js"></script>
 
 
 <script type="text/javascript">

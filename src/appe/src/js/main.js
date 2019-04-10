@@ -374,7 +374,7 @@ app.main.handle.prototype.close = app.main.handle.prototype.prevent;
 app.main.handle.prototype.history = function() {
   var title = this.getTitle();
   var url = this.getURL();
-console.log(title);
+
   app.controller.history(title, url);
 }
 
@@ -495,8 +495,9 @@ app.main.action.prototype.menu = function(element) {
     element.setAttribute('aria-expanded', false);
     menu.setAttribute('aria-expanded', false);
 
-    //TODO FIX
-    app.utils.addEvent('click', app._root.document.documentElement, app.layout.collapse('close', element, menu));
+    var _close_event = 'ontouchstart' in document.documentElement ? 'touchstart' : 'click';
+
+    app.utils.addEvent(_close_event, app._root.document.documentElement, app.layout.collapse('close', element, menu));
   }
 
   app.layout.collapse('toggle', element, menu)();
@@ -534,6 +535,7 @@ app.main.setup = function() {
  * Default "main" load function
  *
  * @global <Object> appe__config
+ * @global <Object> appe__locale
  * @return
  */
 app.main.load = function() {
@@ -543,17 +545,31 @@ app.main.load = function() {
     return app.stop('app.main.load');
   }
 
-
   app.checkConfig(config);
 
 
+  var _localize = function() {
+    var localize_elements = app._root.document.querySelectorAll('[data-localize]');
+
+    if (localize_elements.length) {
+      Array.prototype.forEach.call(localize_elements, function(element) {
+        app.layout.localize(element);
+      });
+    }
+  }
+
   var _layout = function() {
+    var _has_locale = ! (app._root.window.appe__locale === undefined);
+
+
     var navbar_brand = app._root.document.getElementById('brand');
     brand.innerHTML = app.controller.getTitle();
 
     var open_actions = app._root.document.querySelectorAll('.main-action-open');
     var new_actions = app._root.document.querySelectorAll('.main-action-new');
     var save_actions = app._root.document.querySelectorAll('.main-action-save');
+
+    var localize_elements = app._root.document.querySelectorAll('[data-localize]');
 
     if (open_actions.length) {
       Array.prototype.forEach.call(open_actions, function(element) {
@@ -571,6 +587,10 @@ app.main.load = function() {
       Array.prototype.forEach.call(save_actions, function(element) {
         app.utils.addEvent('click', element, app.saveSession);
       });
+    }
+
+    if (_has_locale) {
+      _localize();
     }
   }
 
@@ -596,6 +616,7 @@ app.main.load = function() {
 
 
   app.session(_session, config, true);
+
 }
 
 

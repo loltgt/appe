@@ -104,7 +104,7 @@ app.os.fileOpen = function(callback) {
   //:WORKAROUND temp ios
   if (app._runtime.system.platform != 'ios') {
     if (file.name.indexOf(file_extension) === -1) {
-      app.error('app.os.fileOpen', app.L10n('This file format cannot be open.'), 'file');
+      app.error('app.os.fileOpen', app.i18n('This file format cannot be open.'), 'file');
 
       return callback(false);
     }

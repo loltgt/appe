@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,23 +10,23 @@
 </head>
 
 <body class="view view_edit">
-<h1 id="view-title" class="page-header">Archive</h1>
+<h1 id="view-title" class="page-header" data-localize="page">Archive</h1>
 <h2 id="section-title" class="sub-header"></h2>
 
 
 <div id="section-actions-top" class="section-actions section-actions-top">
   <div>
-    <a class="btn btn-sm btn-gray-lighter" href="../index.html?archive" target="_parent">&laquo; Return Back</a>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?archive" target="_parent">&laquo; <span class="link-label" data-localize="action">Return Back</span></a>
   </div>
 </div>
 
 <form id="form-data" class="form form-data" autocomplete="off" validate>
 <fieldset>
-<legend>Entry</legend>
+<legend data-localize="page">Entry</legend>
 
 <div class="row">
 <div class="form-group col-12 col-lg-6">
-  <label for="archive_title">Title</label>
+  <label for="archive_title" data-localize="page">Title</label>
   <input type="text" id="archive_title" name="title" class="form-control" required>
 </div>
 </div>
@@ -41,18 +41,18 @@
   <tbody>
     <tr class="tpl" draggable="true">
       <td>{name}</td>
-      <td class="text-right"><button type="button" class="btn btn-danger btn-sm" onclick="control.draggable(this, 'remove')">Remove</button></td>
+      <td class="text-right"><button type="button" class="btn btn-danger btn-sm" onclick="control.draggable(this, 'remove')" data-localize="action">Remove</button></td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2"><span class="help-block">Puoi spostare items per ordinarli, clicca su uno di essi e trascinalo per cambiare ordine.</span></td>
+      <td colspan="2"><span class="help-block" data-localize="page">Move items to order them, click on item to drag &amp; drop and change its order.</span></td>
     </tr>
     <tr>
       <td>
         <select id="items" class="form-control"></select>
       </td>
-      <td class="text-right"><button type="button" class="btn btn-secondary btn-sm" onclick="control.draggable(this, 'add')">Add</button></td>
+      <td class="text-right"><button type="button" class="btn btn-secondary btn-sm" onclick="control.draggable(this, 'add')" data-localize="action">Add</button></td>
     </tr>
   </tfoot>
 </table>
@@ -94,7 +94,7 @@
 <fieldset class="form-submit">
   <input type="hidden" id="index" name="id" value="{id}" data-transform="integer">
   <input type="submit" id="real-submit" hidden class="hide">
-  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, '{action_event}')">Update Archive</button>
+  <button type="button" id="submit" class="btn btn-primary btn-lg" onclick="control.action(this, '{action_event}')">Edit Archive</button>
 </fieldset>
 </form>
 
@@ -102,6 +102,7 @@
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../locale.js"></script>
 
 
 <script type="text/javascript">
@@ -142,9 +143,9 @@ control.handle = function(data) {
   var _events = {};
 
   _events.add = function() {
-    _control.setTitle('Add New Archive');
+    _control.setTitle(app.i18n('Add New {{placeholder}}', 'action', '{{Archive||Archives%%1[[page]]}}'));
 
-    _control.setActionHandler('Add Archive');
+    _control.setActionHandler(app.i18n('Add {{placeholder}}', 'action', '{{Archive||Archives%%1[[page]]}}'));
 
 
 
@@ -162,9 +163,9 @@ control.handle = function(data) {
 
 
 
-    _control.setTitle('Edit Archive "' + archive_data.title + '"');
+    _control.setTitle(app.i18n('Edit {{placeholder}} "{{title}}"', 'action', [app.i18n('Archive||Archives', 'page', [[1]]), archive_data.title]));
 
-    _control.setActionHandler('Update Archive');
+    _control.setActionHandler(app.i18n('Edit {{placeholder}}', 'action', '{{Archive||Archives%%1[[page]]}}'));
 
 
     _control.fillForm(form, archive_data);
@@ -224,6 +225,8 @@ control.fillForm = function(data_form, extra) {
 
 /* //TODO fix drop in droid */
 control.draggable = function(element, event, items, disallow) {
+  var _has_locale = ! (app._root.window.appe__locale === undefined);
+
   var data_items = app.data('items');
 
   var table = document.getElementById('table-data');
@@ -396,7 +399,13 @@ control.draggable = function(element, event, items, disallow) {
     }
 
     if (items.indexOf(index) != -1) {
-      alert('This item is already in list.');
+      var item_in_list_label = 'This item is already in list.';
+
+      if (_has_locale) {
+        item_in_list_label = app.i18n(item_in_list_label, 'page') || item_in_list_label;
+      }
+
+      alert(item_in_list_label);
 
       return;
     }

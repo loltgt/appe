@@ -315,13 +315,13 @@ app.start.alternative = function() {
 
   var alt = '';
 
-  alt = app.L10n('This application cannot be run due to restrictions into the software {{browser}}.', browser);
+  alt = app.i18n('This application cannot be run due to restrictions into the software {{browser}}.', null, browser);
 
   if (exec_platform && config.alt.exec_folder && config.alt.exec_folder) {
     var alt_exec_folder = config.alt.exec_folder.toString();
     var alt_exec_platform = exec_platform in config.alt.exec_platform ? config.alt.exec_platform[exec_platform].toString() : '';
 
-    alt += app.L10n('GO TO FOLDER "{{alt_exec_folder}}" AND OPEN "{{alt_exec_platform}}"', { 'alt_exec_folder': alt_exec_folder, 'alt_exec_platform': alt_exec_platform });
+    alt += app.i18n('GO TO FOLDER "{{alt_exec_folder}}" AND OPEN "{{alt_exec_platform}}."', null, { 'alt_exec_folder': alt_exec_folder, 'alt_exec_platform': alt_exec_platform });
   }
 
   alt = alt.replace('{browser}', browser);
@@ -342,6 +342,7 @@ app.start.alternative = function() {
  * //TODO hook?
  *
  * @global <Object> appe__config
+ * @global <Object> appe__locale
  * @return
  */
 app.start.load = function() {
@@ -400,12 +401,29 @@ app.start.load = function() {
     }
   }
 
+  var _localize = function() {
+    var localize_elements = app._root.document.querySelectorAll('[data-localize]');
+
+    if (localize_elements.length) {
+      Array.prototype.forEach.call(localize_elements, function(element) {
+        app.layout.localize(element);
+      });
+    }
+  }
+
   var _layout = function() {
+    var _has_locale = ! (app._root.window.appe__locale === undefined);
+
+
     var open_action = app._root.document.getElementById('start-action-open');
     var new_action = app._root.document.getElementById('start-action-new');
 
-    app.utils.addEvent('click', open_action, app.openSession);    
+    app.utils.addEvent('click', open_action, app.openSession);
     app.utils.addEvent('click', new_action, app.newSession);
+
+    if (_has_locale) {
+      _localize();
+    }
   }
 
   var _session = function() {

@@ -585,9 +585,6 @@ fieldset[disabled] .btn-secondary.focus {
   border: 0;
   -webkit-overflow-scrolling: touch;
 }
-.system--platform-ios .table-responsive .table {
-  max-width: 480px;
-}
 .table-auto {
   width: auto;
 }
@@ -671,8 +668,8 @@ fieldset[disabled] .btn-secondary.focus {
   padding-top: 0;
 }
 .start-progress-wait {
-  padding: 8% 0;
-  padding: 6vh 0;
+  padding: 12% 0;
+  padding: 10vh 0;
   color: #666;
 }
 .start-progress-wait p {
@@ -749,6 +746,8 @@ fieldset[disabled] .btn-secondary.focus {
 }
 
 .view {
+  max-width: 100%;
+  max-width: 100vw;
   margin-bottom: 30px;
   padding: 20px;
   overflow-x: hidden;
@@ -966,8 +965,10 @@ legend {
   display: block;
   padding: 9.5px;
   margin: 30px 0 10px;
+  height: 212px;
   min-width: 480px;
-  min-height: 100px;
+  max-width: 100%;
+  max-height: 100%;
   overflow: auto;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -1148,3 +1149,6 @@ legend {
   }
   .view_wide_list .table-bordered>thead>tr>th, .view_wide_list .table-bordered>tbody>tr>th, .view_wide_list .table-bordered>tfoot>tr>th, .view_wide_list .table-bordered>thead>tr>td, .view_wide_list .table-bordered>tbody>tr>td, .view_wide_list .table-bordered>tfoot>tr>td { border-color: #000 !important; }
 }
+
+
+html:not([lang]) [data-localize] { color: transparent !important; }

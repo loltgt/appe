@@ -25,6 +25,8 @@ app._runtime = {
   session: false,
   title: '',
   name: '',
+  locale: 'en',
+  locale_dir: 'ltr',
   storage: false,
   binary: false,
   compression: false,
@@ -33,7 +35,6 @@ app._runtime = {
   hangs: 0
 };
 
-app._L10n = {};
 
 
 /**
@@ -98,7 +99,7 @@ app.unload = function(func) {
 /**
  * app.redirect
  *
- * Performs app redirects
+ * Performs app redirect
  *
  * @global <Object> appe__config
  * @return
@@ -113,21 +114,19 @@ app.redirect = function() {
   var base = config.base_path.toString();
   var filename = 'index';
 
-  if (location.href.indexOf(base + '/') != -1) {
+  if (app._root.window.location.href.indexOf(base + '/') != -1) {
     base = '..';
     filename = config.launcher_name.toString();
   }
 
-  if (app._root.window.appe__start) {
-  location.href = base + '/' + filename + '.html';
-}
+  app._root.window.location.href = base + '/' + filename + '.html';
 }
 
 
 /**
  * app.position
  *
- * Returns serialized app position
+ * Returns JSON serialized app position
  *
  * @return <String> position
  */
@@ -155,9 +154,10 @@ app.position = function() {
 /**
  * app.session
  *
- * Starts the session
+ * Initializes the session
  *
  * @global <Object> appe__store
+ * @global <Object> appe__locale
  * @global <Object> CryptoJS
  * @global <Object> pako
  * @param <Function> callback
@@ -195,7 +195,40 @@ app.session = function(callback, config, target) {
   }
 
   app._runtime.session = true;
-  app._runtime.locale = config.language.toString();
+
+
+  var _has_locale = ! (app._root.window.appe__locale === undefined);
+
+
+  // auto-select language locale
+  if (_has_locale && config.language === null) {
+    var locale = app._root.window.appe__locale;
+
+    if (typeof locale != 'object') {
+      return app.error('app.session', 'locale');
+    }
+
+    var navigator = app._root.window.navigator;
+
+    if (navigator && navigator.languages && typeof navigator.languages === 'object') {
+      var found_locale = false;
+
+      for (lang in navigator.languages) {
+        if (! found_locale && navigator.languages[lang] in locale) {
+          app._runtime.locale = navigator.languages[lang].toString();
+
+          found_locale = true;
+        }
+      }
+
+      if (! found_locale && navigator.languages.length) {
+        app._runtime.locale = navigator.languages[lang].split('-')[0] || app._runtime.locale;
+      }
+    }
+  }
+
+  app._runtime.locale = !! config.language ? config.language.toString() : app._runtime.locale;
+  app._runtime.locale_dir = !! config.language_direction ? config.language_direction.toString() : app._runtime.locale_dir;
 
 
   if (!!! app._root.document.native) {
@@ -319,7 +352,7 @@ app.session = function(callback, config, target) {
 /**
  * app.resume
  *
- * Resumes session, return last opened file
+ * Resumes session, returns last opened file
  *
  * @param <Object> config
  * @param <Boolean> target
@@ -371,7 +404,7 @@ app.resume = function(config, target) {
 /**
  * app.data
  *
- * Get data store
+ * Gets data store
  *
  * @global <Object> appe__store
  * @param <String> key
@@ -468,7 +501,7 @@ app.checkFile = function(source, checksum) {
   var _app_version = app._runtime.version.toString();
 
   if (_app_version !== source.file.version) {
-    return app.error('app.checkFile', app.L10n('This file is incompatible with running version: {{_app_version}}.',  _app_version), source.file);
+    return app.error('app.checkFile', app.i18n('This file is incompatible with running version: {{_app_version}}.', null, _app_version), source.file);
   }
 
   if (!! config.verify_checksum && !! checksum) {
@@ -491,7 +524,7 @@ app.checkFile = function(source, checksum) {
 /**
  * app.newSession
  *
- * Create a new empty session
+ * Creates a new empty session
  *
  * @global <Object> appe__config
  * @global <Object> appe__start
@@ -549,7 +582,7 @@ app.newSession = function() {
   }
 
   var _complete = function() {
-    _is_start ? app.start.redirect(false) : location.reload();
+    _is_start ? app.start.redirect(false) : app._root.document.location.reload();
   }
 
 
@@ -560,7 +593,7 @@ app.newSession = function() {
 /**
  * app.openSession
  *
- * Opens session from an app js file
+ * Opens session from an app session file
  *
  * @global <Object> appe__config
  * @global <Object> appe__start
@@ -650,7 +683,7 @@ app.openSession = function() {
     app.memory.set('last_session', _current_timestamp_enc);
 
 
-    _is_start ? app.start.redirect(true) : location.reload();
+    _is_start ? app.start.redirect(true) : app._root.document.location.reload();
   }
 
 
@@ -681,7 +714,7 @@ app.openSession = function() {
 /**
  * app.saveSession
  *
- * Saves session to app js file
+ * Saves session to app session file
  *
  * @global <Object> appe__config
  * @global <Object> appe__store
@@ -744,71 +777,131 @@ app.saveSession = function() {
 
 
 /**
- * app.L10n
+ * app.i18n
  *
- * App localizazion
+ * App localization
  *
+ * @global <Object> appe__locale
  * @param <String> to_translate
- * @param to_replace
  * @param <String> context
+ * @param to_replace
  */
-app.L10n = function(to_translate, to_replace, context) {
+app.i18n = function(to_translate, context, to_replace) {
   var locale = app._root.window.appe__locale;
 
   if (! locale) {
     return to_translate;
   } else if (typeof locale != 'object') {
-    return app.stop('app.L10n', 'locale');
+    return app.stop('app.i18n', 'locale');
   }
 
-  var L10n = app._L10n;
-  var _current_locale = app._runtime.language.toString();
+  var _current_locale = app._runtime.locale.toString();
+  var _current_locale_direction = app._runtime.locale_dir.toString();
 
-  if (typeof to_translate != 'string' || (to_replace && (typeof to_replace != 'string' || typeof to_replace != 'object')) || (context && typeof context != 'string')) {
-    return app.error('app.L10n', arguments);
+  if (typeof to_translate != 'string' || (to_replace && (typeof to_replace != 'string' && typeof to_replace != 'object')) || (context && typeof context != 'string')) {
+    return app.error('app.i18n', arguments);
   }
 
-  context = context || 0;
+  context = !! context ? context.toString() : '0';
 
-  if (! (L10n[_current_locale] && L10n[_current_locale][context] && to_translate in L10n[_current_locale][context])) {
-    return to_translate;
+
+  var lstring = null;
+
+  if (! (locale[_current_locale] && locale[_current_locale][context] && to_translate in locale[_current_locale][context] && locale[_current_locale][context][to_translate])) {
+
+    // no locale but have replacement with placeholder
+    if (/\{\{|\|\|/.test(to_translate)) {
+
+      lstring = to_translate;
+
+    // no locale skip
+    } else {
+      return to_translate;
+    }
+  } else {
+    lstring = locale[_current_locale][context][to_translate].toString();
   }
 
-  var _lstring = L10N[_current_locale][context][to_translate].toString();
 
   // no replacement
   if (! to_replace) {
-    return _lstring;
+    return lstring;
+  }
+
   // single string replacement
-  } else if (typeof to_replace == 'string') {
-    return _lstring.replace(/\{\{[\w]+\}\}/, to_replace);
-  } else if (to_replace == 'object') {
-    //TODO _runtime.dir reverse order
-    // multiple string replacement in ltr order
-    if (to_replace instanceof Array) {
-      for (var tr in to_replace) {
-        _lstring = _lstring.replace(/\{\{[\w]+\}\}/, tr.toString());
+  if (typeof to_replace == 'string') {
+
+    // replacement with placeholder
+    if (to_replace.indexOf('{{') != -1) {
+
+      var lsstring_placeholder = to_replace.indexOf('[[') != -1 ? to_replace.match(/\{\{(.+)(?:\[\[([\w]+)\]\])\}\}/) : to_replace.match(/\{\{(.+)\}\}/);
+      var lsstring_replacement = null;
+
+      if (lsstring_placeholder[1].indexOf('%%') != -1) {
+        lsstring_replacement = lsstring_placeholder[1].split('%%');
+
+        if (!! lsstring_replacement[0]) {
+          lsstring_placeholder = [null, lsstring_replacement[0], lsstring_placeholder[2]];
+        } else {
+          lstring = '{{placeholder}}';
+          lsstring_placeholder = [null, to_translate.toString(), context];
+        }
+
+        lsstring_replacement = lsstring_replacement[1];
+
+        if (lsstring_replacement.length) {
+          if (! /\D/.test(lsstring_replacement[0])) {
+            //TODO nest
+            lsstring_replacement = [[lsstring_replacement[0]]];
+          } else {
+            lsstring_replacement = lsstring_replacement.split(',');
+          }
+        }
       }
 
-      return _lstring;
+      to_replace = app.i18n(lsstring_placeholder[1], lsstring_placeholder[2], lsstring_replacement);
+    }
+
+    lstring = lstring.replace(/\{\{[\w]+\}\}/, to_replace);
+
+  } else if (typeof to_replace == 'object') {
+
     // singular/plural replacement
-    } else if (to_replace.singular_plural && to_replace.digits) {
-      _lstring = _lstring.replace(/([.]+)\|\|([.]+)/, !! to_replace.digits ? '$1' : '$2');
+    if (to_replace[0] instanceof Array) {
+      var quantitative = ['$1', '$2'];
 
-      if (!! to_replace.digits) {
-        _lstring = _lstring.replace(/\{\{[\w]+\}\}/, to_replace.digits.toString());
+      // "rtl" locale order
+      if (_current_locale_direction == 'rtl') {
+        quantitative.reverse();
       }
 
-      return _lstring;
+      lstring = lstring.replace(/(.+)\|\|(.+)/, parseInt(to_replace[0][0]) > 1 ? quantitative[1] : quantitative[0]);
+
+      //TODO nest replacement
+
+    // multiple string replacement in locale order
+    } else if (to_replace instanceof Array) {
+
+      // "rtl" locale order
+      if (_current_locale_direction == 'rtl') {
+        to_replace.reverse();
+      }
+
+      for (var i in to_replace) {
+        lstring = lstring.replace(/\{\{[\w]+\}\}/, to_replace[i].toString());
+      }
+
     // multiple string replacement exact match
     } else {
+
       for (var tr in to_replace) {
-        _lstring = _lstring.replace(new RegExp('{{' + tr.toString() + '}}'), to_replace[tr]);
+        lstring = lstring.replace(new RegExp('{{' + tr.toString() + '}}'), to_replace[tr]);
       }
 
-      return _lstring;
     }
   }
+
+  return lstring;
 }
 
 
@@ -898,6 +991,10 @@ app.error = function() {
     return undefined;
   }
 
+  if (! document.documentElement.lang) {
+    document.documentElement.lang = app._runtime.language.toString();
+  }
+
   if (app._runtime.debug) {
     if (app._runtime.exec) {
       console.error('ERR', fn, msg, app.position() || '');
@@ -911,10 +1008,10 @@ app.error = function() {
   }
 
   if (! msg) {
-    msg = app.L10n('There was an error while executing.');
+    msg = app.i18n('There was an error while executing.');
 
     if (! app._runtime.exec) {
-      msg += '\n\n' + app.L10n('Please reload the application.');
+      msg += '\n\n' + app.i18n('Please reload the application.');
     }
   }
 
@@ -970,15 +1067,15 @@ app.getInfo = function(from, info) {
   switch (from) {
     case 'config':
       _available_infos = {
-        'debug': !! config.debug ? true : false,
         'app_name': config.app_name.toString(),
-        'locale': config.language.toString(),
         'schema': typeof config.schema === 'object' ? config.schema : [],
         'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': config.license.file.toString() } : config.license.toString()) || false
       };
     break;
     case 'runtime':
       _available_infos = {
+        'debug': !! app._runtime.debug ? true : false,
+        'locale': app._runtime.locale.toString(),
         'version': app._runtime.version.toString(),
         'release': app._runtime.release.toString()
       };
@@ -1162,7 +1259,7 @@ app.os.fileOpen = function(callback) {
   //:WORKAROUND temp ios
   if (app._runtime.system.platform != 'ios') {
     if (file.name.indexOf(file_extension) === -1) {
-      app.error('app.os.fileOpen', app.L10n('This file format cannot be open.'), 'file');
+      app.error('app.os.fileOpen', app.i18n('This file format cannot be open.'), 'file');
 
       return callback(false);
     }
@@ -1364,8 +1461,12 @@ app.os.fileSave = function(callback, source, timestamp) {
     step = app.error('app.os.fileSave', 'config');
   }
 
-  if (! saveAs) {
-    step = app.error('app.os.fileSave', 'FileSaver');
+  if (! Blob) {
+    step = app.error('app.os.fileSave', 'Blob');
+  }
+
+  if (! FileReader) {
+    step = app.error('app.os.fileSave', 'FileReader');
   }
 
   if (! (CryptoJS && CryptoJS.MD5)) {
@@ -1479,6 +1580,10 @@ app.os.fileSave = function(callback, source, timestamp) {
   }
 
   var _complete = function(source, cb) {
+    if (! source) {
+      return cb('source');
+    }
+
     // source to JavaScript JSON file format
     if (! fbinary) {
       // should wrap source in double quotes
@@ -1489,18 +1594,10 @@ app.os.fileSave = function(callback, source, timestamp) {
       source = file_heads + '=' + source;
     }
 
-    try {
-      var blob = new Blob([ source ], { type: file_type });
-
-      if (! blob) { throw 'blob'; }
-
-      cb(false, blob);
-    } catch (err) {
-      cb(err);
-    }
+    cb(false, source);
   }
 
-  var _save = function(blob, cb) {
+  var _save = function(source, cb) {
     var file_saves = app.memory.has('file_saves') ? parseInt(app.memory.get('file_saves')) : 0;
 
     file_saves++;
@@ -1515,16 +1612,18 @@ app.os.fileSave = function(callback, source, timestamp) {
     file_name += file_name_separator + file_name_date;
     file_name += file_name_separator + file_saves;
 
+    var _file = file_name + '.' + file_extension;
+
     if (!! app._runtime.debug) {
-      console.info('app.os.fileSave', 'file', { name: file_name + '.' + file_extension, type: file_type }, config.file);
+      console.info('app.os.fileSave', 'file', _file, file_type, config.file);
     }
 
     try {
-      saveAs(blob, file_name + '.' + file_extension);
-
       app.memory.set('file_saves', file_saves);
 
-      cb(false, file_name + '.' + file_extension);
+      app.os.fileDownload(source, file_type, _file);
+
+      cb(false, _file);
     } catch (err) {
       cb(err);
     }
@@ -1596,6 +1695,157 @@ app.os.fileSave = function(callback, source, timestamp) {
 
 
   _init(source);
+}
+
+
+
+/**
+ * app.os.fileDownload
+ *
+ * Prepares attachment data file and send to browser
+ *
+ * @link https://github.com/eligrey/FileSaver.js/
+ *
+ * @param source
+ * @param <String> mime_type
+ * @param <String> filename
+ * @return
+ */
+app.os.fileDownload = function(source, mime_type, filename) {
+  if (! FileReader) {
+    return app.error('app.os.fileDownload', 'FileReader');
+  }
+
+  if (! Blob) {
+    return app.error('app.os.fileDownload', 'Blob');
+  }
+
+  var navigator = app._root.window.navigator;
+
+  if ((typeof source != 'object' && typeof source != 'string') || typeof mime_type != 'string' || typeof filename != 'string') {
+    return app.error('app.os.fileDownload', arguments);
+  }
+
+
+  var _linkDownload = function(data) {
+    var _URL = app._root.window.URL || app._root.window.webkitURL;
+    var _revoke, _dispatch, _check, triggered = false;
+
+    var link = app._root.document.createElement('a');
+    var object = data != undefined ? data.toString() : _URL.createObjectURL(blob);
+
+    link.download = filename;
+    link.href = object;
+    link.rel = 'noopener';
+    link.target = '_self';
+    link.onclick = (function() {
+      triggered = true;
+
+      this.remove();
+
+      clearTimeout(_revoke);
+      clearTimeout(_dispatch);
+    });
+
+    _revoke = setTimeout(function() {
+      ! data && _URL.revokeObjectURL(object);
+
+      this.clearTimeout();
+    }, 4E4); // 40s
+
+    _dispatch = setTimeout(function() {
+      var e;
+
+      try {
+        e = new MouseEvent('click');
+
+        link.target = '_blank';
+        link.dispatchEvent(e);
+      } catch (err) {
+        e = document.createEvent('MouseEvents');
+        e.initMouseEvent('click', true, true, window, 0, 0, 0, 80, 20, false, false, false, false, 0, null);
+
+        link.dispatchEvent(e);
+      }
+
+      this.clearTimeout();
+    }, 0);
+
+    _check = setTimeout(function() {
+      if (! triggered) {
+        link.click();
+      }
+
+      this.clearTimeout();
+    }, 10);
+  }
+
+  var _msBlobDownload = function() {
+    navigator.msSaveOrOpenBlob(blob, filename);
+  }
+
+  var _attachmentDownload = function(cb) {
+    try {
+      var reader = new FileReader();
+
+      reader.onloadend = (function() {
+        if (! this.result) { throw 'data'; }
+
+        var data = this.result;
+
+        if (!! force) {
+          data = data.replace(/^data:[^;]*;/, 'data:attachment/file;');
+
+          _linkDownload(data);
+        } else {
+          app._root.window.open(data, '_blank');
+        }
+      });
+
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      return app.error('app.os.fileDownload', err);
+    }
+  }
+
+
+  try {
+    var blob = new Blob([ source ], { type: mime_type });
+
+    if (! blob) { throw 'blob'; }
+  } catch (err) {
+    return app.error('app.os.fileDownload', err);
+  }
+
+  // target browsers with download anchor attribute
+  if ('download' in app._root.window.HTMLAnchorElement.prototype) {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'link', mime_type, filename);
+    }
+
+    _linkDownload();
+  // target ie
+  } else if ('msSaveOrOpenBlob' in app._root.window.navigator) {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'ms', mime_type, filename);
+    }
+
+    _msBlobDownload();
+  // target other browsers with open support
+  } else if ('open' in app._root.window) {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'attachment', mime_type, filename);
+    }
+
+    _attachmentDownload();
+  // fallback to link and attachment/file download
+  } else {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'fallback', mime_type, filename);
+    }
+
+    _linkDownload(true);
+  }
 }
 
 
@@ -1886,11 +2136,11 @@ app.controller.spoof = function() {
   var loc = { view: null, action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') == -1) {
+  if (app._root.window.location.href.indexOf('?') == -1) {
     return loc;
   }
 
-  var ref = location.href.split('?')[1];
+  var ref = app._root.window.location.href.split('?')[1];
 
   // querystring
   if (ref.indexOf('&') != -1) {
@@ -1929,7 +2179,7 @@ app.controller.history = function(title, url) {
   }
 
   if (app._runtime.system.navigator == 'safari') {
-    location.href = url;
+    app._root.window.location.href = url;
   } else {
     history.replaceState(null, title, url);
   }
@@ -2642,13 +2892,13 @@ app.start.alternative = function() {
 
   var alt = '';
 
-  alt = app.L10n('This application cannot be run due to restrictions into the software {{browser}}.', browser);
+  alt = app.i18n('This application cannot be run due to restrictions into the software {{browser}}.', null, browser);
 
   if (exec_platform && config.alt.exec_folder && config.alt.exec_folder) {
     var alt_exec_folder = config.alt.exec_folder.toString();
     var alt_exec_platform = exec_platform in config.alt.exec_platform ? config.alt.exec_platform[exec_platform].toString() : '';
 
-    alt += app.L10n('GO TO FOLDER "{{alt_exec_folder}}" AND OPEN "{{alt_exec_platform}}"', { 'alt_exec_folder': alt_exec_folder, 'alt_exec_platform': alt_exec_platform });
+    alt += app.i18n('GO TO FOLDER "{{alt_exec_folder}}" AND OPEN "{{alt_exec_platform}}."', null, { 'alt_exec_folder': alt_exec_folder, 'alt_exec_platform': alt_exec_platform });
   }
 
   alt = alt.replace('{browser}', browser);
@@ -2669,6 +2919,7 @@ app.start.alternative = function() {
  * //TODO hook?
  *
  * @global <Object> appe__config
+ * @global <Object> appe__locale
  * @return
  */
 app.start.load = function() {
@@ -2727,12 +2978,29 @@ app.start.load = function() {
     }
   }
 
+  var _localize = function() {
+    var localize_elements = app._root.document.querySelectorAll('[data-localize]');
+
+    if (localize_elements.length) {
+      Array.prototype.forEach.call(localize_elements, function(element) {
+        app.layout.localize(element);
+      });
+    }
+  }
+
   var _layout = function() {
+    var _has_locale = ! (app._root.window.appe__locale === undefined);
+
+
     var open_action = app._root.document.getElementById('start-action-open');
     var new_action = app._root.document.getElementById('start-action-new');
 
-    app.utils.addEvent('click', open_action, app.openSession);    
+    app.utils.addEvent('click', open_action, app.openSession);
     app.utils.addEvent('click', new_action, app.newSession);
+
+    if (_has_locale) {
+      _localize();
+    }
   }
 
   var _session = function() {
@@ -3055,11 +3323,11 @@ app.main.handle.prototype.getURL = function() {
 app.main.handle.prototype.redirect = function() {
   var href = this.getURL();
 
-  location.href = href;
+  app._root.window.location.href = href;
 }
 
 app.main.handle.prototype.refresh = function() {
-  location.reload();
+  app._root.document.location.reload();
 }
 
 app.main.handle.prototype.resize = function() {
@@ -3147,7 +3415,7 @@ app.main.handle.prototype.close = app.main.handle.prototype.prevent;
 app.main.handle.prototype.history = function() {
   var title = this.getTitle();
   var url = this.getURL();
-console.log(title);
+
   app.controller.history(title, url);
 }
 
@@ -3268,8 +3536,9 @@ app.main.action.prototype.menu = function(element) {
     element.setAttribute('aria-expanded', false);
     menu.setAttribute('aria-expanded', false);
 
-    //TODO FIX
-    app.utils.addEvent('click', app._root.document.documentElement, app.layout.collapse('close', element, menu));
+    var _close_event = 'ontouchstart' in document.documentElement ? 'touchstart' : 'click';
+
+    app.utils.addEvent(_close_event, app._root.document.documentElement, app.layout.collapse('close', element, menu));
   }
 
   app.layout.collapse('toggle', element, menu)();
@@ -3307,6 +3576,7 @@ app.main.setup = function() {
  * Default "main" load function
  *
  * @global <Object> appe__config
+ * @global <Object> appe__locale
  * @return
  */
 app.main.load = function() {
@@ -3316,17 +3586,31 @@ app.main.load = function() {
     return app.stop('app.main.load');
   }
 
-
   app.checkConfig(config);
 
 
+  var _localize = function() {
+    var localize_elements = app._root.document.querySelectorAll('[data-localize]');
+
+    if (localize_elements.length) {
+      Array.prototype.forEach.call(localize_elements, function(element) {
+        app.layout.localize(element);
+      });
+    }
+  }
+
   var _layout = function() {
+    var _has_locale = ! (app._root.window.appe__locale === undefined);
+
+
     var navbar_brand = app._root.document.getElementById('brand');
     brand.innerHTML = app.controller.getTitle();
 
     var open_actions = app._root.document.querySelectorAll('.main-action-open');
     var new_actions = app._root.document.querySelectorAll('.main-action-new');
     var save_actions = app._root.document.querySelectorAll('.main-action-save');
+
+    var localize_elements = app._root.document.querySelectorAll('[data-localize]');
 
     if (open_actions.length) {
       Array.prototype.forEach.call(open_actions, function(element) {
@@ -3344,6 +3628,10 @@ app.main.load = function() {
       Array.prototype.forEach.call(save_actions, function(element) {
         app.utils.addEvent('click', element, app.saveSession);
       });
+    }
+
+    if (_has_locale) {
+      _localize();
     }
   }
 
@@ -3369,6 +3657,7 @@ app.main.load = function() {
 
 
   app.session(_session, config, true);
+
 }
 
 
@@ -3409,11 +3698,11 @@ app.view.spoof = function() {
   var loc = { action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') == -1) {
+  if (app._root.window.location.href.indexOf('?') == -1) {
     return loc;
   }
 
-  var ref = location.href.split('?')[1];
+  var ref = app._root.window.location.href.split('?')[1];
 
   // querystring
   if (ref.indexOf('&') != -1) {
@@ -3453,9 +3742,11 @@ app.view.spoof = function() {
  *  - fillForm (form <NodeElement>, data <Object>)
  *  - fillSelection (data <Object>, id <Number>)
  *  - fillCTA (id <Number>)
+ *  - localize (element <NodeElement>)
  *
  * @global <Object> appe__config
  * @global <Object> appe__control
+ * @global <Object> appe__locale
  * @param <Array> events
  * @param <Object> data
  * @param <NodeElement> form
@@ -3474,6 +3765,8 @@ app.view.control = function(events, data, form) {
     return app.error('app.view.control', 'control');
   }
 
+  var _has_locale = ! (app._root.window.appe__locale === undefined);
+
   var self = app.view.control.prototype;
 
   if ((events && events instanceof Array === false) || (data && typeof data != 'object')) {
@@ -3481,6 +3774,7 @@ app.view.control = function(events, data, form) {
   }
 
   self._initialized = false;
+  self._has_locale = _has_locale;
 
   self.events = events || null;
   self.data = data || {};
@@ -3646,10 +3940,14 @@ app.view.control.prototype.setTitle = function(section_title, view_title, id) {
 
   var event = this.getEvent();
 
-  id = parseInt(id) || app.view.control.prototype.getID();
+  id = (id != false) ? parseInt(id) : app.view.control.prototype.getID();
 
-  if (event === 'edit') {
-    section_title += ' # ' + id;
+  if (event === 'edit' && !! id) {
+    if (app._runtime.locale_dir == 'rtl') {
+      section_title = '# ' + id + ' ' + section_title;
+    } else {
+      section_title += ' # ' + id;
+    }
   }
 
   var _view_title = app._root.document.getElementById('view-title');
@@ -3744,6 +4042,8 @@ app.view.control.prototype.fillTable = function(table, data, order) {
     });
 
     tbody.innerHTML = rows;
+
+    this._has_locale && this.localize(table);
   }
 
   return { rows: rows, tpl: trow_tpl, data: _data, args: _args };
@@ -3772,6 +4072,8 @@ app.view.control.prototype.fillForm = function(form, data) {
    */
   if ('fillForm' in control && typeof control.fillForm === 'function') {
     control.fillForm(_data, _args);
+
+    this._has_locale && this.localize(form);
   }
 
   return { data: _data, args: _args };
@@ -3826,6 +4128,22 @@ app.view.control.prototype.fillCTA = function(id) {
   }
 }
 
+app.view.control.prototype.localize = function(elements) {
+  this.isInitialized('localize');
+
+  if (! elements) {
+    return app.error('app.view.control.prototype.localize', arguments);
+  }
+
+  var localize_elements = elements.querySelectorAll('[data-localize]');
+
+  if (localize_elements.length) {
+    Array.prototype.forEach.call(localize_elements, function(element) {
+      app.layout.localize(element);
+    });
+  }
+}
+
 
 /**
  * app.view.action
@@ -3851,6 +4169,7 @@ app.view.control.prototype.fillCTA = function(id) {
  *
  * @global <Object> appe__config
  * @global <Object> appe__control
+ * @global <Object> appe__locale
  * @param <Array> events
  * @param <String> event
  * @param <NodeElement> element
@@ -3870,6 +4189,8 @@ app.view.action = function(events, event, element, form) {
     return app.error('app.view.action', 'control');
   }
 
+  var _has_locale = ! (app._root.window.appe__locale === undefined);
+
   var self = app.view.action.prototype;
 
   if ((events && (events instanceof Array === false)) || ! event || ! element) {
@@ -3877,6 +4198,7 @@ app.view.action = function(events, event, element, form) {
   }
 
   self._initialized = false;
+  self._has_locale = _has_locale;
 
   if (! (config.events && typeof config.events === 'object')) {
     return app.error('app.view.action', 'config');
@@ -3983,7 +4305,7 @@ app.view.action.prototype.prepare = function(data, submit) {
   }
 
   var id = this.getID();
-  var event_label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
+  var label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
 
   try {
     this.ctl.action = this.event;
@@ -3996,8 +4318,17 @@ app.view.action.prototype.prepare = function(data, submit) {
         this.ctl.history = true;
 
         //TODO <Number> | <String>
-        this.ctl.title = event_label + ' ';
-        this.ctl.title += (typeof this.ctl.index === 'number' ? '#' + this.ctl.index : '"' + this.ctl.index + '"');
+        this.ctl.title = (typeof this.ctl.index === 'number' ? '# ' + this.ctl.index : '"' + this.ctl.index + '"');
+
+        if (label) {
+          label = label[0].toUpperCase() + label.slice(1);
+
+          if (this._has_locale) {
+            label = app.i18n(label, 'action') || label;
+          }
+
+          this.ctl.title = app._runtime.locale_dir == 'rtl' ? this.ctl.title + ' ' + label : label + ' ' + this.ctl.title;
+        }
       }
     }
 
@@ -4037,12 +4368,20 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
-  var event_label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
+  var label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
 
-  if (title && (typeof name === 'number' || typeof name === 'string')) {
-    this.ctl.msg  = 'Are you sure to ' + event_label + ' ' + title + ' ';
-    this.ctl.msg += (typeof name === 'number' ? '#' + name : '"' + name + '"');
-    this.ctl.msg +=' ?';
+  if (this._has_locale) {
+    label = app.i18n(label, 'event') || label;
+  }
+
+  if (title && (typeof name == 'number' || typeof name == 'string')) {
+    name = app._runtime.locale_dir == 'rtl' ? (typeof name == 'number' ? parseInt(name) + ' #' : '"' + name + '"') : (typeof name == 'number' ? '# ' + parseInt(name) : '"' + name + '"');
+
+    this.ctl.msg = app.i18n('Are you sure to {{placeholder}} {{name}} {{title}}?', 'action', {
+      'placeholder': label,
+      'name': name,
+      'title': title
+    });
   } else {
     this.ctl.msg = title;
   }
@@ -4166,7 +4505,7 @@ app.view.sub.prototype.clipboard = function(element, table) {
 
   // perform line break replacements for clipboard
   Array.prototype.forEach.call(table_csv, function(line) {
-    source += line.join('\t') + '\r\n'; //TODO safari
+    source += line.join('\t') + '\r\n';
   });
 
   app.view.copyToClipboard(source);
@@ -4195,8 +4534,9 @@ app.view.sub.prototype.toggler = function(element) {
   if (! element.getAttribute('data-is-visible')) {
     element.setAttribute('data-is-visible', true);
 
-    //TODO FIX
-    app.utils.addEvent('click', app._root.document.documentElement, app.layout.dropdown('close', element, dropdown));
+    var _close_event = 'ontouchstart' in document.documentElement ? 'touchstart' : 'click';
+
+    app.utils.addEvent(_close_event, app._root.document.documentElement, app.layout.dropdown('close', element, dropdown));
   }
 
   app.layout.dropdown('toggle', element, dropdown)();
@@ -4488,6 +4828,7 @@ app.view.copyToClipboard = function(source) {
  * Default "view" load function
  *
  * @global <Object> appe__config
+ * @global <Object> appe__locale
  * @return
  */
 app.view.load = function() {
@@ -4498,6 +4839,24 @@ app.view.load = function() {
   }
 
 
+  var _localize = function() {
+    var localize_elements = app._root.document.querySelectorAll('[data-localize]');
+
+    if (localize_elements.length) {
+      Array.prototype.forEach.call(localize_elements, function(element) {
+        app.layout.localize(element);
+      });
+    }
+  }
+
+  var _layout = function() {
+    var _has_locale = ! (app._root.window.appe__locale === undefined);
+
+    if (_has_locale) {
+      _localize();
+    }
+  }
+
   var _session = function() {
     app.resume(config, false);
 
@@ -4506,6 +4865,11 @@ app.view.load = function() {
     routine.push({ fn: app._runtime.name, schema: config.schema });
 
     app.controller.retrieve(app.view.handle, routine);
+
+
+    if (!!! app._root.document.native) {
+      _layout();
+    }
   }
 
 
@@ -4836,7 +5200,6 @@ app.layout.draggable.prototype.drop = function(table, e) {
 
     this.setAttribute('data-index', table._draggable.next_index);
     this.innerHTML = e.dataTransfer.getData('text/html');
-    this.querySelector('meta').remove();
   } else {
     table._draggable.next_index = null;
   }
@@ -5010,6 +5373,40 @@ app.layout.collapse.prototype.toggle = function() {
 
 
 /**
+ * app.layout.localize
+ *
+ * Helper to localize layout
+ *
+ * @global <Object> appe__locale
+ * @param <ElementNode> element
+ * @return
+ */
+app.layout.localize = function(element) {
+  var locale = app._root.window.appe__locale;
+
+  if (! locale) {
+    return; // silent fail
+  }
+
+  if (! element) {
+    return app.error('app.layout.localize', arguments);
+  }
+
+  if (element.localized) {
+    return; // silent fail
+  }
+
+  var to_translate = element.innerHTML.toString();
+  var to_replace = element.getAttribute('data-localize-replacement');
+  var context = element.getAttribute('data-localize');
+
+  element.innerHTML = app.i18n(to_translate, context, to_replace);
+
+  element.localized = true;
+}
+
+
+/**
  * app.utils
  *
  * Utils functions
@@ -5148,6 +5545,8 @@ app.utils.extendObject = function() {
  * @return <Object> system
  */
 app.utils.system = function(purpose) {
+  var navigator = app._root.window.navigator;
+
   var system = { 'platform': null, 'architecture': null, 'navigator': null, 'release': null };
 
   var _platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);

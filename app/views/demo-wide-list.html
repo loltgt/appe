@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -16,22 +16,22 @@
 
 <div id="section-actions-top" class="section-actions section-actions-top clearfix">
   <div class="pull-left">
-    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block">Select archive</label>
+    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Select {{placeholder}}</label>
     <select id="selection" onchange="control.action(this, 'selection')"></select>
   </div>
   <div class="pull-right">
     <div class="btn-group">
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')">Export <span class="caret"></span></button>
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')"><span class="button-label" data-localize="action">Export</span> <span class="caret"></span></button>
       <ul class="dropdown-menu">
-        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;">Export CSV</a></li>
-        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;">Copy to clipboard</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;" data-localize="action">Export CSV</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;" data-localize="action">Copy to clipboard</a></li>
       </ul>
     </div>
-    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
+    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')" data-localize="action">Print</button>
   </div>
   <div class="clearfix"></div>
   <div>
-    <a class="btn btn-sm btn-gray-lighter" href="../index.html?demo" target="_parent">&laquo; Return Back</a>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?demo" target="_parent">&laquo; <span class="link-label" data-localize="action">Return Back</span></a>
   </div>
 </div>
 
@@ -40,8 +40,8 @@
   <table id="table-data" class="table table-bordered table-data">
     <thead>
       <tr class="hidden-csv">
-        <th class="thrv"><span class="trv"><span><strong>ID</strong></span></span></th>
-        <th class="thrv"><span class="trv"><span>Name</span></span></th>
+        <th class="thrv"><span class="trv"><span><strong data-localize="page">ID</strong></span></span></th>
+        <th class="thrv"><span class="trv"><span data-localize="page">Name</span></span></th>
         <th class="thrv"><span class="trv"><span>Specimen</span></span></th>
         <th class="thrv"><span class="trv"><span>Family</span></span></th>
         <th class="thrv"><span class="trv"><span>Discovered</span></span></th>
@@ -102,6 +102,7 @@
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../locale.js"></script>
 
 
 <script type="text/javascript">
@@ -153,7 +154,7 @@ control.handle = function(data) {
 
   var title = (archive_data.title || '');
 
-  _control.setTitle(title, 'Demo');
+  _control.setTitle(title, app.i18n('Demo', 'custom'));
 
   _control.fillSelection(archive_selection, (__data && id));
 
@@ -231,9 +232,9 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
     .replace('{title}', data_row.title)
     .replace('{type}', categories_data_extra.types[data_row.type])
     .replace('{date}', app.utils.dateFormat(data_row.date, 'Y'))
-    .replace('{checked}', (data_row.checked ? 'yes' : 'no'))
-    .replace('{custom_1}', (data_row.custom_1 ? 'yes' : 'no'))
-    .replace('{custom_2}', (data_row.custom_2 ? 'yes' : 'no'))
+    .replace('{checked}', '<span class="text-label" data-localize="page">' + (data_row.checked ? 'yes' : 'no') + '</span>')
+    .replace('{custom_1}', '<span class="text-label" data-localize="page">' + (data_row.custom_1 ? 'yes' : 'no') + '</span>')
+    .replace('{custom_2}', '<span class="text-label" data-localize="page">' + (data_row.custom_2 ? 'yes' : 'no') + '</span>')
     .replace('{pop_avg}', data_row.pop['avg'])
     .replace('{pop_movies}', data_row.pop['movies'])
     .replace('{pop_toyes}', data_row.pop['toyes'])

@@ -61,9 +61,11 @@ app.view.spoof = function() {
  *  - fillForm (form <NodeElement>, data <Object>)
  *  - fillSelection (data <Object>, id <Number>)
  *  - fillCTA (id <Number>)
+ *  - localize (element <NodeElement>)
  *
  * @global <Object> appe__config
  * @global <Object> appe__control
+ * @global <Object> appe__locale
  * @param <Array> events
  * @param <Object> data
  * @param <NodeElement> form
@@ -82,6 +84,8 @@ app.view.control = function(events, data, form) {
     return app.error('app.view.control', 'control');
   }
 
+  var _has_locale = ! (app._root.window.appe__locale === undefined);
+
   var self = app.view.control.prototype;
 
   if ((events && events instanceof Array === false) || (data && typeof data != 'object')) {
@@ -89,6 +93,7 @@ app.view.control = function(events, data, form) {
   }
 
   self._initialized = false;
+  self._has_locale = _has_locale;
 
   self.events = events || null;
   self.data = data || {};
@@ -254,10 +259,14 @@ app.view.control.prototype.setTitle = function(section_title, view_title, id) {
 
   var event = this.getEvent();
 
-  id = parseInt(id) || app.view.control.prototype.getID();
+  id = (id != false) ? parseInt(id) : app.view.control.prototype.getID();
 
-  if (event === 'edit') {
-    section_title += ' # ' + id;
+  if (event === 'edit' && !! id) {
+    if (app._runtime.locale_dir == 'rtl') {
+      section_title = '# ' + id + ' ' + section_title;
+    } else {
+      section_title += ' # ' + id;
+    }
   }
 
   var _view_title = app._root.document.getElementById('view-title');
@@ -352,6 +361,8 @@ app.view.control.prototype.fillTable = function(table, data, order) {
     });
 
     tbody.innerHTML = rows;
+
+    this._has_locale && this.localize(table);
   }
 
   return { rows: rows, tpl: trow_tpl, data: _data, args: _args };
@@ -380,6 +391,8 @@ app.view.control.prototype.fillForm = function(form, data) {
    */
   if ('fillForm' in control && typeof control.fillForm === 'function') {
     control.fillForm(_data, _args);
+
+    this._has_locale && this.localize(form);
   }
 
   return { data: _data, args: _args };
@@ -434,6 +447,22 @@ app.view.control.prototype.fillCTA = function(id) {
   }
 }
 
+app.view.control.prototype.localize = function(elements) {
+  this.isInitialized('localize');
+
+  if (! elements) {
+    return app.error('app.view.control.prototype.localize', arguments);
+  }
+
+  var localize_elements = elements.querySelectorAll('[data-localize]');
+
+  if (localize_elements.length) {
+    Array.prototype.forEach.call(localize_elements, function(element) {
+      app.layout.localize(element);
+    });
+  }
+}
+
 
 /**
  * app.view.action
@@ -459,6 +488,7 @@ app.view.control.prototype.fillCTA = function(id) {
  *
  * @global <Object> appe__config
  * @global <Object> appe__control
+ * @global <Object> appe__locale
  * @param <Array> events
  * @param <String> event
  * @param <NodeElement> element
@@ -478,6 +508,8 @@ app.view.action = function(events, event, element, form) {
     return app.error('app.view.action', 'control');
   }
 
+  var _has_locale = ! (app._root.window.appe__locale === undefined);
+
   var self = app.view.action.prototype;
 
   if ((events && (events instanceof Array === false)) || ! event || ! element) {
@@ -485,6 +517,7 @@ app.view.action = function(events, event, element, form) {
   }
 
   self._initialized = false;
+  self._has_locale = _has_locale;
 
   if (! (config.events && typeof config.events === 'object')) {
     return app.error('app.view.action', 'config');
@@ -591,7 +624,7 @@ app.view.action.prototype.prepare = function(data, submit) {
   }
 
   var id = this.getID();
-  var event_label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
+  var label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
 
   try {
     this.ctl.action = this.event;
@@ -604,8 +637,17 @@ app.view.action.prototype.prepare = function(data, submit) {
         this.ctl.history = true;
 
         //TODO <Number> | <String>
-        this.ctl.title = event_label + ' ';
-        this.ctl.title += (typeof this.ctl.index === 'number' ? '#' + this.ctl.index : '"' + this.ctl.index + '"');
+        this.ctl.title = (typeof this.ctl.index === 'number' ? '# ' + this.ctl.index : '"' + this.ctl.index + '"');
+
+        if (label) {
+          label = label[0].toUpperCase() + label.slice(1);
+
+          if (this._has_locale) {
+            label = app.i18n(label, 'action') || label;
+          }
+
+          this.ctl.title = app._runtime.locale_dir == 'rtl' ? this.ctl.title + ' ' + label : label + ' ' + this.ctl.title;
+        }
       }
     }
 
@@ -645,12 +687,20 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
     return app.error('app.view.action.prototype.' + this.event, arguments);
   }
 
-  var event_label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
+  var label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
 
-  if (title && (typeof name === 'number' || typeof name === 'string')) {
-    this.ctl.msg  = 'Are you sure to ' + event_label + ' ' + title + ' ';
-    this.ctl.msg += (typeof name === 'number' ? '#' + name : '"' + name + '"');
-    this.ctl.msg +=' ?';
+  if (this._has_locale) {
+    label = app.i18n(label, 'event') || label;
+  }
+
+  if (title && (typeof name == 'number' || typeof name == 'string')) {
+    name = app._runtime.locale_dir == 'rtl' ? (typeof name == 'number' ? parseInt(name) + ' #' : '"' + name + '"') : (typeof name == 'number' ? '# ' + parseInt(name) : '"' + name + '"');
+
+    this.ctl.msg = app.i18n('Are you sure to {{placeholder}} {{name}} {{title}}?', 'action', {
+      'placeholder': label,
+      'name': name,
+      'title': title
+    });
   } else {
     this.ctl.msg = title;
   }
@@ -774,7 +824,7 @@ app.view.sub.prototype.clipboard = function(element, table) {
 
   // perform line break replacements for clipboard
   Array.prototype.forEach.call(table_csv, function(line) {
-    source += line.join('\t') + '\r\n'; //TODO safari
+    source += line.join('\t') + '\r\n';
   });
 
   app.view.copyToClipboard(source);
@@ -803,8 +853,9 @@ app.view.sub.prototype.toggler = function(element) {
   if (! element.getAttribute('data-is-visible')) {
     element.setAttribute('data-is-visible', true);
 
-    //TODO FIX
-    app.utils.addEvent('click', app._root.document.documentElement, app.layout.dropdown('close', element, dropdown));
+    var _close_event = 'ontouchstart' in document.documentElement ? 'touchstart' : 'click';
+
+    app.utils.addEvent(_close_event, app._root.document.documentElement, app.layout.dropdown('close', element, dropdown));
   }
 
   app.layout.dropdown('toggle', element, dropdown)();
@@ -1096,6 +1147,7 @@ app.view.copyToClipboard = function(source) {
  * Default "view" load function
  *
  * @global <Object> appe__config
+ * @global <Object> appe__locale
  * @return
  */
 app.view.load = function() {
@@ -1106,6 +1158,24 @@ app.view.load = function() {
   }
 
 
+  var _localize = function() {
+    var localize_elements = app._root.document.querySelectorAll('[data-localize]');
+
+    if (localize_elements.length) {
+      Array.prototype.forEach.call(localize_elements, function(element) {
+        app.layout.localize(element);
+      });
+    }
+  }
+
+  var _layout = function() {
+    var _has_locale = ! (app._root.window.appe__locale === undefined);
+
+    if (_has_locale) {
+      _localize();
+    }
+  }
+
   var _session = function() {
     app.resume(config, false);
 
@@ -1114,6 +1184,11 @@ app.view.load = function() {
     routine.push({ fn: app._runtime.name, schema: config.schema });
 
     app.controller.retrieve(app.view.handle, routine);
+
+
+    if (!!! app._root.document.native) {
+      _layout();
+    }
   }
 
 

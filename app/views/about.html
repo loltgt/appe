@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,7 +10,7 @@
 </head>
 
 <body class="view about">
-<h1 class="page-header">About</h1>
+<h1 class="page-header" data-localize="session">About</h1>
 
 <section class="page-section">
 <div class="row">
@@ -32,22 +32,22 @@
 <hr>
 
 <section class="page-section">
-<h5>Running application</h5>
+<h5 data-localize="session">Running application</h5>
 
 <p id="app-name" class="lead">{app_name}</p>
 
 <table id="table" class="table table-bordered table-auto">
   <tbody>
     <tr>
-      <th>File loaded</th>
+      <th data-localize="session">File loaded</th>
       <td><span>{file_name}</span></td>
     </tr>
     <tr>
-      <th>File version</th>
+      <th data-localize="session">File version</th>
       <td><span>{file_version}</span></td>
     </tr>
     <tr>
-      <th>File checksum</th>
+      <th data-localize="session">File checksum</th>
       <td><span>{file_checksum}</span></td>
     </tr>
   </tbody>
@@ -56,7 +56,7 @@
 
 
 <section class="page-section">
-<h5>Application license</h5>
+<h5 data-localize="session">Application license</h5>
 
 <div id="license"></div>
 </section>
@@ -65,6 +65,7 @@
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../locale.js"></script>
 
 
 <script type="text/javascript">
@@ -73,9 +74,9 @@ var control = appe__control = {};
 
 
 control.handle = function(data) {
-  var _handler = app.view.control();
+  var _control = app.view.control();
 
-  _handler.begin();
+  _control.begin();
 
 
   var appe = document.getElementById('appe');
@@ -120,7 +121,6 @@ control.handle = function(data) {
 
       _license = document.createElement('IFRAME');
       _license.setAttribute('class', 'license');
-      _license.setAttribute('readonly', '');
       _license.setAttribute('src', _license_uri);
       license.appendChild(_license);
     } else if (app_license.length <= 64) {
@@ -142,7 +142,7 @@ control.handle = function(data) {
   }
 
 
-  _handler.end();
+  _control.end();
 }
 
 
