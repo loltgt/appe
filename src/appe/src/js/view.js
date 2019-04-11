@@ -17,11 +17,11 @@ app.view.spoof = function() {
   var loc = { action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') == -1) {
+  if (app._root.window.location.href.indexOf('?') == -1) {
     return loc;
   }
 
-  var ref = location.href.split('?')[1];
+  var ref = app._root.window.location.href.split('?')[1];
 
   // querystring
   if (ref.indexOf('&') != -1) {

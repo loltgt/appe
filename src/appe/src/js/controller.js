@@ -43,11 +43,11 @@ app.controller.spoof = function() {
   var loc = { view: null, action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') == -1) {
+  if (app._root.window.location.href.indexOf('?') == -1) {
     return loc;
   }
 
-  var ref = location.href.split('?')[1];
+  var ref = app._root.window.location.href.split('?')[1];
 
   // querystring
   if (ref.indexOf('&') != -1) {
@@ -86,7 +86,7 @@ app.controller.history = function(title, url) {
   }
 
   if (app._runtime.system.navigator == 'safari') {
-    location.href = url;
+    app._root.window.location.href = url;
   } else {
     history.replaceState(null, title, url);
   }

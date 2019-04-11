@@ -306,8 +306,12 @@ app.os.fileSave = function(callback, source, timestamp) {
     step = app.error('app.os.fileSave', 'config');
   }
 
-  if (! saveAs) {
-    step = app.error('app.os.fileSave', 'FileSaver');
+  if (! Blob) {
+    step = app.error('app.os.fileSave', 'Blob');
+  }
+
+  if (! FileReader) {
+    step = app.error('app.os.fileSave', 'FileReader');
   }
 
   if (! (CryptoJS && CryptoJS.MD5)) {
@@ -421,6 +425,10 @@ app.os.fileSave = function(callback, source, timestamp) {
   }
 
   var _complete = function(source, cb) {
+    if (! source) {
+      return cb('source');
+    }
+
     // source to JavaScript JSON file format
     if (! fbinary) {
       // should wrap source in double quotes
@@ -431,18 +439,10 @@ app.os.fileSave = function(callback, source, timestamp) {
       source = file_heads + '=' + source;
     }
 
-    try {
-      var blob = new Blob([ source ], { type: file_type });
-
-      if (! blob) { throw 'blob'; }
-
-      cb(false, blob);
-    } catch (err) {
-      cb(err);
-    }
+    cb(false, source);
   }
 
-  var _save = function(blob, cb) {
+  var _save = function(source, cb) {
     var file_saves = app.memory.has('file_saves') ? parseInt(app.memory.get('file_saves')) : 0;
 
     file_saves++;
@@ -457,16 +457,18 @@ app.os.fileSave = function(callback, source, timestamp) {
     file_name += file_name_separator + file_name_date;
     file_name += file_name_separator + file_saves;
 
+    var _file = file_name + '.' + file_extension;
+
     if (!! app._runtime.debug) {
-      console.info('app.os.fileSave', 'file', { name: file_name + '.' + file_extension, type: file_type }, config.file);
+      console.info('app.os.fileSave', 'file', _file, file_type, config.file);
     }
 
     try {
-      saveAs(blob, file_name + '.' + file_extension);
-
       app.memory.set('file_saves', file_saves);
 
-      cb(false, file_name + '.' + file_extension);
+      app.os.fileDownload(source, file_type, _file);
+
+      cb(false, _file);
     } catch (err) {
       cb(err);
     }
@@ -538,6 +540,157 @@ app.os.fileSave = function(callback, source, timestamp) {
 
 
   _init(source);
+}
+
+
+
+/**
+ * app.os.fileDownload
+ *
+ * Prepares attachment data file and send to browser
+ *
+ * @link https://github.com/eligrey/FileSaver.js/
+ *
+ * @param source
+ * @param <String> mime_type
+ * @param <String> filename
+ * @return
+ */
+app.os.fileDownload = function(source, mime_type, filename) {
+  if (! FileReader) {
+    return app.error('app.os.fileDownload', 'FileReader');
+  }
+
+  if (! Blob) {
+    return app.error('app.os.fileDownload', 'Blob');
+  }
+
+  var navigator = app._root.window.navigator;
+
+  if ((typeof source != 'object' && typeof source != 'string') || typeof mime_type != 'string' || typeof filename != 'string') {
+    return app.error('app.os.fileDownload', arguments);
+  }
+
+
+  var _linkDownload = function(data) {
+    var _URL = app._root.window.URL || app._root.window.webkitURL;
+    var _revoke, _dispatch, _check, triggered = false;
+
+    var link = app._root.document.createElement('a');
+    var object = data != undefined ? data.toString() : _URL.createObjectURL(blob);
+
+    link.download = filename;
+    link.href = object;
+    link.rel = 'noopener';
+    link.target = '_self';
+    link.onclick = (function() {
+      triggered = true;
+
+      this.remove();
+
+      clearTimeout(_revoke);
+      clearTimeout(_dispatch);
+    });
+
+    _revoke = setTimeout(function() {
+      ! data && _URL.revokeObjectURL(object);
+
+      this.clearTimeout();
+    }, 4E4); // 40s
+
+    _dispatch = setTimeout(function() {
+      var e;
+
+      try {
+        e = new MouseEvent('click');
+
+        link.target = '_blank';
+        link.dispatchEvent(e);
+      } catch (err) {
+        e = document.createEvent('MouseEvents');
+        e.initMouseEvent('click', true, true, window, 0, 0, 0, 80, 20, false, false, false, false, 0, null);
+
+        link.dispatchEvent(e);
+      }
+
+      this.clearTimeout();
+    }, 0);
+
+    _check = setTimeout(function() {
+      if (! triggered) {
+        link.click();
+      }
+
+      this.clearTimeout();
+    }, 10);
+  }
+
+  var _msBlobDownload = function() {
+    navigator.msSaveOrOpenBlob(blob, filename);
+  }
+
+  var _attachmentDownload = function(force) {
+    try {
+      var reader = new FileReader();
+
+      reader.onloadend = (function() {
+        if (! this.result) { throw 'data'; }
+
+        var data = this.result;
+
+        if (!! force) {
+          data = data.replace(/^data:[^;]*;/, 'data:attachment/file;');
+
+          _linkDownload(data);
+        } else {
+          app._root.window.open(data, '_blank');
+        }
+      });
+
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      return app.error('app.os.fileDownload', err);
+    }
+  }
+
+
+  try {
+    var blob = new Blob([ source ], { type: mime_type });
+
+    if (! blob) { throw 'blob'; }
+  } catch (err) {
+    return app.error('app.os.fileDownload', err);
+  }
+
+  // target browsers with download anchor attribute
+  if ('download' in app._root.window.HTMLAnchorElement.prototype) {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'link', mime_type, filename);
+    }
+
+    _linkDownload();
+  // target ie
+  } else if ('msSaveOrOpenBlob' in app._root.window.navigator) {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'ms', mime_type, filename);
+    }
+
+    _msBlobDownload();
+  // target other browsers with open support
+  } else if ('open' in app._root.window) {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'attachment', mime_type, filename);
+    }
+
+    _attachmentDownload();
+  // fallback to link and attachment/file download
+  } else {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'fallback', mime_type, filename);
+    }
+
+    _linkDownload(true);
+  }
 }
 
 

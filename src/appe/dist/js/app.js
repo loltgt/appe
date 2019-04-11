@@ -10,12 +10,11 @@
  * - ($.jQuery.fn.extend) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
  */
 
-var app = app = {};
+var app = app = { '_root': {}, '_runtime': {} };
 
-app._root = {
-  window: window || { document: app._root.document, native: false },
-  document: document || { documentElement: {}, native: false }
-};
+app._root.document = !! this.Document && document || { documentElement: {}, native: false };
+app._root.window = !! this.Window && window || { document: app._root.document, native: false };
+app._root.process = !!! this.Process && { native: false } || process;
 
 app._runtime = {
   version: '1.0',
@@ -48,7 +47,7 @@ app._runtime = {
  */
 app.load = function(func) {
   if (typeof func != 'function') {
-    return app.stop('app.load');
+    return app.stop('app.load', [func]);
   }
 
   var loaded = false;
@@ -85,7 +84,7 @@ app.load = function(func) {
  */
 app.unload = function(func) {
   if (typeof func != 'function') {
-    return app.stop('app.unload');
+    return app.stop('app.unload', [func]);
   }
 
   if (!!! app._root.window.native) {
@@ -114,14 +113,12 @@ app.redirect = function() {
   var base = config.base_path.toString();
   var filename = 'index';
 
-  if (location.href.indexOf(base + '/') != -1) {
+  if (app._root.window.location.href.indexOf(base + '/') != -1) {
     base = '..';
     filename = config.launcher_name.toString();
   }
 
-  if (app._root.window.appe__start) {
-  location.href = base + '/' + filename + '.html';
-}
+  app._root.window.location.href = base + '/' + filename + '.html';
 }
 
 
@@ -169,7 +166,7 @@ app.position = function() {
  */
 app.session = function(callback, config, target) {
   if (typeof callback != 'function' || ! config) {
-    return app.stop('app.session');
+    return app.stop('app.session', [callback, config, target]);
   }
 
   app._root.window.appe__store = {};
@@ -209,6 +206,8 @@ app.session = function(callback, config, target) {
     if (typeof locale != 'object') {
       return app.error('app.session', 'locale');
     }
+
+    var navigator = app._root.window.navigator;
 
     if (navigator && navigator.languages && typeof navigator.languages === 'object') {
       var found_locale = false;
@@ -360,7 +359,7 @@ app.session = function(callback, config, target) {
  */
 app.resume = function(config, target) {
   if (! config) {
-    return app.stop('app.resume');
+    return app.stop('app.resume', [config, target]);
   }
 
   var session_resume = '';
@@ -446,7 +445,7 @@ app.data = function(key) {
  */
 app.checkConfig = function(config) {
   if (! (config && typeof config === 'object')) {
-    return app.stop('app.checkConfig');
+    return app.stop('app.checkConfig', [config]);
   }
 
   var error = false;
@@ -495,7 +494,7 @@ app.checkFile = function(source, checksum) {
   }
 
   if (! (source && typeof source === 'object')) {
-    return app.error('app.checkFile', arguments);
+    return app.error('app.checkFile', [source, checksum]);
   }
 
   var _app_version = app._runtime.version.toString();
@@ -582,7 +581,7 @@ app.newSession = function() {
   }
 
   var _complete = function() {
-    _is_start ? app.start.redirect(false) : location.reload();
+    _is_start ? app.start.redirect(false) : app._root.document.location.reload();
   }
 
 
@@ -683,7 +682,7 @@ app.openSession = function() {
     app.memory.set('last_session', _current_timestamp_enc);
 
 
-    _is_start ? app.start.redirect(true) : location.reload();
+    _is_start ? app.start.redirect(true) : app._root.document.location.reload();
   }
 
 
@@ -799,7 +798,7 @@ app.i18n = function(to_translate, context, to_replace) {
   var _current_locale_direction = app._runtime.locale_dir.toString();
 
   if (typeof to_translate != 'string' || (to_replace && (typeof to_replace != 'string' && typeof to_replace != 'object')) || (context && typeof context != 'string')) {
-    return app.error('app.i18n', arguments);
+    return app.error('app.i18n', [to_translate, context, to_replace]);
   }
 
   context = !! context ? context.toString() : '0';
@@ -924,9 +923,13 @@ app.debug = function() {
  * Stops app execution
  *
  * @global <Object> appe__main
+ * @param <String> arg0 - msg | fn
+ * @param arg1 - log | msg
+ * @param arg2 - log | msg
+ * @param <Boolean> arg3 - soft
  * @return <Boolean>
  */
-app.stop = function() {
+app.stop = function(arg0, arg1, arg2, arg3) {
   if (! app._runtime.exec) {
     return false;
   }
@@ -935,10 +938,12 @@ app.stop = function() {
 
   app._runtime.exec = false;
 
-  var args = Object.values(arguments).slice(0);
+  var _arguments = [arg0, arg1, arg2, arg3];
 
-  if (arguments.length == 1) {
-    args.push(null);
+  var args = Object.values(_arguments).slice(0);
+
+  if (_arguments.length == 1) {
+    _arguments.push(null);
   }
 
   if (_is_main) {
@@ -957,33 +962,35 @@ app.stop = function() {
  * Helper to debug and display error messages
  *
  * @global <Object> appe__control
- * @param <String> msg | fn
- * @param log | msg
- * @param log | msg
- * @param <Boolean> soft
+ * @param <String> arg0 - msg | fn
+ * @param arg1 - log | msg
+ * @param arg2 - log | msg
+ * @param <Boolean> arg3 - soft
  * @return <undefined>
  */
-app.error = function() {
+app.error = function(arg0, arg1, arg2, arg3) {
   var _is_view = ! (app._root.window.appe__control === undefined);
+
+  var _arguments = [arg0, arg1, arg2, arg3];
 
   var soft = false;
   var fn = null;
   var msg = null;
   var log = null;
 
-  if (arguments.length == 4) {
+  if (_arguments.length == 4) {
     soft = true;
   }
 
-  if (arguments.length > 2) {
-    fn = arguments[0];
-    msg = arguments[1];
-    log = arguments[2];
-  } else if (arguments.length == 2) {
-    fn = arguments[0];
-    log = arguments[1];
-  } else if (arguments.length == 1) {
-    msg = arguments[0];
+  if (_arguments.length > 2) {
+    fn = _arguments[0];
+    msg = _arguments[1];
+    log = _arguments[2];
+  } else if (_arguments.length == 2) {
+    fn = _arguments[0];
+    log = _arguments[1];
+  } else if (_arguments.length == 1) {
+    msg = _arguments[0];
   }
 
   // avoid too much recursions
@@ -997,9 +1004,9 @@ app.error = function() {
 
   if (app._runtime.debug) {
     if (app._runtime.exec) {
-      console.error('ERR', fn, msg, app.position() || '');
+      console.error('ERR', fn, msg, (app.position() || ''));
     } else {
-      console.warn('WARN', fn, msg, app.position() || '');
+      console.warn('WARN', fn, msg, (app.position() || ''));
     }
 
     if (log) {
@@ -1016,7 +1023,7 @@ app.error = function() {
   }
 
   if (! _is_view && ! soft && ! app._runtime.hangs++) {
-    alert(msg);
+    !! app._root.window.alert && app._root.window.alert(msg);
   }
 
   return undefined;
@@ -1062,6 +1069,10 @@ app.getInfo = function(from, info) {
     return app.stop('app.getConfig');
   }
 
+  if (typeof from != 'string' && (info && typeof info != 'string')) {
+    return app.error('app.getInfo', [from, info]);
+  }
+
   var _available_infos = null;
 
   switch (from) {
@@ -1081,15 +1092,11 @@ app.getInfo = function(from, info) {
       };
     break;
     default:
-      return app.error('app.getInfo', arguments);
+      return app.error('app.getInfo', 'info');
   }
 
-  if (info) {
-    if (info in _available_infos) {
-      return _available_infos[info];
-    } else {
-      return app.error('app.getInfo', 'info');
-    }
+  if (!! info && info in _available_infos) {
+    return _available_infos[info];
   }
 
   return _available_infos;
@@ -1117,6 +1124,10 @@ app.getName = function() {
  * @return
  */
 app.getVersion = function(info) {
+  if (info && typeof info != 'string') {
+    return app.error('app.getVersion', [info]);
+  }
+
   if (info == 'version' || info == 'release') {
     return app.getInfo('runtime', info);
   }
@@ -1461,8 +1472,12 @@ app.os.fileSave = function(callback, source, timestamp) {
     step = app.error('app.os.fileSave', 'config');
   }
 
-  if (! saveAs) {
-    step = app.error('app.os.fileSave', 'FileSaver');
+  if (! Blob) {
+    step = app.error('app.os.fileSave', 'Blob');
+  }
+
+  if (! FileReader) {
+    step = app.error('app.os.fileSave', 'FileReader');
   }
 
   if (! (CryptoJS && CryptoJS.MD5)) {
@@ -1576,6 +1591,10 @@ app.os.fileSave = function(callback, source, timestamp) {
   }
 
   var _complete = function(source, cb) {
+    if (! source) {
+      return cb('source');
+    }
+
     // source to JavaScript JSON file format
     if (! fbinary) {
       // should wrap source in double quotes
@@ -1586,18 +1605,10 @@ app.os.fileSave = function(callback, source, timestamp) {
       source = file_heads + '=' + source;
     }
 
-    try {
-      var blob = new Blob([ source ], { type: file_type });
-
-      if (! blob) { throw 'blob'; }
-
-      cb(false, blob);
-    } catch (err) {
-      cb(err);
-    }
+    cb(false, source);
   }
 
-  var _save = function(blob, cb) {
+  var _save = function(source, cb) {
     var file_saves = app.memory.has('file_saves') ? parseInt(app.memory.get('file_saves')) : 0;
 
     file_saves++;
@@ -1612,16 +1623,18 @@ app.os.fileSave = function(callback, source, timestamp) {
     file_name += file_name_separator + file_name_date;
     file_name += file_name_separator + file_saves;
 
+    var _file = file_name + '.' + file_extension;
+
     if (!! app._runtime.debug) {
-      console.info('app.os.fileSave', 'file', { name: file_name + '.' + file_extension, type: file_type }, config.file);
+      console.info('app.os.fileSave', 'file', _file, file_type, config.file);
     }
 
     try {
-      saveAs(blob, file_name + '.' + file_extension);
-
       app.memory.set('file_saves', file_saves);
 
-      cb(false, file_name + '.' + file_extension);
+      app.os.fileDownload(source, file_type, _file);
+
+      cb(false, _file);
     } catch (err) {
       cb(err);
     }
@@ -1693,6 +1706,157 @@ app.os.fileSave = function(callback, source, timestamp) {
 
 
   _init(source);
+}
+
+
+
+/**
+ * app.os.fileDownload
+ *
+ * Prepares attachment data file and send to browser
+ *
+ * @link https://github.com/eligrey/FileSaver.js/
+ *
+ * @param source
+ * @param <String> mime_type
+ * @param <String> filename
+ * @return
+ */
+app.os.fileDownload = function(source, mime_type, filename) {
+  if (! FileReader) {
+    return app.error('app.os.fileDownload', 'FileReader');
+  }
+
+  if (! Blob) {
+    return app.error('app.os.fileDownload', 'Blob');
+  }
+
+  var navigator = app._root.window.navigator;
+
+  if ((typeof source != 'object' && typeof source != 'string') || typeof mime_type != 'string' || typeof filename != 'string') {
+    return app.error('app.os.fileDownload', arguments);
+  }
+
+
+  var _linkDownload = function(data) {
+    var _URL = app._root.window.URL || app._root.window.webkitURL;
+    var _revoke, _dispatch, _check, triggered = false;
+
+    var link = app._root.document.createElement('a');
+    var object = data != undefined ? data.toString() : _URL.createObjectURL(blob);
+
+    link.download = filename;
+    link.href = object;
+    link.rel = 'noopener';
+    link.target = '_self';
+    link.onclick = (function() {
+      triggered = true;
+
+      this.remove();
+
+      clearTimeout(_revoke);
+      clearTimeout(_dispatch);
+    });
+
+    _revoke = setTimeout(function() {
+      ! data && _URL.revokeObjectURL(object);
+
+      this.clearTimeout();
+    }, 4E4); // 40s
+
+    _dispatch = setTimeout(function() {
+      var e;
+
+      try {
+        e = new MouseEvent('click');
+
+        link.target = '_blank';
+        link.dispatchEvent(e);
+      } catch (err) {
+        e = document.createEvent('MouseEvents');
+        e.initMouseEvent('click', true, true, window, 0, 0, 0, 80, 20, false, false, false, false, 0, null);
+
+        link.dispatchEvent(e);
+      }
+
+      this.clearTimeout();
+    }, 0);
+
+    _check = setTimeout(function() {
+      if (! triggered) {
+        link.click();
+      }
+
+      this.clearTimeout();
+    }, 10);
+  }
+
+  var _msBlobDownload = function() {
+    navigator.msSaveOrOpenBlob(blob, filename);
+  }
+
+  var _attachmentDownload = function(force) {
+    try {
+      var reader = new FileReader();
+
+      reader.onloadend = (function() {
+        if (! this.result) { throw 'data'; }
+
+        var data = this.result;
+
+        if (!! force) {
+          data = data.replace(/^data:[^;]*;/, 'data:attachment/file;');
+
+          _linkDownload(data);
+        } else {
+          app._root.window.open(data, '_blank');
+        }
+      });
+
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      return app.error('app.os.fileDownload', err);
+    }
+  }
+
+
+  try {
+    var blob = new Blob([ source ], { type: mime_type });
+
+    if (! blob) { throw 'blob'; }
+  } catch (err) {
+    return app.error('app.os.fileDownload', err);
+  }
+
+  // target browsers with download anchor attribute
+  if ('download' in app._root.window.HTMLAnchorElement.prototype) {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'link', mime_type, filename);
+    }
+
+    _linkDownload();
+  // target ie
+  } else if ('msSaveOrOpenBlob' in app._root.window.navigator) {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'ms', mime_type, filename);
+    }
+
+    _msBlobDownload();
+  // target other browsers with open support
+  } else if ('open' in app._root.window) {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'attachment', mime_type, filename);
+    }
+
+    _attachmentDownload();
+  // fallback to link and attachment/file download
+  } else {
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', 'fallback', mime_type, filename);
+    }
+
+    _linkDownload(true);
+  }
 }
 
 
@@ -1983,11 +2147,11 @@ app.controller.spoof = function() {
   var loc = { view: null, action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') == -1) {
+  if (app._root.window.location.href.indexOf('?') == -1) {
     return loc;
   }
 
-  var ref = location.href.split('?')[1];
+  var ref = app._root.window.location.href.split('?')[1];
 
   // querystring
   if (ref.indexOf('&') != -1) {
@@ -2026,7 +2190,7 @@ app.controller.history = function(title, url) {
   }
 
   if (app._runtime.system.navigator == 'safari') {
-    location.href = url;
+    app._root.window.location.href = url;
   } else {
     history.replaceState(null, title, url);
   }
@@ -3170,11 +3334,11 @@ app.main.handle.prototype.getURL = function() {
 app.main.handle.prototype.redirect = function() {
   var href = this.getURL();
 
-  location.href = href;
+  app._root.window.location.href = href;
 }
 
 app.main.handle.prototype.refresh = function() {
-  location.reload();
+  app._root.document.location.reload();
 }
 
 app.main.handle.prototype.resize = function() {
@@ -3545,11 +3709,11 @@ app.view.spoof = function() {
   var loc = { action: null, index: null };
 
   // path
-  if (location.href.indexOf('?') == -1) {
+  if (app._root.window.location.href.indexOf('?') == -1) {
     return loc;
   }
 
-  var ref = location.href.split('?')[1];
+  var ref = app._root.window.location.href.split('?')[1];
 
   // querystring
   if (ref.indexOf('&') != -1) {
@@ -5388,85 +5552,114 @@ app.utils.extendObject = function() {
  *
  * Detects browser and system environments
  *
+ * //TODO rename system.navigator
+ *
  * @param <String> purpose
  * @return <Object> system
  */
 app.utils.system = function(purpose) {
   var system = { 'platform': null, 'architecture': null, 'navigator': null, 'release': null };
 
-  var _platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
-  var _navigator = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
-  var _release = null;
 
-  if (_platform) {
-    _platform = _platform[0].toLowerCase();
+  var _ssn = function() {
+    var _platform = app._root.process.platform.toString();
+    var _architecture = app._root.process.architecture.toString();
+    var _navigator = app._root.process.platform.title.toString();
+    var _release = app._root.process.versions.node.toString();
 
-    if (_platform === 'android') {
-      system.platform = 'android';
-    } else if (_platform === 'windows phone') {
-      system.platform = 'wm';
-    } else if (_platform === 'ipad') {
-      system.platform = 'ios';
-      system.model = 'ipad';
+    return { 'platform': _platform, 'architecture': _architecture, 'navigator': _navigator, 'release': _release };
+  }
+
+  var _csn = function() {
+    var _platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
+    var _navigator = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
+    var _release = null;
+
+    if (!! _platform) {
+      _platform = _platform[0].toLowerCase();
+
+      if (_platform === 'android') {
+        system.platform = 'android';
+      } else if (_platform === 'windows phone') {
+        system.platform = 'wm';
+      } else if (_platform === 'ipad') {
+        system.platform = 'ios';
+        system.model = 'ipad';
+      } else {
+        system.platform = 'ios';
+        system.model = 'iphone';
+      }
     } else {
-      system.platform = 'ios';
-      system.model = 'iphone';
-    }
-  } else {
-    _platform = navigator.userAgent.match(/(Win|Mac|Linux)/i)
+      _platform = navigator.userAgent.match(/(Win|Mac|Linux)/i)
 
-    if (_platform) {
-      _platform = _platform[0].substring(0, 3).toLowerCase();
+      if (_platform) {
+        _platform = _platform[0].substring(0, 3).toLowerCase();
 
-      if (_platform === 'win') {
-        if (navigator.userAgent.indexOf('WOW64') != -1 || navigator.userAgent.indexOf('Win64') != -1) {
-          system.architecture = 64;
-        } else {
-          system.architecture = 32;
-        }
-      }
-
-      if (_platform === 'lin') {
-        _platform = 'nxl';
-      }
-
-      system.platform = _platform;
-    }
-  }
-
-  if (_navigator) {
-    _release = _navigator[2] || null;
-    _navigator = _navigator[1] || _navigator[0];
-    _navigator = _navigator.toLowerCase();
-
-    if (_navigator) {
-      if (_navigator === 'crios') {
-        _navigator = 'chrome';
-      }
-
-      if (_navigator.indexOf('ie') != -1 || _navigator == 'trident') {
-        if (_navigator === 'trident') {
-          _release = navigator.userAgent.match(/rv:([\d]+)/i);
-
-          if (_release) {
-            _navigator = 'ie';
-            _release = _release[1];
+        if (_platform === 'win') {
+          if (nav.userAgent.indexOf('WOW64') != -1 || nav.userAgent.indexOf('Win64') != -1) {
+            system.architecture = 64;
           } else {
-            _navigator = null;
-            _release = null;
+            system.architecture = 32;
           }
-        } else {
-          _navigator = 'ie';
         }
-      }
 
-      system.navigator = _navigator;
+        if (_platform === 'lin') {
+          _platform = 'nxl';
+        }
 
-      if (_release) {
-        system.release = parseFloat(_release);
+        system.platform = _platform;
       }
     }
+
+    if (!! _navigator) {
+      _release = _navigator[2] || null;
+      _navigator = _navigator[1] || _navigator[0];
+      _navigator = _navigator.toLowerCase();
+
+      if (_navigator) {
+        if (_navigator === 'crios') {
+          _navigator = 'chrome';
+        }
+
+        if (_navigator.indexOf('ie') != -1 || _navigator == 'trident') {
+          if (_navigator === 'trident') {
+            _release = navigator.userAgent.match(/rv:([\d]+)/i);
+
+            if (_release) {
+              _navigator = 'ie';
+              _release = _release[1];
+            } else {
+              _navigator = null;
+              _release = null;
+            }
+          } else {
+            _navigator = 'ie';
+          }
+        }
+
+        system.navigator = _navigator;
+
+        if (_release) {
+          system.release = parseFloat(_release);
+        }
+      }
+    }
+
+    return system;
   }
+
+
+  // clientside
+  if (!!! app._root.window.native) {
+    system = _csn();
+  // serverside
+  } else if (!!! app._root.window.process && app._root.window.process.title === 'node') {
+    system = _ssn();
+  // maybe unsupported serverside
+  } else {
+    return app.error('app.utils.system', 'This webserver is not supported.')
+  }
+
 
   if (purpose && typeof purpose === 'string' && purpose in system) {
     return system[purpose];

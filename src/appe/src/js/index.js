@@ -10,12 +10,11 @@
  * - ($.jQuery.fn.extend) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
  */
 
-var app = app = {};
+var app = app = { '_root': {}, '_runtime': {} };
 
-app._root = {
-  window: window || { document: app._root.document, native: false },
-  document: document || { documentElement: {}, native: false }
-};
+app._root.document = !! this.Document && document || { documentElement: {}, native: false };
+app._root.window = !! this.Window && window || { document: app._root.document, native: false };
+app._root.process = !!! this.Process && { native: false } || process;
 
 app._runtime = {
   version: '1.0',
@@ -48,7 +47,7 @@ app._runtime = {
  */
 app.load = function(func) {
   if (typeof func != 'function') {
-    return app.stop('app.load');
+    return app.stop('app.load', [func]);
   }
 
   var loaded = false;
@@ -85,7 +84,7 @@ app.load = function(func) {
  */
 app.unload = function(func) {
   if (typeof func != 'function') {
-    return app.stop('app.unload');
+    return app.stop('app.unload', [func]);
   }
 
   if (!!! app._root.window.native) {
@@ -114,14 +113,12 @@ app.redirect = function() {
   var base = config.base_path.toString();
   var filename = 'index';
 
-  if (location.href.indexOf(base + '/') != -1) {
+  if (app._root.window.location.href.indexOf(base + '/') != -1) {
     base = '..';
     filename = config.launcher_name.toString();
   }
 
-  if (app._root.window.appe__start) {
-  location.href = base + '/' + filename + '.html';
-}
+  app._root.window.location.href = base + '/' + filename + '.html';
 }
 
 
@@ -169,7 +166,7 @@ app.position = function() {
  */
 app.session = function(callback, config, target) {
   if (typeof callback != 'function' || ! config) {
-    return app.stop('app.session');
+    return app.stop('app.session', [callback, config, target]);
   }
 
   app._root.window.appe__store = {};
@@ -209,6 +206,8 @@ app.session = function(callback, config, target) {
     if (typeof locale != 'object') {
       return app.error('app.session', 'locale');
     }
+
+    var navigator = app._root.window.navigator;
 
     if (navigator && navigator.languages && typeof navigator.languages === 'object') {
       var found_locale = false;
@@ -360,7 +359,7 @@ app.session = function(callback, config, target) {
  */
 app.resume = function(config, target) {
   if (! config) {
-    return app.stop('app.resume');
+    return app.stop('app.resume', [config, target]);
   }
 
   var session_resume = '';
@@ -446,7 +445,7 @@ app.data = function(key) {
  */
 app.checkConfig = function(config) {
   if (! (config && typeof config === 'object')) {
-    return app.stop('app.checkConfig');
+    return app.stop('app.checkConfig', [config]);
   }
 
   var error = false;
@@ -495,7 +494,7 @@ app.checkFile = function(source, checksum) {
   }
 
   if (! (source && typeof source === 'object')) {
-    return app.error('app.checkFile', arguments);
+    return app.error('app.checkFile', [source, checksum]);
   }
 
   var _app_version = app._runtime.version.toString();
@@ -582,7 +581,7 @@ app.newSession = function() {
   }
 
   var _complete = function() {
-    _is_start ? app.start.redirect(false) : location.reload();
+    _is_start ? app.start.redirect(false) : app._root.document.location.reload();
   }
 
 
@@ -683,7 +682,7 @@ app.openSession = function() {
     app.memory.set('last_session', _current_timestamp_enc);
 
 
-    _is_start ? app.start.redirect(true) : location.reload();
+    _is_start ? app.start.redirect(true) : app._root.document.location.reload();
   }
 
 
@@ -799,7 +798,7 @@ app.i18n = function(to_translate, context, to_replace) {
   var _current_locale_direction = app._runtime.locale_dir.toString();
 
   if (typeof to_translate != 'string' || (to_replace && (typeof to_replace != 'string' && typeof to_replace != 'object')) || (context && typeof context != 'string')) {
-    return app.error('app.i18n', arguments);
+    return app.error('app.i18n', [to_translate, context, to_replace]);
   }
 
   context = !! context ? context.toString() : '0';
@@ -924,9 +923,13 @@ app.debug = function() {
  * Stops app execution
  *
  * @global <Object> appe__main
+ * @param <String> arg0 - msg | fn
+ * @param arg1 - log | msg
+ * @param arg2 - log | msg
+ * @param <Boolean> arg3 - soft
  * @return <Boolean>
  */
-app.stop = function() {
+app.stop = function(arg0, arg1, arg2, arg3) {
   if (! app._runtime.exec) {
     return false;
   }
@@ -935,10 +938,12 @@ app.stop = function() {
 
   app._runtime.exec = false;
 
-  var args = Object.values(arguments).slice(0);
+  var _arguments = [arg0, arg1, arg2, arg3];
 
-  if (arguments.length == 1) {
-    args.push(null);
+  var args = Object.values(_arguments).slice(0);
+
+  if (_arguments.length == 1) {
+    _arguments.push(null);
   }
 
   if (_is_main) {
@@ -957,33 +962,35 @@ app.stop = function() {
  * Helper to debug and display error messages
  *
  * @global <Object> appe__control
- * @param <String> msg | fn
- * @param log | msg
- * @param log | msg
- * @param <Boolean> soft
+ * @param <String> arg0 - msg | fn
+ * @param arg1 - log | msg
+ * @param arg2 - log | msg
+ * @param <Boolean> arg3 - soft
  * @return <undefined>
  */
-app.error = function() {
+app.error = function(arg0, arg1, arg2, arg3) {
   var _is_view = ! (app._root.window.appe__control === undefined);
+
+  var _arguments = [arg0, arg1, arg2, arg3];
 
   var soft = false;
   var fn = null;
   var msg = null;
   var log = null;
 
-  if (arguments.length == 4) {
+  if (_arguments.length == 4) {
     soft = true;
   }
 
-  if (arguments.length > 2) {
-    fn = arguments[0];
-    msg = arguments[1];
-    log = arguments[2];
-  } else if (arguments.length == 2) {
-    fn = arguments[0];
-    log = arguments[1];
-  } else if (arguments.length == 1) {
-    msg = arguments[0];
+  if (_arguments.length > 2) {
+    fn = _arguments[0];
+    msg = _arguments[1];
+    log = _arguments[2];
+  } else if (_arguments.length == 2) {
+    fn = _arguments[0];
+    log = _arguments[1];
+  } else if (_arguments.length == 1) {
+    msg = _arguments[0];
   }
 
   // avoid too much recursions
@@ -997,9 +1004,9 @@ app.error = function() {
 
   if (app._runtime.debug) {
     if (app._runtime.exec) {
-      console.error('ERR', fn, msg, app.position() || '');
+      console.error('ERR', fn, msg, (app.position() || ''));
     } else {
-      console.warn('WARN', fn, msg, app.position() || '');
+      console.warn('WARN', fn, msg, (app.position() || ''));
     }
 
     if (log) {
@@ -1016,7 +1023,7 @@ app.error = function() {
   }
 
   if (! _is_view && ! soft && ! app._runtime.hangs++) {
-    alert(msg);
+    !! app._root.window.alert && app._root.window.alert(msg);
   }
 
   return undefined;
@@ -1062,6 +1069,10 @@ app.getInfo = function(from, info) {
     return app.stop('app.getConfig');
   }
 
+  if (typeof from != 'string' && (info && typeof info != 'string')) {
+    return app.error('app.getInfo', [from, info]);
+  }
+
   var _available_infos = null;
 
   switch (from) {
@@ -1081,15 +1092,11 @@ app.getInfo = function(from, info) {
       };
     break;
     default:
-      return app.error('app.getInfo', arguments);
+      return app.error('app.getInfo', 'info');
   }
 
-  if (info) {
-    if (info in _available_infos) {
-      return _available_infos[info];
-    } else {
-      return app.error('app.getInfo', 'info');
-    }
+  if (!! info && info in _available_infos) {
+    return _available_infos[info];
   }
 
   return _available_infos;
@@ -1117,6 +1124,10 @@ app.getName = function() {
  * @return
  */
 app.getVersion = function(info) {
+  if (info && typeof info != 'string') {
+    return app.error('app.getVersion', [info]);
+  }
+
   if (info == 'version' || info == 'release') {
     return app.getInfo('runtime', info);
   }

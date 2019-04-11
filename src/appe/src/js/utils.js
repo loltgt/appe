@@ -133,85 +133,114 @@ app.utils.extendObject = function() {
  *
  * Detects browser and system environments
  *
+ * //TODO rename system.navigator
+ *
  * @param <String> purpose
  * @return <Object> system
  */
 app.utils.system = function(purpose) {
   var system = { 'platform': null, 'architecture': null, 'navigator': null, 'release': null };
 
-  var _platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
-  var _navigator = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
-  var _release = null;
 
-  if (_platform) {
-    _platform = _platform[0].toLowerCase();
+  var _ssn = function() {
+    var _platform = app._root.process.platform.toString();
+    var _architecture = app._root.process.architecture.toString();
+    var _navigator = app._root.process.platform.title.toString();
+    var _release = app._root.process.versions.node.toString();
 
-    if (_platform === 'android') {
-      system.platform = 'android';
-    } else if (_platform === 'windows phone') {
-      system.platform = 'wm';
-    } else if (_platform === 'ipad') {
-      system.platform = 'ios';
-      system.model = 'ipad';
+    return { 'platform': _platform, 'architecture': _architecture, 'navigator': _navigator, 'release': _release };
+  }
+
+  var _csn = function() {
+    var _platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
+    var _navigator = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
+    var _release = null;
+
+    if (!! _platform) {
+      _platform = _platform[0].toLowerCase();
+
+      if (_platform === 'android') {
+        system.platform = 'android';
+      } else if (_platform === 'windows phone') {
+        system.platform = 'wm';
+      } else if (_platform === 'ipad') {
+        system.platform = 'ios';
+        system.model = 'ipad';
+      } else {
+        system.platform = 'ios';
+        system.model = 'iphone';
+      }
     } else {
-      system.platform = 'ios';
-      system.model = 'iphone';
-    }
-  } else {
-    _platform = navigator.userAgent.match(/(Win|Mac|Linux)/i)
+      _platform = navigator.userAgent.match(/(Win|Mac|Linux)/i)
 
-    if (_platform) {
-      _platform = _platform[0].substring(0, 3).toLowerCase();
+      if (_platform) {
+        _platform = _platform[0].substring(0, 3).toLowerCase();
 
-      if (_platform === 'win') {
-        if (navigator.userAgent.indexOf('WOW64') != -1 || navigator.userAgent.indexOf('Win64') != -1) {
-          system.architecture = 64;
-        } else {
-          system.architecture = 32;
-        }
-      }
-
-      if (_platform === 'lin') {
-        _platform = 'nxl';
-      }
-
-      system.platform = _platform;
-    }
-  }
-
-  if (_navigator) {
-    _release = _navigator[2] || null;
-    _navigator = _navigator[1] || _navigator[0];
-    _navigator = _navigator.toLowerCase();
-
-    if (_navigator) {
-      if (_navigator === 'crios') {
-        _navigator = 'chrome';
-      }
-
-      if (_navigator.indexOf('ie') != -1 || _navigator == 'trident') {
-        if (_navigator === 'trident') {
-          _release = navigator.userAgent.match(/rv:([\d]+)/i);
-
-          if (_release) {
-            _navigator = 'ie';
-            _release = _release[1];
+        if (_platform === 'win') {
+          if (nav.userAgent.indexOf('WOW64') != -1 || nav.userAgent.indexOf('Win64') != -1) {
+            system.architecture = 64;
           } else {
-            _navigator = null;
-            _release = null;
+            system.architecture = 32;
           }
-        } else {
-          _navigator = 'ie';
         }
-      }
 
-      system.navigator = _navigator;
+        if (_platform === 'lin') {
+          _platform = 'nxl';
+        }
 
-      if (_release) {
-        system.release = parseFloat(_release);
+        system.platform = _platform;
       }
     }
+
+    if (!! _navigator) {
+      _release = _navigator[2] || null;
+      _navigator = _navigator[1] || _navigator[0];
+      _navigator = _navigator.toLowerCase();
+
+      if (_navigator) {
+        if (_navigator === 'crios') {
+          _navigator = 'chrome';
+        }
+
+        if (_navigator.indexOf('ie') != -1 || _navigator == 'trident') {
+          if (_navigator === 'trident') {
+            _release = navigator.userAgent.match(/rv:([\d]+)/i);
+
+            if (_release) {
+              _navigator = 'ie';
+              _release = _release[1];
+            } else {
+              _navigator = null;
+              _release = null;
+            }
+          } else {
+            _navigator = 'ie';
+          }
+        }
+
+        system.navigator = _navigator;
+
+        if (_release) {
+          system.release = parseFloat(_release);
+        }
+      }
+    }
+
+    return system;
   }
+
+
+  // clientside
+  if (!!! app._root.window.native) {
+    system = _csn();
+  // serverside
+  } else if (!!! app._root.window.process && app._root.window.process.title === 'node') {
+    system = _ssn();
+  // maybe unsupported serverside
+  } else {
+    return app.error('app.utils.system', 'This webserver is not supported.')
+  }
+
 
   if (purpose && typeof purpose === 'string' && purpose in system) {
     return system[purpose];

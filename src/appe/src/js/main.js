@@ -282,11 +282,11 @@ app.main.handle.prototype.getURL = function() {
 app.main.handle.prototype.redirect = function() {
   var href = this.getURL();
 
-  location.href = href;
+  app._root.window.location.href = href;
 }
 
 app.main.handle.prototype.refresh = function() {
-  location.reload();
+  app._root.document.location.reload();
 }
 
 app.main.handle.prototype.resize = function() {
