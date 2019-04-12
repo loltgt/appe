@@ -16,7 +16,7 @@ app.main = {};
  * @return
  */
 app.main.control = function(loc) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.control');
@@ -107,7 +107,7 @@ app.main.control = function(loc) {
       nav_selector_current.parentNode.classList.add('active');
     }
   } else {
-    return app.stop('app.main.control', arguments);
+    return app.stop('app.main.control', [loc]);
   }
 }
 
@@ -148,7 +148,7 @@ app.main.control = function(loc) {
  * @return
  */
 app.main.handle = function(e) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.handle');
@@ -158,12 +158,12 @@ app.main.handle = function(e) {
     return app.error('app.main.handle', 'config');
   }
 
-  var main = app._root.window.appe__main;
+  var main = app._root.server.appe__main;
 
   var self = app.main.handle.prototype;
 
   if (! e.data) {
-    return app.error('app.main.handle', arguments);
+    return app.error('app.main.handle', [e]);
   }
 
   try {
@@ -252,7 +252,7 @@ app.main.handle.prototype.getTitle = function() {
 
 app.main.handle.prototype.setMsg = function(msg) {
   if (! (msg && typeof msg === 'string')) {
-    return app.error('app.main.handle.prototype.setTitle', 'title');
+    return app.error('app.main.handle.prototype.setMsg', 'msg');
   }
 
   this._msg = msg;
@@ -306,22 +306,24 @@ app.main.handle.prototype.selection = function() {
 }
 
 app.main.handle.prototype.export = function() {
-  if (! Blob || ! saveAs) {
-    return app.error('app.main.handle.prototype.export', 'FileSaver');
+  if (! Blob) {
+    return app.error('app.main.handle.prototype.export', 'Blob');
+  }
+
+  if (! FileReader) {
+    return app.error('app.main.handle.prototype.export', 'FileReader');
   }
 
   if (! this.ctl.data || ! (this.ctl.file && typeof this.ctl.file === 'object')) {
     return app.error('app.main.handle.prototype.export', 'ctl');
   }
 
-  if (! (this.ctl.file.name && typeof this.ctl.file.name === 'string') || ! (this.ctl.file.options && typeof this.ctl.file.options === 'object')) {
+  if (! (this.ctl.file.name && typeof this.ctl.file.name === 'string') || ! (this.ctl.file.type && typeof this.ctl.file.type === 'string')) {
     return app.error('app.main.handle.prototype.export', 'file');
   }
 
   try {
-    var blob = new Blob([ this.ctl.data ], (this.ctl.file.options || {}));
-
-    saveAs(blob, this.ctl.file.name);
+    app.os.fileDownload(this.ctl.data, this.ctl.file.name, this.ctl.file.type);
   } catch (err) {
     return app.error('app.main.handle.prototype.export', err);
   }
@@ -379,7 +381,7 @@ app.main.handle.prototype.history = function() {
 }
 
 app.main.handle.prototype.receiver = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.handle.prototype.receiver');
@@ -441,18 +443,18 @@ app.main.handle.prototype.receiver = function() {
  * @return
  */
 app.main.action = function(events, event, element) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.action');
   }
 
-  var main = app._root.window.appe__main;
+  var main = app._root.server.appe__main;
 
   var self = app.main.action.prototype;
 
   if ((events && (events instanceof Array === false)) || ! event || ! element) {
-    return app.error('app.main.action', arguments);
+    return app.error('app.main.action', [events, event, element]);
   }
 
   this._initialized = false;
@@ -485,7 +487,7 @@ app.main.action.prototype.menu = function(element) {
   }
 
   if (! element) {
-    return app.error('app.main.action.prototype.menu', arguments);
+    return app.error('app.main.action.prototype.menu', [element]);
   }
 
   var menu = app._root.document.querySelector(element.getAttribute('data-target'));
@@ -514,7 +516,7 @@ app.main.action.prototype.menu = function(element) {
  * @global <Object> appe__main
  */
 app.main.setup = function() {
-  var main = appe__main;
+  var main = app._root.server.appe__main;
 
   /**
    * main.setup hook
@@ -539,7 +541,7 @@ app.main.setup = function() {
  * @return
  */
 app.main.load = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.load');
@@ -559,7 +561,7 @@ app.main.load = function() {
   }
 
   var _layout = function() {
-    var _has_locale = ! (app._root.window.appe__locale === undefined);
+    var _is_localized = ! (app._root.server.appe__locale === undefined);
 
 
     var navbar_brand = app._root.document.getElementById('brand');
@@ -589,7 +591,7 @@ app.main.load = function() {
       });
     }
 
-    if (_has_locale) {
+    if (_is_localized) {
       _localize();
     }
   }
@@ -609,7 +611,7 @@ app.main.load = function() {
     app.utils.addEvent('message', app._root.window, app.main.handle);
 
 
-    if (!!! app._root.document.native) {
+    if (app._root.document.native == undefined) {
       _layout();
     }
   }

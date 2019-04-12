@@ -11,7 +11,7 @@ app.utils = {};
  *
  * Checks if object is a plain object
  *
- *  ($.jQuery.fn.isPlainObject)
+ *  (jQuery.fn.isPlainObject)
  *  jQuery JavaScript Library
  *
  * @link https://jquery.com/
@@ -49,7 +49,7 @@ app.utils.isPlainObject = function( obj ) {
  *
  * Extend and merge objects
  *
- *  ($.jQuery.fn.extend)
+ *  (jQuery.fn.extend)
  *  jQuery JavaScript Library
  *
  * @link https://jquery.com/
@@ -77,12 +77,6 @@ app.utils.extendObject = function() {
   // Handle case when target is a string or something (possible in deep copy)
   if ( typeof target !== "object" && !(typeof target === "function" && typeof target.nodeType !== "number") ) {
     target = {};
-  }
-
-  // Extend jQuery itself if only one argument is passed
-  if ( i === length ) {
-    target = this;
-    i--;
   }
 
   for ( ; i < length; i++ ) {
@@ -133,37 +127,69 @@ app.utils.extendObject = function() {
  *
  * Detects browser and system environments
  *
- * //TODO rename system.navigator
- *
- * @param <String> purpose
+ * @param <String> purpose  ( name | platform | architecture | release )
  * @return <Object> system
  */
 app.utils.system = function(purpose) {
-  var system = { 'platform': null, 'architecture': null, 'navigator': null, 'release': null };
+  var system = { 'name': null, 'platform': null, 'architecture': null, 'release': null };
 
 
   var _ssn = function() {
-    var _platform = app._root.process.platform.toString();
-    var _architecture = app._root.process.architecture.toString();
-    var _navigator = app._root.process.platform.title.toString();
-    var _release = app._root.process.versions.node.toString();
+    var name = app._root.process.title.toString();
+    var platform = app._root.process.platform.toString();
+    var architecture = parseInt(app._root.process.arch.replace(/\D+/, ''));
+    var release = parseFloat(app._root.process.versions.node);
 
-    return { 'platform': _platform, 'architecture': _architecture, 'navigator': _navigator, 'release': _release };
+    return { 'name': name, 'platform': platform, 'architecture': architecture, 'release': release };
   }
 
   var _csn = function() {
-    var _platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
-    var _navigator = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
-    var _release = null;
+    var name = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
+    var platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
+    var release = null;
 
-    if (!! _platform) {
-      _platform = _platform[0].toLowerCase();
+    if (!! name) {
+      release = name[2] || null;
+      name = name[1] || name[0];
+      name = name.toLowerCase();
 
-      if (_platform === 'android') {
+      if (name) {
+        if (name === 'crios') {
+          name = 'chrome';
+        }
+
+        if (name.indexOf('ie') != -1 || name == 'trident') {
+          if (name === 'trident') {
+            release = navigator.userAgent.match(/rv:([\d]+)/i);
+
+            if (release) {
+              name = 'ie';
+              release = release[1];
+            } else {
+              name = null;
+              release = null;
+            }
+          } else {
+            name = 'ie';
+          }
+        }
+
+        system.navigator = name;
+
+        if (release) {
+          system.release = parseFloat(release);
+        }
+      }
+    }
+
+    if (!! platform) {
+      platform = platform[0].toLowerCase();
+
+      if (platform === 'android') {
         system.platform = 'android';
-      } else if (_platform === 'windows phone') {
+      } else if (platform === 'windows phone') {
         system.platform = 'wm';
-      } else if (_platform === 'ipad') {
+      } else if (platform === 'ipad') {
         system.platform = 'ios';
         system.model = 'ipad';
       } else {
@@ -171,58 +197,24 @@ app.utils.system = function(purpose) {
         system.model = 'iphone';
       }
     } else {
-      _platform = navigator.userAgent.match(/(Win|Mac|Linux)/i)
+      platform = navigator.userAgent.match(/(Win|Mac|Linux)/i)
 
-      if (_platform) {
-        _platform = _platform[0].substring(0, 3).toLowerCase();
+      if (platform) {
+        platform = platform[0].substring(0, 3).toLowerCase();
 
-        if (_platform === 'win') {
-          if (nav.userAgent.indexOf('WOW64') != -1 || nav.userAgent.indexOf('Win64') != -1) {
+        if (platform === 'win') {
+          if (navigator.userAgent.indexOf('WOW64') != -1 || navigator.userAgent.indexOf('Win64') != -1) {
             system.architecture = 64;
           } else {
             system.architecture = 32;
           }
         }
 
-        if (_platform === 'lin') {
-          _platform = 'nxl';
+        if (platform === 'lin') {
+          platform = 'nxl';
         }
 
-        system.platform = _platform;
-      }
-    }
-
-    if (!! _navigator) {
-      _release = _navigator[2] || null;
-      _navigator = _navigator[1] || _navigator[0];
-      _navigator = _navigator.toLowerCase();
-
-      if (_navigator) {
-        if (_navigator === 'crios') {
-          _navigator = 'chrome';
-        }
-
-        if (_navigator.indexOf('ie') != -1 || _navigator == 'trident') {
-          if (_navigator === 'trident') {
-            _release = navigator.userAgent.match(/rv:([\d]+)/i);
-
-            if (_release) {
-              _navigator = 'ie';
-              _release = _release[1];
-            } else {
-              _navigator = null;
-              _release = null;
-            }
-          } else {
-            _navigator = 'ie';
-          }
-        }
-
-        system.navigator = _navigator;
-
-        if (_release) {
-          system.release = parseFloat(_release);
-        }
+        system.platform = platform;
       }
     }
 
@@ -231,14 +223,14 @@ app.utils.system = function(purpose) {
 
 
   // clientside
-  if (!!! app._root.window.native) {
+  if (app._root.window.native == undefined) {
     system = _csn();
   // serverside
-  } else if (!!! app._root.window.process && app._root.window.process.title === 'node') {
+  } else if (app._root.process.native == undefined && app._root.process.title === 'node') {
     system = _ssn();
   // maybe unsupported serverside
   } else {
-    return app.error('app.utils.system', 'This webserver is not supported.')
+    return app.error('app.utils.system', 'This system is not supported.')
   }
 
 
@@ -261,8 +253,8 @@ app.utils.system = function(purpose) {
  * @return
  */
 app.utils.addEvent = function(event, element, func) {
-  if (typeof event !== 'string' || ! element || typeof func !== 'function') {
-    return app.error('app.utils.addEvent', arguments);
+  if (typeof event != 'string' || ! element || typeof func != 'function') {
+    return app.error('app.utils.addEvent', [event, element, func]);
   }
 
   if (element.addEventListener) {
@@ -284,8 +276,8 @@ app.utils.addEvent = function(event, element, func) {
  * @return
  */
 app.utils.removeEvent = function(event, element, func) {
-  if (! event || ! element || typeof func !== 'function') {
-    return app.error('app.utils.removeEvent', arguments);
+  if (! event || ! element || typeof func != 'function') {
+    return app.error('app.utils.removeEvent', [event, element, func]);
   }
 
   if (element.addEventListener) {
@@ -299,7 +291,7 @@ app.utils.removeEvent = function(event, element, func) {
 /**
  * app.utils.storage
  *
- * Storage utility, it memorizes persistent and non-persistent data using localStorage and sessionStorage
+ * Storage utility, it stores persistent and non-persistent data using localStorage and sessionStorage
  *
  * available methods:
  *  - set (key <String>, value)
@@ -316,11 +308,11 @@ app.utils.removeEvent = function(event, element, func) {
  */
 app.utils.storage = function(persists, method, key, value) {
   if (persists === undefined || method === undefined) {
-    return app.error('app.utils.storage', arguments);
+    return app.error('app.utils.storage', [persists, method, key, value]);
   }
 
   if (! app._runtime.storage) {
-    return app.stop('app.utils.storage', 'runtime', arguments);
+    return app.stop('app.utils.storage', 'runtime');
   }
 
   var self = app.utils.storage.prototype;
@@ -339,9 +331,8 @@ app.utils.storage = function(persists, method, key, value) {
 }
 
 app.utils.storage.prototype.set = function(key, value) {
-
-  if (key === undefined  || typeof key !== 'string' || value === undefined) {
-    return app.error('app.utils.storage.prototype.set', arguments);
+  if (key === undefined  || typeof key != 'string' || value === undefined) {
+    return app.error('app.utils.storage.prototype.set', [key, value]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -362,8 +353,8 @@ app.utils.storage.prototype.set = function(key, value) {
 }
 
 app.utils.storage.prototype.get = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.storage.prototype.get', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.storage.prototype.get', [key]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -381,8 +372,8 @@ app.utils.storage.prototype.get = function(key) {
 }
 
 app.utils.storage.prototype.has = function(key, value) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.storage.prototype.has', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.storage.prototype.has', [key, value]);
   }
 
   if (value != undefined) {
@@ -403,8 +394,8 @@ app.utils.storage.prototype.has = function(key, value) {
 }
 
 app.utils.storage.prototype.del = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.storage.prototype.del', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.storage.prototype.del', [key]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -441,7 +432,7 @@ app.utils.storage.prototype.reset = function() {
  */
 app.utils.cookie = function(method, key, value, expire_time) {
   if (method === undefined) {
-    return app.error('app.utils.cookie', arguments);
+    return app.error('app.utils.cookie', [method, key, value, expire_time]);
   }
 
   var self = app.utils.cookie.prototype;
@@ -452,8 +443,8 @@ app.utils.cookie = function(method, key, value, expire_time) {
 }
 
 app.utils.cookie.prototype.set = function(key, value, expire_time) {
-  if (key === undefined || typeof key !== 'string' || value === undefined) {
-    return app.error('app.utils.cookie.prototype.set', arguments);
+  if (key === undefined || typeof key != 'string' || value === undefined) {
+    return app.error('app.utils.cookie.prototype.set', [key, value, expire_time]);
   }
 
   var _time = 'Fri, 31 Dec 9999 23:59:59 GMT';
@@ -482,8 +473,8 @@ app.utils.cookie.prototype.set = function(key, value, expire_time) {
 }
 
 app.utils.cookie.prototype.get = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.cookie.prototype.get', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.cookie.prototype.get', [key]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -515,8 +506,8 @@ app.utils.cookie.prototype.get = function(key) {
 }
 
 app.utils.cookie.prototype.has = function(key, value) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.cookie.prototype.has', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.cookie.prototype.has', [key, value]);
   }
 
   if (value != undefined) {
@@ -538,8 +529,8 @@ app.utils.cookie.prototype.has = function(key, value) {
 }
 
 app.utils.cookie.prototype.del = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.cookie.prototype.del', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.cookie.prototype.del', [key]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -579,7 +570,7 @@ app.utils.base64 = function(method, data) {
   }
 
   if (method === undefined || ! data) {
-    return app.error('app.utils.base64', arguments);
+    return app.error('app.utils.base64', [method, data]);
   }
 
   return self[method](data);
@@ -589,7 +580,7 @@ app.utils.base64.prototype.encode = function(to_encode) {
   var _btoa = app._root.window.btoa;
 
   if (typeof to_encode !== 'string') {
-    return app.error('app.utils.base64.prototype.encode', arguments);
+    return app.error('app.utils.base64.prototype.encode', [to_encode]);
   }
 
   to_encode = encodeURIComponent(to_encode);
@@ -602,7 +593,7 @@ app.utils.base64.prototype.decode = function(to_decode) {
   var _atob = app._root.window.atob;
 
   if (typeof to_decode !== 'string') {
-    return app.error('app.utils.base64.prototype.decode', arguments);
+    return app.error('app.utils.base64.prototype.decode', [to_decode]);
   }
 
   to_decode = _atob(to_decode);
@@ -617,13 +608,13 @@ app.utils.base64.prototype.decode = function(to_decode) {
  *
  * Transforms type of passed value
  *
- * @param <String> purpose
+ * @param <String> purpose  ( lowercase | uppercase | numeric | integer | json )
  * @param value
  * @return value
  */
 app.utils.transform = function(purpose, value) {
   if (! purpose) {
-    return app.error('app.utils.transform', arguments);
+    return app.error('app.utils.transform', [purpose, value]);
   }
 
   switch (purpose) {
@@ -646,13 +637,13 @@ app.utils.transform = function(purpose, value) {
  *
  * Sanitizes passed value
  *
- * @param <String> purpose
+ * @param <String> purpose  ( whitespace | breakline | date | datetime | datetime-local | array )
  * @param value
  * @return value
  */
 app.utils.sanitize = function(purpose, value) {
   if (! purpose) {
-    return app.error('app.utils.sanitize', arguments);
+    return app.error('app.utils.sanitize', [purpose, value]);
   }
 
   switch (purpose) {
@@ -704,7 +695,7 @@ app.utils.sanitize = function(purpose, value) {
  */
 app.utils.classify = function(data, prefix, to_array) {
   if (! (data && typeof data === 'object') || (prefix && typeof prefix != 'string')) {
-    return app.error('app.utils.classify', arguments);
+    return app.error('app.utils.classify', [data, prefix, to_array]);
   }
 
   prefix = prefix || '';
@@ -743,7 +734,7 @@ app.utils.classify = function(data, prefix, to_array) {
  */
 app.utils.numberFormat = function(number, decimals, decimals_separator, thousands_separator) {
   if (typeof number != 'number') {
-    return app.error('app.utils.numberFormat', arguments);
+    return app.error('app.utils.numberFormat', [number, decimals, decimals_separator, thousands_separator]);
   }
 
   decimals = decimals != undefined ? parseInt(decimals) : 0;
@@ -763,7 +754,7 @@ app.utils.numberFormat = function(number, decimals, decimals_separator, thousand
  * app.utils.dateFormat
  *
  * Formats date, supported format specifiers are like them used in strftime() C library function, 
- * it accepts Date time format or true for 'now'
+ * it accepts Date time format or true for 'now', default: "Y-m-d H:M"
  *
  * format specifiers:
  *  - d  <Number> // Day of the month, digits preceded by zero (01-31)

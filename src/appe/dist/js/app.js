@@ -6,15 +6,16 @@
  * @license MIT License
  *
  * contains:
- * - ($.jQuery.fn.isPlainObject) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
- * - ($.jQuery.fn.extend) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
+ * - (jQuery.fn.isPlainObject) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
+ * - (jQuery.fn.extend) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
  */
 
 var app = app = { '_root': {}, '_runtime': {} };
 
-app._root.document = !! this.Document && document || { documentElement: {}, native: false };
-app._root.window = !! this.Window && window || { document: app._root.document, native: false };
-app._root.process = !!! this.Process && { native: false } || process;
+app._root.server = this;
+app._root.document = !! this.Document && document || { native: false, documentElement: null };
+app._root.window = !! this.Window && window || { native: false, document: app._root.document, navigator: null };
+app._root.process = !! this.Window && ! this.Process && { native: false } || process;
 
 app._runtime = {
   version: '1.0',
@@ -47,7 +48,7 @@ app._runtime = {
  */
 app.load = function(func) {
   if (typeof func != 'function') {
-    return app.stop('app.load', [func]);
+    return app.stop('app.load', 'func');
   }
 
   var loaded = false;
@@ -60,16 +61,16 @@ app.load = function(func) {
     }
   }
 
-  if (!!! app._root.window.native) {
-    if (app._root.document.readyState == 'complete') {
+  if (app._root.window.native == undefined) {
+    if (document.readyState == 'complete') {
       _func();
     } else {
-      app._root.document.addEventListener('DOMContentLoaded', _func);
+      document.addEventListener('DOMContentLoaded', _func);
     }
 
     app.utils.addEvent('load', app._root.window, _func);
   } else {
-    app._root.window.onload = func;
+    app._root.server.load = func;
   }
 }
 
@@ -84,13 +85,13 @@ app.load = function(func) {
  */
 app.unload = function(func) {
   if (typeof func != 'function') {
-    return app.stop('app.unload', [func]);
+    return app.stop('app.unload', 'func');
   }
 
-  if (!!! app._root.window.native) {
+  if (app._root.window.native == undefined) {
     app.utils.addEvent('beforeunload', app._root.window, func);
   } else {
-    app._root.window.onunload = func;
+    app._root.server.onunload = func;
   }
 }
 
@@ -104,7 +105,7 @@ app.unload = function(func) {
  * @return
  */
 app.redirect = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.redirect');
@@ -166,10 +167,10 @@ app.position = function() {
  */
 app.session = function(callback, config, target) {
   if (typeof callback != 'function' || ! config) {
-    return app.stop('app.session', [callback, config, target]);
+    return app.stop('app.session', [callback, 'config', target]);
   }
 
-  app._root.window.appe__store = {};
+  app._root.server.appe__store = {};
 
   app._runtime.name = config.app_ns.toString();
   app._runtime.debug = !! config.debug ? true : false;
@@ -187,8 +188,10 @@ app.session = function(callback, config, target) {
     app._runtime.storage = 'sessionStorage';
   } else if ('sessionStorage' in app._root.window === false) {
     app._runtime.storage = 'localStorage';
-  } else if (app._runtime.system.navigator == 'safari') {
+  } else if (app._runtime.system.name == 'safari') {
     app._runtime.storage = 'sessionStorage';
+  } else if (app._root.process == undefined) {
+    app._runtime.storage = 'storage';
   } else {
     app._runtime.storage = 'localStorage';
   }
@@ -196,20 +199,18 @@ app.session = function(callback, config, target) {
   app._runtime.session = true;
 
 
-  var _has_locale = ! (app._root.window.appe__locale === undefined);
+  var _is_localized = ! (app._root.server.appe__locale === undefined);
 
 
   // auto-select language locale
-  if (_has_locale && config.language === null) {
+  if (_is_localized && config.language === null) {
     var locale = app._root.window.appe__locale;
 
     if (typeof locale != 'object') {
       return app.error('app.session', 'locale');
     }
 
-    var navigator = app._root.window.navigator;
-
-    if (navigator && navigator.languages && typeof navigator.languages === 'object') {
+    if (app._root.window.navigator && navigator.languages && typeof navigator.languages === 'object') {
       var found_locale = false;
 
       for (lang in navigator.languages) {
@@ -230,9 +231,9 @@ app.session = function(callback, config, target) {
   app._runtime.locale_dir = !! config.language_direction ? config.language_direction.toString() : app._runtime.locale_dir;
 
 
-  if (!!! app._root.document.native) {
-    app._root.document.documentElement.setAttribute('lang', app._runtime.locale);
-    app._root.document.documentElement.setAttribute('class', app.utils.classify(app._runtime.system, 'system--'));
+  if (app._root.document.native == undefined) {
+    document.documentElement.setAttribute('lang', app._runtime.locale);
+    document.documentElement.setAttribute('class', app.utils.classify(app._runtime.system, 'system--'));
   }
 
 
@@ -359,7 +360,7 @@ app.session = function(callback, config, target) {
  */
 app.resume = function(config, target) {
   if (! config) {
-    return app.stop('app.resume', [config, target]);
+    return app.stop('app.resume', ['config', target]);
   }
 
   var session_resume = '';
@@ -410,13 +411,12 @@ app.resume = function(config, target) {
  * @return <Object>
  */
 app.data = function(key) {
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.data', 'store');
   }
 
-  //TODO fn
   var _app_name = app._runtime.name.toString();
 
   if (! store[_app_name]) {
@@ -445,12 +445,12 @@ app.data = function(key) {
  */
 app.checkConfig = function(config) {
   if (! (config && typeof config === 'object')) {
-    return app.stop('app.checkConfig', [config]);
+    return app.stop('app.checkConfig');
   }
 
   var error = false;
 
-  var _required_keys = [ 'app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'base_path', 'save_path' ];
+  var _required_keys = ['app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'base_path', 'save_path'];
   var key = null, i = 0;
 
   while ((key = _required_keys[i++])) {
@@ -472,7 +472,7 @@ app.checkConfig = function(config) {
     error = true;
   }
 
-  return !! error && app.stop('app.checkConfig');
+  return !! error && app.stop('app.checkConfig', 'config');
 }
 
 
@@ -487,14 +487,14 @@ app.checkConfig = function(config) {
  * @return <Boolean>
  */
 app.checkFile = function(source, checksum) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.checkFile');
   }
 
   if (! (source && typeof source === 'object')) {
-    return app.error('app.checkFile', [source, checksum]);
+    return app.error('app.checkFile', ['source', 'checksum']);
   }
 
   var _app_version = app._runtime.version.toString();
@@ -521,22 +521,208 @@ app.checkFile = function(source, checksum) {
 
 
 /**
+ * app.openSessionFile
+ *
+ * Opens session from an app session file
+ *
+ * @global <Object> appe__config
+ * @global <Object> appe__start
+ * @global <Object> CryptoJS
+ * @global <Function> pako
+ * @param <Object> source
+ * @return
+ */
+app.openSessionFile = function() {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.openSessionFile');
+  }
+
+  var _is_start = ! (app._root.server.appe__start === undefined);
+
+
+  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    return app.error('app.openSessionFile', 'CryptoJS');
+  }
+
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    return app.error('app.openSessionFile', 'pako');
+  }
+
+
+  var schema = config.schema;
+
+  if (typeof schema != 'object') {
+    return app.error('app.openSessionFile', 'schema');
+  }
+
+  var _current_timestamp = new Date();
+  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
+
+  var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
+  var _app_name = app._runtime.name.toString();
+
+
+  var fbinary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var fcompress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  if (fbinary && ! (fcompress && fcrypt)) {
+    app.error('app.openSessionFile', 'binary');
+
+    return callback(false);
+  }
+
+  var file_extension = 'js';
+
+  if (fbinary) {
+    file_extension = 'appe';
+  }
+
+  file_extension = config.file && config.file.extension ? '.' + config.file.extension.toString() : file_extension;
+
+
+  var _open = function() {
+    app.os.fileSessionOpen.call(this, _complete);
+  }
+
+  var _complete = function(filename) {
+    _is_start && app.start.progress(0);
+
+    if (! filename) {
+      return; // silent fail
+    }
+
+
+    app.utils.cookie('del', 'last_opened_file');
+    app.utils.cookie('del', 'last_session');
+
+
+    var _filename = app.utils.base64('encode', filename);
+
+
+    app.utils.cookie('set', 'last_opened_file', _filename);
+    app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+
+
+    app.memory.set('last_opened_file', _filename);
+
+    app.memory.set('last_stored', _current_timestamp);
+    app.memory.set('last_time', _current_timestamp);
+    app.memory.set('last_session', _current_timestamp_enc);
+
+
+    _is_start ? app.start.redirect(true) : app._root.window.location.reload();
+  }
+
+
+  var open_input = null;
+  var _se_open_input = this.getAttribute('data-open');
+
+  if (! _se_open_input) {
+    this.setAttribute('data-open', '');
+
+    var open_input_ref = this.getAttribute('data-open-input');
+    var open_input = this.parentNode.querySelector(open_input_ref);
+
+    if (app._runtime.system.platform != 'ios') {
+      open_input.setAttribute('accept', '.' + file_extension);
+    }
+
+    app.utils.addEvent('change', open_input, _open);
+  }
+
+  if (open_input) {
+    _is_start && app.start.progress(2);
+
+    open_input.click();
+  }
+}
+
+
+/**
+ * app.saveSessionFile
+ *
+ * Saves session to app session file
+ *
+ * @global <Object> appe__config
+ * @global <Object> appe__store
+ * @global <Object> appe__start
+ * @global <Object> CryptoJS
+ * @global <Function> pako
+ * @param <Object> source
+ */
+app.saveSessionFile = function() {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.saveSessionFile');
+  }
+
+  var store = app._root.server.appe__store;
+
+  if (! store) {
+    return app.stop('app.saveSessionFile', 'store');
+  }
+
+  var _is_start = ! (app._root.server.appe__start === undefined);
+
+
+  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    return app.error('app.saveSessionFile', 'CryptoJS');
+  }
+
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    return app.error('app.saveSessionFile', 'pako');
+  }
+
+
+  var _app_name = app._runtime.name.toString();
+
+  var schema = config.schema;
+
+  if (typeof schema != 'object') {
+    return app.error('app.saveSessionFile', 'schema');
+  }
+
+  var source = {};
+
+  var _current_timestamp = new Date();
+
+
+  Array.prototype.forEach.call(schema, function(key) {
+    source[key] = store[_app_name][key];
+  });  
+
+  source.file = app.os.generateJsonHead(source, _current_timestamp);
+
+
+  app.os.fileSessionSave(function(filename) {
+    if (!! app._runtime.debug) {
+      console.info('save', filename);
+    }
+  }, source, _current_timestamp);
+}
+
+
+/**
  * app.newSession
  *
  * Creates a new empty session
  *
  * @global <Object> appe__config
  * @global <Object> appe__start
- * @return <Boolean>
+ * @return
  */
 app.newSession = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
-    return app.stop('app.openSession');
+    return app.stop('app.newSession');
   }
 
-  var _is_start = ! (app._root.window.appe__start === undefined);
+  var _is_start = ! (app._root.server.appe__start === undefined);
 
   var _app_name = app._runtime.name.toString();
 
@@ -549,7 +735,7 @@ app.newSession = function() {
   var schema = config.schema;
 
   if (typeof schema != 'object') {
-    return app.error('app.openSession', 'schema');
+    return app.error('app.newSession', 'schema');
   }
 
 
@@ -581,7 +767,7 @@ app.newSession = function() {
   }
 
   var _complete = function() {
-    _is_start ? app.start.redirect(false) : app._root.document.location.reload();
+    _is_start ? app.start.redirect(false) : app._root.window.location.reload();
   }
 
 
@@ -592,187 +778,17 @@ app.newSession = function() {
 /**
  * app.openSession
  *
- * Opens session from an app session file
- *
- * @global <Object> appe__config
- * @global <Object> appe__start
- * @global <Object> CryptoJS
- * @global <Function> pako
- * @param <Object> source
- * @return
+ * Opens session, alias of app.openSessionFile
  */
-app.openSession = function() {
-  var config = app._root.window.appe__config;
-
-  if (! config) {
-    return app.stop('app.openSession');
-  }
-
-  var _is_start = ! (app._root.window.appe__start === undefined);
-
-
-  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    return app.error('app.openSession', 'CryptoJS');
-  }
-
-  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.openSession', 'pako');
-  }
-
-
-  var schema = config.schema;
-
-  if (typeof schema != 'object') {
-    return app.error('app.openSession', 'schema');
-  }
-
-  var _current_timestamp = new Date();
-  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
-
-  var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
-  var _app_name = app._runtime.name.toString();
-
-
-  var fbinary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
-  var fcompress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
-  var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
-
-  if (fbinary && ! (fcompress && fcrypt)) {
-    app.error('app.openSession', 'binary');
-
-    return callback(false);
-  }
-
-  var file_extension = 'js';
-
-  if (fbinary) {
-    file_extension = 'appe';
-  }
-
-  file_extension = config.file && config.file.extension ? '.' + config.file.extension.toString() : file_extension;
-
-
-  var _open = function() {
-    app.os.fileOpen.call(this, _complete);
-  }
-
-  var _complete = function(filename) {
-    _is_start && app.start.progress(0);
-
-    if (! filename) {
-      return; // silent fail
-    }
-
-
-    app.utils.cookie('del', 'last_opened_file');
-    app.utils.cookie('del', 'last_session');
-
-
-    var _filename = app.utils.base64('encode', filename);
-
-
-    app.utils.cookie('set', 'last_opened_file', _filename);
-    app.utils.cookie('set', 'last_session', _current_timestamp_enc);
-
-
-    app.memory.set('last_opened_file', _filename);
-
-    app.memory.set('last_stored', _current_timestamp);
-    app.memory.set('last_time', _current_timestamp);
-    app.memory.set('last_session', _current_timestamp_enc);
-
-
-    _is_start ? app.start.redirect(true) : app._root.document.location.reload();
-  }
-
-
-  var open_input = null;
-  var _se_open_input = this.getAttribute('data-open');
-
-  if (! _se_open_input) {
-    this.setAttribute('data-open', '');
-
-    var open_input_ref = this.getAttribute('data-open-input');
-    var open_input = this.parentNode.querySelector(open_input_ref);
-
-    if (app._runtime.system.platform != 'ios') {
-      open_input.setAttribute('accept', '.' + file_extension);
-    }
-
-    app.utils.addEvent('change', open_input, _open);
-  }
-
-  if (open_input) {
-    _is_start && app.start.progress(2);
-
-    open_input.click();
-  }
-}
+app.openSession = app.openSessionFile;
 
 
 /**
  * app.saveSession
  *
- * Saves session to app session file
- *
- * @global <Object> appe__config
- * @global <Object> appe__store
- * @global <Object> appe__start
- * @global <Object> CryptoJS
- * @global <Function> pako
- * @param <Object> source
+ * Saves session, alias of app.saveSessionFile
  */
-app.saveSession = function() {
-  var config = app._root.window.appe__config;
-
-  if (! config) {
-    return app.stop('app.saveSession');
-  }
-
-  var store = app._root.window.appe__store;
-
-  if (! store) {
-    return app.stop('app.saveSession', 'store');
-  }
-
-  var _is_start = ! (app._root.window.appe__start === undefined);
-
-
-  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    return app.error('app.saveSession', 'CryptoJS');
-  }
-
-  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.saveSession', 'pako');
-  }
-
-
-  var _app_name = app._runtime.name.toString();
-
-  var schema = config.schema;
-
-  if (typeof schema != 'object') {
-    return app.error('app.saveSession', 'schema');
-  }
-
-  var source = {};
-
-  var _current_timestamp = new Date();
-
-
-  Array.prototype.forEach.call(schema, function(key) {
-    source[key] = store[_app_name][key];
-  });  
-
-  source.file = app.os.generateJsonHead(source, _current_timestamp);
-
-
-  app.os.fileSave(function(filename) {
-    if (!! app._runtime.debug) {
-      console.info('save', filename);
-    }
-  }, source, _current_timestamp);
-}
+app.saveSession = app.saveSessionFile;
 
 
 /**
@@ -923,34 +939,28 @@ app.debug = function() {
  * Stops app execution
  *
  * @global <Object> appe__main
- * @param <String> arg0 - msg | fn
- * @param arg1 - log | msg
- * @param arg2 - log | msg
- * @param <Boolean> arg3 - soft
+ * @param <String> arg0  ( msg | fn )
+ * @param arg1  ( log | msg )
+ * @param arg2  ( log | msg )
+ * @param <Boolean> soft
  * @return <Boolean>
  */
-app.stop = function(arg0, arg1, arg2, arg3) {
+app.stop = function(arg0, arg1, arg2, soft) {
   if (! app._runtime.exec) {
     return false;
   }
 
-  var _is_main = ! (app._root.window.appe__main || undefined);
+  var _is_main = ! (app._root.server.appe__main === undefined);
 
   app._runtime.exec = false;
 
-  var _arguments = [arg0, arg1, arg2, arg3];
-
-  var args = Object.values(_arguments).slice(0);
-
-  if (_arguments.length == 1) {
-    _arguments.push(null);
-  }
+  arg1 = arg1 || null;
 
   if (_is_main) {
     app.blind();
   }
 
-  app.error.apply(this, args);
+  app.error.apply(this, [arg0, arg1, arg2, soft]);
 
   return false;
 }
@@ -962,35 +972,28 @@ app.stop = function(arg0, arg1, arg2, arg3) {
  * Helper to debug and display error messages
  *
  * @global <Object> appe__control
- * @param <String> arg0 - msg | fn
- * @param arg1 - log | msg
- * @param arg2 - log | msg
- * @param <Boolean> arg3 - soft
+ * @param <String> arg0  ( msg | fn )
+ * @param arg1  ( log | msg )
+ * @param arg2  ( log | msg )
+ * @param <Boolean> soft
  * @return <undefined>
  */
-app.error = function(arg0, arg1, arg2, arg3) {
-  var _is_view = ! (app._root.window.appe__control === undefined);
+app.error = function(arg0, arg1, arg2, soft) {
+  var _is_view = ! (app._root.server.appe__control === undefined);
 
-  var _arguments = [arg0, arg1, arg2, arg3];
-
-  var soft = false;
   var fn = null;
   var msg = null;
   var log = null;
 
-  if (_arguments.length == 4) {
-    soft = true;
-  }
-
-  if (_arguments.length > 2) {
-    fn = _arguments[0];
-    msg = _arguments[1];
-    log = _arguments[2];
-  } else if (_arguments.length == 2) {
-    fn = _arguments[0];
-    log = _arguments[1];
-  } else if (_arguments.length == 1) {
-    msg = _arguments[0];
+  if (arg2) {
+    fn = arg0;
+    msg = arg1;
+    log = arg2;
+  } else if (arg1) {
+    fn = arg0;
+    log = arg1;
+  } else if (arg0) {
+    msg = arg0;
   }
 
   // avoid too much recursions
@@ -998,8 +1001,8 @@ app.error = function(arg0, arg1, arg2, arg3) {
     return undefined;
   }
 
-  if (! document.documentElement.lang) {
-    document.documentElement.lang = app._runtime.language.toString();
+  if (! app._root.document.documentElement.lang) {
+    document.documentElement.lang = app._runtime.locale.toString();
   }
 
   if (app._runtime.debug) {
@@ -1048,7 +1051,7 @@ app.blind = function() {
   var _blind = app._root.document.createElement('div');
   _blind.setAttribute('style', 'position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; background: rgba(0,0,0,0.3);');
 
-  !!! app._root.document.native && app._root.document.body.appendChild(_blind);
+  app._root.document == undefined && app._root.document.body.appendChild(_blind);
 }
 
 
@@ -1058,12 +1061,12 @@ app.blind = function() {
  * Utility to get app info(s)
  *
  * @global <Object> appe__config
- * @param <String> from
- * @param <String> info
+ * @param <String> from  ( config | runtime )
+ * @param <String> info  { config { app_name | schema | license } } | runtime { { debug | locale | version | release } } )
  * @return
  */
 app.getInfo = function(from, info) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.getConfig');
@@ -1173,9 +1176,9 @@ app.os = {};
 
 
 /**
- * app.os.fileOpen
+ * app.os.fileSessionOpen
  *
- * Opens a file through FileReader api, stores it, returns to callback
+ * Opens a session file through FileReader api, stores it, returns to callback
  *
  * @global <Object> appe__config
  * @global <Object> CryptoJS
@@ -1183,37 +1186,37 @@ app.os = {};
  * @param <Function> callback
  * @return
  */
-app.os.fileOpen = function(callback) {
-  var config = app._root.window.appe__config;
+app.os.fileSessionOpen = function(callback) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
-    return app.stop('app.os.fileOpen');
+    return app.stop('app.os.fileSessionOpen');
   }
 
   var step = true;
 
   if (config.file && typeof config.file != 'object') {
-    step = app.error('app.os.fileOpen', 'config');
+    step = app.error('app.os.fileSessionOpen', 'config');
   }
 
   if (! FileReader) {
-    step = app.error('app.os.fileOpen', 'FileReader');
+    step = app.error('app.os.fileSessionOpen', 'FileReader');
   }
 
   if (! (CryptoJS && CryptoJS.MD5)) {
-    step = app.error('app.os.fileOpen', 'CryptoJS');
+    step = app.error('app.os.fileSessionOpen', 'CryptoJS');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    step = app.error('app.os.fileOpen', 'CryptoJS');
+    step = app.error('app.os.fileSessionOpen', 'CryptoJS');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    step = app.error('app.os.fileOpen', 'pako');
+    step = app.error('app.os.fileSessionOpen', 'pako');
   }
 
   if (! (callback && typeof callback === 'function')) {
-    step = app.error('app.os.fileOpen', arguments);
+    step = app.error('app.os.fileSessionOpen', [callback]);
   }
 
   if (! step || ! this.files.length) {
@@ -1225,7 +1228,7 @@ app.os.fileOpen = function(callback) {
   var schema = config.schema;
 
   if (typeof schema != 'object') {
-    app.error('app.os.fileOpen', 'schema');
+    app.error('app.os.fileSessionOpen', 'schema');
 
     return callback(false);
   }
@@ -1236,7 +1239,7 @@ app.os.fileOpen = function(callback) {
   var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
   if (fbinary && ! (fcompress && fcrypt)) {
-    app.error('app.os.fileOpen', 'binary');
+    app.error('app.os.fileSessionOpen', 'binary');
 
     return callback(false);
   }
@@ -1264,13 +1267,13 @@ app.os.fileOpen = function(callback) {
 
 
   if (!! app._runtime.debug) {
-    console.info('app.os.fileOpen', 'file', file, config.file);
+    console.info('app.os.fileSessionOpen', 'file', file, config.file);
   }
 
   //:WORKAROUND temp ios
   if (app._runtime.system.platform != 'ios') {
     if (file.name.indexOf(file_extension) === -1) {
-      app.error('app.os.fileOpen', app.i18n('This file format cannot be open.'), 'file');
+      app.error('app.os.fileSessionOpen', app.i18n('This file format cannot be open.'), 'file');
 
       return callback(false);
     }
@@ -1419,7 +1422,7 @@ app.os.fileOpen = function(callback) {
         });
       }
     } catch (err) {
-      app.error('app.os.fileOpen', err);
+      app.error('app.os.fileSessionOpen', err);
 
       return callback(false);
     }
@@ -1428,12 +1431,12 @@ app.os.fileOpen = function(callback) {
 
   var reader = new FileReader();
 
-  reader.onload = (function() {
+  reader.onloadend = (function() {
     _init(this.result);
   });
 
   reader.onerror = (function(err) {
-    app.error('app.os.fileOpen', err);
+    app.error('app.os.fileSessionOpen', err);
 
     callback(false);
   });
@@ -1447,7 +1450,7 @@ app.os.fileOpen = function(callback) {
 
 
 /**
- * app.os.fileSave
+ * app.os.fileSessionSave
  *
  * Sends a file to the browser, returns to callback
  *
@@ -1459,41 +1462,41 @@ app.os.fileOpen = function(callback) {
  * @param <Date> timestamp
  * @return
  */
-app.os.fileSave = function(callback, source, timestamp) {
-  var config = app._root.window.appe__config;
+app.os.fileSessionSave = function(callback, source, timestamp) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
-    return app.stop('app.os.fileSave');
+    return app.stop('app.os.fileSessionSave');
   }
 
   var step = true;
 
   if (config.file && typeof config.file != 'object') {
-    step = app.error('app.os.fileSave', 'config');
+    step = app.error('app.os.fileSessionSave', 'config');
   }
 
   if (! Blob) {
-    step = app.error('app.os.fileSave', 'Blob');
+    step = app.error('app.os.fileSessionSave', 'Blob');
   }
 
   if (! FileReader) {
-    step = app.error('app.os.fileSave', 'FileReader');
+    step = app.error('app.os.fileSessionSave', 'FileReader');
   }
 
   if (! (CryptoJS && CryptoJS.MD5)) {
-    step = app.error('app.os.fileOpen', 'CryptoJS');
+    step = app.error('app.os.fileSessionOpen', 'CryptoJS');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    step = app.error('app.os.fileSave', 'CryptoJS');
+    step = app.error('app.os.fileSessionSave', 'CryptoJS');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    step = app.error('app.os.fileSave', 'pako');
+    step = app.error('app.os.fileSessionSave', 'pako');
   }
 
   if (! (callback && typeof callback === 'function') || ! (timestamp && timestamp instanceof Date)) {
-    step = app.error('app.os.fileSave', arguments);
+    step = app.error('app.os.fileSessionSave', [callback, source, timestamp]);
   }
 
   if (! step || ! (source && typeof source === 'object')) {
@@ -1508,7 +1511,7 @@ app.os.fileSave = function(callback, source, timestamp) {
   var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
   if (fbinary && ! (fcompress && fcrypt)) {
-    app.error('app.os.fileSave', 'binary');
+    app.error('app.os.fileSessionSave', 'binary');
 
     return callback(false);
   }
@@ -1626,13 +1629,13 @@ app.os.fileSave = function(callback, source, timestamp) {
     var _file = file_name + '.' + file_extension;
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileSave', 'file', _file, file_type, config.file);
+      console.info('app.os.fileSessionSave', 'file', _file, file_type, config.file);
     }
 
     try {
       app.memory.set('file_saves', file_saves);
 
-      app.os.fileDownload(source, file_type, _file);
+      app.os.fileDownload(source, _file, file_type);
 
       cb(false, _file);
     } catch (err) {
@@ -1698,7 +1701,7 @@ app.os.fileSave = function(callback, source, timestamp) {
         });
       }
     } catch (err) {
-      app.error('app.os.fileSave', err);
+      app.error('app.os.fileSessionSave', err);
 
       callback(false);
     }
@@ -1718,11 +1721,11 @@ app.os.fileSave = function(callback, source, timestamp) {
  * @link https://github.com/eligrey/FileSaver.js/
  *
  * @param source
- * @param <String> mime_type
  * @param <String> filename
+ * @param <String> mime_type
  * @return
  */
-app.os.fileDownload = function(source, mime_type, filename) {
+app.os.fileDownload = function(source, filename, mime_type) {
   if (! FileReader) {
     return app.error('app.os.fileDownload', 'FileReader');
   }
@@ -1731,46 +1734,41 @@ app.os.fileDownload = function(source, mime_type, filename) {
     return app.error('app.os.fileDownload', 'Blob');
   }
 
-  var navigator = app._root.window.navigator;
-
-  if ((typeof source != 'object' && typeof source != 'string') || typeof mime_type != 'string' || typeof filename != 'string') {
-    return app.error('app.os.fileDownload', arguments);
+  if ((typeof source != 'object' && typeof source != 'string') || typeof filename != 'string' || typeof mime_type != 'string') {
+    return app.error('app.os.fileDownload', [source, filename, mime_type]);
   }
 
 
-  var _linkDownload = function(data) {
-    var _URL = app._root.window.URL || app._root.window.webkitURL;
-    var _revoke, _dispatch, _check, triggered = false;
+  var URL = app._root.window.URL || app._root.window.webkitURL;
 
-    var link = app._root.document.createElement('a');
-    var object = data != undefined ? data.toString() : _URL.createObjectURL(blob);
+  var _linkAttachment = function(data, is_object_link, force_new) {
+    var open, check, triggered = false;
 
+    var link = app._root.document.createElement('A');
+
+    link.href = data.toString();
     link.download = filename;
-    link.href = object;
     link.rel = 'noopener';
-    link.target = '_self';
+    link.target = !! force_new ? '_blank' : '_self';
     link.onclick = (function() {
       triggered = true;
 
-      this.remove();
+      link.remove();
 
-      clearTimeout(_revoke);
-      clearTimeout(_dispatch);
+      if (is_object_link) {
+        URL.revokeObjectURL(data);
+      }
+
+      open && clearTimeout(open);
+      check && clearTimeout(check);
     });
 
-    _revoke = setTimeout(function() {
-      ! data && _URL.revokeObjectURL(object);
-
-      this.clearTimeout();
-    }, 4E4); // 40s
-
-    _dispatch = setTimeout(function() {
+    open = setTimeout(function() {
       var e;
 
       try {
         e = new MouseEvent('click');
 
-        link.target = '_blank';
         link.dispatchEvent(e);
       } catch (err) {
         e = document.createEvent('MouseEvents');
@@ -1779,43 +1777,78 @@ app.os.fileDownload = function(source, mime_type, filename) {
         link.dispatchEvent(e);
       }
 
-      this.clearTimeout();
+      clearTimeout(open);
     }, 0);
 
-    _check = setTimeout(function() {
+    check = setTimeout(function() {
       if (! triggered) {
+        link.target = '_blank';
         link.click();
       }
 
-      this.clearTimeout();
+      clearTimeout(check);
     }, 10);
   }
 
-  var _msBlobDownload = function() {
-    navigator.msSaveOrOpenBlob(blob, filename);
+  var _sendAttachment = function(data, is_object_link, as_link, force_new) {
+    if (!! as_link) {
+      _linkAttachment(data, is_object_link, force_new);
+    } else {
+      var wn = app._root.window.open('', !! force_new ? '_blank' : '_self');
+
+      if (wn && wn.location) {
+        wn.location.href = data;
+        wn = null;
+      } else {
+        app._root.window.open(data, !! force_new ? '_blank' : '_self');
+      }
+    }
   }
 
-  var _attachmentDownload = function(force) {
+  var _blobAttachment = function(file, as_link, force_new) {
+    var reader = new FileReader();
+
+    reader.onloadend = (function() {
+      if (! reader.result) { throw 'data'; }
+
+      var data = reader.result;
+
+      _sendAttachment(data, false, as_link, force_new);
+    });
+
+    reader.onerror = (function(err) {
+      return app.error('app.os.fileDownload() > _blob', err);
+    });
+
+    reader.readAsDataURL(file);
+  }
+
+  var _objectLinkAttachment = function(file, as_link, force_new) {
     try {
-      var reader = new FileReader();
+      data = URL.createObjectURL(file);
 
-      reader.onloadend = (function() {
-        if (! this.result) { throw 'data'; }
-
-        var data = this.result;
-
-        if (!! force) {
-          data = data.replace(/^data:[^;]*;/, 'data:attachment/file;');
-
-          _linkDownload(data);
-        } else {
-          app._root.window.open(data, '_blank');
-        }
-      });
-
-      reader.readAsDataURL(blob);
+      _sendAttachment(data, true, as_link, force_new);
     } catch (err) {
-      return app.error('app.os.fileDownload', err);
+      return app.error('app.os.fileDownload() > _objectURL', err);
+    }
+  }
+
+  var _downloadAttachment = function(as_link, as_object_link, force_attachment, force_new) {
+    var file_type = !! force_attachment ? 'attachment/file' : 'application/octet-stream';
+    var file;
+
+    try {
+      file = new File([ blob ], filename, { type: file_type });
+    } catch (err) {
+      app.error('app.os.fileDownload() > _downloadAttachment', 'File', null, true);
+
+      file = new Blob([ blob ], { type: file_type });
+    }
+
+    if (as_object_link) {
+      _objectLinkAttachment(file, as_link, force_new);
+    } else {
+      _blobAttachment(file, as_link, force_new);
     }
   }
 
@@ -1828,34 +1861,53 @@ app.os.fileDownload = function(source, mime_type, filename) {
     return app.error('app.os.fileDownload', err);
   }
 
+
+  var as_object_link = app._root.window.location.protocol != 'file:' ? true : false;
+
   // target browsers with download anchor attribute
   if ('download' in app._root.window.HTMLAnchorElement.prototype) {
-    if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', 'link', mime_type, filename);
-    }
+    // default: 1 0 0 0
 
-    _linkDownload();
+    _downloadAttachment(true);
+
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', [1, 0, 0, 0], mime_type, filename);
+    }
   // target ie
   } else if ('msSaveOrOpenBlob' in app._root.window.navigator) {
+    // ie: 1 ? 0 0
+
+    navigator.msSaveOrOpenBlob(file, filename) || _downloadAttachment(true, as_object_link, false, false);
+
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', 'ms', mime_type, filename);
+      console.info('app.os.fileDownload', [1, as_object_link, 0, 1], mime_type, filename);
     }
 
-    _msBlobDownload();
   // target other browsers with open support
   } else if ('open' in app._root.window) {
-    if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', 'attachment', mime_type, filename);
-    }
+    var as_link = app._runtime.system.name == 'chrome' ? true : false;
+        as_object_link = app._runtime.system.name != 'chrome' ? as_object_link : false;
+    var force_attachment = app._runtime.system.name == 'safari' ? true : false;
+    var force_new = app._runtime.system.name == 'safari' ? true : false;
 
-    _attachmentDownload();
-  // fallback to link and attachment/file download
+    // safari: 0 ? 1 1
+    // crios: 1 0 0 0
+    // default: 0 ? 0 1
+
+    _downloadAttachment(as_link, as_object_link, force_attachment, force_new);
+
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', [as_link, as_object_link, force_attachment, force_new], mime_type, filename);
+    }
+  // fallback
   } else {
-    if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', 'fallback', mime_type, filename);
-    }
+    // default: 1 ? 1 1
 
-    _linkDownload(true);
+    _downloadAttachment(true, as_object_link, true, true);
+
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', [1, as_object_link, 1, 1], mime_type, filename);
+    }
   }
 }
 
@@ -1873,7 +1925,7 @@ app.os.fileDownload = function(source, mime_type, filename) {
  */
 app.os.scriptOpen = function(callback, file, fn, max_attempts) {
   if (typeof callback != 'function' || typeof file != 'string' || (fn && typeof fn != 'string')) {
-    app.error('app.os.scriptOpen', arguments);
+    app.error('app.os.scriptOpen', [callback, file, fn, max_attempts]);
 
     return callback(false);
   }
@@ -1931,14 +1983,14 @@ app.os.scriptOpen = function(callback, file, fn, max_attempts) {
  * @return <Object>
  */
 app.os.generateJsonHead = function(source, timestamp) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.os.generateJsonHead');
   }
 
   if (! (source && typeof source === 'object') && ! (timestamp && timestamp instanceof Date)) {
-    return app.error('app.os.generateJsonHead', arguments);
+    return app.error('app.os.generateJsonHead', [source, timestamp]);
   }
 
   var checksum = '';
@@ -1964,7 +2016,7 @@ app.os.generateJsonHead = function(source, timestamp) {
  */
 app.os.generateJsonChecksum = function(callback, source) {
   if (typeof callback != 'function' && typeof source != 'string') {
-    app.error('app.os.generateJsonChecksum', arguments);
+    app.error('app.os.generateJsonChecksum', [callback, source]);
 
     return callback(false);
   }
@@ -1995,7 +2047,7 @@ app.os.generateJsonChecksum = function(callback, source) {
  * @return <String>
  */
 app.os.getLastFileName = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.os.getLastFileName');
@@ -2029,7 +2081,7 @@ app.os.getLastFileName = function() {
  * @return <String>
  */
 app.os.getLastFileVersion = function() {
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.os.getLastFileVersion', 'store');
@@ -2062,7 +2114,7 @@ app.os.getLastFileVersion = function() {
  * @return <String>
  */
 app.os.getLastFileChecksum = function() {
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.os.getLastFileChecksum', 'store');
@@ -2121,7 +2173,7 @@ app.controller = {};
  */
 app.controller.cursor = function(loc) {
   if (loc && typeof loc != 'object') {
-    return app.error('app.controller.cursor', arguments);
+    return app.error('app.controller.cursor', [loc]);
   }
 
   if (loc) {
@@ -2157,9 +2209,10 @@ app.controller.spoof = function() {
   if (ref.indexOf('&') != -1) {
     ref = ref.split('&');
 
-    // values
+    // querystring values
     if (ref[1].indexOf('=') != -1) {
       var sub = ref[1].split('=');
+
       loc = { view: ref[0], action: sub[0], index: parseInt(sub[1]) };
     } else {
       loc = { view: ref[0], action: ref[1] };
@@ -2189,7 +2242,7 @@ app.controller.history = function(title, url) {
     title = _title;
   }
 
-  if (app._runtime.system.navigator == 'safari') {
+  if (app._runtime.system.name == 'safari') {
     app._root.window.location.href = url;
   } else {
     history.replaceState(null, title, url);
@@ -2239,20 +2292,20 @@ app.controller.getTitle = function() {
  * @return
  */
 app.controller.retrieve = function(callback, routine) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.controller.retrieve');
   }
 
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.controller.retrieve', 'store');
   }
 
   if (typeof callback != 'function' || typeof routine != 'object') {
-    return app.stop('app.controller.retrieve', arguments);
+    return app.stop('app.controller.retrieve', [callback, routine]);
   }
 
   var schema = config.schema;
@@ -2264,7 +2317,7 @@ app.controller.retrieve = function(callback, routine) {
 
   var _retrieve = function(fn, schema) {
     if (typeof fn != 'string' || typeof schema != 'object') {
-      return app.stop('app.controller.retrieve() > _retrieve', arguments);
+      return app.stop('app.controller.retrieve() > _retrieve', [fn, schema]);
     }
 
     if (store[fn] && typeof store[fn] === 'object') {
@@ -2317,14 +2370,14 @@ app.controller.retrieve = function(callback, routine) {
  * @return
  */
 app.controller.store = function(callback, fn, schema, data) {
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.controller.store', 'store');
   }
 
   if (typeof callback != 'function' || typeof fn != 'string' || typeof schema != 'object' || typeof data != 'object') {
-    return app.stop('app.controller.store', arguments);
+    return app.stop('app.controller.store', [callback, fn, schema, data]);
   }
 
   var source = store[fn];
@@ -2336,7 +2389,7 @@ app.controller.store = function(callback, fn, schema, data) {
 
   var _store = function(key, values) {
     if (typeof key != 'string' || typeof values != 'object') {
-      return app.stop('app.controller.store() > _store', arguments);
+      return app.stop('app.controller.store() > _store', [key, values]);
     }
 
     if (! source[key]) {
@@ -2386,13 +2439,13 @@ app.controller.store = function(callback, fn, schema, data) {
  * @return <Boolean>
  */
 app.controller.clear = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.controller.clear');
   }
 
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.controller.clear', 'store');
@@ -2602,8 +2655,8 @@ app.start = {};
  * @param <Number> phase
  */
 app.start.progress = function(phase) {
-  var progress_wait = app._root.document.getElementById('start-progress-wait');
-  var progress_open = app._root.document.getElementById('start-progress-open');
+  var progress_wait = document.getElementById('start-progress-wait');
+  var progress_open = document.getElementById('start-progress-open');
 
   switch (phase) {
     case 2:
@@ -2631,7 +2684,7 @@ app.start.progress = function(phase) {
  * @return
  */
 app.start.loadComplete = function(session_resume) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.start.loadComplete');
@@ -2688,7 +2741,7 @@ app.start.loadComplete = function(session_resume) {
  * @return
  */
 app.start.attemptLoad = function(callback, fn, file, schema, memoize) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.start.attemptLoad');
@@ -2708,12 +2761,8 @@ app.start.attemptLoad = function(callback, fn, file, schema, memoize) {
     step = app.error('app.start.attemptLoad', 'CryptoJS');
   }
 
-  if (! callback || ! fn || ! file || ! schema) {
-    step = app.stop('app.start.attemptLoad', arguments);
-  }
-
-  if (typeof callback != 'function' || typeof fn != 'string' || typeof file != 'string' || typeof schema != 'object') {
-    step = app.stop('app.start.attemptLoad', arguments);
+  if (typeof callback != 'function' || ! fn || typeof fn != 'string' || ! file || typeof file != 'string' || typeof schema != 'object') {
+    step = app.stop('app.start.attemptLoad', [callback, fn, file, schema, memoize]);
   }
 
   if (! step) {
@@ -2875,7 +2924,7 @@ app.start.redirect = function(loaded) {
  * @return
  */
 app.start.alternative = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.start.alternative');
@@ -2897,7 +2946,7 @@ app.start.alternative = function() {
     'iemobile': 'Explorer'
   };
 
-  var browser = navigators[system.navigator];
+  var browser = navigators[system.name];
   var exec_platform = system.platform in config.alt.exec_platform ? system.platform : null;
 
 
@@ -2934,7 +2983,7 @@ app.start.alternative = function() {
  * @return
  */
 app.start.load = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.start.load');
@@ -2945,22 +2994,20 @@ app.start.load = function() {
 
   var exec = true;
 
-  if (
-    ('sessionStorage' in app._root.window === false && 'localStorage' in app._root.window === false) ||
-    'FileReader' in app._root.window === false ||
-    'Blob' in app._root.window === false ||
-    'history' in app._root.window === false ||
-    'atob' in app._root.window === false ||
-    'btoa' in app._root.window === false ||
-    sessionStorage === undefined
-  ) {
-    exec = false;
-  }
-
-  if (!!! app._root.document.native) {
+  if (app._root.window.native == undefined) {
     if (
+      ('sessionStorage' in window == false && 'localStorage' in window == false) ||
+      'FileReader' in window == false ||
+      'Blob' in window == false ||
+      'history' in window == false ||
+      'atob' in window == false ||
+      'btoa' in window == false
+    ) {
+      exec = false;
+    } else if (
+      sessionStorage === undefined ||
       'replaceState' in history === false ||
-      'checkValidity' in app._root.document.createElement('form') === false
+      'checkValidity' in document.createElement('form') === false
     ) {
       exec = false;
     }
@@ -3000,16 +3047,16 @@ app.start.load = function() {
   }
 
   var _layout = function() {
-    var _has_locale = ! (app._root.window.appe__locale === undefined);
+    var _is_localized = ! (app._root.server.appe__locale === undefined);
 
 
-    var open_action = app._root.document.getElementById('start-action-open');
-    var new_action = app._root.document.getElementById('start-action-new');
+    var open_action = document.getElementById('start-action-open');
+    var new_action = document.getElementById('start-action-new');
 
     app.utils.addEvent('click', open_action, app.openSession);
     app.utils.addEvent('click', new_action, app.newSession);
 
-    if (_has_locale) {
+    if (_is_localized) {
       _localize();
     }
   }
@@ -3027,7 +3074,7 @@ app.start.load = function() {
     app.controller.setTitle(config.app_name);
 
 
-    if (!!! app._root.document.native) {
+    if (app._root.document.native == undefined) {
       _layout();
     }
 
@@ -3068,7 +3115,7 @@ app.main = {};
  * @return
  */
 app.main.control = function(loc) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.control');
@@ -3159,7 +3206,7 @@ app.main.control = function(loc) {
       nav_selector_current.parentNode.classList.add('active');
     }
   } else {
-    return app.stop('app.main.control', arguments);
+    return app.stop('app.main.control', [loc]);
   }
 }
 
@@ -3200,7 +3247,7 @@ app.main.control = function(loc) {
  * @return
  */
 app.main.handle = function(e) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.handle');
@@ -3210,12 +3257,12 @@ app.main.handle = function(e) {
     return app.error('app.main.handle', 'config');
   }
 
-  var main = app._root.window.appe__main;
+  var main = app._root.server.appe__main;
 
   var self = app.main.handle.prototype;
 
   if (! e.data) {
-    return app.error('app.main.handle', arguments);
+    return app.error('app.main.handle', [e]);
   }
 
   try {
@@ -3304,7 +3351,7 @@ app.main.handle.prototype.getTitle = function() {
 
 app.main.handle.prototype.setMsg = function(msg) {
   if (! (msg && typeof msg === 'string')) {
-    return app.error('app.main.handle.prototype.setTitle', 'title');
+    return app.error('app.main.handle.prototype.setMsg', 'msg');
   }
 
   this._msg = msg;
@@ -3358,22 +3405,24 @@ app.main.handle.prototype.selection = function() {
 }
 
 app.main.handle.prototype.export = function() {
-  if (! Blob || ! saveAs) {
-    return app.error('app.main.handle.prototype.export', 'FileSaver');
+  if (! Blob) {
+    return app.error('app.main.handle.prototype.export', 'Blob');
+  }
+
+  if (! FileReader) {
+    return app.error('app.main.handle.prototype.export', 'FileReader');
   }
 
   if (! this.ctl.data || ! (this.ctl.file && typeof this.ctl.file === 'object')) {
     return app.error('app.main.handle.prototype.export', 'ctl');
   }
 
-  if (! (this.ctl.file.name && typeof this.ctl.file.name === 'string') || ! (this.ctl.file.options && typeof this.ctl.file.options === 'object')) {
+  if (! (this.ctl.file.name && typeof this.ctl.file.name === 'string') || ! (this.ctl.file.type && typeof this.ctl.file.type === 'string')) {
     return app.error('app.main.handle.prototype.export', 'file');
   }
 
   try {
-    var blob = new Blob([ this.ctl.data ], (this.ctl.file.options || {}));
-
-    saveAs(blob, this.ctl.file.name);
+    app.os.fileDownload(this.ctl.data, this.ctl.file.name, this.ctl.file.type);
   } catch (err) {
     return app.error('app.main.handle.prototype.export', err);
   }
@@ -3431,7 +3480,7 @@ app.main.handle.prototype.history = function() {
 }
 
 app.main.handle.prototype.receiver = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.handle.prototype.receiver');
@@ -3493,18 +3542,18 @@ app.main.handle.prototype.receiver = function() {
  * @return
  */
 app.main.action = function(events, event, element) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.action');
   }
 
-  var main = app._root.window.appe__main;
+  var main = app._root.server.appe__main;
 
   var self = app.main.action.prototype;
 
   if ((events && (events instanceof Array === false)) || ! event || ! element) {
-    return app.error('app.main.action', arguments);
+    return app.error('app.main.action', [events, event, element]);
   }
 
   this._initialized = false;
@@ -3537,7 +3586,7 @@ app.main.action.prototype.menu = function(element) {
   }
 
   if (! element) {
-    return app.error('app.main.action.prototype.menu', arguments);
+    return app.error('app.main.action.prototype.menu', [element]);
   }
 
   var menu = app._root.document.querySelector(element.getAttribute('data-target'));
@@ -3566,7 +3615,7 @@ app.main.action.prototype.menu = function(element) {
  * @global <Object> appe__main
  */
 app.main.setup = function() {
-  var main = appe__main;
+  var main = app._root.server.appe__main;
 
   /**
    * main.setup hook
@@ -3591,7 +3640,7 @@ app.main.setup = function() {
  * @return
  */
 app.main.load = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.main.load');
@@ -3611,7 +3660,7 @@ app.main.load = function() {
   }
 
   var _layout = function() {
-    var _has_locale = ! (app._root.window.appe__locale === undefined);
+    var _is_localized = ! (app._root.server.appe__locale === undefined);
 
 
     var navbar_brand = app._root.document.getElementById('brand');
@@ -3641,7 +3690,7 @@ app.main.load = function() {
       });
     }
 
-    if (_has_locale) {
+    if (_is_localized) {
       _localize();
     }
   }
@@ -3661,7 +3710,7 @@ app.main.load = function() {
     app.utils.addEvent('message', app._root.window, app.main.handle);
 
 
-    if (!!! app._root.document.native) {
+    if (app._root.document.native == undefined) {
       _layout();
     }
   }
@@ -3719,7 +3768,7 @@ app.view.spoof = function() {
   if (ref.indexOf('&') != -1) {
     ref = ref.split('&');
 
-    // values
+    // querystring values
     if (ref[1].indexOf('=') != -1) {
       var sub = ref[1].split('=');
       loc = { action: ref[0], index: parseInt(sub[1]) };
@@ -3764,28 +3813,28 @@ app.view.spoof = function() {
  * @return <Object> __construct
  */
 app.view.control = function(events, data, form) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.control');
   }
 
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.control', 'control');
   }
 
-  var _has_locale = ! (app._root.window.appe__locale === undefined);
+  var _is_localized = ! (app._root.server.appe__locale === undefined);
 
   var self = app.view.control.prototype;
 
   if ((events && events instanceof Array === false) || (data && typeof data != 'object')) {
-    return app.error('app.view.control', arguments);
+    return app.error('app.view.control', [events, data, form]);
   }
 
   self._initialized = false;
-  self._has_locale = _has_locale;
+  self._is_localized = _is_localized;
 
   self.events = events || null;
   self.data = data || {};
@@ -3804,7 +3853,7 @@ app.view.control.prototype.isInitialized = function(funcName) {
 }
 
 app.view.control.prototype.begin = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.control.prototype.begin');
@@ -3932,7 +3981,7 @@ app.view.control.prototype.setEvent = function(event) {
   this.isInitialized('setEvent');
 
   if ((this.events && this.events.indexOf(event) === -1)) {
-    return app.error('app.view.control.prototype.setEvent', arguments);
+    return app.error('app.view.control.prototype.setEvent', 'event');
   }
 
   control.temp.event = event;
@@ -4018,7 +4067,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
   this.isInitialized('fillTable');
 
   if (! table) {
-    return app.error('app.view.control.prototype.fillTable', arguments);
+    return app.error('app.view.control.prototype.fillTable', [table, data, order]);
   }
 
   var _data = data;
@@ -4029,7 +4078,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
 
   order = (order && order instanceof Array) ? order : Object.keys(_data);
 
-  var _args = Object.values(arguments).slice(3);
+  var args = Object.values(arguments).slice(3);
 
   var tbody = table.querySelector('tbody');
   var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
@@ -4047,24 +4096,24 @@ app.view.control.prototype.fillTable = function(table, data, order) {
    */
   if ('renderRow' in control && typeof control.renderRow === 'function') {
     Array.prototype.forEach.call(order, function(id) {
-      var row = control.renderRow(trow_tpl, id, _data[id], _args);
+      var row = control.renderRow(trow_tpl, id, _data[id], args);
 
       rows += row.outerHTML;
     });
 
     tbody.innerHTML = rows;
 
-    this._has_locale && this.localize(table);
+    this._is_localized && this.localize(table);
   }
 
-  return { rows: rows, tpl: trow_tpl, data: _data, args: _args };
+  return { rows: rows, tpl: trow_tpl, data: _data, args: args };
 }
 
 app.view.control.prototype.fillForm = function(form, data) {
   this.isInitialized('fillForm');
 
   if (! this.form) {
-    return app.error('app.view.control.prototype.fillForm', arguments);
+    return app.error('app.view.control.prototype.fillForm', [form, data]);
   }
 
   var _data = data;
@@ -4073,7 +4122,7 @@ app.view.control.prototype.fillForm = function(form, data) {
     _data = this.data;
   }
 
-  var _args = Object.values(arguments).slice(2);
+  var args = Object.values(arguments).slice(2);
 
   /**
    * control.fillForm hook
@@ -4082,19 +4131,19 @@ app.view.control.prototype.fillForm = function(form, data) {
    * @param <Object> _args
    */
   if ('fillForm' in control && typeof control.fillForm === 'function') {
-    control.fillForm(_data, _args);
+    control.fillForm(_data, args);
 
-    this._has_locale && this.localize(form);
+    this._is_localized && this.localize(form);
   }
 
-  return { data: _data, args: _args };
+  return { data: _data, args: args };
 }
 
 app.view.control.prototype.fillSelection = function(data, id) {
   this.isInitialized('fillSelection');
 
   if (! (data && typeof data === 'object')) {
-    return app.error('app.view.control.prototype.fillSelection', arguments);
+    return app.error('app.view.control.prototype.fillSelection', [data, id]);
   }
 
   var selection = app._root.document.getElementById('selection');
@@ -4143,7 +4192,7 @@ app.view.control.prototype.localize = function(elements) {
   this.isInitialized('localize');
 
   if (! elements) {
-    return app.error('app.view.control.prototype.localize', arguments);
+    return app.error('app.view.control.prototype.localize', [elements]);
   }
 
   var localize_elements = elements.querySelectorAll('[data-localize]');
@@ -4188,28 +4237,28 @@ app.view.control.prototype.localize = function(elements) {
  * @return <Object> __construct
  */
 app.view.action = function(events, event, element, form) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.action');
   }
 
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.action', 'control');
   }
 
-  var _has_locale = ! (app._root.window.appe__locale === undefined);
+  var _is_localized = ! (app._root.server.appe__locale === undefined);
 
   var self = app.view.action.prototype;
 
   if ((events && (events instanceof Array === false)) || ! event || ! element) {
-    return app.error('app.view.action', arguments);
+    return app.error('app.view.action', [events, event, element, form]);
   }
 
   self._initialized = false;
-  self._has_locale = _has_locale;
+  self._is_localized = _is_localized;
 
   if (! (config.events && typeof config.events === 'object')) {
     return app.error('app.view.action', 'config');
@@ -4312,7 +4361,7 @@ app.view.action.prototype.prepare = function(data, submit) {
   this.isInitialized(this.event);
 
   if (data && typeof data != 'object') {
-    return app.error('app.view.action.prototype.' + this.event, arguments);
+    return app.error('app.view.action.prototype.' + this.event, [data, submit]);
   }
 
   var id = this.getID();
@@ -4334,7 +4383,7 @@ app.view.action.prototype.prepare = function(data, submit) {
         if (label) {
           label = label[0].toUpperCase() + label.slice(1);
 
-          if (this._has_locale) {
+          if (this._is_localized) {
             label = app.i18n(label, 'action') || label;
           }
 
@@ -4363,7 +4412,7 @@ app.view.action.prototype.prepare = function(data, submit) {
 }
 
 app.view.action.prototype.prevent = function(data, submit, title, name) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.action.prototype.prevent');
@@ -4371,17 +4420,13 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
 
   this.isInitialized(this.event);
 
-  if (data && typeof data != 'object') {
-    return app.error('app.view.action.prototype.' + this.event, arguments);
-  }
-
-  if (typeof title != 'string') {
-    return app.error('app.view.action.prototype.' + this.event, arguments);
+  if (typeof title != 'string' || (data && typeof data != 'object')) {
+    return app.error('app.view.action.prototype.' + this.event, [data, submit, title, name]);
   }
 
   var label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
 
-  if (this._has_locale) {
+  if (this._is_localized) {
     label = app.i18n(label, 'event') || label;
   }
 
@@ -4415,12 +4460,7 @@ app.view.action.prototype.close = app.view.action.prototype.prevent;
 app.view.action.prototype.selection = function() {
   this.isInitialized('selection');
 
-  var selected = this.element.value.toString();
-
-  if (! selected) {
-    return app.error('app.view.action().selection', 'selected');
-  }
-
+  var selected = this.element.value ? this.element.value.toString() : '';
   var data = { 'id': selected };
 
   return this.prepare(data, true);
@@ -4450,7 +4490,7 @@ app.view.action.prototype.print = function() {
  * @return <Function>
  */
 app.view.sub = function(method, element, table) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.sub');
@@ -4459,21 +4499,21 @@ app.view.sub = function(method, element, table) {
   var self = app.view.sub.prototype;
 
   if (! method || ! element) {
-    return app.error('app.view.sub', arguments);
+    return app.error('app.view.sub', [method, element, table]);
   }
 
   return self[method](element, table);
 }
 
 app.view.sub.prototype.csv = function(element, table) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.sub.prototype.csv');
   }
 
   if (! element || ! table) {
-    return app.error('app.view.sub.prototype.csv', arguments);
+    return app.error('app.view.sub.prototype.csv', [element, table]);
   }
 
   var source = '';
@@ -4499,7 +4539,7 @@ app.view.sub.prototype.csv = function(element, table) {
 
   filename += filename_separator + filename_date;
 
-  var file = { 'name': filename + '.csv', 'options': { 'type': 'text/csv;charset=utf-8' } };
+  var file = { 'name': filename + '.csv', 'type': 'text/csv;charset=utf-8' };
 
   var ctl = { action: 'export', file: file, data: source };
 
@@ -4508,7 +4548,7 @@ app.view.sub.prototype.csv = function(element, table) {
 
 app.view.sub.prototype.clipboard = function(element, table) {
   if (! element || ! table) {
-    return app.error('app.view.sub.prototype.clipboard', arguments);
+    return app.error('app.view.sub.prototype.clipboard', [element, table]);
   }
 
   var source = '';
@@ -4525,9 +4565,10 @@ app.view.sub.prototype.clipboard = function(element, table) {
   var dropdown_btn = dropdown.querySelector('.dropdown-toggle');
   dropdown_btn.classList.add('btn-gray-lighter');
 
-  setTimeout(function() {
+  var rem = setTimeout(function() {
     dropdown_btn.classList.remove('btn-gray-lighter');
-    this.clearTimeout();
+
+    clearTimeout(rem);
   }, 1000);
 }
 
@@ -4537,7 +4578,7 @@ app.view.sub.prototype.toggler = function(element) {
   }
 
   if (! element) {
-    return app.error('app.view.sub.prototype.clipboard', arguments);
+    return app.error('app.view.sub.prototype.clipboard', [element]);
   }
 
   var dropdown = element.parentNode.parentNode.parentNode;
@@ -4564,13 +4605,13 @@ app.view.sub.prototype.toggler = function(element) {
  * @return
  */
 app.view.handle = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.handle');
   }
 
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.handle', 'control');
@@ -4599,7 +4640,7 @@ app.view.handle = function() {
  * @return
  */
 app.view.resize = function(check_time) {
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! (control && control.temp)) {
     return; // silent fail
@@ -4631,13 +4672,13 @@ app.view.resize = function(check_time) {
  * @return
  */
 app.view.send = function(ctl) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.action');
   }
 
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.action', 'control');
@@ -4648,7 +4689,7 @@ app.view.send = function(ctl) {
   }
 
   if (typeof ctl != 'object') {
-    return app.error('app.view.send', arguments);
+    return app.error('app.view.send', [ctl]);
   }
 
   if ('view' in ctl === false) {
@@ -4688,7 +4729,7 @@ app.view.send = function(ctl) {
  */
 app.view.getFormData = function(elements) {
   if (! (elements && elements.length)) {
-    return app.error('app.view.getFormData', arguments);
+    return app.error('app.view.getFormData', [elements]);
   }
 
   var data = {};
@@ -4750,13 +4791,13 @@ app.view.getFormData = function(elements) {
  */
 app.view.convertTableCSV = function(table) {
   if (! table) {
-    return app.error('app.view.convertTableCSV', arguments);
+    return app.error('app.view.convertTableCSV', [table]);
   }
 
   var thead_th = table.querySelectorAll('thead tr:not(.hidden-csv) th');
   var tbody_trow = table.querySelectorAll('tbody tr:not(.hidden-csv)');
 
-  var csv = [ [] ];
+  var csv = [[]];
 
   Array.prototype.forEach.call(thead_th, function(node) {
     if (node.classList.contains('hidden-print')) { return; }
@@ -4803,7 +4844,7 @@ app.view.convertTableCSV = function(table) {
  */
 app.view.copyToClipboard = function(source) {
   if (! source) {
-    return app.error('app.view.copyToClipboard', arguments);
+    return app.error('app.view.copyToClipboard', [source]);
   }
 
   var _clipboard = app._root.document.createElement('TEXTAREA');
@@ -4843,7 +4884,7 @@ app.view.copyToClipboard = function(source) {
  * @return
  */
 app.view.load = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.load');
@@ -4861,9 +4902,9 @@ app.view.load = function() {
   }
 
   var _layout = function() {
-    var _has_locale = ! (app._root.window.appe__locale === undefined);
+    var _is_localized = ! (app._root.server.appe__locale === undefined);
 
-    if (_has_locale) {
+    if (_is_localized) {
       _localize();
     }
   }
@@ -4878,7 +4919,7 @@ app.view.load = function() {
     app.controller.retrieve(app.view.handle, routine);
 
 
-    if (!!! app._root.document.native) {
+    if (app._root.document.native == undefined) {
       _layout();
     }
   }
@@ -4897,7 +4938,7 @@ app.view.load = function() {
  * @return <Boolean>
  */
 app.view.unload = function() {
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.unload', 'control');
@@ -4940,7 +4981,7 @@ app.layout = {};
  */
 app.layout.renderElement = function(node, content, attributes) {
   if (typeof node !== 'string' || (content && typeof content !== 'string') || (attributes && typeof attributes !== 'object')) {
-    return app.error('app.layout.renderElement', arguments);
+    return app.error('app.layout.renderElement', [node, content, attributes]);
   }
 
   var _node = node.toLowerCase();
@@ -4979,7 +5020,7 @@ app.layout.renderElement = function(node, content, attributes) {
  */
 app.layout.renderSelect = function(select_id, data, selected, attributes) {
   if (! select_id || typeof data !== 'object') {
-    return app.error('app.layout.renderSelectOptions', arguments);
+    return app.error('app.layout.renderSelectOptions', [select_id, data, selected, attributes]);
   }
 
   var select_attrs = app.utils.extendObject({ id: select_id }, attributes);
@@ -5005,7 +5046,7 @@ app.layout.renderSelect = function(select_id, data, selected, attributes) {
  */
 app.layout.renderSelectOption = function(value, name, selected) {
   if (! value || ! name) {
-    return app.error('app.layout.renderSelectOption', arguments);
+    return app.error('app.layout.renderSelectOption', [value, name, selected]);
   }
 
   return app.layout.renderElement('option', name, { value: value, selected: (selected ? '' : null) });
@@ -5023,7 +5064,7 @@ app.layout.renderSelectOption = function(value, name, selected) {
  */
 app.layout.renderSelectOptionGroup = function(label, options) {
   if (! label || ! options) {
-    return app.error('app.layout.renderSelectOptionGroup', arguments);
+    return app.error('app.layout.renderSelectOptionGroup', [label, options]);
   }
 
   return app.layout.renderElement('optgroup', options, { label: label });
@@ -5037,8 +5078,8 @@ app.layout.renderSelectOptionGroup = function(label, options) {
  *
  * example:
  *
- *   [ {"optgroup_label": [ {"option_name": "option_value"}, ... ]} ]
- *   [ {"option_name": "option_value"}, ... ]
+ *   [ { "optgroup_label": [ { "option_name": "option_value" }, ... ] } ]
+ *   [ { "option_name": "option_value" }, ... ]
  *   [ "option_value", ... ]
  *
  * @param <String> select_id
@@ -5047,7 +5088,7 @@ app.layout.renderSelectOptionGroup = function(label, options) {
  */
 app.layout.renderSelectOptions = function(select_id, data, selected) {
   if (! select_id || typeof data !== 'object') {
-    return app.error('app.layout.renderSelectOptions', arguments);
+    return app.error('app.layout.renderSelectOptions', [select_id, data, selected]);
   }
 
   var select_opts = '';
@@ -5102,7 +5143,7 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
  */
 app.layout.draggable = function(event, table, field) {
   if (! event || ! table) {
-    return app.error('app.view.draggable', arguments);
+    return app.error('app.view.draggable', [event, table, field]);
   }
 
   var self = app.layout.draggable.prototype;
@@ -5236,7 +5277,7 @@ app.layout.draggable.prototype.drop = function(table, e) {
  */
 app.layout.dropdown = function(event, element, dropdown) {
   if (! event || ! element || ! dropdown) {
-    return app.error('app.view.dropdown', arguments);
+    return app.error('app.view.dropdown', [event, element, dropdown]);
   }
 
   var self = app.layout.dropdown.prototype;
@@ -5317,7 +5358,7 @@ app.layout.dropdown.prototype.toggle = function() {
  */
 app.layout.collapse = function(event, element, collapsible) {
   if (! event || ! element || ! collapsible) {
-    return app.error('app.layout.collapse', arguments);
+    return app.error('app.layout.collapse', [event, element, collapsible]);
   }
 
   var self = app.layout.collapse.prototype;
@@ -5400,7 +5441,7 @@ app.layout.localize = function(element) {
   }
 
   if (! element) {
-    return app.error('app.layout.localize', arguments);
+    return app.error('app.layout.localize', [element]);
   }
 
   if (element.localized) {
@@ -5430,7 +5471,7 @@ app.utils = {};
  *
  * Checks if object is a plain object
  *
- *  ($.jQuery.fn.isPlainObject)
+ *  (jQuery.fn.isPlainObject)
  *  jQuery JavaScript Library
  *
  * @link https://jquery.com/
@@ -5468,7 +5509,7 @@ app.utils.isPlainObject = function( obj ) {
  *
  * Extend and merge objects
  *
- *  ($.jQuery.fn.extend)
+ *  (jQuery.fn.extend)
  *  jQuery JavaScript Library
  *
  * @link https://jquery.com/
@@ -5496,12 +5537,6 @@ app.utils.extendObject = function() {
   // Handle case when target is a string or something (possible in deep copy)
   if ( typeof target !== "object" && !(typeof target === "function" && typeof target.nodeType !== "number") ) {
     target = {};
-  }
-
-  // Extend jQuery itself if only one argument is passed
-  if ( i === length ) {
-    target = this;
-    i--;
   }
 
   for ( ; i < length; i++ ) {
@@ -5552,37 +5587,69 @@ app.utils.extendObject = function() {
  *
  * Detects browser and system environments
  *
- * //TODO rename system.navigator
- *
- * @param <String> purpose
+ * @param <String> purpose  ( name | platform | architecture | release )
  * @return <Object> system
  */
 app.utils.system = function(purpose) {
-  var system = { 'platform': null, 'architecture': null, 'navigator': null, 'release': null };
+  var system = { 'name': null, 'platform': null, 'architecture': null, 'release': null };
 
 
   var _ssn = function() {
-    var _platform = app._root.process.platform.toString();
-    var _architecture = app._root.process.architecture.toString();
-    var _navigator = app._root.process.platform.title.toString();
-    var _release = app._root.process.versions.node.toString();
+    var name = app._root.process.title.toString();
+    var platform = app._root.process.platform.toString();
+    var architecture = parseInt(app._root.process.arch.replace(/\D+/, ''));
+    var release = parseFloat(app._root.process.versions.node);
 
-    return { 'platform': _platform, 'architecture': _architecture, 'navigator': _navigator, 'release': _release };
+    return { 'name': name, 'platform': platform, 'architecture': architecture, 'release': release };
   }
 
   var _csn = function() {
-    var _platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
-    var _navigator = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
-    var _release = null;
+    var name = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
+    var platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
+    var release = null;
 
-    if (!! _platform) {
-      _platform = _platform[0].toLowerCase();
+    if (!! name) {
+      release = name[2] || null;
+      name = name[1] || name[0];
+      name = name.toLowerCase();
 
-      if (_platform === 'android') {
+      if (name) {
+        if (name === 'crios') {
+          name = 'chrome';
+        }
+
+        if (name.indexOf('ie') != -1 || name == 'trident') {
+          if (name === 'trident') {
+            release = navigator.userAgent.match(/rv:([\d]+)/i);
+
+            if (release) {
+              name = 'ie';
+              release = release[1];
+            } else {
+              name = null;
+              release = null;
+            }
+          } else {
+            name = 'ie';
+          }
+        }
+
+        system.navigator = name;
+
+        if (release) {
+          system.release = parseFloat(release);
+        }
+      }
+    }
+
+    if (!! platform) {
+      platform = platform[0].toLowerCase();
+
+      if (platform === 'android') {
         system.platform = 'android';
-      } else if (_platform === 'windows phone') {
+      } else if (platform === 'windows phone') {
         system.platform = 'wm';
-      } else if (_platform === 'ipad') {
+      } else if (platform === 'ipad') {
         system.platform = 'ios';
         system.model = 'ipad';
       } else {
@@ -5590,58 +5657,24 @@ app.utils.system = function(purpose) {
         system.model = 'iphone';
       }
     } else {
-      _platform = navigator.userAgent.match(/(Win|Mac|Linux)/i)
+      platform = navigator.userAgent.match(/(Win|Mac|Linux)/i)
 
-      if (_platform) {
-        _platform = _platform[0].substring(0, 3).toLowerCase();
+      if (platform) {
+        platform = platform[0].substring(0, 3).toLowerCase();
 
-        if (_platform === 'win') {
-          if (nav.userAgent.indexOf('WOW64') != -1 || nav.userAgent.indexOf('Win64') != -1) {
+        if (platform === 'win') {
+          if (navigator.userAgent.indexOf('WOW64') != -1 || navigator.userAgent.indexOf('Win64') != -1) {
             system.architecture = 64;
           } else {
             system.architecture = 32;
           }
         }
 
-        if (_platform === 'lin') {
-          _platform = 'nxl';
+        if (platform === 'lin') {
+          platform = 'nxl';
         }
 
-        system.platform = _platform;
-      }
-    }
-
-    if (!! _navigator) {
-      _release = _navigator[2] || null;
-      _navigator = _navigator[1] || _navigator[0];
-      _navigator = _navigator.toLowerCase();
-
-      if (_navigator) {
-        if (_navigator === 'crios') {
-          _navigator = 'chrome';
-        }
-
-        if (_navigator.indexOf('ie') != -1 || _navigator == 'trident') {
-          if (_navigator === 'trident') {
-            _release = navigator.userAgent.match(/rv:([\d]+)/i);
-
-            if (_release) {
-              _navigator = 'ie';
-              _release = _release[1];
-            } else {
-              _navigator = null;
-              _release = null;
-            }
-          } else {
-            _navigator = 'ie';
-          }
-        }
-
-        system.navigator = _navigator;
-
-        if (_release) {
-          system.release = parseFloat(_release);
-        }
+        system.platform = platform;
       }
     }
 
@@ -5650,14 +5683,14 @@ app.utils.system = function(purpose) {
 
 
   // clientside
-  if (!!! app._root.window.native) {
+  if (app._root.window.native == undefined) {
     system = _csn();
   // serverside
-  } else if (!!! app._root.window.process && app._root.window.process.title === 'node') {
+  } else if (app._root.process.native == undefined && app._root.process.title === 'node') {
     system = _ssn();
   // maybe unsupported serverside
   } else {
-    return app.error('app.utils.system', 'This webserver is not supported.')
+    return app.error('app.utils.system', 'This system is not supported.')
   }
 
 
@@ -5680,8 +5713,8 @@ app.utils.system = function(purpose) {
  * @return
  */
 app.utils.addEvent = function(event, element, func) {
-  if (typeof event !== 'string' || ! element || typeof func !== 'function') {
-    return app.error('app.utils.addEvent', arguments);
+  if (typeof event != 'string' || ! element || typeof func != 'function') {
+    return app.error('app.utils.addEvent', [event, element, func]);
   }
 
   if (element.addEventListener) {
@@ -5703,8 +5736,8 @@ app.utils.addEvent = function(event, element, func) {
  * @return
  */
 app.utils.removeEvent = function(event, element, func) {
-  if (! event || ! element || typeof func !== 'function') {
-    return app.error('app.utils.removeEvent', arguments);
+  if (! event || ! element || typeof func != 'function') {
+    return app.error('app.utils.removeEvent', [event, element, func]);
   }
 
   if (element.addEventListener) {
@@ -5718,7 +5751,7 @@ app.utils.removeEvent = function(event, element, func) {
 /**
  * app.utils.storage
  *
- * Storage utility, it memorizes persistent and non-persistent data using localStorage and sessionStorage
+ * Storage utility, it stores persistent and non-persistent data using localStorage and sessionStorage
  *
  * available methods:
  *  - set (key <String>, value)
@@ -5735,11 +5768,11 @@ app.utils.removeEvent = function(event, element, func) {
  */
 app.utils.storage = function(persists, method, key, value) {
   if (persists === undefined || method === undefined) {
-    return app.error('app.utils.storage', arguments);
+    return app.error('app.utils.storage', [persists, method, key, value]);
   }
 
   if (! app._runtime.storage) {
-    return app.stop('app.utils.storage', 'runtime', arguments);
+    return app.stop('app.utils.storage', 'runtime');
   }
 
   var self = app.utils.storage.prototype;
@@ -5758,9 +5791,8 @@ app.utils.storage = function(persists, method, key, value) {
 }
 
 app.utils.storage.prototype.set = function(key, value) {
-
-  if (key === undefined  || typeof key !== 'string' || value === undefined) {
-    return app.error('app.utils.storage.prototype.set', arguments);
+  if (key === undefined  || typeof key != 'string' || value === undefined) {
+    return app.error('app.utils.storage.prototype.set', [key, value]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -5781,8 +5813,8 @@ app.utils.storage.prototype.set = function(key, value) {
 }
 
 app.utils.storage.prototype.get = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.storage.prototype.get', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.storage.prototype.get', [key]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -5800,8 +5832,8 @@ app.utils.storage.prototype.get = function(key) {
 }
 
 app.utils.storage.prototype.has = function(key, value) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.storage.prototype.has', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.storage.prototype.has', [key, value]);
   }
 
   if (value != undefined) {
@@ -5822,8 +5854,8 @@ app.utils.storage.prototype.has = function(key, value) {
 }
 
 app.utils.storage.prototype.del = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.storage.prototype.del', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.storage.prototype.del', [key]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -5860,7 +5892,7 @@ app.utils.storage.prototype.reset = function() {
  */
 app.utils.cookie = function(method, key, value, expire_time) {
   if (method === undefined) {
-    return app.error('app.utils.cookie', arguments);
+    return app.error('app.utils.cookie', [method, key, value, expire_time]);
   }
 
   var self = app.utils.cookie.prototype;
@@ -5871,8 +5903,8 @@ app.utils.cookie = function(method, key, value, expire_time) {
 }
 
 app.utils.cookie.prototype.set = function(key, value, expire_time) {
-  if (key === undefined || typeof key !== 'string' || value === undefined) {
-    return app.error('app.utils.cookie.prototype.set', arguments);
+  if (key === undefined || typeof key != 'string' || value === undefined) {
+    return app.error('app.utils.cookie.prototype.set', [key, value, expire_time]);
   }
 
   var _time = 'Fri, 31 Dec 9999 23:59:59 GMT';
@@ -5901,8 +5933,8 @@ app.utils.cookie.prototype.set = function(key, value, expire_time) {
 }
 
 app.utils.cookie.prototype.get = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.cookie.prototype.get', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.cookie.prototype.get', [key]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -5934,8 +5966,8 @@ app.utils.cookie.prototype.get = function(key) {
 }
 
 app.utils.cookie.prototype.has = function(key, value) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.cookie.prototype.has', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.cookie.prototype.has', [key, value]);
   }
 
   if (value != undefined) {
@@ -5957,8 +5989,8 @@ app.utils.cookie.prototype.has = function(key, value) {
 }
 
 app.utils.cookie.prototype.del = function(key) {
-  if (key === undefined || typeof key !== 'string') {
-    return app.error('app.utils.cookie.prototype.del', arguments);
+  if (key === undefined || typeof key != 'string') {
+    return app.error('app.utils.cookie.prototype.del', [key]);
   }
 
   var _key = app.utils.base64('encode', this._prefix + key);
@@ -5998,7 +6030,7 @@ app.utils.base64 = function(method, data) {
   }
 
   if (method === undefined || ! data) {
-    return app.error('app.utils.base64', arguments);
+    return app.error('app.utils.base64', [method, data]);
   }
 
   return self[method](data);
@@ -6008,7 +6040,7 @@ app.utils.base64.prototype.encode = function(to_encode) {
   var _btoa = app._root.window.btoa;
 
   if (typeof to_encode !== 'string') {
-    return app.error('app.utils.base64.prototype.encode', arguments);
+    return app.error('app.utils.base64.prototype.encode', [to_encode]);
   }
 
   to_encode = encodeURIComponent(to_encode);
@@ -6021,7 +6053,7 @@ app.utils.base64.prototype.decode = function(to_decode) {
   var _atob = app._root.window.atob;
 
   if (typeof to_decode !== 'string') {
-    return app.error('app.utils.base64.prototype.decode', arguments);
+    return app.error('app.utils.base64.prototype.decode', [to_decode]);
   }
 
   to_decode = _atob(to_decode);
@@ -6036,13 +6068,13 @@ app.utils.base64.prototype.decode = function(to_decode) {
  *
  * Transforms type of passed value
  *
- * @param <String> purpose
+ * @param <String> purpose  ( lowercase | uppercase | numeric | integer | json )
  * @param value
  * @return value
  */
 app.utils.transform = function(purpose, value) {
   if (! purpose) {
-    return app.error('app.utils.transform', arguments);
+    return app.error('app.utils.transform', [purpose, value]);
   }
 
   switch (purpose) {
@@ -6065,13 +6097,13 @@ app.utils.transform = function(purpose, value) {
  *
  * Sanitizes passed value
  *
- * @param <String> purpose
+ * @param <String> purpose  ( whitespace | breakline | date | datetime | datetime-local | array )
  * @param value
  * @return value
  */
 app.utils.sanitize = function(purpose, value) {
   if (! purpose) {
-    return app.error('app.utils.sanitize', arguments);
+    return app.error('app.utils.sanitize', [purpose, value]);
   }
 
   switch (purpose) {
@@ -6123,7 +6155,7 @@ app.utils.sanitize = function(purpose, value) {
  */
 app.utils.classify = function(data, prefix, to_array) {
   if (! (data && typeof data === 'object') || (prefix && typeof prefix != 'string')) {
-    return app.error('app.utils.classify', arguments);
+    return app.error('app.utils.classify', [data, prefix, to_array]);
   }
 
   prefix = prefix || '';
@@ -6162,7 +6194,7 @@ app.utils.classify = function(data, prefix, to_array) {
  */
 app.utils.numberFormat = function(number, decimals, decimals_separator, thousands_separator) {
   if (typeof number != 'number') {
-    return app.error('app.utils.numberFormat', arguments);
+    return app.error('app.utils.numberFormat', [number, decimals, decimals_separator, thousands_separator]);
   }
 
   decimals = decimals != undefined ? parseInt(decimals) : 0;
@@ -6182,7 +6214,7 @@ app.utils.numberFormat = function(number, decimals, decimals_separator, thousand
  * app.utils.dateFormat
  *
  * Formats date, supported format specifiers are like them used in strftime() C library function, 
- * it accepts Date time format or true for 'now'
+ * it accepts Date time format or true for 'now', default: "Y-m-d H:M"
  *
  * format specifiers:
  *  - d  <Number> // Day of the month, digits preceded by zero (01-31)

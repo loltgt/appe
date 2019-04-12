@@ -7,9 +7,9 @@ app.os = {};
 
 
 /**
- * app.os.fileOpen
+ * app.os.fileSessionOpen
  *
- * Opens a file through FileReader api, stores it, returns to callback
+ * Opens a session file through FileReader api, stores it, returns to callback
  *
  * @global <Object> appe__config
  * @global <Object> CryptoJS
@@ -17,37 +17,37 @@ app.os = {};
  * @param <Function> callback
  * @return
  */
-app.os.fileOpen = function(callback) {
-  var config = app._root.window.appe__config;
+app.os.fileSessionOpen = function(callback) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
-    return app.stop('app.os.fileOpen');
+    return app.stop('app.os.fileSessionOpen');
   }
 
   var step = true;
 
   if (config.file && typeof config.file != 'object') {
-    step = app.error('app.os.fileOpen', 'config');
+    step = app.error('app.os.fileSessionOpen', 'config');
   }
 
   if (! FileReader) {
-    step = app.error('app.os.fileOpen', 'FileReader');
+    step = app.error('app.os.fileSessionOpen', 'FileReader');
   }
 
   if (! (CryptoJS && CryptoJS.MD5)) {
-    step = app.error('app.os.fileOpen', 'CryptoJS');
+    step = app.error('app.os.fileSessionOpen', 'CryptoJS');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    step = app.error('app.os.fileOpen', 'CryptoJS');
+    step = app.error('app.os.fileSessionOpen', 'CryptoJS');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    step = app.error('app.os.fileOpen', 'pako');
+    step = app.error('app.os.fileSessionOpen', 'pako');
   }
 
   if (! (callback && typeof callback === 'function')) {
-    step = app.error('app.os.fileOpen', arguments);
+    step = app.error('app.os.fileSessionOpen', [callback]);
   }
 
   if (! step || ! this.files.length) {
@@ -59,7 +59,7 @@ app.os.fileOpen = function(callback) {
   var schema = config.schema;
 
   if (typeof schema != 'object') {
-    app.error('app.os.fileOpen', 'schema');
+    app.error('app.os.fileSessionOpen', 'schema');
 
     return callback(false);
   }
@@ -70,7 +70,7 @@ app.os.fileOpen = function(callback) {
   var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
   if (fbinary && ! (fcompress && fcrypt)) {
-    app.error('app.os.fileOpen', 'binary');
+    app.error('app.os.fileSessionOpen', 'binary');
 
     return callback(false);
   }
@@ -98,13 +98,13 @@ app.os.fileOpen = function(callback) {
 
 
   if (!! app._runtime.debug) {
-    console.info('app.os.fileOpen', 'file', file, config.file);
+    console.info('app.os.fileSessionOpen', 'file', file, config.file);
   }
 
   //:WORKAROUND temp ios
   if (app._runtime.system.platform != 'ios') {
     if (file.name.indexOf(file_extension) === -1) {
-      app.error('app.os.fileOpen', app.i18n('This file format cannot be open.'), 'file');
+      app.error('app.os.fileSessionOpen', app.i18n('This file format cannot be open.'), 'file');
 
       return callback(false);
     }
@@ -253,7 +253,7 @@ app.os.fileOpen = function(callback) {
         });
       }
     } catch (err) {
-      app.error('app.os.fileOpen', err);
+      app.error('app.os.fileSessionOpen', err);
 
       return callback(false);
     }
@@ -262,12 +262,12 @@ app.os.fileOpen = function(callback) {
 
   var reader = new FileReader();
 
-  reader.onload = (function() {
+  reader.onloadend = (function() {
     _init(this.result);
   });
 
   reader.onerror = (function(err) {
-    app.error('app.os.fileOpen', err);
+    app.error('app.os.fileSessionOpen', err);
 
     callback(false);
   });
@@ -281,7 +281,7 @@ app.os.fileOpen = function(callback) {
 
 
 /**
- * app.os.fileSave
+ * app.os.fileSessionSave
  *
  * Sends a file to the browser, returns to callback
  *
@@ -293,41 +293,41 @@ app.os.fileOpen = function(callback) {
  * @param <Date> timestamp
  * @return
  */
-app.os.fileSave = function(callback, source, timestamp) {
-  var config = app._root.window.appe__config;
+app.os.fileSessionSave = function(callback, source, timestamp) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
-    return app.stop('app.os.fileSave');
+    return app.stop('app.os.fileSessionSave');
   }
 
   var step = true;
 
   if (config.file && typeof config.file != 'object') {
-    step = app.error('app.os.fileSave', 'config');
+    step = app.error('app.os.fileSessionSave', 'config');
   }
 
   if (! Blob) {
-    step = app.error('app.os.fileSave', 'Blob');
+    step = app.error('app.os.fileSessionSave', 'Blob');
   }
 
   if (! FileReader) {
-    step = app.error('app.os.fileSave', 'FileReader');
+    step = app.error('app.os.fileSessionSave', 'FileReader');
   }
 
   if (! (CryptoJS && CryptoJS.MD5)) {
-    step = app.error('app.os.fileOpen', 'CryptoJS');
+    step = app.error('app.os.fileSessionOpen', 'CryptoJS');
   }
 
   if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    step = app.error('app.os.fileSave', 'CryptoJS');
+    step = app.error('app.os.fileSessionSave', 'CryptoJS');
   }
 
   if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    step = app.error('app.os.fileSave', 'pako');
+    step = app.error('app.os.fileSessionSave', 'pako');
   }
 
   if (! (callback && typeof callback === 'function') || ! (timestamp && timestamp instanceof Date)) {
-    step = app.error('app.os.fileSave', arguments);
+    step = app.error('app.os.fileSessionSave', [callback, source, timestamp]);
   }
 
   if (! step || ! (source && typeof source === 'object')) {
@@ -342,7 +342,7 @@ app.os.fileSave = function(callback, source, timestamp) {
   var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
   if (fbinary && ! (fcompress && fcrypt)) {
-    app.error('app.os.fileSave', 'binary');
+    app.error('app.os.fileSessionSave', 'binary');
 
     return callback(false);
   }
@@ -460,13 +460,13 @@ app.os.fileSave = function(callback, source, timestamp) {
     var _file = file_name + '.' + file_extension;
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileSave', 'file', _file, file_type, config.file);
+      console.info('app.os.fileSessionSave', 'file', _file, file_type, config.file);
     }
 
     try {
       app.memory.set('file_saves', file_saves);
 
-      app.os.fileDownload(source, file_type, _file);
+      app.os.fileDownload(source, _file, file_type);
 
       cb(false, _file);
     } catch (err) {
@@ -532,7 +532,7 @@ app.os.fileSave = function(callback, source, timestamp) {
         });
       }
     } catch (err) {
-      app.error('app.os.fileSave', err);
+      app.error('app.os.fileSessionSave', err);
 
       callback(false);
     }
@@ -552,11 +552,11 @@ app.os.fileSave = function(callback, source, timestamp) {
  * @link https://github.com/eligrey/FileSaver.js/
  *
  * @param source
- * @param <String> mime_type
  * @param <String> filename
+ * @param <String> mime_type
  * @return
  */
-app.os.fileDownload = function(source, mime_type, filename) {
+app.os.fileDownload = function(source, filename, mime_type) {
   if (! FileReader) {
     return app.error('app.os.fileDownload', 'FileReader');
   }
@@ -565,46 +565,41 @@ app.os.fileDownload = function(source, mime_type, filename) {
     return app.error('app.os.fileDownload', 'Blob');
   }
 
-  var navigator = app._root.window.navigator;
-
-  if ((typeof source != 'object' && typeof source != 'string') || typeof mime_type != 'string' || typeof filename != 'string') {
-    return app.error('app.os.fileDownload', arguments);
+  if ((typeof source != 'object' && typeof source != 'string') || typeof filename != 'string' || typeof mime_type != 'string') {
+    return app.error('app.os.fileDownload', [source, filename, mime_type]);
   }
 
 
-  var _linkDownload = function(data) {
-    var _URL = app._root.window.URL || app._root.window.webkitURL;
-    var _revoke, _dispatch, _check, triggered = false;
+  var URL = app._root.window.URL || app._root.window.webkitURL;
 
-    var link = app._root.document.createElement('a');
-    var object = data != undefined ? data.toString() : _URL.createObjectURL(blob);
+  var _linkAttachment = function(data, is_object_link, force_new) {
+    var open, check, triggered = false;
 
+    var link = app._root.document.createElement('A');
+
+    link.href = data.toString();
     link.download = filename;
-    link.href = object;
     link.rel = 'noopener';
-    link.target = '_self';
+    link.target = !! force_new ? '_blank' : '_self';
     link.onclick = (function() {
       triggered = true;
 
-      this.remove();
+      link.remove();
 
-      clearTimeout(_revoke);
-      clearTimeout(_dispatch);
+      if (is_object_link) {
+        URL.revokeObjectURL(data);
+      }
+
+      open && clearTimeout(open);
+      check && clearTimeout(check);
     });
 
-    _revoke = setTimeout(function() {
-      ! data && _URL.revokeObjectURL(object);
-
-      this.clearTimeout();
-    }, 4E4); // 40s
-
-    _dispatch = setTimeout(function() {
+    open = setTimeout(function() {
       var e;
 
       try {
         e = new MouseEvent('click');
 
-        link.target = '_blank';
         link.dispatchEvent(e);
       } catch (err) {
         e = document.createEvent('MouseEvents');
@@ -613,43 +608,78 @@ app.os.fileDownload = function(source, mime_type, filename) {
         link.dispatchEvent(e);
       }
 
-      this.clearTimeout();
+      clearTimeout(open);
     }, 0);
 
-    _check = setTimeout(function() {
+    check = setTimeout(function() {
       if (! triggered) {
+        link.target = '_blank';
         link.click();
       }
 
-      this.clearTimeout();
+      clearTimeout(check);
     }, 10);
   }
 
-  var _msBlobDownload = function() {
-    navigator.msSaveOrOpenBlob(blob, filename);
+  var _sendAttachment = function(data, is_object_link, as_link, force_new) {
+    if (!! as_link) {
+      _linkAttachment(data, is_object_link, force_new);
+    } else {
+      var wn = app._root.window.open('', !! force_new ? '_blank' : '_self');
+
+      if (wn && wn.location) {
+        wn.location.href = data;
+        wn = null;
+      } else {
+        app._root.window.open(data, !! force_new ? '_blank' : '_self');
+      }
+    }
   }
 
-  var _attachmentDownload = function(force) {
+  var _blobAttachment = function(file, as_link, force_new) {
+    var reader = new FileReader();
+
+    reader.onloadend = (function() {
+      if (! reader.result) { throw 'data'; }
+
+      var data = reader.result;
+
+      _sendAttachment(data, false, as_link, force_new);
+    });
+
+    reader.onerror = (function(err) {
+      return app.error('app.os.fileDownload() > _blob', err);
+    });
+
+    reader.readAsDataURL(file);
+  }
+
+  var _objectLinkAttachment = function(file, as_link, force_new) {
     try {
-      var reader = new FileReader();
+      data = URL.createObjectURL(file);
 
-      reader.onloadend = (function() {
-        if (! this.result) { throw 'data'; }
-
-        var data = this.result;
-
-        if (!! force) {
-          data = data.replace(/^data:[^;]*;/, 'data:attachment/file;');
-
-          _linkDownload(data);
-        } else {
-          app._root.window.open(data, '_blank');
-        }
-      });
-
-      reader.readAsDataURL(blob);
+      _sendAttachment(data, true, as_link, force_new);
     } catch (err) {
-      return app.error('app.os.fileDownload', err);
+      return app.error('app.os.fileDownload() > _objectURL', err);
+    }
+  }
+
+  var _downloadAttachment = function(as_link, as_object_link, force_attachment, force_new) {
+    var file_type = !! force_attachment ? 'attachment/file' : 'application/octet-stream';
+    var file;
+
+    try {
+      file = new File([ blob ], filename, { type: file_type });
+    } catch (err) {
+      app.error('app.os.fileDownload() > _downloadAttachment', 'File', null, true);
+
+      file = new Blob([ blob ], { type: file_type });
+    }
+
+    if (as_object_link) {
+      _objectLinkAttachment(file, as_link, force_new);
+    } else {
+      _blobAttachment(file, as_link, force_new);
     }
   }
 
@@ -662,34 +692,53 @@ app.os.fileDownload = function(source, mime_type, filename) {
     return app.error('app.os.fileDownload', err);
   }
 
+
+  var as_object_link = app._root.window.location.protocol != 'file:' ? true : false;
+
   // target browsers with download anchor attribute
   if ('download' in app._root.window.HTMLAnchorElement.prototype) {
-    if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', 'link', mime_type, filename);
-    }
+    // default: 1 0 0 0
 
-    _linkDownload();
+    _downloadAttachment(true);
+
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', [1, 0, 0, 0], mime_type, filename);
+    }
   // target ie
   } else if ('msSaveOrOpenBlob' in app._root.window.navigator) {
+    // ie: 1 ? 0 0
+
+    navigator.msSaveOrOpenBlob(file, filename) || _downloadAttachment(true, as_object_link, false, false);
+
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', 'ms', mime_type, filename);
+      console.info('app.os.fileDownload', [1, as_object_link, 0, 1], mime_type, filename);
     }
 
-    _msBlobDownload();
   // target other browsers with open support
   } else if ('open' in app._root.window) {
-    if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', 'attachment', mime_type, filename);
-    }
+    var as_link = app._runtime.system.name == 'chrome' ? true : false;
+        as_object_link = app._runtime.system.name != 'chrome' ? as_object_link : false;
+    var force_attachment = app._runtime.system.name == 'safari' ? true : false;
+    var force_new = app._runtime.system.name == 'safari' ? true : false;
 
-    _attachmentDownload();
-  // fallback to link and attachment/file download
+    // safari: 0 ? 1 1
+    // crios: 1 0 0 0
+    // default: 0 ? 0 1
+
+    _downloadAttachment(as_link, as_object_link, force_attachment, force_new);
+
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', [as_link, as_object_link, force_attachment, force_new], mime_type, filename);
+    }
+  // fallback
   } else {
-    if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', 'fallback', mime_type, filename);
-    }
+    // default: 1 ? 1 1
 
-    _linkDownload(true);
+    _downloadAttachment(true, as_object_link, true, true);
+
+    if (!! app._runtime.debug) {
+      console.info('app.os.fileDownload', [1, as_object_link, 1, 1], mime_type, filename);
+    }
   }
 }
 
@@ -707,7 +756,7 @@ app.os.fileDownload = function(source, mime_type, filename) {
  */
 app.os.scriptOpen = function(callback, file, fn, max_attempts) {
   if (typeof callback != 'function' || typeof file != 'string' || (fn && typeof fn != 'string')) {
-    app.error('app.os.scriptOpen', arguments);
+    app.error('app.os.scriptOpen', [callback, file, fn, max_attempts]);
 
     return callback(false);
   }
@@ -765,14 +814,14 @@ app.os.scriptOpen = function(callback, file, fn, max_attempts) {
  * @return <Object>
  */
 app.os.generateJsonHead = function(source, timestamp) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.os.generateJsonHead');
   }
 
   if (! (source && typeof source === 'object') && ! (timestamp && timestamp instanceof Date)) {
-    return app.error('app.os.generateJsonHead', arguments);
+    return app.error('app.os.generateJsonHead', [source, timestamp]);
   }
 
   var checksum = '';
@@ -798,7 +847,7 @@ app.os.generateJsonHead = function(source, timestamp) {
  */
 app.os.generateJsonChecksum = function(callback, source) {
   if (typeof callback != 'function' && typeof source != 'string') {
-    app.error('app.os.generateJsonChecksum', arguments);
+    app.error('app.os.generateJsonChecksum', [callback, source]);
 
     return callback(false);
   }
@@ -829,7 +878,7 @@ app.os.generateJsonChecksum = function(callback, source) {
  * @return <String>
  */
 app.os.getLastFileName = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.os.getLastFileName');
@@ -863,7 +912,7 @@ app.os.getLastFileName = function() {
  * @return <String>
  */
 app.os.getLastFileVersion = function() {
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.os.getLastFileVersion', 'store');
@@ -896,7 +945,7 @@ app.os.getLastFileVersion = function() {
  * @return <String>
  */
 app.os.getLastFileChecksum = function() {
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.os.getLastFileChecksum', 'store');

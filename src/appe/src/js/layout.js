@@ -18,7 +18,7 @@ app.layout = {};
  */
 app.layout.renderElement = function(node, content, attributes) {
   if (typeof node !== 'string' || (content && typeof content !== 'string') || (attributes && typeof attributes !== 'object')) {
-    return app.error('app.layout.renderElement', arguments);
+    return app.error('app.layout.renderElement', [node, content, attributes]);
   }
 
   var _node = node.toLowerCase();
@@ -57,7 +57,7 @@ app.layout.renderElement = function(node, content, attributes) {
  */
 app.layout.renderSelect = function(select_id, data, selected, attributes) {
   if (! select_id || typeof data !== 'object') {
-    return app.error('app.layout.renderSelectOptions', arguments);
+    return app.error('app.layout.renderSelectOptions', [select_id, data, selected, attributes]);
   }
 
   var select_attrs = app.utils.extendObject({ id: select_id }, attributes);
@@ -83,7 +83,7 @@ app.layout.renderSelect = function(select_id, data, selected, attributes) {
  */
 app.layout.renderSelectOption = function(value, name, selected) {
   if (! value || ! name) {
-    return app.error('app.layout.renderSelectOption', arguments);
+    return app.error('app.layout.renderSelectOption', [value, name, selected]);
   }
 
   return app.layout.renderElement('option', name, { value: value, selected: (selected ? '' : null) });
@@ -101,7 +101,7 @@ app.layout.renderSelectOption = function(value, name, selected) {
  */
 app.layout.renderSelectOptionGroup = function(label, options) {
   if (! label || ! options) {
-    return app.error('app.layout.renderSelectOptionGroup', arguments);
+    return app.error('app.layout.renderSelectOptionGroup', [label, options]);
   }
 
   return app.layout.renderElement('optgroup', options, { label: label });
@@ -115,8 +115,8 @@ app.layout.renderSelectOptionGroup = function(label, options) {
  *
  * example:
  *
- *   [ {"optgroup_label": [ {"option_name": "option_value"}, ... ]} ]
- *   [ {"option_name": "option_value"}, ... ]
+ *   [ { "optgroup_label": [ { "option_name": "option_value" }, ... ] } ]
+ *   [ { "option_name": "option_value" }, ... ]
  *   [ "option_value", ... ]
  *
  * @param <String> select_id
@@ -125,7 +125,7 @@ app.layout.renderSelectOptionGroup = function(label, options) {
  */
 app.layout.renderSelectOptions = function(select_id, data, selected) {
   if (! select_id || typeof data !== 'object') {
-    return app.error('app.layout.renderSelectOptions', arguments);
+    return app.error('app.layout.renderSelectOptions', [select_id, data, selected]);
   }
 
   var select_opts = '';
@@ -180,7 +180,7 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
  */
 app.layout.draggable = function(event, table, field) {
   if (! event || ! table) {
-    return app.error('app.view.draggable', arguments);
+    return app.error('app.view.draggable', [event, table, field]);
   }
 
   var self = app.layout.draggable.prototype;
@@ -314,7 +314,7 @@ app.layout.draggable.prototype.drop = function(table, e) {
  */
 app.layout.dropdown = function(event, element, dropdown) {
   if (! event || ! element || ! dropdown) {
-    return app.error('app.view.dropdown', arguments);
+    return app.error('app.view.dropdown', [event, element, dropdown]);
   }
 
   var self = app.layout.dropdown.prototype;
@@ -395,7 +395,7 @@ app.layout.dropdown.prototype.toggle = function() {
  */
 app.layout.collapse = function(event, element, collapsible) {
   if (! event || ! element || ! collapsible) {
-    return app.error('app.layout.collapse', arguments);
+    return app.error('app.layout.collapse', [event, element, collapsible]);
   }
 
   var self = app.layout.collapse.prototype;
@@ -478,7 +478,7 @@ app.layout.localize = function(element) {
   }
 
   if (! element) {
-    return app.error('app.layout.localize', arguments);
+    return app.error('app.layout.localize', [element]);
   }
 
   if (element.localized) {

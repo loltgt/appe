@@ -14,8 +14,8 @@ app.start = {};
  * @param <Number> phase
  */
 app.start.progress = function(phase) {
-  var progress_wait = app._root.document.getElementById('start-progress-wait');
-  var progress_open = app._root.document.getElementById('start-progress-open');
+  var progress_wait = document.getElementById('start-progress-wait');
+  var progress_open = document.getElementById('start-progress-open');
 
   switch (phase) {
     case 2:
@@ -43,7 +43,7 @@ app.start.progress = function(phase) {
  * @return
  */
 app.start.loadComplete = function(session_resume) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.start.loadComplete');
@@ -100,7 +100,7 @@ app.start.loadComplete = function(session_resume) {
  * @return
  */
 app.start.attemptLoad = function(callback, fn, file, schema, memoize) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.start.attemptLoad');
@@ -120,12 +120,8 @@ app.start.attemptLoad = function(callback, fn, file, schema, memoize) {
     step = app.error('app.start.attemptLoad', 'CryptoJS');
   }
 
-  if (! callback || ! fn || ! file || ! schema) {
-    step = app.stop('app.start.attemptLoad', arguments);
-  }
-
-  if (typeof callback != 'function' || typeof fn != 'string' || typeof file != 'string' || typeof schema != 'object') {
-    step = app.stop('app.start.attemptLoad', arguments);
+  if (typeof callback != 'function' || ! fn || typeof fn != 'string' || ! file || typeof file != 'string' || typeof schema != 'object') {
+    step = app.stop('app.start.attemptLoad', [callback, fn, file, schema, memoize]);
   }
 
   if (! step) {
@@ -287,7 +283,7 @@ app.start.redirect = function(loaded) {
  * @return
  */
 app.start.alternative = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.start.alternative');
@@ -309,7 +305,7 @@ app.start.alternative = function() {
     'iemobile': 'Explorer'
   };
 
-  var browser = navigators[system.navigator];
+  var browser = navigators[system.name];
   var exec_platform = system.platform in config.alt.exec_platform ? system.platform : null;
 
 
@@ -346,7 +342,7 @@ app.start.alternative = function() {
  * @return
  */
 app.start.load = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.start.load');
@@ -357,22 +353,20 @@ app.start.load = function() {
 
   var exec = true;
 
-  if (
-    ('sessionStorage' in app._root.window === false && 'localStorage' in app._root.window === false) ||
-    'FileReader' in app._root.window === false ||
-    'Blob' in app._root.window === false ||
-    'history' in app._root.window === false ||
-    'atob' in app._root.window === false ||
-    'btoa' in app._root.window === false ||
-    sessionStorage === undefined
-  ) {
-    exec = false;
-  }
-
-  if (!!! app._root.document.native) {
+  if (app._root.window.native == undefined) {
     if (
+      ('sessionStorage' in window == false && 'localStorage' in window == false) ||
+      'FileReader' in window == false ||
+      'Blob' in window == false ||
+      'history' in window == false ||
+      'atob' in window == false ||
+      'btoa' in window == false
+    ) {
+      exec = false;
+    } else if (
+      sessionStorage === undefined ||
       'replaceState' in history === false ||
-      'checkValidity' in app._root.document.createElement('form') === false
+      'checkValidity' in document.createElement('form') === false
     ) {
       exec = false;
     }
@@ -412,16 +406,16 @@ app.start.load = function() {
   }
 
   var _layout = function() {
-    var _has_locale = ! (app._root.window.appe__locale === undefined);
+    var _is_localized = ! (app._root.server.appe__locale === undefined);
 
 
-    var open_action = app._root.document.getElementById('start-action-open');
-    var new_action = app._root.document.getElementById('start-action-new');
+    var open_action = document.getElementById('start-action-open');
+    var new_action = document.getElementById('start-action-new');
 
     app.utils.addEvent('click', open_action, app.openSession);
     app.utils.addEvent('click', new_action, app.newSession);
 
-    if (_has_locale) {
+    if (_is_localized) {
       _localize();
     }
   }
@@ -439,7 +433,7 @@ app.start.load = function() {
     app.controller.setTitle(config.app_name);
 
 
-    if (!!! app._root.document.native) {
+    if (app._root.document.native == undefined) {
       _layout();
     }
 

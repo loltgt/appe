@@ -17,7 +17,7 @@ app.controller = {};
  */
 app.controller.cursor = function(loc) {
   if (loc && typeof loc != 'object') {
-    return app.error('app.controller.cursor', arguments);
+    return app.error('app.controller.cursor', [loc]);
   }
 
   if (loc) {
@@ -53,9 +53,10 @@ app.controller.spoof = function() {
   if (ref.indexOf('&') != -1) {
     ref = ref.split('&');
 
-    // values
+    // querystring values
     if (ref[1].indexOf('=') != -1) {
       var sub = ref[1].split('=');
+
       loc = { view: ref[0], action: sub[0], index: parseInt(sub[1]) };
     } else {
       loc = { view: ref[0], action: ref[1] };
@@ -85,7 +86,7 @@ app.controller.history = function(title, url) {
     title = _title;
   }
 
-  if (app._runtime.system.navigator == 'safari') {
+  if (app._runtime.system.name == 'safari') {
     app._root.window.location.href = url;
   } else {
     history.replaceState(null, title, url);
@@ -135,20 +136,20 @@ app.controller.getTitle = function() {
  * @return
  */
 app.controller.retrieve = function(callback, routine) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.controller.retrieve');
   }
 
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.controller.retrieve', 'store');
   }
 
   if (typeof callback != 'function' || typeof routine != 'object') {
-    return app.stop('app.controller.retrieve', arguments);
+    return app.stop('app.controller.retrieve', [callback, routine]);
   }
 
   var schema = config.schema;
@@ -160,7 +161,7 @@ app.controller.retrieve = function(callback, routine) {
 
   var _retrieve = function(fn, schema) {
     if (typeof fn != 'string' || typeof schema != 'object') {
-      return app.stop('app.controller.retrieve() > _retrieve', arguments);
+      return app.stop('app.controller.retrieve() > _retrieve', [fn, schema]);
     }
 
     if (store[fn] && typeof store[fn] === 'object') {
@@ -213,14 +214,14 @@ app.controller.retrieve = function(callback, routine) {
  * @return
  */
 app.controller.store = function(callback, fn, schema, data) {
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.controller.store', 'store');
   }
 
   if (typeof callback != 'function' || typeof fn != 'string' || typeof schema != 'object' || typeof data != 'object') {
-    return app.stop('app.controller.store', arguments);
+    return app.stop('app.controller.store', [callback, fn, schema, data]);
   }
 
   var source = store[fn];
@@ -232,7 +233,7 @@ app.controller.store = function(callback, fn, schema, data) {
 
   var _store = function(key, values) {
     if (typeof key != 'string' || typeof values != 'object') {
-      return app.stop('app.controller.store() > _store', arguments);
+      return app.stop('app.controller.store() > _store', [key, values]);
     }
 
     if (! source[key]) {
@@ -282,13 +283,13 @@ app.controller.store = function(callback, fn, schema, data) {
  * @return <Boolean>
  */
 app.controller.clear = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.controller.clear');
   }
 
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.controller.clear', 'store');

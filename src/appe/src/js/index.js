@@ -6,15 +6,16 @@
  * @license MIT License
  *
  * contains:
- * - ($.jQuery.fn.isPlainObject) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
- * - ($.jQuery.fn.extend) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
+ * - (jQuery.fn.isPlainObject) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
+ * - (jQuery.fn.extend) from jQuery JavaScript Library <https://jquery.com/>, Copyright JS Foundation and other contributors, MIT license <https://jquery.org/license>
  */
 
 var app = app = { '_root': {}, '_runtime': {} };
 
-app._root.document = !! this.Document && document || { documentElement: {}, native: false };
-app._root.window = !! this.Window && window || { document: app._root.document, native: false };
-app._root.process = !!! this.Process && { native: false } || process;
+app._root.server = this;
+app._root.document = !! this.Document && document || { native: false, documentElement: null };
+app._root.window = !! this.Window && window || { native: false, document: app._root.document, navigator: null };
+app._root.process = !! this.Window && ! this.Process && { native: false } || process;
 
 app._runtime = {
   version: '1.0',
@@ -47,7 +48,7 @@ app._runtime = {
  */
 app.load = function(func) {
   if (typeof func != 'function') {
-    return app.stop('app.load', [func]);
+    return app.stop('app.load', 'func');
   }
 
   var loaded = false;
@@ -60,16 +61,16 @@ app.load = function(func) {
     }
   }
 
-  if (!!! app._root.window.native) {
-    if (app._root.document.readyState == 'complete') {
+  if (app._root.window.native == undefined) {
+    if (document.readyState == 'complete') {
       _func();
     } else {
-      app._root.document.addEventListener('DOMContentLoaded', _func);
+      document.addEventListener('DOMContentLoaded', _func);
     }
 
     app.utils.addEvent('load', app._root.window, _func);
   } else {
-    app._root.window.onload = func;
+    app._root.server.load = func;
   }
 }
 
@@ -84,13 +85,13 @@ app.load = function(func) {
  */
 app.unload = function(func) {
   if (typeof func != 'function') {
-    return app.stop('app.unload', [func]);
+    return app.stop('app.unload', 'func');
   }
 
-  if (!!! app._root.window.native) {
+  if (app._root.window.native == undefined) {
     app.utils.addEvent('beforeunload', app._root.window, func);
   } else {
-    app._root.window.onunload = func;
+    app._root.server.onunload = func;
   }
 }
 
@@ -104,7 +105,7 @@ app.unload = function(func) {
  * @return
  */
 app.redirect = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.redirect');
@@ -166,10 +167,10 @@ app.position = function() {
  */
 app.session = function(callback, config, target) {
   if (typeof callback != 'function' || ! config) {
-    return app.stop('app.session', [callback, config, target]);
+    return app.stop('app.session', [callback, 'config', target]);
   }
 
-  app._root.window.appe__store = {};
+  app._root.server.appe__store = {};
 
   app._runtime.name = config.app_ns.toString();
   app._runtime.debug = !! config.debug ? true : false;
@@ -187,8 +188,10 @@ app.session = function(callback, config, target) {
     app._runtime.storage = 'sessionStorage';
   } else if ('sessionStorage' in app._root.window === false) {
     app._runtime.storage = 'localStorage';
-  } else if (app._runtime.system.navigator == 'safari') {
+  } else if (app._runtime.system.name == 'safari') {
     app._runtime.storage = 'sessionStorage';
+  } else if (app._root.process == undefined) {
+    app._runtime.storage = 'storage';
   } else {
     app._runtime.storage = 'localStorage';
   }
@@ -196,20 +199,18 @@ app.session = function(callback, config, target) {
   app._runtime.session = true;
 
 
-  var _has_locale = ! (app._root.window.appe__locale === undefined);
+  var _is_localized = ! (app._root.server.appe__locale === undefined);
 
 
   // auto-select language locale
-  if (_has_locale && config.language === null) {
+  if (_is_localized && config.language === null) {
     var locale = app._root.window.appe__locale;
 
     if (typeof locale != 'object') {
       return app.error('app.session', 'locale');
     }
 
-    var navigator = app._root.window.navigator;
-
-    if (navigator && navigator.languages && typeof navigator.languages === 'object') {
+    if (app._root.window.navigator && navigator.languages && typeof navigator.languages === 'object') {
       var found_locale = false;
 
       for (lang in navigator.languages) {
@@ -230,9 +231,9 @@ app.session = function(callback, config, target) {
   app._runtime.locale_dir = !! config.language_direction ? config.language_direction.toString() : app._runtime.locale_dir;
 
 
-  if (!!! app._root.document.native) {
-    app._root.document.documentElement.setAttribute('lang', app._runtime.locale);
-    app._root.document.documentElement.setAttribute('class', app.utils.classify(app._runtime.system, 'system--'));
+  if (app._root.document.native == undefined) {
+    document.documentElement.setAttribute('lang', app._runtime.locale);
+    document.documentElement.setAttribute('class', app.utils.classify(app._runtime.system, 'system--'));
   }
 
 
@@ -359,7 +360,7 @@ app.session = function(callback, config, target) {
  */
 app.resume = function(config, target) {
   if (! config) {
-    return app.stop('app.resume', [config, target]);
+    return app.stop('app.resume', ['config', target]);
   }
 
   var session_resume = '';
@@ -410,13 +411,12 @@ app.resume = function(config, target) {
  * @return <Object>
  */
 app.data = function(key) {
-  var store = app._root.window.appe__store;
+  var store = app._root.server.appe__store;
 
   if (! store) {
     return app.stop('app.data', 'store');
   }
 
-  //TODO fn
   var _app_name = app._runtime.name.toString();
 
   if (! store[_app_name]) {
@@ -445,12 +445,12 @@ app.data = function(key) {
  */
 app.checkConfig = function(config) {
   if (! (config && typeof config === 'object')) {
-    return app.stop('app.checkConfig', [config]);
+    return app.stop('app.checkConfig');
   }
 
   var error = false;
 
-  var _required_keys = [ 'app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'base_path', 'save_path' ];
+  var _required_keys = ['app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'base_path', 'save_path'];
   var key = null, i = 0;
 
   while ((key = _required_keys[i++])) {
@@ -472,7 +472,7 @@ app.checkConfig = function(config) {
     error = true;
   }
 
-  return !! error && app.stop('app.checkConfig');
+  return !! error && app.stop('app.checkConfig', 'config');
 }
 
 
@@ -487,14 +487,14 @@ app.checkConfig = function(config) {
  * @return <Boolean>
  */
 app.checkFile = function(source, checksum) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.checkFile');
   }
 
   if (! (source && typeof source === 'object')) {
-    return app.error('app.checkFile', [source, checksum]);
+    return app.error('app.checkFile', ['source', 'checksum']);
   }
 
   var _app_version = app._runtime.version.toString();
@@ -521,22 +521,208 @@ app.checkFile = function(source, checksum) {
 
 
 /**
+ * app.openSessionFile
+ *
+ * Opens session from an app session file
+ *
+ * @global <Object> appe__config
+ * @global <Object> appe__start
+ * @global <Object> CryptoJS
+ * @global <Function> pako
+ * @param <Object> source
+ * @return
+ */
+app.openSessionFile = function() {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.openSessionFile');
+  }
+
+  var _is_start = ! (app._root.server.appe__start === undefined);
+
+
+  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    return app.error('app.openSessionFile', 'CryptoJS');
+  }
+
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    return app.error('app.openSessionFile', 'pako');
+  }
+
+
+  var schema = config.schema;
+
+  if (typeof schema != 'object') {
+    return app.error('app.openSessionFile', 'schema');
+  }
+
+  var _current_timestamp = new Date();
+  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
+
+  var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
+  var _app_name = app._runtime.name.toString();
+
+
+  var fbinary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var fcompress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+  if (fbinary && ! (fcompress && fcrypt)) {
+    app.error('app.openSessionFile', 'binary');
+
+    return callback(false);
+  }
+
+  var file_extension = 'js';
+
+  if (fbinary) {
+    file_extension = 'appe';
+  }
+
+  file_extension = config.file && config.file.extension ? '.' + config.file.extension.toString() : file_extension;
+
+
+  var _open = function() {
+    app.os.fileSessionOpen.call(this, _complete);
+  }
+
+  var _complete = function(filename) {
+    _is_start && app.start.progress(0);
+
+    if (! filename) {
+      return; // silent fail
+    }
+
+
+    app.utils.cookie('del', 'last_opened_file');
+    app.utils.cookie('del', 'last_session');
+
+
+    var _filename = app.utils.base64('encode', filename);
+
+
+    app.utils.cookie('set', 'last_opened_file', _filename);
+    app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+
+
+    app.memory.set('last_opened_file', _filename);
+
+    app.memory.set('last_stored', _current_timestamp);
+    app.memory.set('last_time', _current_timestamp);
+    app.memory.set('last_session', _current_timestamp_enc);
+
+
+    _is_start ? app.start.redirect(true) : app._root.window.location.reload();
+  }
+
+
+  var open_input = null;
+  var _se_open_input = this.getAttribute('data-open');
+
+  if (! _se_open_input) {
+    this.setAttribute('data-open', '');
+
+    var open_input_ref = this.getAttribute('data-open-input');
+    var open_input = this.parentNode.querySelector(open_input_ref);
+
+    if (app._runtime.system.platform != 'ios') {
+      open_input.setAttribute('accept', '.' + file_extension);
+    }
+
+    app.utils.addEvent('change', open_input, _open);
+  }
+
+  if (open_input) {
+    _is_start && app.start.progress(2);
+
+    open_input.click();
+  }
+}
+
+
+/**
+ * app.saveSessionFile
+ *
+ * Saves session to app session file
+ *
+ * @global <Object> appe__config
+ * @global <Object> appe__store
+ * @global <Object> appe__start
+ * @global <Object> CryptoJS
+ * @global <Function> pako
+ * @param <Object> source
+ */
+app.saveSessionFile = function() {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.saveSessionFile');
+  }
+
+  var store = app._root.server.appe__store;
+
+  if (! store) {
+    return app.stop('app.saveSessionFile', 'store');
+  }
+
+  var _is_start = ! (app._root.server.appe__start === undefined);
+
+
+  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    return app.error('app.saveSessionFile', 'CryptoJS');
+  }
+
+  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
+    return app.error('app.saveSessionFile', 'pako');
+  }
+
+
+  var _app_name = app._runtime.name.toString();
+
+  var schema = config.schema;
+
+  if (typeof schema != 'object') {
+    return app.error('app.saveSessionFile', 'schema');
+  }
+
+  var source = {};
+
+  var _current_timestamp = new Date();
+
+
+  Array.prototype.forEach.call(schema, function(key) {
+    source[key] = store[_app_name][key];
+  });  
+
+  source.file = app.os.generateJsonHead(source, _current_timestamp);
+
+
+  app.os.fileSessionSave(function(filename) {
+    if (!! app._runtime.debug) {
+      console.info('save', filename);
+    }
+  }, source, _current_timestamp);
+}
+
+
+/**
  * app.newSession
  *
  * Creates a new empty session
  *
  * @global <Object> appe__config
  * @global <Object> appe__start
- * @return <Boolean>
+ * @return
  */
 app.newSession = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
-    return app.stop('app.openSession');
+    return app.stop('app.newSession');
   }
 
-  var _is_start = ! (app._root.window.appe__start === undefined);
+  var _is_start = ! (app._root.server.appe__start === undefined);
 
   var _app_name = app._runtime.name.toString();
 
@@ -549,7 +735,7 @@ app.newSession = function() {
   var schema = config.schema;
 
   if (typeof schema != 'object') {
-    return app.error('app.openSession', 'schema');
+    return app.error('app.newSession', 'schema');
   }
 
 
@@ -581,7 +767,7 @@ app.newSession = function() {
   }
 
   var _complete = function() {
-    _is_start ? app.start.redirect(false) : app._root.document.location.reload();
+    _is_start ? app.start.redirect(false) : app._root.window.location.reload();
   }
 
 
@@ -592,187 +778,17 @@ app.newSession = function() {
 /**
  * app.openSession
  *
- * Opens session from an app session file
- *
- * @global <Object> appe__config
- * @global <Object> appe__start
- * @global <Object> CryptoJS
- * @global <Function> pako
- * @param <Object> source
- * @return
+ * Opens session, alias of app.openSessionFile
  */
-app.openSession = function() {
-  var config = app._root.window.appe__config;
-
-  if (! config) {
-    return app.stop('app.openSession');
-  }
-
-  var _is_start = ! (app._root.window.appe__start === undefined);
-
-
-  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    return app.error('app.openSession', 'CryptoJS');
-  }
-
-  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.openSession', 'pako');
-  }
-
-
-  var schema = config.schema;
-
-  if (typeof schema != 'object') {
-    return app.error('app.openSession', 'schema');
-  }
-
-  var _current_timestamp = new Date();
-  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
-
-  var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
-  var _app_name = app._runtime.name.toString();
-
-
-  var fbinary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
-  var fcompress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
-  var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
-
-  if (fbinary && ! (fcompress && fcrypt)) {
-    app.error('app.openSession', 'binary');
-
-    return callback(false);
-  }
-
-  var file_extension = 'js';
-
-  if (fbinary) {
-    file_extension = 'appe';
-  }
-
-  file_extension = config.file && config.file.extension ? '.' + config.file.extension.toString() : file_extension;
-
-
-  var _open = function() {
-    app.os.fileOpen.call(this, _complete);
-  }
-
-  var _complete = function(filename) {
-    _is_start && app.start.progress(0);
-
-    if (! filename) {
-      return; // silent fail
-    }
-
-
-    app.utils.cookie('del', 'last_opened_file');
-    app.utils.cookie('del', 'last_session');
-
-
-    var _filename = app.utils.base64('encode', filename);
-
-
-    app.utils.cookie('set', 'last_opened_file', _filename);
-    app.utils.cookie('set', 'last_session', _current_timestamp_enc);
-
-
-    app.memory.set('last_opened_file', _filename);
-
-    app.memory.set('last_stored', _current_timestamp);
-    app.memory.set('last_time', _current_timestamp);
-    app.memory.set('last_session', _current_timestamp_enc);
-
-
-    _is_start ? app.start.redirect(true) : app._root.document.location.reload();
-  }
-
-
-  var open_input = null;
-  var _se_open_input = this.getAttribute('data-open');
-
-  if (! _se_open_input) {
-    this.setAttribute('data-open', '');
-
-    var open_input_ref = this.getAttribute('data-open-input');
-    var open_input = this.parentNode.querySelector(open_input_ref);
-
-    if (app._runtime.system.platform != 'ios') {
-      open_input.setAttribute('accept', '.' + file_extension);
-    }
-
-    app.utils.addEvent('change', open_input, _open);
-  }
-
-  if (open_input) {
-    _is_start && app.start.progress(2);
-
-    open_input.click();
-  }
-}
+app.openSession = app.openSessionFile;
 
 
 /**
  * app.saveSession
  *
- * Saves session to app session file
- *
- * @global <Object> appe__config
- * @global <Object> appe__store
- * @global <Object> appe__start
- * @global <Object> CryptoJS
- * @global <Function> pako
- * @param <Object> source
+ * Saves session, alias of app.saveSessionFile
  */
-app.saveSession = function() {
-  var config = app._root.window.appe__config;
-
-  if (! config) {
-    return app.stop('app.saveSession');
-  }
-
-  var store = app._root.window.appe__store;
-
-  if (! store) {
-    return app.stop('app.saveSession', 'store');
-  }
-
-  var _is_start = ! (app._root.window.appe__start === undefined);
-
-
-  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    return app.error('app.saveSession', 'CryptoJS');
-  }
-
-  if (!! app._runtime.compression && ! (pako && pako.inflate && pako.deflate)) {
-    return app.error('app.saveSession', 'pako');
-  }
-
-
-  var _app_name = app._runtime.name.toString();
-
-  var schema = config.schema;
-
-  if (typeof schema != 'object') {
-    return app.error('app.saveSession', 'schema');
-  }
-
-  var source = {};
-
-  var _current_timestamp = new Date();
-
-
-  Array.prototype.forEach.call(schema, function(key) {
-    source[key] = store[_app_name][key];
-  });  
-
-  source.file = app.os.generateJsonHead(source, _current_timestamp);
-
-
-  app.os.fileSave(function(filename) {
-    if (!! app._runtime.debug) {
-      console.info('save', filename);
-    }
-  }, source, _current_timestamp);
-}
+app.saveSession = app.saveSessionFile;
 
 
 /**
@@ -923,34 +939,28 @@ app.debug = function() {
  * Stops app execution
  *
  * @global <Object> appe__main
- * @param <String> arg0 - msg | fn
- * @param arg1 - log | msg
- * @param arg2 - log | msg
- * @param <Boolean> arg3 - soft
+ * @param <String> arg0  ( msg | fn )
+ * @param arg1  ( log | msg )
+ * @param arg2  ( log | msg )
+ * @param <Boolean> soft
  * @return <Boolean>
  */
-app.stop = function(arg0, arg1, arg2, arg3) {
+app.stop = function(arg0, arg1, arg2, soft) {
   if (! app._runtime.exec) {
     return false;
   }
 
-  var _is_main = ! (app._root.window.appe__main || undefined);
+  var _is_main = ! (app._root.server.appe__main === undefined);
 
   app._runtime.exec = false;
 
-  var _arguments = [arg0, arg1, arg2, arg3];
-
-  var args = Object.values(_arguments).slice(0);
-
-  if (_arguments.length == 1) {
-    _arguments.push(null);
-  }
+  arg1 = arg1 || null;
 
   if (_is_main) {
     app.blind();
   }
 
-  app.error.apply(this, args);
+  app.error.apply(this, [arg0, arg1, arg2, soft]);
 
   return false;
 }
@@ -962,35 +972,28 @@ app.stop = function(arg0, arg1, arg2, arg3) {
  * Helper to debug and display error messages
  *
  * @global <Object> appe__control
- * @param <String> arg0 - msg | fn
- * @param arg1 - log | msg
- * @param arg2 - log | msg
- * @param <Boolean> arg3 - soft
+ * @param <String> arg0  ( msg | fn )
+ * @param arg1  ( log | msg )
+ * @param arg2  ( log | msg )
+ * @param <Boolean> soft
  * @return <undefined>
  */
-app.error = function(arg0, arg1, arg2, arg3) {
-  var _is_view = ! (app._root.window.appe__control === undefined);
+app.error = function(arg0, arg1, arg2, soft) {
+  var _is_view = ! (app._root.server.appe__control === undefined);
 
-  var _arguments = [arg0, arg1, arg2, arg3];
-
-  var soft = false;
   var fn = null;
   var msg = null;
   var log = null;
 
-  if (_arguments.length == 4) {
-    soft = true;
-  }
-
-  if (_arguments.length > 2) {
-    fn = _arguments[0];
-    msg = _arguments[1];
-    log = _arguments[2];
-  } else if (_arguments.length == 2) {
-    fn = _arguments[0];
-    log = _arguments[1];
-  } else if (_arguments.length == 1) {
-    msg = _arguments[0];
+  if (arg2) {
+    fn = arg0;
+    msg = arg1;
+    log = arg2;
+  } else if (arg1) {
+    fn = arg0;
+    log = arg1;
+  } else if (arg0) {
+    msg = arg0;
   }
 
   // avoid too much recursions
@@ -998,8 +1001,8 @@ app.error = function(arg0, arg1, arg2, arg3) {
     return undefined;
   }
 
-  if (! document.documentElement.lang) {
-    document.documentElement.lang = app._runtime.language.toString();
+  if (! app._root.document.documentElement.lang) {
+    document.documentElement.lang = app._runtime.locale.toString();
   }
 
   if (app._runtime.debug) {
@@ -1048,7 +1051,7 @@ app.blind = function() {
   var _blind = app._root.document.createElement('div');
   _blind.setAttribute('style', 'position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; background: rgba(0,0,0,0.3);');
 
-  !!! app._root.document.native && app._root.document.body.appendChild(_blind);
+  app._root.document == undefined && app._root.document.body.appendChild(_blind);
 }
 
 
@@ -1058,12 +1061,12 @@ app.blind = function() {
  * Utility to get app info(s)
  *
  * @global <Object> appe__config
- * @param <String> from
- * @param <String> info
+ * @param <String> from  ( config | runtime )
+ * @param <String> info  { config { app_name | schema | license } } | runtime { { debug | locale | version | release } } )
  * @return
  */
 app.getInfo = function(from, info) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.getConfig');

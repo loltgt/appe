@@ -27,7 +27,7 @@ app.view.spoof = function() {
   if (ref.indexOf('&') != -1) {
     ref = ref.split('&');
 
-    // values
+    // querystring values
     if (ref[1].indexOf('=') != -1) {
       var sub = ref[1].split('=');
       loc = { action: ref[0], index: parseInt(sub[1]) };
@@ -72,28 +72,28 @@ app.view.spoof = function() {
  * @return <Object> __construct
  */
 app.view.control = function(events, data, form) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.control');
   }
 
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.control', 'control');
   }
 
-  var _has_locale = ! (app._root.window.appe__locale === undefined);
+  var _is_localized = ! (app._root.server.appe__locale === undefined);
 
   var self = app.view.control.prototype;
 
   if ((events && events instanceof Array === false) || (data && typeof data != 'object')) {
-    return app.error('app.view.control', arguments);
+    return app.error('app.view.control', [events, data, form]);
   }
 
   self._initialized = false;
-  self._has_locale = _has_locale;
+  self._is_localized = _is_localized;
 
   self.events = events || null;
   self.data = data || {};
@@ -112,7 +112,7 @@ app.view.control.prototype.isInitialized = function(funcName) {
 }
 
 app.view.control.prototype.begin = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.control.prototype.begin');
@@ -240,7 +240,7 @@ app.view.control.prototype.setEvent = function(event) {
   this.isInitialized('setEvent');
 
   if ((this.events && this.events.indexOf(event) === -1)) {
-    return app.error('app.view.control.prototype.setEvent', arguments);
+    return app.error('app.view.control.prototype.setEvent', 'event');
   }
 
   control.temp.event = event;
@@ -326,7 +326,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
   this.isInitialized('fillTable');
 
   if (! table) {
-    return app.error('app.view.control.prototype.fillTable', arguments);
+    return app.error('app.view.control.prototype.fillTable', [table, data, order]);
   }
 
   var _data = data;
@@ -337,7 +337,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
 
   order = (order && order instanceof Array) ? order : Object.keys(_data);
 
-  var _args = Object.values(arguments).slice(3);
+  var args = Object.values(arguments).slice(3);
 
   var tbody = table.querySelector('tbody');
   var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
@@ -355,24 +355,24 @@ app.view.control.prototype.fillTable = function(table, data, order) {
    */
   if ('renderRow' in control && typeof control.renderRow === 'function') {
     Array.prototype.forEach.call(order, function(id) {
-      var row = control.renderRow(trow_tpl, id, _data[id], _args);
+      var row = control.renderRow(trow_tpl, id, _data[id], args);
 
       rows += row.outerHTML;
     });
 
     tbody.innerHTML = rows;
 
-    this._has_locale && this.localize(table);
+    this._is_localized && this.localize(table);
   }
 
-  return { rows: rows, tpl: trow_tpl, data: _data, args: _args };
+  return { rows: rows, tpl: trow_tpl, data: _data, args: args };
 }
 
 app.view.control.prototype.fillForm = function(form, data) {
   this.isInitialized('fillForm');
 
   if (! this.form) {
-    return app.error('app.view.control.prototype.fillForm', arguments);
+    return app.error('app.view.control.prototype.fillForm', [form, data]);
   }
 
   var _data = data;
@@ -381,7 +381,7 @@ app.view.control.prototype.fillForm = function(form, data) {
     _data = this.data;
   }
 
-  var _args = Object.values(arguments).slice(2);
+  var args = Object.values(arguments).slice(2);
 
   /**
    * control.fillForm hook
@@ -390,19 +390,19 @@ app.view.control.prototype.fillForm = function(form, data) {
    * @param <Object> _args
    */
   if ('fillForm' in control && typeof control.fillForm === 'function') {
-    control.fillForm(_data, _args);
+    control.fillForm(_data, args);
 
-    this._has_locale && this.localize(form);
+    this._is_localized && this.localize(form);
   }
 
-  return { data: _data, args: _args };
+  return { data: _data, args: args };
 }
 
 app.view.control.prototype.fillSelection = function(data, id) {
   this.isInitialized('fillSelection');
 
   if (! (data && typeof data === 'object')) {
-    return app.error('app.view.control.prototype.fillSelection', arguments);
+    return app.error('app.view.control.prototype.fillSelection', [data, id]);
   }
 
   var selection = app._root.document.getElementById('selection');
@@ -451,7 +451,7 @@ app.view.control.prototype.localize = function(elements) {
   this.isInitialized('localize');
 
   if (! elements) {
-    return app.error('app.view.control.prototype.localize', arguments);
+    return app.error('app.view.control.prototype.localize', [elements]);
   }
 
   var localize_elements = elements.querySelectorAll('[data-localize]');
@@ -496,28 +496,28 @@ app.view.control.prototype.localize = function(elements) {
  * @return <Object> __construct
  */
 app.view.action = function(events, event, element, form) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.action');
   }
 
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.action', 'control');
   }
 
-  var _has_locale = ! (app._root.window.appe__locale === undefined);
+  var _is_localized = ! (app._root.server.appe__locale === undefined);
 
   var self = app.view.action.prototype;
 
   if ((events && (events instanceof Array === false)) || ! event || ! element) {
-    return app.error('app.view.action', arguments);
+    return app.error('app.view.action', [events, event, element, form]);
   }
 
   self._initialized = false;
-  self._has_locale = _has_locale;
+  self._is_localized = _is_localized;
 
   if (! (config.events && typeof config.events === 'object')) {
     return app.error('app.view.action', 'config');
@@ -620,7 +620,7 @@ app.view.action.prototype.prepare = function(data, submit) {
   this.isInitialized(this.event);
 
   if (data && typeof data != 'object') {
-    return app.error('app.view.action.prototype.' + this.event, arguments);
+    return app.error('app.view.action.prototype.' + this.event, [data, submit]);
   }
 
   var id = this.getID();
@@ -642,7 +642,7 @@ app.view.action.prototype.prepare = function(data, submit) {
         if (label) {
           label = label[0].toUpperCase() + label.slice(1);
 
-          if (this._has_locale) {
+          if (this._is_localized) {
             label = app.i18n(label, 'action') || label;
           }
 
@@ -671,7 +671,7 @@ app.view.action.prototype.prepare = function(data, submit) {
 }
 
 app.view.action.prototype.prevent = function(data, submit, title, name) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.action.prototype.prevent');
@@ -679,17 +679,13 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
 
   this.isInitialized(this.event);
 
-  if (data && typeof data != 'object') {
-    return app.error('app.view.action.prototype.' + this.event, arguments);
-  }
-
-  if (typeof title != 'string') {
-    return app.error('app.view.action.prototype.' + this.event, arguments);
+  if (typeof title != 'string' || (data && typeof data != 'object')) {
+    return app.error('app.view.action.prototype.' + this.event, [data, submit, title, name]);
   }
 
   var label = self.cfg_events ? self.cfg_events[this.event].toString() : this.event;
 
-  if (this._has_locale) {
+  if (this._is_localized) {
     label = app.i18n(label, 'event') || label;
   }
 
@@ -723,12 +719,7 @@ app.view.action.prototype.close = app.view.action.prototype.prevent;
 app.view.action.prototype.selection = function() {
   this.isInitialized('selection');
 
-  var selected = this.element.value.toString();
-
-  if (! selected) {
-    return app.error('app.view.action().selection', 'selected');
-  }
-
+  var selected = this.element.value ? this.element.value.toString() : '';
   var data = { 'id': selected };
 
   return this.prepare(data, true);
@@ -758,7 +749,7 @@ app.view.action.prototype.print = function() {
  * @return <Function>
  */
 app.view.sub = function(method, element, table) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.sub');
@@ -767,21 +758,21 @@ app.view.sub = function(method, element, table) {
   var self = app.view.sub.prototype;
 
   if (! method || ! element) {
-    return app.error('app.view.sub', arguments);
+    return app.error('app.view.sub', [method, element, table]);
   }
 
   return self[method](element, table);
 }
 
 app.view.sub.prototype.csv = function(element, table) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.sub.prototype.csv');
   }
 
   if (! element || ! table) {
-    return app.error('app.view.sub.prototype.csv', arguments);
+    return app.error('app.view.sub.prototype.csv', [element, table]);
   }
 
   var source = '';
@@ -807,7 +798,7 @@ app.view.sub.prototype.csv = function(element, table) {
 
   filename += filename_separator + filename_date;
 
-  var file = { 'name': filename + '.csv', 'options': { 'type': 'text/csv;charset=utf-8' } };
+  var file = { 'name': filename + '.csv', 'type': 'text/csv;charset=utf-8' };
 
   var ctl = { action: 'export', file: file, data: source };
 
@@ -816,7 +807,7 @@ app.view.sub.prototype.csv = function(element, table) {
 
 app.view.sub.prototype.clipboard = function(element, table) {
   if (! element || ! table) {
-    return app.error('app.view.sub.prototype.clipboard', arguments);
+    return app.error('app.view.sub.prototype.clipboard', [element, table]);
   }
 
   var source = '';
@@ -833,9 +824,10 @@ app.view.sub.prototype.clipboard = function(element, table) {
   var dropdown_btn = dropdown.querySelector('.dropdown-toggle');
   dropdown_btn.classList.add('btn-gray-lighter');
 
-  setTimeout(function() {
+  var rem = setTimeout(function() {
     dropdown_btn.classList.remove('btn-gray-lighter');
-    this.clearTimeout();
+
+    clearTimeout(rem);
   }, 1000);
 }
 
@@ -845,7 +837,7 @@ app.view.sub.prototype.toggler = function(element) {
   }
 
   if (! element) {
-    return app.error('app.view.sub.prototype.clipboard', arguments);
+    return app.error('app.view.sub.prototype.clipboard', [element]);
   }
 
   var dropdown = element.parentNode.parentNode.parentNode;
@@ -872,13 +864,13 @@ app.view.sub.prototype.toggler = function(element) {
  * @return
  */
 app.view.handle = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.handle');
   }
 
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.handle', 'control');
@@ -907,7 +899,7 @@ app.view.handle = function() {
  * @return
  */
 app.view.resize = function(check_time) {
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! (control && control.temp)) {
     return; // silent fail
@@ -939,13 +931,13 @@ app.view.resize = function(check_time) {
  * @return
  */
 app.view.send = function(ctl) {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.action');
   }
 
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.action', 'control');
@@ -956,7 +948,7 @@ app.view.send = function(ctl) {
   }
 
   if (typeof ctl != 'object') {
-    return app.error('app.view.send', arguments);
+    return app.error('app.view.send', [ctl]);
   }
 
   if ('view' in ctl === false) {
@@ -996,7 +988,7 @@ app.view.send = function(ctl) {
  */
 app.view.getFormData = function(elements) {
   if (! (elements && elements.length)) {
-    return app.error('app.view.getFormData', arguments);
+    return app.error('app.view.getFormData', [elements]);
   }
 
   var data = {};
@@ -1058,13 +1050,13 @@ app.view.getFormData = function(elements) {
  */
 app.view.convertTableCSV = function(table) {
   if (! table) {
-    return app.error('app.view.convertTableCSV', arguments);
+    return app.error('app.view.convertTableCSV', [table]);
   }
 
   var thead_th = table.querySelectorAll('thead tr:not(.hidden-csv) th');
   var tbody_trow = table.querySelectorAll('tbody tr:not(.hidden-csv)');
 
-  var csv = [ [] ];
+  var csv = [[]];
 
   Array.prototype.forEach.call(thead_th, function(node) {
     if (node.classList.contains('hidden-print')) { return; }
@@ -1111,7 +1103,7 @@ app.view.convertTableCSV = function(table) {
  */
 app.view.copyToClipboard = function(source) {
   if (! source) {
-    return app.error('app.view.copyToClipboard', arguments);
+    return app.error('app.view.copyToClipboard', [source]);
   }
 
   var _clipboard = app._root.document.createElement('TEXTAREA');
@@ -1151,7 +1143,7 @@ app.view.copyToClipboard = function(source) {
  * @return
  */
 app.view.load = function() {
-  var config = app._root.window.appe__config;
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
     return app.stop('app.view.load');
@@ -1169,9 +1161,9 @@ app.view.load = function() {
   }
 
   var _layout = function() {
-    var _has_locale = ! (app._root.window.appe__locale === undefined);
+    var _is_localized = ! (app._root.server.appe__locale === undefined);
 
-    if (_has_locale) {
+    if (_is_localized) {
       _localize();
     }
   }
@@ -1186,7 +1178,7 @@ app.view.load = function() {
     app.controller.retrieve(app.view.handle, routine);
 
 
-    if (!!! app._root.document.native) {
+    if (app._root.document.native == undefined) {
       _layout();
     }
   }
@@ -1205,7 +1197,7 @@ app.view.load = function() {
  * @return <Boolean>
  */
 app.view.unload = function() {
-  var control = app._root.window.appe__control;
+  var control = app._root.server.appe__control;
 
   if (! control) {
     return app.error('app.view.unload', 'control');
