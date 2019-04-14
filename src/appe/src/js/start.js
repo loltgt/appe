@@ -277,7 +277,6 @@ app.start.redirect = function(loaded) {
  * Display messages with info and alternatives to help to execute app 
  *
  * //TODO hook
- * //TODO test hta
  *
  * @global <Object> appe__config
  * @return

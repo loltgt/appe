@@ -128,7 +128,7 @@ app.utils.extendObject = function() {
  * Detects browser and system environments
  *
  * @param <String> purpose  ( name | platform | architecture | release )
- * @return <Object> system
+ * @return
  */
 app.utils.system = function(purpose) {
   var system = { 'name': null, 'platform': null, 'architecture': null, 'release': null };
@@ -248,7 +248,7 @@ app.utils.system = function(purpose) {
  * Helper to add element event listener
  *
  * @param <String> event
- * @param <NodeElement> element
+ * @param <ElementNode> element
  * @param <Function> func
  * @return
  */
@@ -271,7 +271,7 @@ app.utils.addEvent = function(event, element, func) {
  * Helper to remove element event listener
  *
  * @param <String> event
- * @param <NodeElement> element
+ * @param <ElementNode> element
  * @param <Function> func
  * @return
  */
@@ -293,11 +293,11 @@ app.utils.removeEvent = function(event, element, func) {
  *
  * Storage utility, it stores persistent and non-persistent data using localStorage and sessionStorage
  *
- * available methods:
- *  - set (key <String>, value)
- *  - get (key <String>)
- *  - has (key <String>, value)
- *  - del (key <String>)
+ * available prototype methods:
+ *  - set (key, value)
+ *  - get (key)
+ *  - has (key, value)
+ *  - del (key)
  *  - reset ()
  *
  * @param <String> persists
@@ -330,6 +330,13 @@ app.utils.storage = function(persists, method, key, value) {
   return self[method].apply(self, [ key, value ]);
 }
 
+/**
+ * app.utils.storage.prototype.set
+ *
+ * @param <String> key
+ * @param value
+ * @return
+ */
 app.utils.storage.prototype.set = function(key, value) {
   if (key === undefined  || typeof key != 'string' || value === undefined) {
     return app.error('app.utils.storage.prototype.set', [key, value]);
@@ -348,10 +355,14 @@ app.utils.storage.prototype.set = function(key, value) {
   value = value.toString();
 
   app._root.window[this._fn].setItem(_key, value);
-
-  return true;
 }
 
+/**
+ * app.utils.storage.prototype.get
+ *
+ * @param <String> key
+ * @return value
+ */
 app.utils.storage.prototype.get = function(key) {
   if (key === undefined || typeof key != 'string') {
     return app.error('app.utils.storage.prototype.get', [key]);
@@ -371,6 +382,13 @@ app.utils.storage.prototype.get = function(key) {
   return value;
 }
 
+/**
+ * app.utils.storage.prototype.has
+ *
+ * @param <String> key
+ * @param value
+ * @return <Boolean>
+ */
 app.utils.storage.prototype.has = function(key, value) {
   if (key === undefined || typeof key != 'string') {
     return app.error('app.utils.storage.prototype.has', [key, value]);
@@ -393,6 +411,12 @@ app.utils.storage.prototype.has = function(key, value) {
   return this.constructor.call(this, this._persist, 'get', key) ? true : false;
 }
 
+/**
+ * app.utils.storage.prototype.del
+ *
+ * @param <String> key
+ * @return
+ */
 app.utils.storage.prototype.del = function(key) {
   if (key === undefined || typeof key != 'string') {
     return app.error('app.utils.storage.prototype.del', [key]);
@@ -401,14 +425,13 @@ app.utils.storage.prototype.del = function(key) {
   var _key = app.utils.base64('encode', this._prefix + key);
 
   app._root.window[this._fn].removeItem(_key);
-
-  return true;
 }
 
+/**
+ * app.utils.storage.prototype.reset
+ */
 app.utils.storage.prototype.reset = function() {
   app._root.window[this._fn].clear();
-
-  return true;
 }
 
 
@@ -417,11 +440,11 @@ app.utils.storage.prototype.reset = function() {
  *
  * Helper to handle cookie
  *
- * available methods:
- *  - set (key <String>, value, expire_time <Date>)
- *  - get (key <String>)
- *  - has (key <String>, value)
- *  - del (key <String>)
+ * available prototype methods:
+ *  - set (key, value, expire_time)
+ *  - get (key)
+ *  - has (key, value)
+ *  - del (key)
  *  - reset ()
  *
  * @param <String> method
@@ -442,6 +465,14 @@ app.utils.cookie = function(method, key, value, expire_time) {
   return self[method].apply(self, [ key, value, expire_time ]);
 }
 
+/**
+ * app.utils.cookie.prototype.set
+ *
+ * @param <String> key
+ * @param value
+ * @param <Date> expire_time
+ * @return
+ */
 app.utils.cookie.prototype.set = function(key, value, expire_time) {
   if (key === undefined || typeof key != 'string' || value === undefined) {
     return app.error('app.utils.cookie.prototype.set', [key, value, expire_time]);
@@ -468,10 +499,14 @@ app.utils.cookie.prototype.set = function(key, value, expire_time) {
   value = encodeURIComponent(value);
 
   app._root.document.cookie = _key + '=' + value + '; expires=' + _time;
-
-  return true;
 }
 
+/**
+ * app.utils.cookie.prototype.get
+ *
+ * @param <String> key
+ * @return value
+ */
 app.utils.cookie.prototype.get = function(key) {
   if (key === undefined || typeof key != 'string') {
     return app.error('app.utils.cookie.prototype.get', [key]);
@@ -505,6 +540,13 @@ app.utils.cookie.prototype.get = function(key) {
   return value;
 }
 
+/**
+ * app.utils.cookie.prototype.has
+ *
+ * @param <String> key
+ * @param value
+ * @return <Boolean>
+ */
 app.utils.cookie.prototype.has = function(key, value) {
   if (key === undefined || typeof key != 'string') {
     return app.error('app.utils.cookie.prototype.has', [key, value]);
@@ -528,6 +570,12 @@ app.utils.cookie.prototype.has = function(key, value) {
   return this.constructor.call(this, 'get', key) ? true : false;
 }
 
+/**
+ * app.utils.cookie.prototype.del
+ *
+ * @param <String> key
+ * @return
+ */
 app.utils.cookie.prototype.del = function(key) {
   if (key === undefined || typeof key != 'string') {
     return app.error('app.utils.cookie.prototype.del', [key]);
@@ -537,14 +585,13 @@ app.utils.cookie.prototype.del = function(key) {
   _key = encodeURIComponent(_key);
 
   app._root.document.cookie = _key + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-
-  return true;
 }
 
+/**
+ * app.utils.cookie.prototype.reset
+ */
 app.utils.cookie.prototype.reset = function() {
   app._root.document.cookie = '';
-
-  return true;
 }
 
 
@@ -553,9 +600,9 @@ app.utils.cookie.prototype.reset = function() {
  *
  * Alias to base64 browser implementation with URI encoding
  *
- * available methods:
- *  - encode (to_encode <String>)
- *  - decode (to_decode <String>)
+ * available prototype methods:
+ *  - encode (to_encode)
+ *  - decode (to_decode)
  *
  * @global <Function> btoa
  * @global <Function> atob
@@ -576,6 +623,12 @@ app.utils.base64 = function(method, data) {
   return self[method](data);
 }
 
+/**
+ * app.utils.base64.prototype.encode
+ *
+ * @param <String> to_encode
+ * @return <String>
+ */
 app.utils.base64.prototype.encode = function(to_encode) {
   var _btoa = app._root.window.btoa;
 
@@ -589,6 +642,12 @@ app.utils.base64.prototype.encode = function(to_encode) {
   return to_encode;
 }
 
+/**
+ * app.utils.base64.prototype.decode
+ *
+ * @param <String> to_decode
+ * @return <String>
+ */
 app.utils.base64.prototype.decode = function(to_decode) {
   var _atob = app._root.window.atob;
 
@@ -610,7 +669,7 @@ app.utils.base64.prototype.decode = function(to_decode) {
  *
  * @param <String> purpose  ( lowercase | uppercase | numeric | integer | json )
  * @param value
- * @return value
+ * @return
  */
 app.utils.transform = function(purpose, value) {
   if (! purpose) {
@@ -639,7 +698,7 @@ app.utils.transform = function(purpose, value) {
  *
  * @param <String> purpose  ( whitespace | breakline | date | datetime | datetime-local | array )
  * @param value
- * @return value
+ * @return
  */
 app.utils.sanitize = function(purpose, value) {
   if (! purpose) {
@@ -688,10 +747,10 @@ app.utils.sanitize = function(purpose, value) {
  *
  * Transforms object to classnames
  *
- * @param <Object> data
+ * @param <Object> | <Array> data
  * @param <String> prefix
  * @param <Boolean> to_array
- * @return value
+ * @return classes
  */
 app.utils.classify = function(data, prefix, to_array) {
   if (! (data && typeof data === 'object') || (prefix && typeof prefix != 'string')) {
@@ -757,34 +816,34 @@ app.utils.numberFormat = function(number, decimals, decimals_separator, thousand
  * it accepts Date time format or true for 'now', default: "Y-m-d H:M"
  *
  * format specifiers:
- *  - d  <Number> // Day of the month, digits preceded by zero (01-31)
- *  - J  <Number> // Day of the month (1-31)
- *  - w  <Number> // Day of the week (1 Mon - 7 Sun)
- *  - m  <Number> // Month, digits preceded by zero (01-12)
- *  - n  <Number> // Month (1-12)
- *  - N  <Number> // Month, start from zero (0-11)
- *  - Y  <Number> // Year, four digits (1970)
- *  - y  <Number> // Year, two digits (70)
- *  - H  <Number> // Hours, digits preceded by zero (00-23)
- *  - G  <Number> // Hours (0-23)
- *  - M  <Number> // Minutes, digits preceded by zero (00-59)
- *  - I  <Number> // Minutes (0-59)
- *  - S  <Number> // Seconds, digits preceded by zero (00-59)
- *  - K  <Number> // Seconds (0-59)
- *  - v  <Number> // Milliseconds, three digits
- *  - a  <String> // Abbreviated day of the week name (Thu)
- *  - b  <String> // Abbreviated month name (Jan)
- *  - x  <String> // Date representation (1970/01/01)
- *  - X  <String> // Time representation (01:00:00)
- *  - s  <Number> // Seconds since the Unix Epoch
- *  - V  <Number> // Milliseconds since the Unix Epoch
- *  - O  <String> // Difference to Greenwich time GMT in hours (+0100)
- *  - z  <String> // Time zone offset (+0100 (CEST))
- *  - C  <String> // Date and time representation (Thu, 01 Jan 1970 00:00:00 GMT)
- *  - Q  <String> // ISO 8601 date representation (1970-01-01T00:00:00.000Z)
+ *  - d  // Day of the month, digits preceded by zero (01-31)
+ *  - J  // Day of the month (1-31)
+ *  - w  // Day of the week (1 Mon - 7 Sun)
+ *  - m  // Month, digits preceded by zero (01-12)
+ *  - n  // Month (1-12)
+ *  - N  // Month, start from zero (0-11)
+ *  - Y  // Year, four digits (1970)
+ *  - y  // Year, two digits (70)
+ *  - H  // Hours, digits preceded by zero (00-23)
+ *  - G  // Hours (0-23)
+ *  - M  // Minutes, digits preceded by zero (00-59)
+ *  - I  // Minutes (0-59)
+ *  - S  // Seconds, digits preceded by zero (00-59)
+ *  - K  // Seconds (0-59)
+ *  - v  // Milliseconds, three digits
+ *  - a  // Abbreviated day of the week name (Thu)
+ *  - b  // Abbreviated month name (Jan)
+ *  - x  // Date representation (1970/01/01)
+ *  - X  // Time representation (01:00:00)
+ *  - s  // Seconds since the Unix Epoch
+ *  - V  // Milliseconds since the Unix Epoch
+ *  - O  // Difference to Greenwich time GMT in hours (+0100)
+ *  - z  // Time zone offset (+0100 (CEST))
+ *  - C  // Date and time representation (Thu, 01 Jan 1970 00:00:00 GMT)
+ *  - Q  // ISO 8601 date representation (1970-01-01T00:00:00.000Z)
  *
  * @param <Date> | <Boolean> time
- * @return <String> formatted_date
+ * @return formatted_date
  */
 app.utils.dateFormat = function(time, format) {
   var date = null;

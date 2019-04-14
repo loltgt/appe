@@ -43,7 +43,7 @@ app.store.get = function(key) {
 /**
  * app.store.has
  *
- * Checks existence for storage entry by key, could match value
+ * Checks existence for storage entry by key and match value
  *
  * @param <String> key
  * @param value

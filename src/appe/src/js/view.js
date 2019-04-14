@@ -9,9 +9,9 @@ app.view = {};
 /**
  * app.view.spoof
  *
- * Captures the current position inside view using location.href
+ * Captures the current position inside "view" using location.href
  *
- * @return <Object> loc
+ * @return <Object> loc  { action, index }
  */
 app.view.spoof = function() {
   var loc = { action: null, index: null };
@@ -43,33 +43,33 @@ app.view.spoof = function() {
 /**
  * app.view.control
  *
- * Control "view" function, returns object constructor
+ * Control "view" function, returns self prototype
  *
- * avalaible methods:
- *  - isInitialized (funcName <String>)
+ * avalaible prototype methods:
+ *  - isInitialized (funcName)
  *  - begin ()
  *  - end ()
- *  - setID (id <Number>)
+ *  - setID (id)
  *  - getID ()
  *  - getLastID ()
- *  - setEvent (event <String>)
+ *  - setEvent (event)
  *  - getEvent ()
- *  - setTitle (section_title <String>, view_title <String>, id <String>)
- *  - setActionHandler (label <String>, id <String>)
+ *  - setTitle (section_title, view_title, id)
+ *  - setActionHandler (label, id)
  *  - denySubmit ()
- *  - fillTable (table <NodeElement>, data <Object>, order <Array>)
- *  - fillForm (form <NodeElement>, data <Object>)
- *  - fillSelection (data <Object>, id <Number>)
- *  - fillCTA (id <Number>)
- *  - localize (element <NodeElement>)
+ *  - fillTable (table, data, order)
+ *  - fillForm (form, data)
+ *  - fillSelection (data, id)
+ *  - fillCTA (id)
+ *  - localize (element)
  *
  * @global <Object> appe__config
  * @global <Object> appe__control
  * @global <Object> appe__locale
  * @param <Array> events
  * @param <Object> data
- * @param <NodeElement> form
- * @return <Object> __construct
+ * @param <ElementNode> form
+ * @return <Function> prototype
  */
 app.view.control = function(events, data, form) {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
@@ -105,12 +105,23 @@ app.view.control = function(events, data, form) {
   return self;
 }
 
+/**
+ * app.view.control.prototype.isInitialized
+ *
+ * @param <String> funcName
+ * @return
+ */
 app.view.control.prototype.isInitialized = function(funcName) {
   if (this._initialized) { return; }
 
   return app.error('app.view.control.prototype.isInitialized', funcName);
 }
 
+/**
+ * app.view.control.prototype.begin
+ *
+ * @return <Number> id
+ */
 app.view.control.prototype.begin = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
@@ -155,7 +166,6 @@ app.view.control.prototype.begin = function() {
         step = false;
       }
 
-      //TODO <Number> | <String>
       if (loc.index) {
         id = loc.index;
       }
@@ -187,6 +197,11 @@ app.view.control.prototype.begin = function() {
   return id;
 }
 
+/**
+ * app.view.control.prototype.end
+ *
+ * @return
+ */
 app.view.control.prototype.end = function() {
   this.isInitialized('end');
 
@@ -210,6 +225,12 @@ app.view.control.prototype.end = function() {
   _initialized = false;
 }
 
+/**
+ * app.view.control.prototype.setID
+ *
+ * @param <String> id
+ * @return <Number>
+ */
 app.view.control.prototype.setID = function(id) {
   this.isInitialized('setID');
 
@@ -218,16 +239,28 @@ app.view.control.prototype.setID = function(id) {
   return control.temp.id;
 }
 
+/**
+ * app.view.control.prototype.getID
+ *
+ * @return <Number>
+ */
 app.view.control.prototype.getID = function() {
   this.isInitialized('getID');
 
-  if (control.temp.id) {
-    return control.temp.id;
+  if (! control.temp.id) {
+    app.error('app.view.control.prototype.getID', 'id');
+
+    return 0;
   }
 
   return parseInt(control.temp.id);
 }
 
+/**
+ * app.view.control.prototype.getLastID
+ *
+ * @return <Number>
+ */
 app.view.control.prototype.getLastID = function() {
   this.isInitialized('getLastID');
 
@@ -236,6 +269,12 @@ app.view.control.prototype.getLastID = function() {
   return last_id ? (parseInt(last_id) + 1) : 1;
 }
 
+/**
+ * app.view.control.prototype.setEvent
+ *
+ * @param <String> event
+ * @return <String>
+ */
 app.view.control.prototype.setEvent = function(event) {
   this.isInitialized('setEvent');
 
@@ -243,17 +282,29 @@ app.view.control.prototype.setEvent = function(event) {
     return app.error('app.view.control.prototype.setEvent', 'event');
   }
 
-  control.temp.event = event;
+  control.temp.event = event.toString();
 
   return control.temp.event;
 }
 
+/**
+ * app.view.control.prototype.getEvent
+ *
+ * @return <String>
+ */
 app.view.control.prototype.getEvent = function() {
   this.isInitialized('getEvent');
 
-  return control.temp.event;
+  return control.temp.event.toString();
 }
 
+/**
+ * app.view.control.prototype.getLastID
+ *
+ * @param <String> section_title
+ * @param <String> view_title
+ * @param <Number> id
+ */
 app.view.control.prototype.setTitle = function(section_title, view_title, id) {
   this.isInitialized('setTitle');
 
@@ -280,6 +331,13 @@ app.view.control.prototype.setTitle = function(section_title, view_title, id) {
   }
 }
 
+/**
+ * app.view.control.prototype.setActionHandler
+ *
+ * @param <String> label
+ * @param <String> id
+ * @return
+ */
 app.view.control.prototype.setActionHandler = function(label, id) {
   this.isInitialized('setActionHandler');
 
@@ -307,6 +365,9 @@ app.view.control.prototype.setActionHandler = function(label, id) {
   }
 }
 
+/**
+ * app.view.control.prototype.denySubmit
+ */
 app.view.control.prototype.denySubmit = function() {
   this.isInitialized('denySubmit');
 
@@ -322,6 +383,14 @@ app.view.control.prototype.denySubmit = function() {
   }
 }
 
+/**
+ * app.view.control.prototype.fillTable
+ *
+ * @param <ElementNode> table
+ * @param <Object> data
+ * @param <Array> order
+ * @return <Object>  { rows <String>, tpl <ElementNode>, data <Object>, args <Array> }
+ */
 app.view.control.prototype.fillTable = function(table, data, order) {
   this.isInitialized('fillTable');
 
@@ -348,10 +417,10 @@ app.view.control.prototype.fillTable = function(table, data, order) {
   /**
    * control.renderRow hook
    *
-   * @param <NodeElement> trow_tpl
+   * @param <ElementNode> trow_tpl
    * @param <Number> id
-   * @param <Object> _data[id]
-   * @param <Object> _args
+   * @param <Object> data[id]
+   * @param <Object> args
    */
   if ('renderRow' in control && typeof control.renderRow === 'function') {
     Array.prototype.forEach.call(order, function(id) {
@@ -368,6 +437,13 @@ app.view.control.prototype.fillTable = function(table, data, order) {
   return { rows: rows, tpl: trow_tpl, data: _data, args: args };
 }
 
+/**
+ * app.view.control.prototype.fillForm
+ *
+ * @param <ElementNode> form
+ * @param <Object> data
+ * @return <Object>  { data <Object>, args <Array> }
+ */
 app.view.control.prototype.fillForm = function(form, data) {
   this.isInitialized('fillForm');
 
@@ -398,6 +474,13 @@ app.view.control.prototype.fillForm = function(form, data) {
   return { data: _data, args: args };
 }
 
+/**
+ * app.view.control.prototype.fillSelection
+ *
+ * @param <Object> data
+ * @param id
+ * @return
+ */
 app.view.control.prototype.fillSelection = function(data, id) {
   this.isInitialized('fillSelection');
 
@@ -416,12 +499,18 @@ app.view.control.prototype.fillSelection = function(data, id) {
 
     selection.parentNode.classList.add('hidden');
   }
-} 
+}
 
+/**
+ * app.view.control.prototype.fillCTA
+ *
+ * @param <Number> id
+ * @return
+ */
 app.view.control.prototype.fillCTA = function(id) {
   this.isInitialized('fillCTA');
 
-  id = parseInt(id) || null;
+  id = parseInt(id);
 
   var section_actions_top = app._root.document.getElementById('section-actions-top');
   var section_actions_bottom = app._root.document.getElementById('section-actions-bottom');
@@ -447,6 +536,12 @@ app.view.control.prototype.fillCTA = function(id) {
   }
 }
 
+/**
+ * app.view.control.prototype.fillCTA
+ *
+ * @param <NodeList> elements
+ * @return
+ */
 app.view.control.prototype.localize = function(elements) {
   this.isInitialized('localize');
 
@@ -467,22 +562,22 @@ app.view.control.prototype.localize = function(elements) {
 /**
  * app.view.action
  *
- * Actions "view", returns object constructor
+ * Actions "view", returns self prototype
  *
- * avalaible methods:
- *  - isInitialized (funcName <String>)
+ * avalaible prototype methods:
+ *  - isInitialized (funcName)
  *  - begin ()
  *  - end ()
  *  - getID ()
  *  - validateForm () 
- *  - prepare (data <Object>, submit <Boolean>)
- *  - prevent (data <Object>, submit <Boolean>, title <String>, name)
- *  - open (data <Object>, submit <Boolean>) <=> prepare ()
- *  - add (data <Object>, submit <Boolean>) <=> prepare ()
- *  - edit (data <Object>, submit <Boolean>) <=> prepare ()
- *  - update (data <Object>, submit <Boolean>)<=> prepare ()
- *  - delete (data <Object>, submit <Boolean>, title <String>, name) <=> prevent ()
- *  - close (data <Object>, submit <Boolean>, title <String>, name) <=> prevent ()
+ *  - prepare (data, submit)
+ *  - prevent (data, submit, title, name)
+ *  - open (data, submit) <=> prepare ()
+ *  - add (data, submit) <=> prepare ()
+ *  - edit (data, submit) <=> prepare ()
+ *  - update (data, submit)<=> prepare ()
+ *  - delete (data, submit, title, name) <=> prevent ()
+ *  - close (data, submit, title, name) <=> prevent ()
  *  - selection ()
  *  - print ()
  *
@@ -491,9 +586,9 @@ app.view.control.prototype.localize = function(elements) {
  * @global <Object> appe__locale
  * @param <Array> events
  * @param <String> event
- * @param <NodeElement> element
- * @param <NodeElement> form
- * @return <Object> __construct
+ * @param <ElementNode> element
+ * @param <ElementNode> form
+ * @return <Function> prototype
  */
 app.view.action = function(events, event, element, form) {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
@@ -535,12 +630,23 @@ app.view.action = function(events, event, element, form) {
   return self;
 }
 
+/**
+ * app.view.action.prototype.isInitialized
+ *
+ * @param <String> funcName
+ * @return
+ */
 app.view.action.prototype.isInitialized = function(funcName) {
   if (this._initialized) { return; }
 
   return app.error('app.view.action.prototype.isInitialized', funcName);
 }
 
+/**
+ * app.view.action.prototype.begin
+ *
+ * @return
+ */
 app.view.action.prototype.begin = function() {
   if ((this.events && this.events.indexOf(this.event) === -1)) {
     return app.error('app.view.action.prototype.begin', 'event');
@@ -549,12 +655,22 @@ app.view.action.prototype.begin = function() {
   this._initialized = true;
 }
 
+/**
+ * app.view.action.prototype.end
+ *
+ * @return
+ */
 app.view.action.prototype.end = function() {
   this.isInitialized('end');
 
   this._initialized = false;
 }
 
+/**
+ * app.view.action.prototype.getID
+ *
+ * @return <Number> id
+ */
 app.view.action.prototype.getID = function() {
   this.isInitialized('getID');
 
@@ -573,6 +689,11 @@ app.view.action.prototype.getID = function() {
   return parseInt(id);
 }
 
+/**
+ * app.view.action.prototype.validateForm
+ *
+ * @return <Boolean>
+ */
 app.view.action.prototype.validateForm = function() {
   this.isInitialized('validateForm');
 
@@ -616,6 +737,15 @@ app.view.action.prototype.validateForm = function() {
   return true;
 }
 
+/**
+ * app.view.action.prototype.prepare
+ *
+ * Generic method for all actions
+ *
+ * @param <Object> data
+ * @param <Boolean> submit
+ * @return <Boolean>
+ */
 app.view.action.prototype.prepare = function(data, submit) {
   this.isInitialized(this.event);
 
@@ -636,8 +766,7 @@ app.view.action.prototype.prepare = function(data, submit) {
       if (this.event != 'update') {
         this.ctl.history = true;
 
-        //TODO <Number> | <String>
-        this.ctl.title = (typeof this.ctl.index === 'number' ? '# ' + this.ctl.index : '"' + this.ctl.index + '"');
+        this.ctl.title = (this.ctl.title && typeof this.ctl.title === 'string') ? '"' + this.ctl.index + '"' : '# ' + this.ctl.index;
 
         if (label) {
           label = label[0].toUpperCase() + label.slice(1);
@@ -670,6 +799,17 @@ app.view.action.prototype.prepare = function(data, submit) {
   }
 }
 
+/**
+ * app.view.action.prototype.prepare
+ *
+ * Generic method for prevented actions like delete
+ *
+ * @param <Object> data
+ * @param <Boolean> submit
+ * @param <String> title
+ * @param <String> | <Number> name
+ * @return
+ */
 app.view.action.prototype.prevent = function(data, submit, title, name) {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
@@ -704,18 +844,53 @@ app.view.action.prototype.prevent = function(data, submit, title, name) {
   return this.prepare(data, submit);
 }
 
+/**
+ * app.view.action.prototype.open
+ *
+ * alias: app.view.action.prototype.prepare
+ */
 app.view.action.prototype.open = app.view.action.prototype.prepare;
 
+/**
+ * app.view.action.prototype.add
+ *
+ * alias: app.view.action.prototype.prepare
+ */
 app.view.action.prototype.add = app.view.action.prototype.prepare;
 
+/**
+ * app.view.action.prototype.edit
+ *
+ * alias: app.view.action.prototype.prepare
+ */
 app.view.action.prototype.edit = app.view.action.prototype.prepare;
 
+/**
+ * app.view.action.prototype.update
+ *
+ * alias: app.view.action.prototype.prepare
+ */
 app.view.action.prototype.update = app.view.action.prototype.prepare;
 
+/**
+ * app.view.action.prototype.delete
+ *
+ * alias: app.view.action.prototype.prevent
+ */
 app.view.action.prototype.delete = app.view.action.prototype.prevent;
 
+/**
+ * app.view.action.prototype.close
+ *
+ * alias: app.view.action.prototype.prevent
+ */
 app.view.action.prototype.close = app.view.action.prototype.prevent;
 
+/**
+ * app.view.action.prototype.selection
+ *
+ * @return
+ */
 app.view.action.prototype.selection = function() {
   this.isInitialized('selection');
 
@@ -725,6 +900,9 @@ app.view.action.prototype.selection = function() {
   return this.prepare(data, true);
 }
 
+/**
+ * app.view.action.prototype.print
+ */
 app.view.action.prototype.print = function() {
   this.isInitialized('print');
 
@@ -735,17 +913,17 @@ app.view.action.prototype.print = function() {
 /**
  * app.view.sub
  *
- * Sub-actions "view", returns requested object method
+ * Sub-actions "view", returns requested prototype method
  *
- * avalaible methods:
- *  - csv ()
- *  - clipboard ()
- *  - toggler ()
+ * avalaible prototype methods:
+ *  - csv (element, table)
+ *  - clipboard (element, table)
+ *  - toggler (element, dropdown)
  *
  * @global <Object> appe__config
  * @param <String> method
- * @param <NodeElement> element
- * @param <NodeElement> table
+ * @param <ElementNode> element
+ * @param <ElementNode> table
  * @return <Function>
  */
 app.view.sub = function(method, element, table) {
@@ -764,6 +942,13 @@ app.view.sub = function(method, element, table) {
   return self[method](element, table);
 }
 
+/**
+ * app.view.sub.prototype.csv
+ *
+ * @param <ElementNode> element
+ * @param <ElementNode> table
+ * @return
+ */
 app.view.sub.prototype.csv = function(element, table) {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
@@ -805,6 +990,13 @@ app.view.sub.prototype.csv = function(element, table) {
   return app.view.send(ctl);
 }
 
+/**
+ * app.view.sub.prototype.clipboard
+ *
+ * @param <ElementNode> element
+ * @param <ElementNode> table
+ * @return
+ */
 app.view.sub.prototype.clipboard = function(element, table) {
   if (! element || ! table) {
     return app.error('app.view.sub.prototype.clipboard', [element, table]);
@@ -831,7 +1023,14 @@ app.view.sub.prototype.clipboard = function(element, table) {
   }, 1000);
 }
 
-app.view.sub.prototype.toggler = function(element) {
+/**
+ * app.view.sub.prototype.toggler
+ *
+ * @param <ElementNode> element
+ * @param <ElementNode> dropdown
+ * @return
+ */
+app.view.sub.prototype.toggler = function(element, dropdown) {
   if ('jQuery' in app._root.window && 'dropdown' in jQuery.fn) {
     return;
   }
@@ -840,7 +1039,7 @@ app.view.sub.prototype.toggler = function(element) {
     return app.error('app.view.sub.prototype.clipboard', [element]);
   }
 
-  var dropdown = element.parentNode.parentNode.parentNode;
+  dropdown = dropdown || element.parentNode.parentNode.parentNode;
 
   if (! element.getAttribute('data-is-visible')) {
     element.setAttribute('data-is-visible', true);
@@ -970,7 +1169,7 @@ app.view.send = function(ctl) {
 
     ctl = JSON.stringify(ctl);
 
-    // send control submission to parent "main"
+    // sends control submission to parent "main"
     app._root.window.parent.postMessage(ctl, '*');
   } catch (err) {
     return app.error('app.view.send', err);
@@ -1045,7 +1244,7 @@ app.view.getFormData = function(elements) {
  *
  * Helper to convert object data to csv text format
  *
- * @param <NodeElement> table
+ * @param <ElementNode> table
  * @return <String>
  */
 app.view.convertTableCSV = function(table) {

@@ -44,7 +44,7 @@ app.memory.get = function(key) {
 /**
  * app.memory.has
  *
- * Checks existence for persistent storage entry by key, could match value
+ * Checks existence for persistent storage entry by key and match value
  *
  * @param <String> key
  * @param value

@@ -9,7 +9,7 @@ app.layout = {};
 /**
  * app.layout.renderElement
  *
- * Renders an Element
+ * Renders a document element
  *
  * @param <String> node
  * @param <String> content
@@ -48,7 +48,7 @@ app.layout.renderElement = function(node, content, attributes) {
 /**
  * app.layout.renderSelect
  *
- * Renders a SELECT
+ * Renders a SELECT element
  *
  * @param <String> select_id
  * @param <Object> data
@@ -161,17 +161,17 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
 /**
  * app.layout.draggable
  *
- * Helper for draggable table, returns requested object method
+ * Helper for draggable table, returns requested prototype method
  *
  * //TODO fix droid
  *
- * available methods:
- *  - start (e <Object>)
- *  - over (e <Object>)
- *  - enter (e <Object>)
- *  - leave (e <Object>)
- *  - end (e <Object>)
- *  - drop (e <Object>)
+ * available prototype methods:
+ *  - start (e)
+ *  - over (e)
+ *  - enter (e)
+ *  - leave (e)
+ *  - end (e)
+ *  - drop (e)
  *
  * @param <String> event
  * @param <ElementNode> table
@@ -300,12 +300,12 @@ app.layout.draggable.prototype.drop = function(table, e) {
 /**
  * app.layout.dropdown
  *
- * Helper for dropdown, returns requested object method
+ * Helper for dropdown, returns requested prototype method
  *
- * available methods:
- *  - open (e <Object>)
- *  - close (e <Object>)
- *  - toggle (e <Object>)
+ * available prototype methods:
+ *  - open (e)
+ *  - close (e)
+ *  - toggle (e)
  *
  * @param <String> event
  * @param <ElementNode> element
@@ -381,12 +381,12 @@ app.layout.dropdown.prototype.toggle = function() {
 /**
  * app.layout.collapse
  *
- * Helper for collapsible, returns requested object method
+ * Helper for collapsible, returns requested prototype method
  *
- * available methods:
- *  - open (e <Object>)
- *  - close (e <Object>)
- *  - toggle (e <Object>)
+ * available prototype methods:
+ *  - open (e)
+ *  - close (e)
+ *  - toggle (e)
  *
  * @param <String> event
  * @param <ElementNode> element

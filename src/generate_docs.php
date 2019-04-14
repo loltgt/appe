@@ -22,16 +22,6 @@ $namespaces = [
 
 
 
-if (! function_exists('array_key_last')) {
-	function array_key_last($array = array()) {
-		end($array);
-		$_last = key($array);
-		reset($array);
-
-		return $_last;
-	}
-}
-
 function dircm($file, $dir, $path) {
 	global $priorities;
 
@@ -103,11 +93,11 @@ function pcbbl($line, $args = null) {
 
 	switch ($lc) {
 		case 'link':
-			$r = "link to: [" . $line[1] . "](" . $line[1] . ")";
+			$r = "links: [" . $line[1] . "](" . $line[1] . ")";
 		break;
 
 		case 'see':
-			$r = "code refer to: *" . $line[1] . "*";
+			$r = "refers: *" . $line[1] . "*";
 		break;
 
 		case 'license':
@@ -126,7 +116,7 @@ function pcbbl($line, $args = null) {
 			$lc = ($lc !== 'global' ? 'params' : 'globals');
 
 			if (! empty($line[1]))
-				$r = str_replace("|", " or ", $line[1]);
+				$r = $line[1];
 			else
 				$r = "...";
 
@@ -137,23 +127,23 @@ function pcbbl($line, $args = null) {
 					$r .= "   default: " . $args[$line[2]];
 			}
 
-			if (! empty($line[4])) {
-				$r .= "   reference: " . $line[4];
-			}
+			if (! empty($line[3]))
+				$r .= (! empty($line[5]) ? "   " : " ") . implode(' ', array_slice($line, 3));
+			elseif (! empty($line[4]))
+				$r .= "   " . implode(' ', array_slice($line, 4));
 		break;
 
-		//TODO empty return
 		case 'return':
 			if (empty($line[1]))
 				$r = "";
 			else
-				$r = str_replace("|", " or ", $line[1]);
+				$r = $line[1];
 
 			if (! empty($line[2]))
 				$r .= " " . $line[2];
 
 			if (! empty($line[4]))
-				$r .= "   reference: " . str_replace("|", " or ", $line[4]);
+				$r .= "   " . implode(' ', array_slice($line, 4));
 		break;
 
 		default:
@@ -221,7 +211,7 @@ function pcom($comment, $node = null) {
 			} elseif ($needsh && is_int(strpos($line, " "))) {
 				$doc['comment_sh'][1] .= $bbl[1] . "\n";
 			} else {
-				$doc['comment'] .= ($doc['comment'] ? "\n" : "") . str_replace("&#34;", "\"", $bbl[1]);
+				$doc['comment'] .= ($doc['comment'] ? "\n" : "") . $bbl[1];
 				$needsh = false;
 			}
 		}
@@ -296,6 +286,7 @@ foreach ($diri as $brs) {
 		extract(fndlci($source, $token, $token_name));
 
 
+		$comment = str_replace("&#34;", "\"", $comment);
 		$doc = pcom($comment, $source[$index]);
 
 		if (empty($doc)) continue;
@@ -306,11 +297,11 @@ foreach ($diri as $brs) {
 
 		$sth = explode('.', $doc['line']);
 
-		$is_prototype = isset($doc['comment']) && strstr($doc['comment'], 'prototype');
+		$is_prototype = (isset($doc['comment']) && strstr($doc['comment'], 'prototype')) || (isset($doc['comment_sh']) && strstr($doc['comment_sh'][0], 'prototype'));
 		$is_hook = isset($doc['line']) && strstr($doc['line'], 'hook');
+		$is_descriptor = false;
 
-		$descriptor = false;
-		$category = $is_prototype ? 'Function.prototype' : 'Function';
+		$has_callback = isset($doc['comment']) && strstr($doc['comment'], 'callback') ? true : false;
 
 		$three = slugify($namespaces[$f[0]]);
 		$subthree = $is_hook ? 'Hooks' : (isset($sth[2]) ? $sth[1] : $sth[0]);
@@ -320,8 +311,23 @@ foreach ($diri as $brs) {
 			$i = 0;
 			$subthree = $sth[1];
 			$sth[2] = true;
-			$descriptor = true;
+			$is_descriptor = true;
 		}
+
+		$category = '<Function>';
+
+		if (isset($sth[3]) && $sth[3] === 'prototype') {
+			$category = '<Function> prototype';
+
+			continue;
+		} else if ($is_prototype) {
+			$category = '<Function> prototype   constructor';
+		} else if ($is_descriptor) {
+			$category = '<Object>';
+		}
+
+		if ($has_callback)
+			$category .= '   // asyncronous';
 
 
 		if (! isset($docs[$three][$subthree][$i]))
@@ -335,7 +341,7 @@ foreach ($diri as $brs) {
 		$line_url = "{$file_url}#L{$l}";
 
 
-		$docs[$three][$subthree][$i]['descriptor'] = $descriptor;
+		$docs[$three][$subthree][$i]['descriptor'] = $is_descriptor;
 		$docs[$three][$subthree][$i]['name'] = $is_hook ? str_replace(' hook', '', $doc['line']) : $doc['line'];
 		$docs[$three][$subthree][$i]['parent'] = $is_hook ? 'Hooks' : (isset($sth[2]) ? $sth[0] . '.' . $sth[1] : (isset($sth[1]) ? $sth[0] : ''));
 		$docs[$three][$subthree][$i]['child'] = $is_hook ? '' : $f[1];
@@ -379,7 +385,7 @@ foreach ($docs as $three => $branch) {
 
 				$file = $base . '/docs/wiki/' . $name . '.md';
 
-				$header = "\n";
+				$header = "\n\n";
 
 				$list[$text['priority']][] = "";
 				$list[$text['priority']][] = "## [[{$parent}|{$name}]]";
@@ -399,13 +405,15 @@ foreach ($docs as $three => $branch) {
 
 				$menu[$text['priority']][] = "* [[{$node}|{$name}#{$anchor}]]";
 				$list[$text['priority']][] = "- [[{$node}|{$name}#{$anchor}]]";
-
-				$body .= "## {$text['name']}\n\n";
 			}
-			
+
+			$body .= "## {$text['name']}\n\n";
+
 
 			if (isset($text['comment'])) {
 				$text['comment'] = explode("\n", $text['comment']);
+
+				$body .= "\n";
 
 				foreach ($text['comment'] as $line) {
 					if (empty($line)) continue;
@@ -415,7 +423,7 @@ foreach ($docs as $three => $branch) {
 					$line = trim($line);
 					$body .= "{$comment_heading}{$depth} {$line}\n";
 				}
-				$body .= "\n\n";
+				$body .= "\n";
 			}
 
 			if (isset($text['todo'])) {
@@ -424,26 +432,36 @@ foreach ($docs as $three => $branch) {
 			}
 
 			if (isset($text['link']))
-				$body .= "{$text['link']}\n\n";
+				$body .= "{$text['link']}\n";
 
 			if (isset($text['see']))
-				$body .= "{$text['see']}\n\n";
+				$body .= "{$text['see']}\n";
 
 			if (isset($text['license']))
-				$body .= "{$text['license']}\n\n";
+				$body .= "{$text['license']}\n";
 
 			if (isset($text['copyright']))
-				$body .= "{$text['copyright']}\n\n";
+				$body .= "{$text['copyright']}\n";
+
+			if (isset($text['category'])) {
+				$text['category'] = "\n```js\n" . $text['category'] . "\n```\n";
+				$body .= "{$text['category']}\n";
+			}
+
+			if (isset($text['comment_sh'])) {
+				$text['comment_sh'] = "{$text['comment_sh'][0]}\n```js\n{$text['comment_sh'][1]}```\n";
+				$body .= "{$text['comment_sh']}\n";
+			}
 
 			if (isset($text['globals'])) {
 				$text['globals'] = "globals: \n```js\n" . implode("\n", $text['globals']) . "\n```\n";
-				$body .= "{$text['globals']}\n\n";
+				$body .= "{$text['globals']}\n";
 			}
 
 			if (isset($text['params'])) {
 				$params_label = "arguments";
 				$text['params'] = "{$params_label}: \n```js\n" . implode("\n", $text['params']) . "\n```\n";
-				$body .= "{$text['params']}\n\n";
+				$body .= "{$text['params']}\n";
 			}
 
 			if (isset($text['return'])) {
@@ -452,20 +470,15 @@ foreach ($docs as $three => $branch) {
 				else
 					$text['return'] = "returns: \n```js\n" . $text['return'] . "\n```\n";
 
-				$body .= "{$text['return']}\n\n";
-			}
-
-			if (isset($text['comment_sh'])) {
-				$text['comment_sh'] = "{$text['comment_sh'][0]}\n```js\n{$text['comment_sh'][1]}```\n";
-				$body .= "{$text['comment_sh']}\n\n";
+				$body .= "{$text['return']}\n";
 			}
 
 			if (! $text['descriptor'] && isset($text['position'])) {
 				$text['position'] = "position: \n" . implode("\n", $text['position']);
-				$body .= "{$text['position']}\n\n";
+				$body .= "{$text['position']}\n";
 			}
 
-			$body .= " \n\n";
+			$body .= "\n\n \n\n\n";
 
 		}
 

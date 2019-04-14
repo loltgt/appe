@@ -193,9 +193,16 @@ build.prototype.concat = (type) => {
 build.prototype.uglify_js = () => {
   console.log('uglify (js)', build.prototype.log('app.js'), '\r\n');
 
-  var result = UglifyJS.minify(blob.js.join(''), options.js);
+  var result = new UglifyJS.minify(blob.js, options.js);
 
-  if (result.error) throw result.error;
+  if (result.error) {
+    console.error('uglify (js)', '\terror\r\n\r\n\r\n', result.error.message, '\r\n\r\n', {
+      filename: result.error.filename,
+      line: result.error.line,
+      col: result.error.col,
+      pos: result.error.pos
+    }, '\r\n\r\n');
+  }
 
   return result.code;
 }
@@ -205,7 +212,9 @@ build.prototype.uglify_css = () => {
 
   var result = new CleanCSS(options.css).minify(blob.css.join(''));
 
-  if (result.errors && result.errors.length) throw JSON.stringify(result.errors);
+  if (result.errors && result.errors.length) {
+    console.error('uglify (css)', '\terror\r\n\r\n\r\n', JSON.stringify(result.errors), '\r\n\r\n');
+  }
 
   return result.styles;
 }
@@ -276,7 +285,7 @@ build.prototype.init = (type) => {
     fs.readFile('./appe/src/' + type + '/' + file, (err, data) => {
       if (err) throw err;
 
-      blob[type][i] = data;
+      blob[type][i] = data.toString();
       indexes[type][file] = i;
 
       build.prototype.complete(type, end++);

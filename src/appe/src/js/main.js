@@ -61,7 +61,6 @@ app.main.control = function(loc) {
           step = false;
         }
 
-        //TODO <Number> | <String>
         if (loc.index) {
           route += '&id=' + encodeURIComponent(loc.index);
         }
@@ -115,17 +114,17 @@ app.main.control = function(loc) {
 /**
  * app.main.handle
  *
- * Control "main" function handling requests, could return object constructor
+ * Control "main" function handling requests, could return self prototype
  *
- * avalaible methods:
+ * avalaible prototype methods:
  *  - getID ()
  *  - setAction ()
  *  - getAction ()
- *  - setTitle (title <String>)
+ *  - setTitle (title)
  *  - getTitle ()
- *  - setMsg (msg <String>)
+ *  - setMsg (msg)
  *  - getMsg ()
- *  - setURL (path <String>, qs <String>)
+ *  - setURL (path, qs)
  *  - redirect ()
  *  - refresh ()
  *  - resize ()
@@ -144,7 +143,7 @@ app.main.control = function(loc) {
  *
  * @global <Object> appe__config
  * @global <Object> appe__main
- * @param <Object> e
+ * @param <Event> e
  * @return
  */
 app.main.handle = function(e) {
@@ -201,7 +200,7 @@ app.main.handle = function(e) {
   /**
    * main.handle hook
    *
-   * @param <Object> __constructor
+   * @param <Function> prototype
    * @param <String> event
    * @param <Object> ctl
    */
@@ -212,12 +211,22 @@ app.main.handle = function(e) {
   }
 }
 
+/**
+ * app.main.handle.prototype.getID
+ *
+ * @return <Number> id
+ */
 app.main.handle.prototype.getID = function() {
-  var id = parseInt(this.ctl.index) || 0;
+  var id = parseInt(this.ctl.index);
 
   return id;
 }
 
+/**
+ * app.main.handle.prototype.setAction
+ *
+ * @return <String>
+ */
 app.main.handle.prototype.setAction = function() {
   if (this.ctl.action in this.events === false) {
     return app.error('app.main.prototype.setAction', 'ctl');
@@ -228,6 +237,11 @@ app.main.handle.prototype.setAction = function() {
   return this.loc.action;
 }
 
+/**
+ * app.main.handle.prototype.getAction
+ *
+ * @return <String>
+ */
 app.main.handle.prototype.getAction = function() {
   if (! this.loc.action) {
     return app.error('app.main.prototype.setAction', 'loc');
@@ -236,6 +250,12 @@ app.main.handle.prototype.getAction = function() {
   return this.loc.action;
 }
 
+/**
+ * app.main.handle.prototype.setTitle
+ *
+ * @param <String> title
+ * @return <String>
+ */
 app.main.handle.prototype.setTitle = function(title) {
   if (! (title && typeof title === 'string')) {
     return app.error('app.main.handle.prototype.setTitle', 'title');
@@ -246,10 +266,22 @@ app.main.handle.prototype.setTitle = function(title) {
   return this._title;
 }
 
+/**
+ * app.main.handle.prototype.getTitle
+ *
+ * @param <String>
+ * @return <String>
+ */
 app.main.handle.prototype.getTitle = function() {
   return this._title ? this._title : ((this.ctl.title && typeof this.ctl.title === 'string') && this.ctl.title);
 }
 
+/**
+ * app.main.handle.prototype.setMsg
+ *
+ * @param <String> msg
+ * @return <String>
+ */
 app.main.handle.prototype.setMsg = function(msg) {
   if (! (msg && typeof msg === 'string')) {
     return app.error('app.main.handle.prototype.setMsg', 'msg');
@@ -260,10 +292,22 @@ app.main.handle.prototype.setMsg = function(msg) {
   return this._msg;
 }
 
+/**
+ * app.main.handle.prototype.getMsg
+ *
+ * @return <String>
+ */
 app.main.handle.prototype.getMsg = function() {
   return this._msg ? this._msg : ((this.ctl.msg && typeof this.ctl.msg === 'string') && this.ctl.msg);
 }
 
+/**
+ * app.main.handle.prototype.setURL
+ *
+ * @param <String> path
+ * @param <String> qs
+ * @return <String>
+ */
 app.main.handle.prototype.setURL = function(path, qs) {
   var href = 'index.html';
 
@@ -275,20 +319,34 @@ app.main.handle.prototype.setURL = function(path, qs) {
   return this._href;
 }
 
+/**
+ * app.main.handle.prototype.getURL
+ *
+ * @return <String>
+ */
 app.main.handle.prototype.getURL = function() {
   return this._href;
 }
 
+/**
+ * app.main.handle.prototype.redirect
+ */
 app.main.handle.prototype.redirect = function() {
   var href = this.getURL();
 
   app._root.window.location.href = href;
 }
 
+/**
+ * app.main.handle.prototype.refresh
+ */
 app.main.handle.prototype.refresh = function() {
-  app._root.document.location.reload();
+  app._root.window.location.reload();
 }
 
+/**
+ * app.main.handle.prototype.resize
+ */
 app.main.handle.prototype.resize = function() {
   if (! this.ctl.height) {
     return; // silent fail
@@ -301,10 +359,18 @@ app.main.handle.prototype.resize = function() {
   view.scrolling = 'no';
 }
 
+/**
+ * app.main.handle.prototype.selection
+ */
 app.main.handle.prototype.selection = function() {
   this.refresh();
 }
 
+/**
+ * app.main.handle.prototype.export
+ *
+ * @return
+ */
 app.main.handle.prototype.export = function() {
   if (! Blob) {
     return app.error('app.main.handle.prototype.export', 'Blob');
@@ -329,7 +395,11 @@ app.main.handle.prototype.export = function() {
   }
 }
 
-// generic method for all actions
+/**
+ * app.main.handle.prototype.prepare
+ *
+ * Generic method for all actions
+ */
 app.main.handle.prototype.prepare = function() {
   var action = this.setAction();
   var id = this.getID();
@@ -343,7 +413,13 @@ app.main.handle.prototype.prepare = function() {
   this.receiver();
 }
 
-// generic method for prevented actions like delete
+/**
+ * app.main.handle.prototype.prevent
+ *
+ * Generic method for prevented actions like delete
+ *
+ * @return
+ */
 app.main.handle.prototype.prevent = function() {
   var action = this.setAction();
   var msg = this.getMsg();
@@ -361,18 +437,51 @@ app.main.handle.prototype.prevent = function() {
   this.receiver();
 }
 
+/**
+ * app.main.handle.prototype.open
+ *
+ * alias: app.main.handle.prototype.prepare
+ */
 app.main.handle.prototype.open = app.main.handle.prototype.prepare;
 
+/**
+ * app.main.handle.prototype.add
+ *
+ * alias: app.main.handle.prototype.prepare
+ */
 app.main.handle.prototype.add = app.main.handle.prototype.prepare;
 
+/**
+ * app.main.handle.prototype.edit
+ *
+ * alias: app.main.handle.prototype.prepare
+ */
 app.main.handle.prototype.edit = app.main.handle.prototype.prepare;
 
+/**
+ * app.main.handle.prototype.update
+ *
+ * alias: app.main.handle.prototype.prepare
+ */
 app.main.handle.prototype.update = app.main.handle.prototype.prepare;
 
+/**
+ * app.main.handle.prototype.delete
+ *
+ * alias: app.main.handle.prototype.prevent
+ */
 app.main.handle.prototype.delete = app.main.handle.prototype.prevent;
 
+/**
+ * app.main.handle.prototype.close
+ *
+ * alias: app.main.handle.prototype.prevent
+ */
 app.main.handle.prototype.close = app.main.handle.prototype.prevent;
 
+/**
+ * app.main.handle.prototype.history
+ */
 app.main.handle.prototype.history = function() {
   var title = this.getTitle();
   var url = this.getURL();
@@ -380,6 +489,11 @@ app.main.handle.prototype.history = function() {
   app.controller.history(title, url);
 }
 
+/**
+ * app.main.handle.prototype.receiver
+ *
+ * @return 
+ */
 app.main.handle.prototype.receiver = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
@@ -430,17 +544,20 @@ app.main.handle.prototype.receiver = function() {
 /**
  * app.main.action
  *
- * Actions "main", returns object constructor
+ * Actions "main", returns self prototype
  *
- * avalaible methods:
- *  - menu ()
+ * avalaible prototype methods:
+ *  - isInitialized (funcName)
+ *  - begin ()
+ *  - end ()
+ *  - menu (element)
  *
  * @global <Object> appe__config
  * @global <Object> appe__main
  * @param <Array> events
  * @param <String> event
- * @param <NodeElement> element
- * @return
+ * @param <ElementNode> element
+ * @return <Function> prototype
  */
 app.main.action = function(events, event, element) {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
@@ -463,22 +580,40 @@ app.main.action = function(events, event, element) {
   return self;
 }
 
+/**
+ * app.main.action.prototype.isInitialized
+ *
+ * @param <String> funcName
+ * @return 
+ */
 app.main.action.prototype.isInitialized = function(funcName) {
   if (this._initialized) { return; }
 
   return app.error('app.main.action.prototype.isInitialized', funcName);
 }
 
+/**
+ * app.main.action.prototype.begin
+ */
 app.main.action.prototype.begin = function() {
   this._initialized = true;
 }
 
+/**
+ * app.main.action.prototype.end
+ */
 app.main.action.prototype.end = function() {
   this.isInitialized('end');
 
   this._initialized = false;
 }
 
+/**
+ * app.main.action.prototype.menu
+ *
+ * @param <ElementNode> element
+ * @return
+ */
 app.main.action.prototype.menu = function(element) {
   this.isInitialized('menu');
 
@@ -504,7 +639,7 @@ app.main.action.prototype.menu = function(element) {
 
   app.layout.collapse('toggle', element, menu)();
 
-  scrollTo(0, 0);
+  app._root.window.scrollTo(0, 0);
 }
 
 

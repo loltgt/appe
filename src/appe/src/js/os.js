@@ -547,7 +547,7 @@ app.os.fileSessionSave = function(callback, source, timestamp) {
 /**
  * app.os.fileDownload
  *
- * Prepares attachment data file and send to browser
+ * Prepares attachment data file and sends it to browser
  *
  * @link https://github.com/eligrey/FileSaver.js/
  *

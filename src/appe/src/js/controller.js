@@ -10,10 +10,10 @@ app.controller = {};
  * app.controller.cursor
  *
  * Get or set the controller cursor, 
- * it contains current position in the app { view, action, index }
+ * it contains current position in the app
  *
  * @param <Object> loc
- * @return <Object> loc
+ * @return <Object> loc  { view, action, index }
  */
 app.controller.cursor = function(loc) {
   if (loc && typeof loc != 'object') {
@@ -37,7 +37,7 @@ app.controller.cursor = function(loc) {
  *
  * Captures the app position using location.href
  *
- * @param <Object> loc
+ * @param <Object> loc  { view, action, index }
  */
 app.controller.spoof = function() {
   var loc = { view: null, action: null, index: null };

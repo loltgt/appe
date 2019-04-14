@@ -1062,7 +1062,7 @@ app.blind = function() {
  *
  * @global <Object> appe__config
  * @param <String> from  ( config | runtime )
- * @param <String> info  { config { app_name | schema | license } } | runtime { { debug | locale | version | release } } )
+ * @param <String> info  { config { app_name | schema | license } } | runtime { { debug | locale | version | release } }
  * @return
  */
 app.getInfo = function(from, info) {
