@@ -170,7 +170,17 @@ app.session = function(callback, config, target) {
     return app.stop('app.session', [callback, 'config', target]);
   }
 
+  var _secret_passphrase = null;
+
+  if ('secret_passphrase' in config) {
+    _secret_passphrase = config.secret_passphrase.toString();
+
+    delete config.secret_passphrase;
+  }
+
+
   app._root.server.appe__store = {};
+
 
   app._runtime.name = config.app_ns.toString();
   app._runtime.debug = !! config.debug ? true : false;
@@ -195,6 +205,7 @@ app.session = function(callback, config, target) {
   } else {
     app._runtime.storage = 'localStorage';
   }
+
 
   app._runtime.session = true;
 
@@ -293,10 +304,6 @@ app.session = function(callback, config, target) {
       return cb('config');
     }
 
-    _secret_passphrase = config.secret_passphrase.toString();
-
-    delete config.secret_passphrase;
-
     if ('CryptoJS' in app._root.window === false) {
       _asyncLoadCheck('CryptoJS', _crypto.bind(null, cb));
     } else {
@@ -316,14 +323,45 @@ app.session = function(callback, config, target) {
     tasks--;
 
     if (! tasks) {
+      _callback();
+    }
+  }
+
+  var _callback = function() {
+
+    /**
+     * start.session hook
+     *
+     * @param <Function> callback
+     */
+    if (target === undefined && start && 'session' in start && typeof start.session === 'function') {
+      start.session(callback);
+
+    /**
+     * main.session hook
+     *
+     * @param <Function> callback
+     */
+    } else if (target === true && main && 'session' in main && typeof main.session === 'function') {
+      main.session(callback);
+
+    /**
+     * control.session hook
+     *
+     * @param <Function> callback
+     */
+    } else if (target === false && control && 'session' in control && typeof control.session === 'function') {
+      control.session(callback);
+
+    } else {
       callback();
     }
+
   }
 
 
   // only start and main
   if (target !== false) {
-    var _secret_passphrase = null;
 
     if (app._runtime.encryption) {
       tasks++;
@@ -342,10 +380,12 @@ app.session = function(callback, config, target) {
 
       _doDefault(_resolver);
     }
+
   // only view
   } else {
-    callback();
+    _callback();
   }
+
 }
 
 

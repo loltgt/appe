@@ -97,7 +97,7 @@ appe__locale = {
       "Details": "Dettagli",
       "Summary": "Riepilogo",
       "Auto-save on change.": "Salva automaticamente le modifiche.",
-      "Move items to order them, click on item to drag & drop and change its order.": "Puoi spostare sulle voci per ordinarle, clicca su una di esse e trascinala per cambiarne ordine.",
+      "Move items by click or tap on them and change their order.": "Clicca o premi sulle voci per spostarle e cambiarne ordine.",
       "This item is already in list.": "Questa voce è già presente in lista.", 
       "yes": "sì",
       "no": "no",

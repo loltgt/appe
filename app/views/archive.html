@@ -337,17 +337,21 @@ control.action = function(element, event, extra) {
 
   var _events = {};
 
+
   _events.selection = function() {
     return _action.selection();
   }
+
 
   _events.open = function() {
     return _action.open();
   }
 
+
   _events.edit = function() {
     return _action.edit(_data_updated, false);
   }
+
 
   _events.delete = function() {
     var data_archive = app.data('archive');
@@ -375,6 +379,7 @@ control.action = function(element, event, extra) {
     return _action.delete(_data_updated, true, title);
   }
 
+
   _events.close = function() {
     var data_archive = app.data('archive');
 
@@ -396,11 +401,13 @@ control.action = function(element, event, extra) {
     return _action.close(_data_updated, true, title);
   }
 
+
   _events.export = function(method) {
     app.view.sub(method, element, table);
 
     return;
   }
+
 
   _events.print = function() {
     return _action.print();

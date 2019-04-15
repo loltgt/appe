@@ -76,13 +76,13 @@ var main = appe__main = {};
 
 main.handle = function(handler, event, ctl) {
   if (! handler || ! event || ! ctl) {
-    return app.error('main.handler', arguments);
+    return app.error('main.handle', arguments);
   }
 
-  var _handler = app.utils.extendObject({}, handler);
+  var _events = app.utils.extendObject({}, handler);
 
 
-  _handler.selection = function() {
+  _events.selection = function() {
     try {
       var _data = JSON.parse(ctl.data);
 
@@ -95,7 +95,7 @@ main.handle = function(handler, event, ctl) {
   }
 
 
-  _handler[event]();
+  _events[event]();
 }
 
 
@@ -196,6 +196,7 @@ main.action = function(element, event, extra) {
 
 
   var _events = {};
+
 
   _events.menu = function() {
     return _action.menu(element, event);

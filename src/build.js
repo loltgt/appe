@@ -265,7 +265,7 @@ build.prototype.watch = (type) => {
     }
 
     fs.readFile('./appe/src/' + type + '/' + file, (err, data) => {
-      blob[type][indexes[type][file]] = data;
+      blob[type][indexes[type][file]] = data.toString();
 
       console.log('update (' + type + ')', build.prototype.log(file.toString()), '\r\n');
 

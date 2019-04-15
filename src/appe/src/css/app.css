@@ -607,6 +607,11 @@ fieldset[disabled] .btn-secondary.focus {
   border-width: 1px 0;
 }
 
+.table-responsive > .table > tfoot > tr > td,
+.table-responsive > .table > tfoot > tr > th {
+  white-space: normal;
+}
+
 .table > thead > tr > th.thrv, .table > thead > tr > td.tdrv, .table > tbody > tr > td.tdrv { min-width: 60px; }
 .table > thead > tr > th.thrv, .table > thead > tr > td.tdrv { height: 230px; vertical-align: middle !important; }
 .table > thead > tr > th.thrv > span.trv { position: relative; top: 0; left: 0; display: block; width: 42px; height: 230px; margin: auto; overflow: hidden; }
@@ -616,9 +621,9 @@ fieldset[disabled] .btn-secondary.focus {
 .table > tbody > tr.draggable { cursor: move; cursor: grab; -webkit-transition: background-color linear 50ms, opacity linear 100ms; -moz-transition: background-color linear 50ms, opacity linear 100ms; transition: background-color linear 50ms, opacity linear 100ms; }
 .table > tbody > tr.draggable > td:first-child { position: relative; top: 0; left: 0; padding-left: 48px; }
 .table > tbody > tr.draggable > td:first-child:before { content: '\0021F3'; position: absolute; top: 0; left: 0; display: inline-block; padding: 10px 12px; font-size: 32px; line-height: 1; color: #999; }
-.table > tbody > tr.move > td { opacity: 0.8; background-color: #ddd; }
-.table > tbody > tr.over > td { background-color: #eee; }
-.table > tbody > tr.move > td:first-child:before { color: #fff; }
+.table > tbody > tr.draggable.move > td { opacity: 0.8; background-color: #ddd; }
+.table > tbody > tr.draggable.over > td { background-color: #eee; }
+.table > tbody > tr.draggable.move > td:first-child:before { color: #fff; }
 .table-drag { max-width: 640px; }
 
 .table-inline > thead > tr > th, .table-inline > tbody > tr > td { min-width: 50px; text-align: center; }

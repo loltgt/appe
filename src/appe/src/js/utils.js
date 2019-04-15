@@ -7,122 +7,6 @@ app.utils = {};
 
 
 /**
- * app.utils.isPlainObject
- *
- * Checks if object is a plain object
- *
- *  (jQuery.fn.isPlainObject)
- *  jQuery JavaScript Library
- *
- * @link https://jquery.com/
- * @copyright Copyright JS Foundation and other contributors
- * @license MIT license <https://jquery.org/license>
- *
- * @param <Object> obj
- * @return <Boolean>
- */
-app.utils.isPlainObject = function( obj ) {
-  var proto, Ctor;
-  var hasOwn = ({}).hasOwnProperty;
-
-  // Detect obvious negatives
-  // Use toString instead of jQuery.type to catch host objects
-  if ( !obj || toString.call( obj ) !== "[object Object]" ) {
-    return false;
-  }
-
-  proto = Object.getPrototypeOf( obj );
-
-  // Objects with no prototype (e.g., `Object.create( null )`) are plain
-  if ( !proto ) {
-    return true;
-  }
-
-  // Objects with prototype are plain iff they were constructed by a global Object function
-  Ctor = hasOwn.call( proto, "constructor" ) && proto.constructor;
-  return typeof Ctor === "function" && hasOwn.toString.call( Ctor ) === hasOwn.toString.call( Object );
-}
-
-
-/**
- * app.utils.extendObject
- *
- * Extend and merge objects
- *
- *  (jQuery.fn.extend)
- *  jQuery JavaScript Library
- *
- * @link https://jquery.com/
- * @copyright Copyright JS Foundation and other contributors
- * @license MIT license <https://jquery.org/license>
- *
- * @return <Object> target
- */
-app.utils.extendObject = function() {
-  var options, name, src, copy, copyIsArray, clone,
-    target = arguments[ 0 ] || {},
-    i = 1,
-    length = arguments.length,
-    deep = false;
-
-  // Handle a deep copy situation
-  if ( typeof target === "boolean" ) {
-    deep = target;
-
-    // Skip the boolean and the target
-    target = arguments[ i ] || {};
-    i++;
-  }
-
-  // Handle case when target is a string or something (possible in deep copy)
-  if ( typeof target !== "object" && !(typeof target === "function" && typeof target.nodeType !== "number") ) {
-    target = {};
-  }
-
-  for ( ; i < length; i++ ) {
-
-    // Only deal with non-null/undefined values
-    if ( ( options = arguments[ i ] ) != null ) {
-
-      // Extend the base object
-      for ( name in options ) {
-        src = target[ name ];
-        copy = options[ name ];
-
-        // Prevent never-ending loop
-        if ( target === copy ) {
-          continue;
-        }
-
-        // Recurse if we're merging plain objects or arrays
-        if ( deep && copy && ( app.utils.isPlainObject( copy ) ||
-          ( copyIsArray = Array.isArray( copy ) ) ) ) {
-
-          if ( copyIsArray ) {
-            copyIsArray = false;
-            clone = src && Array.isArray( src ) ? src : [];
-
-          } else {
-            clone = src && app.utils.isPlainObject( src ) ? src : {};
-          }
-
-          // Never move original objects, clone them
-          target[ name ] = app.utils.extendObject( deep, clone, copy );
-
-        // Don't bring in undefined values
-        } else if ( copy !== undefined ) {
-          target[ name ] = copy;
-        }
-      }
-    }
-  }
-
-  // Return the modified object
-  return target;
-}
-
-
-/**
  * app.utils.system
  *
  * Detects browser and system environments
@@ -909,4 +793,120 @@ app.utils.dateFormat = function(time, format) {
  */
 app.utils.numberLendingZero = function(number) {
   return number < 10 ? '0' + number : number.toString();
+}
+
+
+/**
+ * app.utils.isPlainObject
+ *
+ * Checks if object is a plain object
+ *
+ *  (jQuery.fn.isPlainObject)
+ *  jQuery JavaScript Library
+ *
+ * @link https://jquery.com/
+ * @copyright Copyright JS Foundation and other contributors
+ * @license MIT license <https://jquery.org/license>
+ *
+ * @param <Object> obj
+ * @return <Boolean>
+ */
+app.utils.isPlainObject = function( obj ) {
+  var proto, Ctor;
+  var hasOwn = ({}).hasOwnProperty;
+
+  // Detect obvious negatives
+  // Use toString instead of jQuery.type to catch host objects
+  if ( !obj || toString.call( obj ) !== "[object Object]" ) {
+    return false;
+  }
+
+  proto = Object.getPrototypeOf( obj );
+
+  // Objects with no prototype (e.g., `Object.create( null )`) are plain
+  if ( !proto ) {
+    return true;
+  }
+
+  // Objects with prototype are plain iff they were constructed by a global Object function
+  Ctor = hasOwn.call( proto, "constructor" ) && proto.constructor;
+  return typeof Ctor === "function" && hasOwn.toString.call( Ctor ) === hasOwn.toString.call( Object );
+}
+
+
+/**
+ * app.utils.extendObject
+ *
+ * Deep extend and merge objects
+ *
+ *  (jQuery.fn.extend)
+ *  jQuery JavaScript Library
+ *
+ * @link https://jquery.com/
+ * @copyright Copyright JS Foundation and other contributors
+ * @license MIT license <https://jquery.org/license>
+ *
+ * @return <Object> target
+ */
+app.utils.extendObject = function() {
+  var options, name, src, copy, copyIsArray, clone,
+    target = arguments[ 0 ] || {},
+    i = 1,
+    length = arguments.length,
+    deep = false;
+
+  // Handle a deep copy situation
+  if ( typeof target === "boolean" ) {
+    deep = target;
+
+    // Skip the boolean and the target
+    target = arguments[ i ] || {};
+    i++;
+  }
+
+  // Handle case when target is a string or something (possible in deep copy)
+  if ( typeof target !== "object" && !(typeof target === "function" && typeof target.nodeType !== "number") ) {
+    target = {};
+  }
+
+  for ( ; i < length; i++ ) {
+
+    // Only deal with non-null/undefined values
+    if ( ( options = arguments[ i ] ) != null ) {
+
+      // Extend the base object
+      for ( name in options ) {
+        src = target[ name ];
+        copy = options[ name ];
+
+        // Prevent never-ending loop
+        if ( target === copy ) {
+          continue;
+        }
+
+        // Recurse if we're merging plain objects or arrays
+        if ( deep && copy && ( app.utils.isPlainObject( copy ) ||
+          ( copyIsArray = Array.isArray( copy ) ) ) ) {
+
+          if ( copyIsArray ) {
+            copyIsArray = false;
+            clone = src && Array.isArray( src ) ? src : [];
+
+          } else {
+            clone = src && app.utils.isPlainObject( src ) ? src : {};
+          }
+
+          // Never move original objects, clone them
+          target[ name ] = app.utils.extendObject( deep, clone, copy );
+
+        // Don't bring in undefined values
+        } else if ( copy !== undefined ) {
+          target[ name ] = copy;
+        }
+      }
+    }
+  }
+
+  // Return the modified object
+  return target;
 }

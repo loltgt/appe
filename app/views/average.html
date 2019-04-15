@@ -213,9 +213,11 @@ control.action = function(element, event, extra) {
 
   var _events = {};
 
+
   _events.selection = function() {
     return _action.selection();
   }
+
 
   _events.update = function() {
     if (_action.validateForm()) {
@@ -240,11 +242,13 @@ control.action = function(element, event, extra) {
     return _action.update(_data_updated, true);
   }
 
+
   _events.export = function(method) {
     app.view.sub(method, element, table);
 
     return;
   }
+
 
   _events.print = function() {
     return _action.print();

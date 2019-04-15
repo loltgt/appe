@@ -190,7 +190,7 @@ app.main.handle = function(e) {
 
   self._initialized = true;
 
-  self.loc = app.utils.extendObject({}, self.ctl);
+  self.loc = 'assign' in Object ? Object.assign({}, self.ctl) : app.utils.extendObject({}, self.ctl);
 
   self._href = '';
   self._title = '';
@@ -678,11 +678,17 @@ app.main.setup = function() {
 app.main.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
-  if (! config) {
+  if (typeof config == 'object') {
+    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+
+    if ('secret_passphrase' in config) {
+      delete config.secret_passphrase;
+    }
+  } else {
     return app.stop('app.main.load');
   }
 
-  app.checkConfig(config);
+  app.checkConfig(_config);
 
 
   var _localize = function() {
@@ -732,15 +738,20 @@ app.main.load = function() {
   }
 
   var _session = function() {
-    app.resume(config, true);
+    if ('secret_passphrase' in _config) {
+      delete _config.secret_passphrase;
+    }
 
+    // try to resume previous session
+    app.resume(_config, true);
 
-    var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
-    routine.push({ file: '', fn: app._runtime.name, schema: config.schema });
+    // try to load extensions
+    var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
+    routine.push({ file: '', fn: app._runtime.name, schema: _config.schema });
 
     app.controller.retrieve(app.main.setup, routine);
 
-    app.controller.setTitle(config.app_name);
+    app.controller.setTitle(_config.app_name);
 
 
     app.utils.addEvent('message', app._root.window, app.main.handle);
@@ -752,7 +763,7 @@ app.main.load = function() {
   }
 
 
-  app.session(_session, config, true);
+  app.session(_session, _config, true);
 
 }
 

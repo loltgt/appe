@@ -170,7 +170,17 @@ app.session = function(callback, config, target) {
     return app.stop('app.session', [callback, 'config', target]);
   }
 
+  var _secret_passphrase = null;
+
+  if ('secret_passphrase' in config) {
+    _secret_passphrase = config.secret_passphrase.toString();
+
+    delete config.secret_passphrase;
+  }
+
+
   app._root.server.appe__store = {};
+
 
   app._runtime.name = config.app_ns.toString();
   app._runtime.debug = !! config.debug ? true : false;
@@ -195,6 +205,7 @@ app.session = function(callback, config, target) {
   } else {
     app._runtime.storage = 'localStorage';
   }
+
 
   app._runtime.session = true;
 
@@ -293,10 +304,6 @@ app.session = function(callback, config, target) {
       return cb('config');
     }
 
-    _secret_passphrase = config.secret_passphrase.toString();
-
-    delete config.secret_passphrase;
-
     if ('CryptoJS' in app._root.window === false) {
       _asyncLoadCheck('CryptoJS', _crypto.bind(null, cb));
     } else {
@@ -316,14 +323,45 @@ app.session = function(callback, config, target) {
     tasks--;
 
     if (! tasks) {
+      _callback();
+    }
+  }
+
+  var _callback = function() {
+
+    /**
+     * start.session hook
+     *
+     * @param <Function> callback
+     */
+    if (target === undefined && start && 'session' in start && typeof start.session === 'function') {
+      start.session(callback);
+
+    /**
+     * main.session hook
+     *
+     * @param <Function> callback
+     */
+    } else if (target === true && main && 'session' in main && typeof main.session === 'function') {
+      main.session(callback);
+
+    /**
+     * control.session hook
+     *
+     * @param <Function> callback
+     */
+    } else if (target === false && control && 'session' in control && typeof control.session === 'function') {
+      control.session(callback);
+
+    } else {
       callback();
     }
+
   }
 
 
   // only start and main
   if (target !== false) {
-    var _secret_passphrase = null;
 
     if (app._runtime.encryption) {
       tasks++;
@@ -342,10 +380,12 @@ app.session = function(callback, config, target) {
 
       _doDefault(_resolver);
     }
+
   // only view
   } else {
-    callback();
+    _callback();
   }
+
 }
 
 
@@ -2163,32 +2203,6 @@ app.controller = {};
 
 
 /**
- * app.controller.cursor
- *
- * Get or set the controller cursor, 
- * it contains current position in the app
- *
- * @param <Object> loc
- * @return <Object> loc  { view, action, index }
- */
-app.controller.cursor = function(loc) {
-  if (loc && typeof loc != 'object') {
-    return app.error('app.controller.cursor', [loc]);
-  }
-
-  if (loc) {
-    app.memory.set('cursor', loc);
-
-    return loc;
-  }
-
-  loc = app.memory.get('cursor', loc);
-
-  return loc;
-}
-
-
-/**
  * app.controller.spoof
  *
  * Captures the app position using location.href
@@ -2253,6 +2267,32 @@ app.controller.history = function(title, url) {
 
 
 /**
+ * app.controller.cursor
+ *
+ * Get or set the controller cursor, 
+ * it contains current position in the app
+ *
+ * @param <Object> loc
+ * @return <Object> loc  { view, action, index }
+ */
+app.controller.cursor = function(loc) {
+  if (loc && typeof loc != 'object') {
+    return app.error('app.controller.cursor', [loc]);
+  }
+
+  if (loc) {
+    app.memory.set('cursor', loc);
+
+    return loc;
+  }
+
+  loc = app.memory.get('cursor', loc);
+
+  return loc;
+}
+
+
+/**
  * app.controller.setTitle
  *
  * Set and store the document title
@@ -2278,6 +2318,78 @@ app.controller.setTitle = function(title) {
  */
 app.controller.getTitle = function() {
   return app._runtime.title.toString();
+}
+
+
+/**
+ * app.controller.store
+ *
+ * Stores data from current session, returns to callback
+ *
+ * @global <Object> appe__store
+ * @param <Function> callback
+ * @param <String> fn
+ * @param <Object> schema
+ * @param <Object> data
+ * @return
+ */
+app.controller.store = function(callback, fn, schema, data) {
+  var store = app._root.server.appe__store;
+
+  if (! store) {
+    return app.stop('app.controller.store', 'store');
+  }
+
+  if (typeof callback != 'function' || typeof fn != 'string' || typeof schema != 'object' || typeof data != 'object') {
+    return app.stop('app.controller.store', [callback, fn, schema, data]);
+  }
+
+  var source = store[fn];
+
+  if (! source) {
+    return app.stop('app.controller.store', 'source');
+  }
+
+
+  var _store = function(key, values) {
+    if (typeof key != 'string' || typeof values != 'object') {
+      return app.stop('app.controller.store() > _store', [key, values]);
+    }
+
+    if (! source[key]) {
+      return app.stop('app.controller.store() > _store', 'source');
+    }
+
+    var _data = values;
+
+    app.store.set(fn + '_' + key, _data);
+
+    return _data;
+  }
+
+
+  var _current_timestamp = new Date();
+  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
+
+
+  var keys = Object.keys(data);
+
+  for (var i in keys) {
+    var key = keys[i];
+    var values = data[key];
+
+    if (schema.indexOf(key) === -1 || ! Object.keys(values).length) {
+      return app.stop('app.controller.store', 'data');
+    }
+
+    store[fn][key] = _store(key, values);
+  }
+
+  app.memory.del('save_reminded');
+
+  app.memory.set('last_stored', _current_timestamp);
+
+  callback();
 }
 
 
@@ -2352,78 +2464,6 @@ app.controller.retrieve = function(callback, routine) {
 
     store[fn] = _retrieve(fn, routine[i].schema);
   }
-
-  callback();
-}
-
-
-/**
- * app.controller.store
- *
- * Stores data from current session, returns to callback
- *
- * @global <Object> appe__store
- * @param <Function> callback
- * @param <String> fn
- * @param <Object> schema
- * @param <Object> data
- * @return
- */
-app.controller.store = function(callback, fn, schema, data) {
-  var store = app._root.server.appe__store;
-
-  if (! store) {
-    return app.stop('app.controller.store', 'store');
-  }
-
-  if (typeof callback != 'function' || typeof fn != 'string' || typeof schema != 'object' || typeof data != 'object') {
-    return app.stop('app.controller.store', [callback, fn, schema, data]);
-  }
-
-  var source = store[fn];
-
-  if (! source) {
-    return app.stop('app.controller.store', 'source');
-  }
-
-
-  var _store = function(key, values) {
-    if (typeof key != 'string' || typeof values != 'object') {
-      return app.stop('app.controller.store() > _store', [key, values]);
-    }
-
-    if (! source[key]) {
-      return app.stop('app.controller.store() > _store', 'source');
-    }
-
-    var _data = values;
-
-    app.store.set(fn + '_' + key, _data);
-
-    return _data;
-  }
-
-
-  var _current_timestamp = new Date();
-  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
-
-
-  var keys = Object.keys(data);
-
-  for (var i in keys) {
-    var key = keys[i];
-    var values = data[key];
-
-    if (schema.indexOf(key) === -1 || ! Object.keys(values).length) {
-      return app.stop('app.controller.store', 'data');
-    }
-
-    store[fn][key] = _store(key, values);
-  }
-
-  app.memory.del('save_reminded');
-
-  app.memory.set('last_stored', _current_timestamp);
 
   callback();
 }
@@ -2917,8 +2957,6 @@ app.start.redirect = function(loaded) {
  *
  * Display messages with info and alternatives to help to execute app 
  *
- * //TODO hook
- *
  * @global <Object> appe__config
  * @return
  */
@@ -2966,7 +3004,9 @@ app.start.alternative = function() {
   app.start.progress(1);
 
 
-  return app.error(alt);
+  app.error(alt);
+
+  app.blind();
 }
 
 
@@ -2975,8 +3015,6 @@ app.start.alternative = function() {
  *
  * Default "start" load function
  *
- * //TODO hook?
- *
  * @global <Object> appe__config
  * @global <Object> appe__locale
  * @return
@@ -2984,11 +3022,17 @@ app.start.alternative = function() {
 app.start.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
-  if (! config) {
+  if (typeof config == 'object') {
+    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+
+    if ('secret_passphrase' in config) {
+      delete config.secret_passphrase;
+    }
+  } else {
     return app.stop('app.start.load');
   }
 
-  app.checkConfig(config);
+  app.checkConfig(_config);
 
 
   var exec = true;
@@ -3014,7 +3058,7 @@ app.start.load = function() {
 
 
   var _asyncAttemptLoadAux = function(cb) {
-    var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
+    var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
 
     if (routine.length) {
       var i = routine.length;
@@ -3061,25 +3105,33 @@ app.start.load = function() {
   }
 
   var _session = function() {
-    if (! exec) {
-      !! config.alt && app.start.alternative();
+    if ('secret_passphrase' in _config) {
+      delete _config.secret_passphrase;
+    }
 
-      app.blind();
+    if (! exec) {
+      /**
+       * start.alternative hook
+       */
+      if (!! _config.alt && start && 'alternative' in start && typeof start.alternative === 'function') {
+        start.alternative();
+      } else if (!! _config.alt) {
+        app.start.alternative();
+      } else {
+        app.blind();
+      }
 
       return;
     }
 
-
-    app.controller.setTitle(config.app_name);
-
+    app.controller.setTitle(_config.app_name);
 
     if (app._root.document.native == undefined) {
       _layout();
     }
 
-
-    // try to resume previous session file
-    var session_resume = app.resume(config);
+    // try to resume previous session and file
+    var session_resume = app.resume(_config);
 
     // try to load extensions
     _asyncAttemptLoadAux(function(err, loaded) {
@@ -3092,7 +3144,7 @@ app.start.load = function() {
   }
 
 
-  app.session(_session, config);
+  app.session(_session, _config);
 }
 
 
@@ -3288,7 +3340,7 @@ app.main.handle = function(e) {
 
   self._initialized = true;
 
-  self.loc = app.utils.extendObject({}, self.ctl);
+  self.loc = 'assign' in Object ? Object.assign({}, self.ctl) : app.utils.extendObject({}, self.ctl);
 
   self._href = '';
   self._title = '';
@@ -3776,11 +3828,17 @@ app.main.setup = function() {
 app.main.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
-  if (! config) {
+  if (typeof config == 'object') {
+    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+
+    if ('secret_passphrase' in config) {
+      delete config.secret_passphrase;
+    }
+  } else {
     return app.stop('app.main.load');
   }
 
-  app.checkConfig(config);
+  app.checkConfig(_config);
 
 
   var _localize = function() {
@@ -3830,15 +3888,20 @@ app.main.load = function() {
   }
 
   var _session = function() {
-    app.resume(config, true);
+    if ('secret_passphrase' in _config) {
+      delete _config.secret_passphrase;
+    }
 
+    // try to resume previous session
+    app.resume(_config, true);
 
-    var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
-    routine.push({ file: '', fn: app._runtime.name, schema: config.schema });
+    // try to load extensions
+    var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
+    routine.push({ file: '', fn: app._runtime.name, schema: _config.schema });
 
     app.controller.retrieve(app.main.setup, routine);
 
-    app.controller.setTitle(config.app_name);
+    app.controller.setTitle(_config.app_name);
 
 
     app.utils.addEvent('message', app._root.window, app.main.handle);
@@ -3850,7 +3913,7 @@ app.main.load = function() {
   }
 
 
-  app.session(_session, config, true);
+  app.session(_session, _config, true);
 
 }
 
@@ -4965,36 +5028,6 @@ app.view.handle = function() {
 
 
 /**
- * app.view.resize
- *
- * Fires when "view" is resized
- *
- * @global <Object> appe__control
- * @return
- */
-app.view.resize = function(check_time) {
-  var control = app._root.server.appe__control;
-
-  if (! (control && control.temp)) {
-    return; // silent fail
-  }
-
-  if (check_time) {
-    if ((new Date().getTime() - control.temp.last_resize) < 1000) {
-      return;
-    }
-
-    control.temp.last_resize = new Date().getTime();
-  }
-
-
-  var ctl = { action: 'resize', height: app._root.document.documentElement.scrollHeight };
-
-  return app.view.send(ctl);
-}
-
-
-/**
  * app.view.send
  *
  * Sends control messages to "main"
@@ -5049,6 +5082,36 @@ app.view.send = function(ctl) {
   } catch (err) {
     return app.error('app.view.send', err);
   }
+}
+
+
+/**
+ * app.view.resize
+ *
+ * Fires when "view" is resized
+ *
+ * @global <Object> appe__control
+ * @return
+ */
+app.view.resize = function(check_time) {
+  var control = app._root.server.appe__control;
+
+  if (! (control && control.temp)) {
+    return; // silent fail
+  }
+
+  if (check_time) {
+    if ((new Date().getTime() - control.temp.last_resize) < 1000) {
+      return;
+    }
+
+    control.temp.last_resize = new Date().getTime();
+  }
+
+
+  var ctl = { action: 'resize', height: app._root.document.documentElement.scrollHeight };
+
+  return app.view.send(ctl);
 }
 
 
@@ -5219,7 +5282,13 @@ app.view.copyToClipboard = function(source) {
 app.view.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
-  if (! config) {
+  if (typeof config == 'object') {
+    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+
+    if ('secret_passphrase' in config) {
+      delete config.secret_passphrase;
+    }
+  } else {
     return app.stop('app.view.load');
   }
 
@@ -5243,11 +5312,16 @@ app.view.load = function() {
   }
 
   var _session = function() {
-    app.resume(config, false);
+    if ('secret_passphrase' in _config) {
+      delete _config.secret_passphrase;
+    }
 
+    // try to resume previous session
+    app.resume(_config, false);
 
-    var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
-    routine.push({ fn: app._runtime.name, schema: config.schema });
+    // try to load extensions
+    var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
+    routine.push({ fn: app._runtime.name, schema: _config.schema });
 
     app.controller.retrieve(app.view.handle, routine);
 
@@ -5258,7 +5332,7 @@ app.view.load = function() {
   }
 
 
-  app.session(_session, config, false);
+  app.session(_session, _config, false);
 }
 
 
@@ -5455,145 +5529,6 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
 
 
 /**
- * app.layout.draggable
- *
- * Helper for draggable table, returns requested prototype method
- *
- * //TODO fix droid
- *
- * available prototype methods:
- *  - start (e)
- *  - over (e)
- *  - enter (e)
- *  - leave (e)
- *  - end (e)
- *  - drop (e)
- *
- * @param <String> event
- * @param <ElementNode> table
- * @param <ElementNode> field
- * @return <Function>
- */
-app.layout.draggable = function(event, table, field) {
-  if (! event || ! table) {
-    return app.error('app.view.draggable', [event, table, field]);
-  }
-
-  var self = app.layout.draggable.prototype;
-
-  if (! table._draggable) {
-    table._draggable = { current: null, prev_index: null, next_index: null };
-  }
-
-
-  var _proxy = (function(e) {
-    return self[event].apply(this, [ table, e, field ]);
-  });
-
-  return _proxy;
-}
-
-app.layout.draggable.prototype.start = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.start', e, table._draggable);
-  }
-
-  table._draggable.current = this;
-  table._draggable.next_index = this.getAttribute('data-index');
-
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', this.innerHTML);
-
-  this.classList.add('move');
-}
-
-app.layout.draggable.prototype.over = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.over', e, table._draggable);
-  }
-
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
-
-  e.dataTransfer.dropEffect = 'move';
-
-  return false;
-}
-
-app.layout.draggable.prototype.enter = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.enter', e, table._draggable);
-  }
-
-  this.classList.add('over');
-}
-
-app.layout.draggable.prototype.leave = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.leave', e, table._draggable);
-  }
-
-  this.classList.remove('over');
-}
-
-app.layout.draggable.prototype.end = function(table, e, field) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.end', e, table._draggable);
-  }
-
-  var tbody = table.querySelector('tbody');
-  var trows = tbody.querySelectorAll('tr.draggable');
-
-  var items = [];
-
-  Array.prototype.forEach.call(trows, function (trow) {
-    items.push(trow.getAttribute('data-index'));
-
-    trow.classList.remove('move');
-    trow.classList.remove('over');
-  });
-
-  // prepare items
-  try {
-    items = JSON.stringify(items);
-    items = encodeURIComponent(items);
-
-    // set items
-    if (field) {
-      field.setAttribute('value', items);
-    }
-  } catch (err) {
-    return app.error('app.view.draggable.end', err);
-  }
-}
-
-app.layout.draggable.prototype.drop = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.drop', e, table._draggable);
-  }
-
-  if (e.stopPropagation) {
-    e.stopPropagation();
-  }
-
-  if (table._draggable.current != this) {
-    table._draggable.prev_index = this.getAttribute('data-index');
-
-    table._draggable.current.innerHTML = this.innerHTML;
-    table._draggable.current.setAttribute('data-index', table._draggable.prev_index);
-
-    this.setAttribute('data-index', table._draggable.next_index);
-    this.innerHTML = e.dataTransfer.getData('text/html');
-  } else {
-    table._draggable.next_index = null;
-  }
-
-  return false;
-}
-
-
-/**
  * app.layout.dropdown
  *
  * Helper for dropdown, returns requested prototype method
@@ -5623,6 +5558,11 @@ app.layout.dropdown = function(event, element, dropdown) {
   return self[event].bind(self);
 }
 
+/**
+ * app.layout.dropdown.prototype.open
+ *
+ * @param <Event> e
+ */
 app.layout.dropdown.prototype.open = function(e) {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.open', (e && e.target), e);
@@ -5642,6 +5582,11 @@ app.layout.dropdown.prototype.open = function(e) {
   this.dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', true);
 }
 
+/**
+ * app.layout.dropdown.prototype.close
+ *
+ * @param <Event> e
+ */
 app.layout.dropdown.prototype.close = function(e) {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.open', (e && e.target), e);
@@ -5661,6 +5606,9 @@ app.layout.dropdown.prototype.close = function(e) {
   this.dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', false);
 }
 
+/**
+ * app.layout.dropdown.prototype.toggle
+ */
 app.layout.dropdown.prototype.toggle = function() {
   if (!! app._runtime.debug) {
     console.info('app.layout.dropdown.prototype.toggle');
@@ -5704,6 +5652,11 @@ app.layout.collapse = function(event, element, collapsible) {
   return self[event].bind(self);
 }
 
+/**
+ * app.layout.collapse.prototype.open
+ *
+ * @param <Event> e
+ */
 app.layout.collapse.prototype.open = function(e) {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.open', (e && e.target), e);
@@ -5724,6 +5677,11 @@ app.layout.collapse.prototype.open = function(e) {
   this.element.classList.remove('collapsed');
 }
 
+/**
+ * app.layout.collapse.prototype.close
+ *
+ * @param <Event> e
+ */
 app.layout.collapse.prototype.close = function(e) {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.open', (e && e.target), e);
@@ -5744,6 +5702,9 @@ app.layout.collapse.prototype.close = function(e) {
   this.element.classList.add('collapsed');
 }
 
+/**
+ * app.layout.collapse.prototype.toggle
+ */
 app.layout.collapse.prototype.toggle = function() {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.toggle');
@@ -5753,6 +5714,237 @@ app.layout.collapse.prototype.toggle = function() {
     this.open();
   } else {
     this.close();
+  }
+}
+
+
+/**
+ * app.layout.draggable
+ *
+ * Helper for draggable, returns requested prototype method
+ *
+ * //TODO fix droid
+ *
+ * available prototype methods:
+ *  - start (e, element, callback)
+ *  - over (e, element, callback)
+ *  - enter (e, element, callback)
+ *  - leave (e, element, callback)
+ *  - end (e, element, callback)
+ *  - drop (e, element, callback)
+ *
+ * @param <String> event
+ * @param <ElementNode> element
+ * @param <String> row_selector - .draggable
+ * @param <Function> callback  ( event, current, e, element )
+ * @return <Function>
+ */
+app.layout.draggable = function(event, element, row_selector, callback) {
+  if (! event || ! element) {
+    return app.error('app.view.draggable', [event, element, field]);
+  }
+
+  var self = app.layout.draggable.prototype;
+
+  row_selector = row_selector || '.draggable';
+  callback = typeof callback === 'function' ? callback : null;
+
+  if (! element._draggable) {
+    element._draggable = { row: row_selector, current: null, prev_index: null, next_index: null };
+  }
+
+
+  var _proxy = (function(e) {
+    return self[event].apply(this, [ e, element, callback ]);
+  });
+
+  return _proxy;
+}
+
+/**
+ * app.layout.draggable.prototype.start
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ * @return
+ */
+app.layout.draggable.prototype.start = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.start', e, element._draggable);
+  }
+
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+
+  element._draggable.current = this;
+  element._draggable.next_index = this.getAttribute('data-index');
+
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.innerHTML);
+
+  this.classList.add('move');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.stopPropagation) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.over
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ * @return
+ */
+app.layout.draggable.prototype.over = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.over', e, element._draggable);
+  }
+
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+
+  e.dataTransfer.dropEffect = 'move';
+
+  if (callback && typeof callback == 'function') {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.preventDefault) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.enter
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ */
+app.layout.draggable.prototype.enter = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.enter', e, element._draggable);
+  }
+
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+
+  this.classList.add('over');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.preventDefault) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.leave
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ */
+app.layout.draggable.prototype.leave = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.leave', e, element._draggable);
+  }
+
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+
+  this.classList.remove('over');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.preventDefault) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.end
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ */
+app.layout.draggable.prototype.end = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.end', e, element._draggable);
+  }
+
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+
+  var rows = document.querySelectorAll(element._draggable.row);
+
+  Array.prototype.forEach.call(rows, function(el) {
+    el.classList.remove('move');
+    el.classList.remove('over');
+  });
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.preventDefault) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.drop
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ * @return
+ */
+app.layout.draggable.prototype.drop = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.drop', e, element._draggable);
+  }
+
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+
+  if (element._draggable.current != this) {
+    element._draggable.prev_index = this.getAttribute('data-index');
+
+    element._draggable.current.innerHTML = this.innerHTML;
+    element._draggable.current.setAttribute('data-index', element._draggable.prev_index);
+
+    this.setAttribute('data-index', element._draggable.next_index);
+    this.innerHTML = e.dataTransfer.getData('text/html');
+    this.querySelector('meta').remove();
+  } else {
+    element._draggable.next_index = null;
+  }
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.stopPropagation) {
+    return false;
   }
 }
 
@@ -5797,122 +5989,6 @@ app.layout.localize = function(element) {
  * Utils functions
  */
 app.utils = {};
-
-
-/**
- * app.utils.isPlainObject
- *
- * Checks if object is a plain object
- *
- *  (jQuery.fn.isPlainObject)
- *  jQuery JavaScript Library
- *
- * @link https://jquery.com/
- * @copyright Copyright JS Foundation and other contributors
- * @license MIT license <https://jquery.org/license>
- *
- * @param <Object> obj
- * @return <Boolean>
- */
-app.utils.isPlainObject = function( obj ) {
-  var proto, Ctor;
-  var hasOwn = ({}).hasOwnProperty;
-
-  // Detect obvious negatives
-  // Use toString instead of jQuery.type to catch host objects
-  if ( !obj || toString.call( obj ) !== "[object Object]" ) {
-    return false;
-  }
-
-  proto = Object.getPrototypeOf( obj );
-
-  // Objects with no prototype (e.g., `Object.create( null )`) are plain
-  if ( !proto ) {
-    return true;
-  }
-
-  // Objects with prototype are plain iff they were constructed by a global Object function
-  Ctor = hasOwn.call( proto, "constructor" ) && proto.constructor;
-  return typeof Ctor === "function" && hasOwn.toString.call( Ctor ) === hasOwn.toString.call( Object );
-}
-
-
-/**
- * app.utils.extendObject
- *
- * Extend and merge objects
- *
- *  (jQuery.fn.extend)
- *  jQuery JavaScript Library
- *
- * @link https://jquery.com/
- * @copyright Copyright JS Foundation and other contributors
- * @license MIT license <https://jquery.org/license>
- *
- * @return <Object> target
- */
-app.utils.extendObject = function() {
-  var options, name, src, copy, copyIsArray, clone,
-    target = arguments[ 0 ] || {},
-    i = 1,
-    length = arguments.length,
-    deep = false;
-
-  // Handle a deep copy situation
-  if ( typeof target === "boolean" ) {
-    deep = target;
-
-    // Skip the boolean and the target
-    target = arguments[ i ] || {};
-    i++;
-  }
-
-  // Handle case when target is a string or something (possible in deep copy)
-  if ( typeof target !== "object" && !(typeof target === "function" && typeof target.nodeType !== "number") ) {
-    target = {};
-  }
-
-  for ( ; i < length; i++ ) {
-
-    // Only deal with non-null/undefined values
-    if ( ( options = arguments[ i ] ) != null ) {
-
-      // Extend the base object
-      for ( name in options ) {
-        src = target[ name ];
-        copy = options[ name ];
-
-        // Prevent never-ending loop
-        if ( target === copy ) {
-          continue;
-        }
-
-        // Recurse if we're merging plain objects or arrays
-        if ( deep && copy && ( app.utils.isPlainObject( copy ) ||
-          ( copyIsArray = Array.isArray( copy ) ) ) ) {
-
-          if ( copyIsArray ) {
-            copyIsArray = false;
-            clone = src && Array.isArray( src ) ? src : [];
-
-          } else {
-            clone = src && app.utils.isPlainObject( src ) ? src : {};
-          }
-
-          // Never move original objects, clone them
-          target[ name ] = app.utils.extendObject( deep, clone, copy );
-
-        // Don't bring in undefined values
-        } else if ( copy !== undefined ) {
-          target[ name ] = copy;
-        }
-      }
-    }
-  }
-
-  // Return the modified object
-  return target;
-}
 
 
 /**
@@ -6702,6 +6778,122 @@ app.utils.dateFormat = function(time, format) {
  */
 app.utils.numberLendingZero = function(number) {
   return number < 10 ? '0' + number : number.toString();
+}
+
+
+/**
+ * app.utils.isPlainObject
+ *
+ * Checks if object is a plain object
+ *
+ *  (jQuery.fn.isPlainObject)
+ *  jQuery JavaScript Library
+ *
+ * @link https://jquery.com/
+ * @copyright Copyright JS Foundation and other contributors
+ * @license MIT license <https://jquery.org/license>
+ *
+ * @param <Object> obj
+ * @return <Boolean>
+ */
+app.utils.isPlainObject = function( obj ) {
+  var proto, Ctor;
+  var hasOwn = ({}).hasOwnProperty;
+
+  // Detect obvious negatives
+  // Use toString instead of jQuery.type to catch host objects
+  if ( !obj || toString.call( obj ) !== "[object Object]" ) {
+    return false;
+  }
+
+  proto = Object.getPrototypeOf( obj );
+
+  // Objects with no prototype (e.g., `Object.create( null )`) are plain
+  if ( !proto ) {
+    return true;
+  }
+
+  // Objects with prototype are plain iff they were constructed by a global Object function
+  Ctor = hasOwn.call( proto, "constructor" ) && proto.constructor;
+  return typeof Ctor === "function" && hasOwn.toString.call( Ctor ) === hasOwn.toString.call( Object );
+}
+
+
+/**
+ * app.utils.extendObject
+ *
+ * Deep extend and merge objects
+ *
+ *  (jQuery.fn.extend)
+ *  jQuery JavaScript Library
+ *
+ * @link https://jquery.com/
+ * @copyright Copyright JS Foundation and other contributors
+ * @license MIT license <https://jquery.org/license>
+ *
+ * @return <Object> target
+ */
+app.utils.extendObject = function() {
+  var options, name, src, copy, copyIsArray, clone,
+    target = arguments[ 0 ] || {},
+    i = 1,
+    length = arguments.length,
+    deep = false;
+
+  // Handle a deep copy situation
+  if ( typeof target === "boolean" ) {
+    deep = target;
+
+    // Skip the boolean and the target
+    target = arguments[ i ] || {};
+    i++;
+  }
+
+  // Handle case when target is a string or something (possible in deep copy)
+  if ( typeof target !== "object" && !(typeof target === "function" && typeof target.nodeType !== "number") ) {
+    target = {};
+  }
+
+  for ( ; i < length; i++ ) {
+
+    // Only deal with non-null/undefined values
+    if ( ( options = arguments[ i ] ) != null ) {
+
+      // Extend the base object
+      for ( name in options ) {
+        src = target[ name ];
+        copy = options[ name ];
+
+        // Prevent never-ending loop
+        if ( target === copy ) {
+          continue;
+        }
+
+        // Recurse if we're merging plain objects or arrays
+        if ( deep && copy && ( app.utils.isPlainObject( copy ) ||
+          ( copyIsArray = Array.isArray( copy ) ) ) ) {
+
+          if ( copyIsArray ) {
+            copyIsArray = false;
+            clone = src && Array.isArray( src ) ? src : [];
+
+          } else {
+            clone = src && app.utils.isPlainObject( src ) ? src : {};
+          }
+
+          // Never move original objects, clone them
+          target[ name ] = app.utils.extendObject( deep, clone, copy );
+
+        // Don't bring in undefined values
+        } else if ( copy !== undefined ) {
+          target[ name ] = copy;
+        }
+      }
+    }
+  }
+
+  // Return the modified object
+  return target;
 }
 
 

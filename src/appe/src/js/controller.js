@@ -7,32 +7,6 @@ app.controller = {};
 
 
 /**
- * app.controller.cursor
- *
- * Get or set the controller cursor, 
- * it contains current position in the app
- *
- * @param <Object> loc
- * @return <Object> loc  { view, action, index }
- */
-app.controller.cursor = function(loc) {
-  if (loc && typeof loc != 'object') {
-    return app.error('app.controller.cursor', [loc]);
-  }
-
-  if (loc) {
-    app.memory.set('cursor', loc);
-
-    return loc;
-  }
-
-  loc = app.memory.get('cursor', loc);
-
-  return loc;
-}
-
-
-/**
  * app.controller.spoof
  *
  * Captures the app position using location.href
@@ -97,6 +71,32 @@ app.controller.history = function(title, url) {
 
 
 /**
+ * app.controller.cursor
+ *
+ * Get or set the controller cursor, 
+ * it contains current position in the app
+ *
+ * @param <Object> loc
+ * @return <Object> loc  { view, action, index }
+ */
+app.controller.cursor = function(loc) {
+  if (loc && typeof loc != 'object') {
+    return app.error('app.controller.cursor', [loc]);
+  }
+
+  if (loc) {
+    app.memory.set('cursor', loc);
+
+    return loc;
+  }
+
+  loc = app.memory.get('cursor', loc);
+
+  return loc;
+}
+
+
+/**
  * app.controller.setTitle
  *
  * Set and store the document title
@@ -122,6 +122,78 @@ app.controller.setTitle = function(title) {
  */
 app.controller.getTitle = function() {
   return app._runtime.title.toString();
+}
+
+
+/**
+ * app.controller.store
+ *
+ * Stores data from current session, returns to callback
+ *
+ * @global <Object> appe__store
+ * @param <Function> callback
+ * @param <String> fn
+ * @param <Object> schema
+ * @param <Object> data
+ * @return
+ */
+app.controller.store = function(callback, fn, schema, data) {
+  var store = app._root.server.appe__store;
+
+  if (! store) {
+    return app.stop('app.controller.store', 'store');
+  }
+
+  if (typeof callback != 'function' || typeof fn != 'string' || typeof schema != 'object' || typeof data != 'object') {
+    return app.stop('app.controller.store', [callback, fn, schema, data]);
+  }
+
+  var source = store[fn];
+
+  if (! source) {
+    return app.stop('app.controller.store', 'source');
+  }
+
+
+  var _store = function(key, values) {
+    if (typeof key != 'string' || typeof values != 'object') {
+      return app.stop('app.controller.store() > _store', [key, values]);
+    }
+
+    if (! source[key]) {
+      return app.stop('app.controller.store() > _store', 'source');
+    }
+
+    var _data = values;
+
+    app.store.set(fn + '_' + key, _data);
+
+    return _data;
+  }
+
+
+  var _current_timestamp = new Date();
+  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
+
+
+  var keys = Object.keys(data);
+
+  for (var i in keys) {
+    var key = keys[i];
+    var values = data[key];
+
+    if (schema.indexOf(key) === -1 || ! Object.keys(values).length) {
+      return app.stop('app.controller.store', 'data');
+    }
+
+    store[fn][key] = _store(key, values);
+  }
+
+  app.memory.del('save_reminded');
+
+  app.memory.set('last_stored', _current_timestamp);
+
+  callback();
 }
 
 
@@ -196,78 +268,6 @@ app.controller.retrieve = function(callback, routine) {
 
     store[fn] = _retrieve(fn, routine[i].schema);
   }
-
-  callback();
-}
-
-
-/**
- * app.controller.store
- *
- * Stores data from current session, returns to callback
- *
- * @global <Object> appe__store
- * @param <Function> callback
- * @param <String> fn
- * @param <Object> schema
- * @param <Object> data
- * @return
- */
-app.controller.store = function(callback, fn, schema, data) {
-  var store = app._root.server.appe__store;
-
-  if (! store) {
-    return app.stop('app.controller.store', 'store');
-  }
-
-  if (typeof callback != 'function' || typeof fn != 'string' || typeof schema != 'object' || typeof data != 'object') {
-    return app.stop('app.controller.store', [callback, fn, schema, data]);
-  }
-
-  var source = store[fn];
-
-  if (! source) {
-    return app.stop('app.controller.store', 'source');
-  }
-
-
-  var _store = function(key, values) {
-    if (typeof key != 'string' || typeof values != 'object') {
-      return app.stop('app.controller.store() > _store', [key, values]);
-    }
-
-    if (! source[key]) {
-      return app.stop('app.controller.store() > _store', 'source');
-    }
-
-    var _data = values;
-
-    app.store.set(fn + '_' + key, _data);
-
-    return _data;
-  }
-
-
-  var _current_timestamp = new Date();
-  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
-
-
-  var keys = Object.keys(data);
-
-  for (var i in keys) {
-    var key = keys[i];
-    var values = data[key];
-
-    if (schema.indexOf(key) === -1 || ! Object.keys(values).length) {
-      return app.stop('app.controller.store', 'data');
-    }
-
-    store[fn][key] = _store(key, values);
-  }
-
-  app.memory.del('save_reminded');
-
-  app.memory.set('last_stored', _current_timestamp);
 
   callback();
 }

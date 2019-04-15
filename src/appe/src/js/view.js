@@ -1090,36 +1090,6 @@ app.view.handle = function() {
 
 
 /**
- * app.view.resize
- *
- * Fires when "view" is resized
- *
- * @global <Object> appe__control
- * @return
- */
-app.view.resize = function(check_time) {
-  var control = app._root.server.appe__control;
-
-  if (! (control && control.temp)) {
-    return; // silent fail
-  }
-
-  if (check_time) {
-    if ((new Date().getTime() - control.temp.last_resize) < 1000) {
-      return;
-    }
-
-    control.temp.last_resize = new Date().getTime();
-  }
-
-
-  var ctl = { action: 'resize', height: app._root.document.documentElement.scrollHeight };
-
-  return app.view.send(ctl);
-}
-
-
-/**
  * app.view.send
  *
  * Sends control messages to "main"
@@ -1174,6 +1144,36 @@ app.view.send = function(ctl) {
   } catch (err) {
     return app.error('app.view.send', err);
   }
+}
+
+
+/**
+ * app.view.resize
+ *
+ * Fires when "view" is resized
+ *
+ * @global <Object> appe__control
+ * @return
+ */
+app.view.resize = function(check_time) {
+  var control = app._root.server.appe__control;
+
+  if (! (control && control.temp)) {
+    return; // silent fail
+  }
+
+  if (check_time) {
+    if ((new Date().getTime() - control.temp.last_resize) < 1000) {
+      return;
+    }
+
+    control.temp.last_resize = new Date().getTime();
+  }
+
+
+  var ctl = { action: 'resize', height: app._root.document.documentElement.scrollHeight };
+
+  return app.view.send(ctl);
 }
 
 
@@ -1344,7 +1344,13 @@ app.view.copyToClipboard = function(source) {
 app.view.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
-  if (! config) {
+  if (typeof config == 'object') {
+    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+
+    if ('secret_passphrase' in config) {
+      delete config.secret_passphrase;
+    }
+  } else {
     return app.stop('app.view.load');
   }
 
@@ -1368,11 +1374,16 @@ app.view.load = function() {
   }
 
   var _session = function() {
-    app.resume(config, false);
+    if ('secret_passphrase' in _config) {
+      delete _config.secret_passphrase;
+    }
 
+    // try to resume previous session
+    app.resume(_config, false);
 
-    var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
-    routine.push({ fn: app._runtime.name, schema: config.schema });
+    // try to load extensions
+    var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
+    routine.push({ fn: app._runtime.name, schema: _config.schema });
 
     app.controller.retrieve(app.view.handle, routine);
 
@@ -1383,7 +1394,7 @@ app.view.load = function() {
   }
 
 
-  app.session(_session, config, false);
+  app.session(_session, _config, false);
 }
 
 

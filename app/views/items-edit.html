@@ -128,11 +128,13 @@ control.handle = function(data) {
 
   var _events = {};
 
+
   _events.add = function() {
     _control.setTitle(app.i18n('Add {{placeholder}}', 'action', '{{Item||Items%%1[[page]]}}'));
 
     _control.setActionHandler(app.i18n('Add {{placeholder}}', 'action', '{{Item||Items%%1[[page]]}}'));
   }
+
 
   _events.edit = function() {
     _control.setTitle(app.i18n('Edit {{placeholder}}', 'action', '{{Item||Items%%1[[page]]}}'));
@@ -214,11 +216,13 @@ control.action = function(element, event, extra) {
 
   var _events = {};
 
+
   _events._prepare = function() {
     var _ext_data = app.utils.extendObject(true, _data_updated['items'][id], app.view.getFormData(form.elements));
 
     _data_updated['items'][id] = _ext_data;
   }
+
 
   _events.add = function() {
     var data_items = app.data('items');
@@ -233,6 +237,7 @@ control.action = function(element, event, extra) {
 
     return _action.add(_data_updated, true);
   }
+
 
   _events.edit = function() {
     var data_items = app.data('items');

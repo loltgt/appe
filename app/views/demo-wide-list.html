@@ -268,19 +268,23 @@ control.action = function(element, event, extra) {
 
   var _events = {};
 
+
   _events.selection = function() {
     return _action.selection();
   }
 
+
   _events.open = function() {
     return _action.open(null);
   }
+
 
   _events.export = function(method) {
     app.view.sub(method, element, table);
 
     return;
   }
+
 
   _events.print = function() {
     return _action.print();

@@ -276,8 +276,6 @@ app.start.redirect = function(loaded) {
  *
  * Display messages with info and alternatives to help to execute app 
  *
- * //TODO hook
- *
  * @global <Object> appe__config
  * @return
  */
@@ -325,7 +323,9 @@ app.start.alternative = function() {
   app.start.progress(1);
 
 
-  return app.error(alt);
+  app.error(alt);
+
+  app.blind();
 }
 
 
@@ -334,8 +334,6 @@ app.start.alternative = function() {
  *
  * Default "start" load function
  *
- * //TODO hook?
- *
  * @global <Object> appe__config
  * @global <Object> appe__locale
  * @return
@@ -343,11 +341,17 @@ app.start.alternative = function() {
 app.start.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
-  if (! config) {
+  if (typeof config == 'object') {
+    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+
+    if ('secret_passphrase' in config) {
+      delete config.secret_passphrase;
+    }
+  } else {
     return app.stop('app.start.load');
   }
 
-  app.checkConfig(config);
+  app.checkConfig(_config);
 
 
   var exec = true;
@@ -373,7 +377,7 @@ app.start.load = function() {
 
 
   var _asyncAttemptLoadAux = function(cb) {
-    var routine = (config.aux && typeof config.aux === 'object') ? config.aux : [];
+    var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
 
     if (routine.length) {
       var i = routine.length;
@@ -420,25 +424,33 @@ app.start.load = function() {
   }
 
   var _session = function() {
-    if (! exec) {
-      !! config.alt && app.start.alternative();
+    if ('secret_passphrase' in _config) {
+      delete _config.secret_passphrase;
+    }
 
-      app.blind();
+    if (! exec) {
+      /**
+       * start.alternative hook
+       */
+      if (!! _config.alt && start && 'alternative' in start && typeof start.alternative === 'function') {
+        start.alternative();
+      } else if (!! _config.alt) {
+        app.start.alternative();
+      } else {
+        app.blind();
+      }
 
       return;
     }
 
-
-    app.controller.setTitle(config.app_name);
-
+    app.controller.setTitle(_config.app_name);
 
     if (app._root.document.native == undefined) {
       _layout();
     }
 
-
-    // try to resume previous session file
-    var session_resume = app.resume(config);
+    // try to resume previous session and file
+    var session_resume = app.resume(_config);
 
     // try to load extensions
     _asyncAttemptLoadAux(function(err, loaded) {
@@ -451,5 +463,5 @@ app.start.load = function() {
   }
 
 
-  app.session(_session, config);
+  app.session(_session, _config);
 }

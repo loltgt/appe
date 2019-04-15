@@ -159,6 +159,7 @@ control.handle = function(data) {
 
   var _events = {};
 
+
   _events.update = function(data_updated) {
     control.action(true, 'update', data_updated);
   }
@@ -280,13 +281,16 @@ control.action = function(element, event, extra) {
 
   var _events = {};
 
+
   _events.selection = function() {
     return _action.selection(null, true);
   }
 
+
   _events.open = function() {
     return _action.open();
   }
+
 
   _events.update = function() {
     if (! (extra && typeof extra === 'object')) {
@@ -306,11 +310,13 @@ control.action = function(element, event, extra) {
     return _action.update(_data_updated, true);
   }
 
+
   _events.export = function(method) {
     app.view.sub(method, element, table);
 
     return;
   }
+
 
   _events.print = function() {
     return _action.print();

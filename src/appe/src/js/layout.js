@@ -159,145 +159,6 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
 
 
 /**
- * app.layout.draggable
- *
- * Helper for draggable table, returns requested prototype method
- *
- * //TODO fix droid
- *
- * available prototype methods:
- *  - start (e)
- *  - over (e)
- *  - enter (e)
- *  - leave (e)
- *  - end (e)
- *  - drop (e)
- *
- * @param <String> event
- * @param <ElementNode> table
- * @param <ElementNode> field
- * @return <Function>
- */
-app.layout.draggable = function(event, table, field) {
-  if (! event || ! table) {
-    return app.error('app.view.draggable', [event, table, field]);
-  }
-
-  var self = app.layout.draggable.prototype;
-
-  if (! table._draggable) {
-    table._draggable = { current: null, prev_index: null, next_index: null };
-  }
-
-
-  var _proxy = (function(e) {
-    return self[event].apply(this, [ table, e, field ]);
-  });
-
-  return _proxy;
-}
-
-app.layout.draggable.prototype.start = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.start', e, table._draggable);
-  }
-
-  table._draggable.current = this;
-  table._draggable.next_index = this.getAttribute('data-index');
-
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', this.innerHTML);
-
-  this.classList.add('move');
-}
-
-app.layout.draggable.prototype.over = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.over', e, table._draggable);
-  }
-
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
-
-  e.dataTransfer.dropEffect = 'move';
-
-  return false;
-}
-
-app.layout.draggable.prototype.enter = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.enter', e, table._draggable);
-  }
-
-  this.classList.add('over');
-}
-
-app.layout.draggable.prototype.leave = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.leave', e, table._draggable);
-  }
-
-  this.classList.remove('over');
-}
-
-app.layout.draggable.prototype.end = function(table, e, field) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.end', e, table._draggable);
-  }
-
-  var tbody = table.querySelector('tbody');
-  var trows = tbody.querySelectorAll('tr.draggable');
-
-  var items = [];
-
-  Array.prototype.forEach.call(trows, function (trow) {
-    items.push(trow.getAttribute('data-index'));
-
-    trow.classList.remove('move');
-    trow.classList.remove('over');
-  });
-
-  // prepare items
-  try {
-    items = JSON.stringify(items);
-    items = encodeURIComponent(items);
-
-    // set items
-    if (field) {
-      field.setAttribute('value', items);
-    }
-  } catch (err) {
-    return app.error('app.view.draggable.end', err);
-  }
-}
-
-app.layout.draggable.prototype.drop = function(table, e) {
-  if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.drop', e, table._draggable);
-  }
-
-  if (e.stopPropagation) {
-    e.stopPropagation();
-  }
-
-  if (table._draggable.current != this) {
-    table._draggable.prev_index = this.getAttribute('data-index');
-
-    table._draggable.current.innerHTML = this.innerHTML;
-    table._draggable.current.setAttribute('data-index', table._draggable.prev_index);
-
-    this.setAttribute('data-index', table._draggable.next_index);
-    this.innerHTML = e.dataTransfer.getData('text/html');
-  } else {
-    table._draggable.next_index = null;
-  }
-
-  return false;
-}
-
-
-/**
  * app.layout.dropdown
  *
  * Helper for dropdown, returns requested prototype method
@@ -327,6 +188,11 @@ app.layout.dropdown = function(event, element, dropdown) {
   return self[event].bind(self);
 }
 
+/**
+ * app.layout.dropdown.prototype.open
+ *
+ * @param <Event> e
+ */
 app.layout.dropdown.prototype.open = function(e) {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.open', (e && e.target), e);
@@ -346,6 +212,11 @@ app.layout.dropdown.prototype.open = function(e) {
   this.dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', true);
 }
 
+/**
+ * app.layout.dropdown.prototype.close
+ *
+ * @param <Event> e
+ */
 app.layout.dropdown.prototype.close = function(e) {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.open', (e && e.target), e);
@@ -365,6 +236,9 @@ app.layout.dropdown.prototype.close = function(e) {
   this.dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', false);
 }
 
+/**
+ * app.layout.dropdown.prototype.toggle
+ */
 app.layout.dropdown.prototype.toggle = function() {
   if (!! app._runtime.debug) {
     console.info('app.layout.dropdown.prototype.toggle');
@@ -408,6 +282,11 @@ app.layout.collapse = function(event, element, collapsible) {
   return self[event].bind(self);
 }
 
+/**
+ * app.layout.collapse.prototype.open
+ *
+ * @param <Event> e
+ */
 app.layout.collapse.prototype.open = function(e) {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.open', (e && e.target), e);
@@ -428,6 +307,11 @@ app.layout.collapse.prototype.open = function(e) {
   this.element.classList.remove('collapsed');
 }
 
+/**
+ * app.layout.collapse.prototype.close
+ *
+ * @param <Event> e
+ */
 app.layout.collapse.prototype.close = function(e) {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.open', (e && e.target), e);
@@ -448,6 +332,9 @@ app.layout.collapse.prototype.close = function(e) {
   this.element.classList.add('collapsed');
 }
 
+/**
+ * app.layout.collapse.prototype.toggle
+ */
 app.layout.collapse.prototype.toggle = function() {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.toggle');
@@ -457,6 +344,237 @@ app.layout.collapse.prototype.toggle = function() {
     this.open();
   } else {
     this.close();
+  }
+}
+
+
+/**
+ * app.layout.draggable
+ *
+ * Helper for draggable, returns requested prototype method
+ *
+ * //TODO fix droid
+ *
+ * available prototype methods:
+ *  - start (e, element, callback)
+ *  - over (e, element, callback)
+ *  - enter (e, element, callback)
+ *  - leave (e, element, callback)
+ *  - end (e, element, callback)
+ *  - drop (e, element, callback)
+ *
+ * @param <String> event
+ * @param <ElementNode> element
+ * @param <String> row_selector - .draggable
+ * @param <Function> callback  ( event, current, e, element )
+ * @return <Function>
+ */
+app.layout.draggable = function(event, element, row_selector, callback) {
+  if (! event || ! element) {
+    return app.error('app.view.draggable', [event, element, field]);
+  }
+
+  var self = app.layout.draggable.prototype;
+
+  row_selector = row_selector || '.draggable';
+  callback = typeof callback === 'function' ? callback : null;
+
+  if (! element._draggable) {
+    element._draggable = { row: row_selector, current: null, prev_index: null, next_index: null };
+  }
+
+
+  var _proxy = (function(e) {
+    return self[event].apply(this, [ e, element, callback ]);
+  });
+
+  return _proxy;
+}
+
+/**
+ * app.layout.draggable.prototype.start
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ * @return
+ */
+app.layout.draggable.prototype.start = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.start', e, element._draggable);
+  }
+
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+
+  element._draggable.current = this;
+  element._draggable.next_index = this.getAttribute('data-index');
+
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.innerHTML);
+
+  this.classList.add('move');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.stopPropagation) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.over
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ * @return
+ */
+app.layout.draggable.prototype.over = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.over', e, element._draggable);
+  }
+
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+
+  e.dataTransfer.dropEffect = 'move';
+
+  if (callback && typeof callback == 'function') {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.preventDefault) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.enter
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ */
+app.layout.draggable.prototype.enter = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.enter', e, element._draggable);
+  }
+
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+
+  this.classList.add('over');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.preventDefault) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.leave
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ */
+app.layout.draggable.prototype.leave = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.leave', e, element._draggable);
+  }
+
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+
+  this.classList.remove('over');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.preventDefault) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.end
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ */
+app.layout.draggable.prototype.end = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.end', e, element._draggable);
+  }
+
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+
+  var rows = document.querySelectorAll(element._draggable.row);
+
+  Array.prototype.forEach.call(rows, function(el) {
+    el.classList.remove('move');
+    el.classList.remove('over');
+  });
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.preventDefault) {
+    return false;
+  }
+}
+
+/**
+ * app.layout.draggable.prototype.drop
+ *
+ * @global <Event> e
+ * @param <ElementNode> element
+ * @param <Function> callback
+ * @return
+ */
+app.layout.draggable.prototype.drop = function(e, element, callback) {
+  if (!! app._runtime.debug) {
+    console.info('app.layout.draggable.prototype.drop', e, element._draggable);
+  }
+
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+
+  if (element._draggable.current != this) {
+    element._draggable.prev_index = this.getAttribute('data-index');
+
+    element._draggable.current.innerHTML = this.innerHTML;
+    element._draggable.current.setAttribute('data-index', element._draggable.prev_index);
+
+    this.setAttribute('data-index', element._draggable.next_index);
+    this.innerHTML = e.dataTransfer.getData('text/html');
+    this.querySelector('meta').remove();
+  } else {
+    element._draggable.next_index = null;
+  }
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+  }
+
+  if (! e.stopPropagation) {
+    return false;
   }
 }
 

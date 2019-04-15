@@ -158,9 +158,11 @@ control.action = function(element, event, extra) {
 
   var _events = {};
 
+
   _events.edit = function() {
     return _action.edit(_data_updated, false);
   }
+
 
   _events.delete = function() {
     var data_items = app.data('items');
@@ -189,11 +191,13 @@ control.action = function(element, event, extra) {
     return _action.delete(_data_updated, true, 'Item', id);
   }
 
+
   _events.export = function(method) {
     app.view.sub(method, element, table);
 
     return;
   }
+
 
   _events.print = function() {
     return _action.print();

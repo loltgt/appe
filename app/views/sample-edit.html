@@ -116,11 +116,13 @@ control.handle = function(data) {
 
   var _events = {};
 
+
   _events.add = function() {
     _control.setTitle('Add New Vehicle');
 
     _control.setActionHandler('Add Vehicle');
   }
+
 
   _events.edit = function() {
     _control.setTitle('Edit Vehicle');
@@ -194,11 +196,13 @@ control.action = function(element, event, extra) {
 
   var _events = {};
 
+
   _events._prepare = function() {
     var _ext_data = app.utils.extendObject(true, _data_updated['sample'][id], app.view.getFormData(form.elements));
 
     _data_updated['sample'][id] = _ext_data;
   }
+
 
   _events.add = function() {
     var data_sample = app.data('sample');
@@ -213,6 +217,7 @@ control.action = function(element, event, extra) {
 
     return _action.add(_data_updated, true);
   }
+
 
   _events.edit = function() {
     var data_sample = app.data('sample');
