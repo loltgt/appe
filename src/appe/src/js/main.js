@@ -190,7 +190,7 @@ app.main.handle = function(e) {
 
   self._initialized = true;
 
-  self.loc = 'assign' in Object ? Object.assign({}, self.ctl) : app.utils.extendObject({}, self.ctl);
+  self.loc = !! Object.assign ? Object.assign({}, self.ctl) : app.utils.extendObject({}, self.ctl);
 
   self._href = '';
   self._title = '';
@@ -612,34 +612,49 @@ app.main.action.prototype.end = function() {
  * app.main.action.prototype.menu
  *
  * @param <ElementNode> element
+ * @param <String> event
+ * @param <ElementNode> menu
+ * @param <ElementNode> toggler
  * @return
  */
-app.main.action.prototype.menu = function(element) {
+app.main.action.prototype.menu = function(element, event, menu, toggler) {
   this.isInitialized('menu');
 
   if ('jQuery' in app._root.window && 'collapse' in jQuery.fn) {
     return;
   }
 
-  if (! element) {
-    return app.error('app.main.action.prototype.menu', [element]);
+  if (element === undefined) {
+    return app.error('app.main.action.prototype.menu', [element, event, menu, toggler]);
   }
 
-  var menu = app._root.document.querySelector(element.getAttribute('data-target'));
+  var _close = function(e) {
+    if (e.target.parentNode.parentNode.parentNode && e.target.parentNode.parentNode.parentNode == menu) {
+      return;
+    }
+    
+    menu.collapse.close(e);
+  }
 
-  if (! element.getAttribute('data-is-visible')) {
-    element.setAttribute('data-is-visible', true);
-    element.setAttribute('aria-expanded', false);
-    menu.setAttribute('aria-expanded', false);
+  menu = menu || app._root.document.querySelector(element.getAttribute('data-target'));
+  toggler = toggler || element;
+
+  if (! menu.getAttribute('data-is-visible')) {
+    menu.setAttribute('data-is-visible', 'true');
+
+    menu.setAttribute('aria-expanded', 'false');
+    toggler.setAttribute('aria-expanded', 'false');
 
     var _close_event = 'ontouchstart' in document.documentElement ? 'touchstart' : 'click';
 
-    app.utils.addEvent(_close_event, app._root.document.documentElement, app.layout.collapse('close', element, menu));
+    menu.collapse = new app.layout.collapse(null, toggler, menu);
+
+    app.utils.addEvent(_close_event, app._root.document.documentElement, _close);
   }
 
-  app.layout.collapse('toggle', element, menu)();
-
   app._root.window.scrollTo(0, 0);
+
+  menu.collapse.toggle(null);
 }
 
 
@@ -679,7 +694,7 @@ app.main.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (typeof config == 'object') {
-    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+    var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
     if ('secret_passphrase' in config) {
       delete config.secret_passphrase;

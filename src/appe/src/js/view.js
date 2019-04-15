@@ -995,9 +995,11 @@ app.view.sub.prototype.csv = function(element, table) {
  *
  * @param <ElementNode> element
  * @param <ElementNode> table
+ * @param <ElementNode> dropdown
+ * @param <ElementNode> toggler
  * @return
  */
-app.view.sub.prototype.clipboard = function(element, table) {
+app.view.sub.prototype.clipboard = function(element, table, dropdown, toggler) {
   if (! element || ! table) {
     return app.error('app.view.sub.prototype.clipboard', [element, table]);
   }
@@ -1012,14 +1014,17 @@ app.view.sub.prototype.clipboard = function(element, table) {
 
   app.view.copyToClipboard(source);
 
-  var dropdown = element.parentNode.parentNode.parentNode;
-  var dropdown_btn = dropdown.querySelector('.dropdown-toggle');
-  dropdown_btn.classList.add('btn-gray-lighter');
+  var closest_node = element.parentNode.parentNode.parentNode;
 
-  var rem = setTimeout(function() {
-    dropdown_btn.classList.remove('btn-gray-lighter');
+  dropdown = dropdown || closest_node.querySelector('.dropdown-menu');
+  toggler = toggler || closest_node.querySelector('.dropdown-toggle');
 
-    clearTimeout(rem);
+  toggler.classList.add('btn-gray-lighter');
+
+  var fx_rm = setTimeout(function() {
+    toggler.classList.remove('btn-gray-lighter');
+
+    clearTimeout(fx_rm);
   }, 1000);
 }
 
@@ -1027,29 +1032,36 @@ app.view.sub.prototype.clipboard = function(element, table) {
  * app.view.sub.prototype.toggler
  *
  * @param <ElementNode> element
+ * @param <ElementNode> table
  * @param <ElementNode> dropdown
+ * @param <ElementNode> toggler
  * @return
  */
-app.view.sub.prototype.toggler = function(element, dropdown) {
+app.view.sub.prototype.toggler = function(element, table, dropdown, toggler) {
   if ('jQuery' in app._root.window && 'dropdown' in jQuery.fn) {
     return;
   }
 
-  if (! element) {
-    return app.error('app.view.sub.prototype.clipboard', [element]);
+  if (element === undefined) {
+    return app.error('app.view.sub.prototype.toggler', [element]);
   }
 
-  dropdown = dropdown || element.parentNode.parentNode.parentNode;
+  var closest_node = element.parentNode.parentNode;
 
-  if (! element.getAttribute('data-is-visible')) {
-    element.setAttribute('data-is-visible', true);
+  dropdown = dropdown || closest_node.querySelector('.dropdown-menu');
+  toggler = toggler || element;
+
+  if (! dropdown.getAttribute('data-is-visible')) {
+    dropdown.setAttribute('data-is-visible', 'true');
 
     var _close_event = 'ontouchstart' in document.documentElement ? 'touchstart' : 'click';
 
-    app.utils.addEvent(_close_event, app._root.document.documentElement, app.layout.dropdown('close', element, dropdown));
+    dropdown.dropdown = new app.layout.dropdown(null, toggler, dropdown);
+
+    app.utils.addEvent(_close_event, app._root.document.documentElement, dropdown.dropdown.close);
   }
 
-  app.layout.dropdown('toggle', element, dropdown)();
+  dropdown.dropdown.toggle(null);
 }
 
 
@@ -1345,7 +1357,7 @@ app.view.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (typeof config == 'object') {
-    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+    var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
     if ('secret_passphrase' in config) {
       delete config.secret_passphrase;

@@ -294,6 +294,13 @@ control.draggable = function(element, event, items, disallow) {
   }
 
 
+  _events._eventCallback = function(e, element) {
+    if (e.type && e.type === 'update') {
+      _events.update(e, element);
+    }
+  }
+
+
   _events._addRow = function(index) {
     var tbody = table.querySelector('tbody');
     var trow_tpl = tbody.querySelector('tr.tpl').cloneNode(true);
@@ -315,12 +322,14 @@ control.draggable = function(element, event, items, disallow) {
     } else {
       trow.classList.add('draggable');
 
-      app.utils.addEvent('dragstart', trow, app.layout.draggable('start', table, trow_selector));
-      app.utils.addEvent('dragenter', trow, app.layout.draggable('enter', table, trow_selector));
-      app.utils.addEvent('dragover', trow, app.layout.draggable('over', table, trow_selector));
-      app.utils.addEvent('dragleave', trow, app.layout.draggable('leave', table, trow_selector));
-      app.utils.addEvent('dragend', trow, app.layout.draggable('end', table, trow_selector, _events.update));
-      app.utils.addEvent('drop', trow, app.layout.draggable('drop', table, trow_selector));
+      trow.dnd = new app.layout.draggable(null, table, trow_selector, _events._eventCallback);
+
+      app.utils.addEvent('dragstart', trow, trow.dnd.start);
+      app.utils.addEvent('dragenter', trow, trow.dnd.enter);
+      app.utils.addEvent('dragover', trow, trow.dnd.over);
+      app.utils.addEvent('dragleave', trow, trow.dnd.leave);
+      app.utils.addEvent('dragend', trow, trow.dnd.end);
+      app.utils.addEvent('drop', trow, trow.dnd.drop);
     }
 
     tbody.appendChild(trow);
@@ -334,16 +343,17 @@ control.draggable = function(element, event, items, disallow) {
     var index = trow.getAttribute('data-index');
     index = index.toString();
 
-    trow.remove();
-
     if (! disallow) {
-      app.utils.removeEvent('dragstart', trow, app.layout.draggable('start', table, trow_selector));
-      app.utils.removeEvent('dragenter', trow, app.layout.draggable('enter', table, trow_selector));
-      app.utils.removeEvent('dragover', trow, app.layout.draggable('over', table, trow_selector));
-      app.utils.removeEvent('dragleave', trow, app.layout.draggable('leave', table, trow_selector));
-      app.utils.removeEvent('dragend', trow, app.layout.draggable('end', table, trow_selector, _events.update));
-      app.utils.removeEvent('drop', trow, app.layout.draggable('drop', table, trow_selector));
+      console.log('eventListener', trow);
+      app.utils.removeEvent('dragstart', trow, trow.dnd.start);
+      app.utils.removeEvent('dragenter', trow, trow.dnd.enter);
+      app.utils.removeEvent('dragover', trow, trow.dnd.over);
+      app.utils.removeEvent('dragleave', trow, trow.dnd.over);
+      app.utils.removeEvent('dragend', trow, trow.dnd.end);
+      app.utils.removeEvent('drop', trow, trow.dnd.drop);
     }
+
+    //trow.remove();
 
     return index;
   }

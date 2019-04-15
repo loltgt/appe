@@ -3023,7 +3023,7 @@ app.start.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (typeof config == 'object') {
-    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+    var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
     if ('secret_passphrase' in config) {
       delete config.secret_passphrase;
@@ -3340,7 +3340,7 @@ app.main.handle = function(e) {
 
   self._initialized = true;
 
-  self.loc = 'assign' in Object ? Object.assign({}, self.ctl) : app.utils.extendObject({}, self.ctl);
+  self.loc = !! Object.assign ? Object.assign({}, self.ctl) : app.utils.extendObject({}, self.ctl);
 
   self._href = '';
   self._title = '';
@@ -3762,34 +3762,49 @@ app.main.action.prototype.end = function() {
  * app.main.action.prototype.menu
  *
  * @param <ElementNode> element
+ * @param <String> event
+ * @param <ElementNode> menu
+ * @param <ElementNode> toggler
  * @return
  */
-app.main.action.prototype.menu = function(element) {
+app.main.action.prototype.menu = function(element, event, menu, toggler) {
   this.isInitialized('menu');
 
   if ('jQuery' in app._root.window && 'collapse' in jQuery.fn) {
     return;
   }
 
-  if (! element) {
-    return app.error('app.main.action.prototype.menu', [element]);
+  if (element === undefined) {
+    return app.error('app.main.action.prototype.menu', [element, event, menu, toggler]);
   }
 
-  var menu = app._root.document.querySelector(element.getAttribute('data-target'));
+  var _close = function(e) {
+    if (e.target.parentNode.parentNode.parentNode && e.target.parentNode.parentNode.parentNode == menu) {
+      return;
+    }
+    
+    menu.collapse.close(e);
+  }
 
-  if (! element.getAttribute('data-is-visible')) {
-    element.setAttribute('data-is-visible', true);
-    element.setAttribute('aria-expanded', false);
-    menu.setAttribute('aria-expanded', false);
+  menu = menu || app._root.document.querySelector(element.getAttribute('data-target'));
+  toggler = toggler || element;
+
+  if (! menu.getAttribute('data-is-visible')) {
+    menu.setAttribute('data-is-visible', 'true');
+
+    menu.setAttribute('aria-expanded', 'false');
+    toggler.setAttribute('aria-expanded', 'false');
 
     var _close_event = 'ontouchstart' in document.documentElement ? 'touchstart' : 'click';
 
-    app.utils.addEvent(_close_event, app._root.document.documentElement, app.layout.collapse('close', element, menu));
+    menu.collapse = new app.layout.collapse(null, toggler, menu);
+
+    app.utils.addEvent(_close_event, app._root.document.documentElement, _close);
   }
 
-  app.layout.collapse('toggle', element, menu)();
-
   app._root.window.scrollTo(0, 0);
+
+  menu.collapse.toggle(null);
 }
 
 
@@ -3829,7 +3844,7 @@ app.main.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (typeof config == 'object') {
-    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+    var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
     if ('secret_passphrase' in config) {
       delete config.secret_passphrase;
@@ -4933,9 +4948,11 @@ app.view.sub.prototype.csv = function(element, table) {
  *
  * @param <ElementNode> element
  * @param <ElementNode> table
+ * @param <ElementNode> dropdown
+ * @param <ElementNode> toggler
  * @return
  */
-app.view.sub.prototype.clipboard = function(element, table) {
+app.view.sub.prototype.clipboard = function(element, table, dropdown, toggler) {
   if (! element || ! table) {
     return app.error('app.view.sub.prototype.clipboard', [element, table]);
   }
@@ -4950,14 +4967,17 @@ app.view.sub.prototype.clipboard = function(element, table) {
 
   app.view.copyToClipboard(source);
 
-  var dropdown = element.parentNode.parentNode.parentNode;
-  var dropdown_btn = dropdown.querySelector('.dropdown-toggle');
-  dropdown_btn.classList.add('btn-gray-lighter');
+  var closest_node = element.parentNode.parentNode.parentNode;
 
-  var rem = setTimeout(function() {
-    dropdown_btn.classList.remove('btn-gray-lighter');
+  dropdown = dropdown || closest_node.querySelector('.dropdown-menu');
+  toggler = toggler || closest_node.querySelector('.dropdown-toggle');
 
-    clearTimeout(rem);
+  toggler.classList.add('btn-gray-lighter');
+
+  var fx_rm = setTimeout(function() {
+    toggler.classList.remove('btn-gray-lighter');
+
+    clearTimeout(fx_rm);
   }, 1000);
 }
 
@@ -4965,29 +4985,36 @@ app.view.sub.prototype.clipboard = function(element, table) {
  * app.view.sub.prototype.toggler
  *
  * @param <ElementNode> element
+ * @param <ElementNode> table
  * @param <ElementNode> dropdown
+ * @param <ElementNode> toggler
  * @return
  */
-app.view.sub.prototype.toggler = function(element, dropdown) {
+app.view.sub.prototype.toggler = function(element, table, dropdown, toggler) {
   if ('jQuery' in app._root.window && 'dropdown' in jQuery.fn) {
     return;
   }
 
-  if (! element) {
-    return app.error('app.view.sub.prototype.clipboard', [element]);
+  if (element === undefined) {
+    return app.error('app.view.sub.prototype.toggler', [element]);
   }
 
-  dropdown = dropdown || element.parentNode.parentNode.parentNode;
+  var closest_node = element.parentNode.parentNode;
 
-  if (! element.getAttribute('data-is-visible')) {
-    element.setAttribute('data-is-visible', true);
+  dropdown = dropdown || closest_node.querySelector('.dropdown-menu');
+  toggler = toggler || element;
+
+  if (! dropdown.getAttribute('data-is-visible')) {
+    dropdown.setAttribute('data-is-visible', 'true');
 
     var _close_event = 'ontouchstart' in document.documentElement ? 'touchstart' : 'click';
 
-    app.utils.addEvent(_close_event, app._root.document.documentElement, app.layout.dropdown('close', element, dropdown));
+    dropdown.dropdown = new app.layout.dropdown(null, toggler, dropdown);
+
+    app.utils.addEvent(_close_event, app._root.document.documentElement, dropdown.dropdown.close);
   }
 
-  app.layout.dropdown('toggle', element, dropdown)();
+  dropdown.dropdown.toggle(null);
 }
 
 
@@ -5283,7 +5310,7 @@ app.view.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (typeof config == 'object') {
-    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+    var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
     if ('secret_passphrase' in config) {
       delete config.secret_passphrase;
@@ -5539,86 +5566,133 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
  *  - toggle (e)
  *
  * @param <String> event
- * @param <ElementNode> element
+ * @param <ElementNode> toggler
  * @param <ElementNode> dropdown
+ * @param <Function> callback
  * @return <Function>
  */
-app.layout.dropdown = function(event, element, dropdown) {
-  if (! event || ! element || ! dropdown) {
-    return app.error('app.view.dropdown', [event, element, dropdown]);
+app.layout.dropdown = function(event, toggler, dropdown, callback) {
+  if (event === undefined || ! toggler || ! dropdown) {
+    return app.error('app.view.dropdown', [event, toggler, dropdown, callback]);
   }
 
   var self = app.layout.dropdown.prototype;
 
-  self.event = event;
-  self.element = element;
   self.dropdown = dropdown;
+  self.toggler = toggler;
+  self.callback = typeof callback === 'function' ? callback : null;
 
+  if (! self.dropdown._dropdown) {
+    self.dropdown._dropdown = { toggler: toggler };
+  }
 
-  return self[event].bind(self);
+  if (event) {
+    return app.utils.proxy(false, self[event], self.dropdown, self.callback);
+  } else {
+    return app.utils.proxy(true, self, self.dropdown, self.callback);
+  }
 }
 
 /**
  * app.layout.dropdown.prototype.open
  *
  * @param <Event> e
+ * @param <ElementNode> dropdown
+ * @param <Function> callback
+ * @return
  */
-app.layout.dropdown.prototype.open = function(e) {
+app.layout.dropdown.prototype.open = function(e, dropdown, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.open', (e && e.target), e);
+    console.info('app.layout.dropdown.prototype.open', (e && e.target), e);
   }
 
-  if (this.element.getAttribute('aria-expanded') === 'true') {
+  (!! e && e.preventDefault) && e.preventDefault();
+
+  if (dropdown.getAttribute('aria-expanded') === 'true') {
     return;
   }
-  if (e && e.target && (e.target === this.element || e.target.offsetParent === this.element)) {
+  if (e && e.target && (e.target === dropdown.toggler || e.target.offsetParent === dropdown.toggler)) {
     return;
   }
 
-  this.element.parentNode.classList.add('open');
-  this.element.setAttribute('aria-expanded', true);
+  dropdown._dropdown.toggler.parentNode.classList.add('open');
+  dropdown._dropdown.toggler.setAttribute('aria-expanded', 'true');
 
-  this.dropdown.classList.add('open');
-  this.dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', true);
+  dropdown.classList.add('open');
+  dropdown.setAttribute('aria-expanded', 'true');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, dropdown ]);
+  }
+
+  if (e && ! e.preventDefault) { return false; }
 }
 
 /**
  * app.layout.dropdown.prototype.close
  *
  * @param <Event> e
+ * @param <ElementNode> dropdown
+ * @param <Function> callback
+ * @return
  */
-app.layout.dropdown.prototype.close = function(e) {
+app.layout.dropdown.prototype.close = function(e, dropdown, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.open', (e && e.target), e);
+    console.info('app.layout.dropdown.prototype.close', (e && e.target), e);
   }
 
-  if (this.element.getAttribute('aria-expanded') === 'false') {
+  (!! e && e.preventDefault) && e.preventDefault();
+
+  if (dropdown.getAttribute('aria-expanded') === 'false') {
     return;
   }
-  if (e && e.target && (e.target === this.element || e.target.offsetParent === this.element)) {
+  if (e && e.target && (e.target === dropdown._dropdown.toggler || e.target.offsetParent === dropdown._dropdown.toggler)) {
     return;
   }
 
-  this.element.parentNode.classList.remove('open');
-  this.element.setAttribute('aria-expanded', false);
+  dropdown._dropdown.toggler.parentNode.classList.remove('open');
+  dropdown._dropdown.toggler.setAttribute('aria-expanded', 'false');
 
-  this.dropdown.classList.remove('open');
-  this.dropdown.querySelector('.dropdown-toggle').setAttribute('aria-expanded', false);
+  dropdown.classList.remove('open');
+  dropdown.setAttribute('aria-expanded', 'false');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, dropdown ]);
+  }
+
+  if (e && ! e.preventDefault) { return false; }
 }
 
 /**
  * app.layout.dropdown.prototype.toggle
+ *
+ * @param <Event> e
+ * @param <ElementNode> dropdown
+ * @param <Function> callback
+ * @return
  */
-app.layout.dropdown.prototype.toggle = function() {
+app.layout.dropdown.prototype.toggle = function(e, dropdown, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.dropdown.prototype.toggle');
+    console.info('app.layout.dropdown.prototype.toggle', (e && e.target), e);
   }
 
-  if (this.element.getAttribute('aria-expanded') === 'false') {
-    this.open();
-  } else {
-    this.close();
+  (!! e && e.preventDefault) && e.preventDefault();
+
+  if (e && e.target && (e.target === dropdown._dropdown.toggler || e.target.offsetParent === dropdown._dropdown.toggler)) {
+    return;
   }
+
+  if (dropdown._dropdown.toggler.getAttribute('aria-expanded') === 'false') {
+    app.layout.dropdown.prototype.open.call(null, dropdown);
+  } else {
+    app.layout.dropdown.prototype.close.call(null, dropdown);
+  }
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, dropdown ]);
+  }
+
+  if (e && ! e.preventDefault) { return false; }
 }
 
 
@@ -5637,84 +5711,123 @@ app.layout.dropdown.prototype.toggle = function() {
  * @param <ElementNode> collapsible
  * @return <Function>
  */
-app.layout.collapse = function(event, element, collapsible) {
-  if (! event || ! element || ! collapsible) {
-    return app.error('app.layout.collapse', [event, element, collapsible]);
+app.layout.collapse = function(event, toggler, collapsible, callback) {
+  if (event === undefined || ! toggler || ! collapsible) {
+    return app.error('app.layout.collapse', [event, toggler, collapsible, callback]);
   }
 
   var self = app.layout.collapse.prototype;
 
-  self.event = event;
-  self.element = element;
   self.collapsible = collapsible;
+  self.toggler = toggler;
+  self.callback = typeof callback === 'function' ? callback : null;
 
+  if (! self.collapsible._collapsible) {
+    self.collapsible._collapsible = { toggler: toggler };
+  }
 
-  return self[event].bind(self);
+  if (event) {
+    return app.utils.proxy(false, self[event], self.collapsible, self.callback);
+  } else {
+    return app.utils.proxy(true, self, self.collapsible, self.callback);
+  }
 }
 
 /**
  * app.layout.collapse.prototype.open
  *
  * @param <Event> e
+ * @param <ElementNode> collapsible
+ * @param <Function> callback
  */
-app.layout.collapse.prototype.open = function(e) {
+app.layout.collapse.prototype.open = function(e, collapsible, callback) {
   if (!! app._runtime.debug) {
     console.info('app.layout.collapse.prototype.open', (e && e.target), e);
   }
 
-  if (this.element.getAttribute('aria-expanded') === 'true') {
+  (!! e && e.preventDefault) && e.preventDefault();
+
+  if (collapsible.getAttribute('aria-expanded') === 'true') {
     return;
   }
-  if (e && e.target && (e.target === this.element || e.target.offsetParent === this.element)) {
+  if (e && e.target && (e.target === collapsible._collapsible.toggler || e.target.offsetParent === collapsible._collapsible.toggler)) {
     return;
   }
 
-  this.collapsible.classList.add('collapse');
-  this.collapsible.classList.add('in');
-  this.collapsible.setAttribute('aria-expanded', true);
+  collapsible.classList.add('collapse');
+  collapsible.classList.add('in');
+  collapsible.setAttribute('aria-expanded', 'true');
 
-  this.element.setAttribute('aria-expanded', true);
-  this.element.classList.remove('collapsed');
+  collapsible._collapsible.toggler.setAttribute('aria-expanded', 'true');
+  collapsible._collapsible.toggler.classList.remove('collapsed');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, collapsible ]);
+  }
+
+  if (e && ! e.preventDefault) { return false; }
 }
 
 /**
  * app.layout.collapse.prototype.close
  *
  * @param <Event> e
+ * @param <ElementNode> collapsible
+ * @param <Function> callback
  */
-app.layout.collapse.prototype.close = function(e) {
+app.layout.collapse.prototype.close = function(e, collapsible, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.open', (e && e.target), e);
+    console.info('app.layout.collapse.prototype.close', (e && e.target), e);
   }
 
-  if (this.element.getAttribute('aria-expanded') === 'false') {
+  (!! e && e.preventDefault) && e.preventDefault();
+
+  if (collapsible.getAttribute('aria-expanded') === 'false') {
     return;
   }
-  if (e && e.target && (e.target === this.element || e.target.offsetParent === this.element)) {
+  if (e && e.target && (e.target === collapsible._collapsible.toggler || e.target.offsetParent === collapsible._collapsible.toggler)) {
     return;
   }
 
-  this.collapsible.classList.remove('collapse');
-  this.collapsible.classList.remove('in');
-  this.collapsible.setAttribute('aria-expanded', false);
+  collapsible.classList.remove('collapse');
+  collapsible.classList.remove('in');
+  collapsible.setAttribute('aria-expanded', 'false');
 
-  this.element.setAttribute('aria-expanded', false);
-  this.element.classList.add('collapsed');
+  collapsible._collapsible.toggler.setAttribute('aria-expanded', 'false');
+  collapsible._collapsible.toggler.classList.add('collapsed');
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, collapsible ]);
+  }
+
+  if (e && ! e.preventDefault) { return false; }
 }
 
 /**
  * app.layout.collapse.prototype.toggle
+ *
+ * @param <Event> e
+ * @param <ElementNode> collapsible
+ * @param <Function> callback
  */
-app.layout.collapse.prototype.toggle = function() {
+app.layout.collapse.prototype.toggle = function(e, collapsible, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.toggle');
+    console.info('app.layout.collapse.prototype.toggle', (e && e.target), e);
   }
 
-  if (this.element.getAttribute('aria-expanded') === 'false') {
-    this.open();
+  (!! e && e.preventDefault) && e.preventDefault();
+
+  if (collapsible.getAttribute('aria-expanded') === 'false') {
+    app.layout.collapse.prototype.open.call(null, collapsible);
   } else {
-    this.close();
+    app.layout.collapse.prototype.close.call(null, collapsible);
   }
+
+  if (callback) {
+    (typeof callback == 'function') && callback.apply(this, [ e, collapsible ]);
+  }
+
+  if (e && ! e.preventDefault) { return false; }
 }
 
 
@@ -5726,60 +5839,58 @@ app.layout.collapse.prototype.toggle = function() {
  * //TODO fix droid
  *
  * available prototype methods:
- *  - start (e, element, callback)
- *  - over (e, element, callback)
- *  - enter (e, element, callback)
- *  - leave (e, element, callback)
- *  - end (e, element, callback)
- *  - drop (e, element, callback)
+ *  - start (e, row, callback)
+ *  - over (e, row, callback)
+ *  - enter (e, row, callback)
+ *  - leave (e, row, callback)
+ *  - end (e, row, callback)
+ *  - drop (e, row, callback)
  *
  * @param <String> event
- * @param <ElementNode> element
+ * @param <ElementNode> row
  * @param <String> row_selector - .draggable
- * @param <Function> callback  ( event, current, e, element )
+ * @param <Function> callback  ( event, current, e, row )
  * @return <Function>
  */
-app.layout.draggable = function(event, element, row_selector, callback) {
-  if (! event || ! element) {
-    return app.error('app.view.draggable', [event, element, field]);
+app.layout.draggable = function(event, row, row_selector, callback) {
+  if (event === undefined || ! row) {
+    return app.error('app.view.draggable', [event, row, row_selector, callback]);
   }
 
   var self = app.layout.draggable.prototype;
 
-  row_selector = row_selector || '.draggable';
-  callback = typeof callback === 'function' ? callback : null;
+  self.row = row;
+  self.row_selector = row_selector || '.draggable';
+  self.callback = typeof callback === 'function' ? callback : null;
 
-  if (! element._draggable) {
-    element._draggable = { row: row_selector, current: null, prev_index: null, next_index: null };
+  if (! self.row._draggable) {
+    self.row._draggable = { selector: row_selector, current: null, prev_index: null, next_index: null };
   }
 
-
-  var _proxy = (function(e) {
-    return self[event].apply(this, [ e, element, callback ]);
-  });
-
-  return _proxy;
+  if (event) {
+    return app.utils.proxy(false, self[event], self.row, self.callback);
+  } else {
+    return app.utils.proxy(true, self, self.row, self.callback);
+  }
 }
 
 /**
  * app.layout.draggable.prototype.start
  *
- * @global <Event> e
- * @param <ElementNode> element
+ * @global <DragEvent> e
+ * @param <ElementNode> row
  * @param <Function> callback
  * @return
  */
-app.layout.draggable.prototype.start = function(e, element, callback) {
+app.layout.draggable.prototype.start = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.start', e, element._draggable);
+    console.info('app.layout.draggable.prototype.start', e, row._draggable);
   }
 
-  if (e.stopPropagation) {
-    e.stopPropagation();
-  }
+  (!! e && e.stopPropagation) && e.stopPropagation();
 
-  element._draggable.current = this;
-  element._draggable.next_index = this.getAttribute('data-index');
+  row._draggable.current = this;
+  row._draggable.next_index = this.getAttribute('data-index');
 
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/html', this.innerHTML);
@@ -5787,165 +5898,143 @@ app.layout.draggable.prototype.start = function(e, element, callback) {
   this.classList.add('move');
 
   if (callback) {
-    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+    (typeof callback == 'function') && callback.apply(this, [ e, row ]);
   }
 
-  if (! e.stopPropagation) {
-    return false;
-  }
+  if (e && ! e.stopPropagation) { return false; }
 }
 
 /**
  * app.layout.draggable.prototype.over
  *
- * @global <Event> e
- * @param <ElementNode> element
+ * @global <DragEvent> e
+ * @param <ElementNode> row
  * @param <Function> callback
  * @return
  */
-app.layout.draggable.prototype.over = function(e, element, callback) {
+app.layout.draggable.prototype.over = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.over', e, element._draggable);
+    console.info('app.layout.draggable.prototype.over', e, row._draggable);
   }
 
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
+  (!! e && e.preventDefault) && e.preventDefault();
 
   e.dataTransfer.dropEffect = 'move';
 
   if (callback && typeof callback == 'function') {
-    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+    (typeof callback == 'function') && callback.apply(this, [ e, row ]);
   }
 
-  if (! e.preventDefault) {
-    return false;
-  }
+  if (e && ! e.preventDefault) { return false; }
 }
 
 /**
  * app.layout.draggable.prototype.enter
  *
- * @global <Event> e
- * @param <ElementNode> element
+ * @global <DragEvent> e
+ * @param <ElementNode> row
  * @param <Function> callback
  */
-app.layout.draggable.prototype.enter = function(e, element, callback) {
+app.layout.draggable.prototype.enter = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.enter', e, element._draggable);
+    console.info('app.layout.draggable.prototype.enter', e, row._draggable);
   }
 
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
+  (!! e && e.preventDefault) && e.preventDefault();
 
   this.classList.add('over');
 
   if (callback) {
-    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+    (typeof callback == 'function') && callback.apply(this, [ e, row ]);
   }
 
-  if (! e.preventDefault) {
-    return false;
-  }
+  if (e && ! e.preventDefault) { return false; }
 }
 
 /**
  * app.layout.draggable.prototype.leave
  *
- * @global <Event> e
- * @param <ElementNode> element
+ * @global <DragEvent> e
+ * @param <ElementNode> row
  * @param <Function> callback
  */
-app.layout.draggable.prototype.leave = function(e, element, callback) {
+app.layout.draggable.prototype.leave = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.leave', e, element._draggable);
+    console.info('app.layout.draggable.prototype.leave', e, row._draggable);
   }
 
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
+  (!! e && e.preventDefault) && e.preventDefault();
 
   this.classList.remove('over');
 
   if (callback) {
-    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+    (typeof callback == 'function') && callback.apply(this, [ e, row ]);
   }
 
-  if (! e.preventDefault) {
-    return false;
-  }
+  if (e && ! e.preventDefault) { return false; }
 }
 
 /**
  * app.layout.draggable.prototype.end
  *
- * @global <Event> e
- * @param <ElementNode> element
+ * @global <DragEvent> e
+ * @param <ElementNode> row
  * @param <Function> callback
  */
-app.layout.draggable.prototype.end = function(e, element, callback) {
+app.layout.draggable.prototype.end = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.end', e, element._draggable);
+    console.info('app.layout.draggable.prototype.end', e, row._draggable);
   }
 
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
+  (!! e && e.stopPropagation) && e.stopPropagation();
 
-  var rows = document.querySelectorAll(element._draggable.row);
+  var rows = document.querySelectorAll(row._draggable.selector);
 
-  Array.prototype.forEach.call(rows, function(el) {
-    el.classList.remove('move');
-    el.classList.remove('over');
+  Array.prototype.forEach.call(rows, function(_row) {
+    _row.classList.remove('move');
+    _row.classList.remove('over');
   });
 
   if (callback) {
-    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+    (typeof callback == 'function') && callback.apply(this, [ e, row ]);
   }
 
-  if (! e.preventDefault) {
-    return false;
-  }
+  if (e && ! e.stopPropagation) { return false; }
 }
 
 /**
  * app.layout.draggable.prototype.drop
  *
- * @global <Event> e
- * @param <ElementNode> element
+ * @global <DragEvent> e
+ * @param <ElementNode> row
  * @param <Function> callback
  * @return
  */
-app.layout.draggable.prototype.drop = function(e, element, callback) {
+app.layout.draggable.prototype.drop = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.drop', e, element._draggable);
+    console.info('app.layout.draggable.prototype.drop', e, row._draggable);
   }
 
-  if (e.stopPropagation) {
-    e.stopPropagation();
-  }
+  (!! e && e.stopPropagation) && e.stopPropagation();
 
-  if (element._draggable.current != this) {
-    element._draggable.prev_index = this.getAttribute('data-index');
+  if (row._draggable.current != this) {
+    row._draggable.prev_index = this.getAttribute('data-index');
 
-    element._draggable.current.innerHTML = this.innerHTML;
-    element._draggable.current.setAttribute('data-index', element._draggable.prev_index);
+    row._draggable.current.innerHTML = this.innerHTML;
+    row._draggable.current.setAttribute('data-index', row._draggable.prev_index);
 
-    this.setAttribute('data-index', element._draggable.next_index);
+    this.setAttribute('data-index', row._draggable.next_index);
     this.innerHTML = e.dataTransfer.getData('text/html');
     this.querySelector('meta').remove();
   } else {
-    element._draggable.next_index = null;
+    row._draggable.next_index = null;
   }
 
   if (callback) {
-    (typeof callback == 'function') && callback.apply(this, [ e, element ]);
+    (typeof callback == 'function') && callback.apply(this, [ e, row ]);
   }
 
-  if (! e.stopPropagation) {
-    return false;
-  }
+  if (e && ! e.stopPropagation) { return false; }
 }
 
 
@@ -6154,6 +6243,42 @@ app.utils.removeEvent = function(event, element, func) {
   } else if (element.attachEvent) {
     element.detachEvent('on' + event, func);
   }
+}
+
+
+/**
+ * app.utils.proxy
+ *
+ * Proxy function with passed arguments mantaining this and event
+ *
+ * @param <Boolean> deep
+ * @param <Object> | <Function> obj
+ * @return <Object> | <Function>
+ */
+app.utils.proxy = function(deep, obj) {
+  var args = Object.values(arguments);
+
+  if (deep && typeof obj === 'object') {
+    args[0] = false;
+
+    for (var method in obj) {
+      if (typeof obj[method] != 'function') { continue; }
+
+      args[1] = obj[method];
+
+      obj[method] = app.utils.proxy.apply(null, args);
+    }
+
+    return obj;
+  }
+
+  args = args.slice(1);
+
+  return (function(e) {
+    args[0] = e;
+
+    obj.apply(this, args);
+  });
 }
 
 

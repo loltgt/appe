@@ -342,7 +342,7 @@ app.start.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (typeof config == 'object') {
-    var _config = 'assign' in Object ? Object.assign({}, config) : app.utils.extendObject({}, config);
+    var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
     if ('secret_passphrase' in config) {
       delete config.secret_passphrase;

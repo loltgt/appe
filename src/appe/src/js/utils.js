@@ -173,6 +173,42 @@ app.utils.removeEvent = function(event, element, func) {
 
 
 /**
+ * app.utils.proxy
+ *
+ * Proxy function with passed arguments mantaining this and event
+ *
+ * @param <Boolean> deep
+ * @param <Object> | <Function> obj
+ * @return <Object> | <Function>
+ */
+app.utils.proxy = function(deep, obj) {
+  var args = Object.values(arguments);
+
+  if (deep && typeof obj === 'object') {
+    args[0] = false;
+
+    for (var method in obj) {
+      if (typeof obj[method] != 'function') { continue; }
+
+      args[1] = obj[method];
+
+      obj[method] = app.utils.proxy.apply(null, args);
+    }
+
+    return obj;
+  }
+
+  args = args.slice(1);
+
+  return (function(e) {
+    args[0] = e;
+
+    obj.apply(this, args);
+  });
+}
+
+
+/**
  * app.utils.storage
  *
  * Storage utility, it stores persistent and non-persistent data using localStorage and sessionStorage
