@@ -56,8 +56,10 @@ appe__config = {
   },
   "default_route": "demo",
   "default_event": "add",
-  "base_path": "app",
+  "base_path": "appe",
+  "runtime_path": "app",
   "save_path": "save",
+  "aux_path": "ext",
   "open_attempts": 20,
   "alt": {
     "exec_folder": "alt",
@@ -69,8 +71,14 @@ appe__config = {
   },
   "license": {
     "text": "LGPL-3.0-or-later",
-    "file": "../LICENSE.txt"
+    "file": "LICENSE.txt"
   },
+  "aux": [
+    {
+      "file": "demo.js",
+      "fn": "appe__demo"
+    }
+  ]
   //"file": {
   //  "compress": false
   //  "heads": "e"

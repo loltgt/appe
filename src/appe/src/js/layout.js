@@ -171,7 +171,7 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
  * @param <String> event
  * @param <ElementNode> toggler
  * @param <ElementNode> dropdown
- * @param <Function> callback
+ * @param <Function> callback (e, dropdown)
  * @return <Function>
  */
 app.layout.dropdown = function(event, toggler, dropdown, callback) {
@@ -206,7 +206,7 @@ app.layout.dropdown = function(event, toggler, dropdown, callback) {
  */
 app.layout.dropdown.prototype.open = function(e, dropdown, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.dropdown.prototype.open', (e && e.target), e);
+    console.info('app.layout.dropdown.prototype.open', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -241,7 +241,7 @@ app.layout.dropdown.prototype.open = function(e, dropdown, callback) {
  */
 app.layout.dropdown.prototype.close = function(e, dropdown, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.dropdown.prototype.close', (e && e.target), e);
+    console.info('app.layout.dropdown.prototype.close', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -276,7 +276,7 @@ app.layout.dropdown.prototype.close = function(e, dropdown, callback) {
  */
 app.layout.dropdown.prototype.toggle = function(e, dropdown, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.dropdown.prototype.toggle', (e && e.target), e);
+    console.info('app.layout.dropdown.prototype.toggle', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -312,6 +312,7 @@ app.layout.dropdown.prototype.toggle = function(e, dropdown, callback) {
  * @param <String> event
  * @param <ElementNode> element
  * @param <ElementNode> collapsible
+ * @param <Function> callback  (e, collapsible)
  * @return <Function>
  */
 app.layout.collapse = function(event, toggler, collapsible, callback) {
@@ -345,7 +346,7 @@ app.layout.collapse = function(event, toggler, collapsible, callback) {
  */
 app.layout.collapse.prototype.open = function(e, collapsible, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.open', (e && e.target), e);
+    console.info('app.layout.collapse.prototype.open', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -380,7 +381,7 @@ app.layout.collapse.prototype.open = function(e, collapsible, callback) {
  */
 app.layout.collapse.prototype.close = function(e, collapsible, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.close', (e && e.target), e);
+    console.info('app.layout.collapse.prototype.close', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -415,7 +416,7 @@ app.layout.collapse.prototype.close = function(e, collapsible, callback) {
  */
 app.layout.collapse.prototype.toggle = function(e, collapsible, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.toggle', (e && e.target), e);
+    console.info('app.layout.collapse.prototype.toggle', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -452,7 +453,7 @@ app.layout.collapse.prototype.toggle = function(e, collapsible, callback) {
  * @param <String> event
  * @param <ElementNode> row
  * @param <String> row_selector - .draggable
- * @param <Function> callback  ( event, current, e, row )
+ * @param <Function> callback (e, row)
  * @return <Function>
  */
 app.layout.draggable = function(event, row, row_selector, callback) {
@@ -487,7 +488,7 @@ app.layout.draggable = function(event, row, row_selector, callback) {
  */
 app.layout.draggable.prototype.start = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.start', e, row._draggable);
+    console.info('app.layout.draggable.prototype.start', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.stopPropagation) && e.stopPropagation();
@@ -517,7 +518,7 @@ app.layout.draggable.prototype.start = function(e, row, callback) {
  */
 app.layout.draggable.prototype.over = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.over', e, row._draggable);
+    console.info('app.layout.draggable.prototype.over', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -540,7 +541,7 @@ app.layout.draggable.prototype.over = function(e, row, callback) {
  */
 app.layout.draggable.prototype.enter = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.enter', e, row._draggable);
+    console.info('app.layout.draggable.prototype.enter', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -563,7 +564,7 @@ app.layout.draggable.prototype.enter = function(e, row, callback) {
  */
 app.layout.draggable.prototype.leave = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.leave', e, row._draggable);
+    console.info('app.layout.draggable.prototype.leave', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -586,7 +587,7 @@ app.layout.draggable.prototype.leave = function(e, row, callback) {
  */
 app.layout.draggable.prototype.end = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.end', e, row._draggable);
+    console.info('app.layout.draggable.prototype.end', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.stopPropagation) && e.stopPropagation();
@@ -615,7 +616,7 @@ app.layout.draggable.prototype.end = function(e, row, callback) {
  */
 app.layout.draggable.prototype.drop = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.drop', e, row._draggable);
+    console.info('app.layout.draggable.prototype.drop', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.stopPropagation) && e.stopPropagation();

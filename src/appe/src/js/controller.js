@@ -232,15 +232,15 @@ app.controller.retrieve = function(callback, routine) {
 
 
   var _retrieve = function(fn, schema) {
-    if (typeof fn != 'string' || typeof schema != 'object') {
+    if (typeof fn != 'string' || (schema && typeof schema != 'object')) {
       return app.stop('app.controller.retrieve() > _retrieve', [fn, schema]);
     }
 
-    if (store[fn] && typeof store[fn] === 'object') {
+    if (store[fn] && (typeof store[fn] === 'object' || typeof store[fn] === 'function')) {
       return store[fn];
     }
 
-    store = {};
+    var _data = {};
 
     for (var i in schema) {
       var key = schema[i].toString();
@@ -250,10 +250,10 @@ app.controller.retrieve = function(callback, routine) {
         return app.stop('app.controller.retrieve() > _retrieve', 'schema');
       }
 
-      store[key] = obj;
+      _data[key] = obj;
     }
 
-    return store;
+    return _data;
   }
 
 

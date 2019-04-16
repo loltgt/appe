@@ -98,10 +98,9 @@ app.os.fileSessionOpen = function(callback) {
 
 
   if (!! app._runtime.debug) {
-    console.info('app.os.fileSessionOpen', 'file', file, config.file);
+    console.info('app.os.fileSessionOpen', '\t', 'file', '\t', file, '\t', config.file);
   }
 
-  //:WORKAROUND temp ios
   if (app._runtime.system.platform != 'ios') {
     if (file.name.indexOf(file_extension) === -1) {
       app.error('app.os.fileSessionOpen', app.i18n('This file format cannot be open.'), 'file');
@@ -460,7 +459,7 @@ app.os.fileSessionSave = function(callback, source, timestamp) {
     var _file = file_name + '.' + file_extension;
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileSessionSave', 'file', _file, file_type, config.file);
+      console.info('app.os.fileSessionSave', '\t', 'file', '\t', _file, '\t', file_type, '\t', config.file);
     }
 
     try {
@@ -702,7 +701,7 @@ app.os.fileDownload = function(source, filename, mime_type) {
     _downloadAttachment(true);
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', [1, 0, 0, 0], mime_type, filename);
+      console.info('app.os.fileDownload', '\t', [1, 0, 0, 0], '\t', mime_type, '\t', filename);
     }
   // target ie
   } else if ('msSaveOrOpenBlob' in app._root.window.navigator) {
@@ -711,7 +710,7 @@ app.os.fileDownload = function(source, filename, mime_type) {
     navigator.msSaveOrOpenBlob(file, filename) || _downloadAttachment(true, as_object_link, false, false);
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', [1, as_object_link, 0, 1], mime_type, filename);
+      console.info('app.os.fileDownload', '\t', [1, as_object_link, 0, 1], '\t', mime_type, '\t', filename);
     }
 
   // target other browsers with open support
@@ -728,7 +727,7 @@ app.os.fileDownload = function(source, filename, mime_type) {
     _downloadAttachment(as_link, as_object_link, force_attachment, force_new);
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', [as_link, as_object_link, force_attachment, force_new], mime_type, filename);
+      console.info('app.os.fileDownload', '\t', [as_link, as_object_link, force_attachment, force_new], '\t', mime_type, '\t', filename);
     }
   // fallback
   } else {
@@ -737,9 +736,55 @@ app.os.fileDownload = function(source, filename, mime_type) {
     _downloadAttachment(true, as_object_link, true, true);
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', [1, as_object_link, 1, 1], mime_type, filename);
+      console.info('app.os.fileDownload', '\t', [1, as_object_link, 1, 1], '\t', mime_type, '\t', filename);
     }
   }
+}
+
+
+/**
+ * app.os.fileFindRoot
+ *
+ * Finds the root base of file
+ *
+ * @global <Object> appe__config
+ * @global <Object> appe__control
+ * @param <String> filename
+ * @return <String>
+ */
+app.os.fileFindRoot = function(filename) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.os.fileFindRoot');
+  }
+
+  if (typeof filename != 'string') {
+    return app.error('app.os.fileFindRoot', [filename]);
+  }
+
+  var _is_view = ! (app._root.window.appe__control === undefined);
+
+  var cl = app._root.window.location.href;
+  var bp = config.base_path.toString();
+  var rp = config.runtime_path.toString();
+
+  var base = '';
+
+  if (cl.indexOf(rp + '/') != -1) {
+    base += !! _is_view ? '../../' : '../';
+  } else {
+    var bpos;
+
+    bpos = cl.substr(cl.indexOf(bp + '/')).split('/').slice(1, -1);
+    bpos = bpos.length;
+
+    while (bpos--) {
+      base += '../';
+    }
+  }
+
+  return base + filename.toString();
 }
 
 

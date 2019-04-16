@@ -97,33 +97,6 @@ app.unload = function(func) {
 
 
 /**
- * app.redirect
- *
- * Performs app redirect
- *
- * @global <Object> appe__config
- * @return
- */
-app.redirect = function() {
-  var config = app._root.window.appe__config || app._root.process.env.appe__config;
-
-  if (! config) {
-    return app.stop('app.redirect');
-  }
-
-  var base = config.base_path.toString();
-  var filename = 'index';
-
-  if (app._root.window.location.href.indexOf(base + '/') != -1) {
-    base = '..';
-    filename = config.launcher_name.toString();
-  }
-
-  app._root.window.location.href = base + '/' + filename + '.html';
-}
-
-
-/**
  * app.position
  *
  * Returns JSON serialized app position
@@ -248,8 +221,6 @@ app.session = function(callback, config, target) {
   }
 
 
-  var tasks = 0;
-
   var _asyncLoadCheck = function(fn, cb) {
     var max = parseInt(config.open_attempts) || 50;
     var attempts = 0;
@@ -300,7 +271,7 @@ app.session = function(callback, config, target) {
   }
 
   var _doCrypto = function(cb) {
-    if (! (config.secret_passphrase && typeof config.secret_passphrase === 'string')) {
+    if (! (_secret_passphrase && typeof _secret_passphrase === 'string')) {
       return cb('config');
     }
 
@@ -320,6 +291,10 @@ app.session = function(callback, config, target) {
   }
 
   var _resolver = function(err) {
+    if (err) {
+      return app.error('app.session', err);
+    }
+
     tasks--;
 
     if (! tasks) {
@@ -334,7 +309,7 @@ app.session = function(callback, config, target) {
      *
      * @param <Function> callback
      */
-    if (target === undefined && start && 'session' in start && typeof start.session === 'function') {
+    if (target === undefined && start && typeof start == 'object' && 'session' in start && typeof start.session === 'function') {
       start.session(callback);
 
     /**
@@ -342,7 +317,7 @@ app.session = function(callback, config, target) {
      *
      * @param <Function> callback
      */
-    } else if (target === true && main && 'session' in main && typeof main.session === 'function') {
+    } else if (target === true && main && typeof main == 'object' && 'session' in main && typeof main.session === 'function') {
       main.session(callback);
 
     /**
@@ -350,7 +325,7 @@ app.session = function(callback, config, target) {
      *
      * @param <Function> callback
      */
-    } else if (target === false && control && 'session' in control && typeof control.session === 'function') {
+    } else if (target === false && control && typeof control == 'object' && 'session' in control && typeof control.session === 'function') {
       control.session(callback);
 
     } else {
@@ -359,6 +334,8 @@ app.session = function(callback, config, target) {
 
   }
 
+
+  var tasks = 1;
 
   // only start and main
   if (target !== false) {
@@ -375,11 +352,7 @@ app.session = function(callback, config, target) {
       _doCompress(_resolver);
     }
 
-    if (! tasks) {
-      tasks = 1;
-
-      _doDefault(_resolver);
-    }
+    _doDefault(_resolver);
 
   // only view
   } else {
@@ -428,6 +401,7 @@ app.resume = function(config, target) {
   if (target === undefined && !! (! session_resume || session_last)) {
     // there's nothing to do
   } else if (!! app._runtime.debug && target !== undefined) {
+    //TODO FIX loop redirect / demo mode
     return (! session_last) && app.newSession();
   } else if (! session_last) {
     return app.redirect();
@@ -435,11 +409,41 @@ app.resume = function(config, target) {
 
   if (!! session_resume) {
     session_resume = app.utils.base64('decode', session_resume);
+    session_resume = app.os.fileFindRoot(config.save_path.toString() + '/' + session_resume);
   }
 
 
   return session_resume;
 }
+
+
+/**
+ * app.redirect
+ *
+ * Performs app redirect
+ *
+ * @global <Object> appe__config
+ * @return
+ */
+app.redirect = function() {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.redirect');
+  }
+
+  var rp = config.runtime_path.toString();
+  var filename = 'index';
+
+  if (app._root.window.location.href.indexOf(rp + '/') != -1) {
+    filename = config.launcher_name.toString();
+  }
+
+  filename += '.html';
+
+  app._root.window.location.href = app.os.fileFindRoot(rp + '/' + filename);
+}
+
 
 /**
  * app.data
@@ -490,7 +494,7 @@ app.checkConfig = function(config) {
 
   var error = false;
 
-  var _required_keys = ['app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'base_path', 'save_path'];
+  var _required_keys = ['app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'runtime_path', 'save_path'];
   var key = null, i = 0;
 
   while ((key = _required_keys[i++])) {
@@ -609,7 +613,7 @@ app.openSessionFile = function() {
   var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
   if (fbinary && ! (fcompress && fcrypt)) {
-    app.error('app.openSessionFile', 'binary');
+    app.error('app.openSessionFile', 'Misleading settings.', 'binary', true);
 
     return callback(false);
   }
@@ -740,7 +744,7 @@ app.saveSessionFile = function() {
 
   app.os.fileSessionSave(function(filename) {
     if (!! app._runtime.debug) {
-      console.info('save', filename);
+      console.info('save', '\t', filename);
     }
   }, source, _current_timestamp);
 }
@@ -829,6 +833,233 @@ app.openSession = app.openSessionFile;
  * Saves session, alias of app.saveSessionFile
  */
 app.saveSession = app.saveSessionFile;
+
+
+/**
+ * app.asyncAttemptLoad
+ *
+ * Attemps to load files and scripts, returns to callback
+ *
+ * @global <Object> appe__config
+ * @global <Object> CryptoJS
+ * @param <Function> callback
+ * @param <Boolean> resume_session
+ * @param <String> fn
+ * @param <String> file
+ * @param <Object> schema
+ * @param <Boolean> memoize
+ * @return
+ */
+app.asyncAttemptLoad = function(callback, resume_session, fn, file, schema, memoize) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.asyncAttemptLoad');
+  }
+
+  var step = true;
+
+  if (config.file && typeof config.file != 'object') {
+    step = app.error('app.asyncAttemptLoad', 'config');
+  }
+
+  if (!! resume_session && ! (CryptoJS && CryptoJS.MD5)) {
+    step = app.error('app.asyncAttemptLoad', 'CryptoJS');
+  }
+
+  if (!! resume_session && !! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    step = app.error('app.asyncAttemptLoad', 'CryptoJS');
+  }
+
+  if (typeof callback != 'function' || ! fn || typeof fn != 'string' || ! file || typeof file != 'string' || (schema && typeof schema != 'object')) {
+    step = app.stop('app.asyncAttemptLoad', [callback, fn, file, schema, memoize]);
+  }
+
+  if (! step) {
+    return callback(false);
+  }
+
+  var _app_name = app._runtime.name.toString();
+
+  fn = fn.toString();
+
+
+  var fbinary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var fcompress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+
+  if (fbinary && ! (fcompress && fcrypt)) {
+    app.error('app.asyncAttemptLoad', 'Misleading settings.', 'binary', true);
+
+    return callback(false);
+  }
+
+  var file_json_checksum = null;
+
+
+  var _decrypt = function(source, cb) {
+    var secret = null;
+
+    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in app._root.document) {
+      secret = app._root.document[app._runtime.secret];
+    } else {
+      return cb('runtime');
+    }
+
+    try {
+      source = CryptoJS.AES.decrypt(source, secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+      source = source.toString(CryptoJS.enc.Utf8);
+
+      if (! source) { throw 'decryption'; }
+
+      cb(false, source);
+    } catch (err) {
+      cb(err);
+    }
+  }
+
+  var _store = function(source, cb) {
+    // check file source before store
+    if (! app.checkFile(source, file_json_checksum)) {
+      return cb('check');
+    }
+
+    for (var i in schema) {
+      var key = schema[i].toString();
+
+      if (key in source === false) {
+        return cb('schema');
+      }
+
+      app.store.set(fn + '_' + key, source[key]);
+    }
+
+    cb(false, true);
+  }
+
+  var _attempt = function(source, cb) {
+    if (fn in app._root.window === false) {
+      app.error('app.asyncAttemptLoad() > _attempt', 'source');
+
+      return callback(false);
+    }
+
+    try {
+      var source = app._root.window[fn];
+
+      if (memoize && fcrypt) {
+        _decrypt(source, function(err, source) {
+          if (err) { throw err; }
+
+          app.os.generateJsonChecksum(function(checksum) {
+            if (! checksum) { throw null; }
+
+            file_json_checksum = checksum;
+
+            source = JSON.parse(source);
+
+            _store(source, function(err, loaded) {
+              if (err) { throw err; }
+
+              callback(loaded);
+            });
+          }, source);
+        });
+      } else if (memoize) {
+        var _source = JSON.stringify(source);
+
+        app.os.generateJsonChecksum(function(checksum) {
+          if (! checksum) { throw null; }
+
+          file_json_checksum = checksum;
+
+          _store(source, function(err, loaded) {
+            if (err) { throw err; }
+
+            callback(loaded);
+          });
+        }, _source);
+      } else {
+        var store = app._root.server.appe__store;
+
+        if (! store) {
+          app.stop('app.asyncAttemptLoad', 'store');
+
+          return callback(false);
+        }
+
+        if (typeof source === 'function') {
+          store[fn] = source;
+        }
+
+        callback(true);
+      }
+    } catch (err) {
+      app.error('app.asyncAttemptLoad() > _attempt', err);
+
+      callback(loaded);
+    }
+  }
+
+
+  var loaded = false;
+  var max_attempts = parseInt(config.open_attempts);
+
+  app.os.scriptOpen(_attempt, file, fn, max_attempts);
+}
+
+
+/**
+ * app.asyncLoadAux
+ *
+ * Load extension scripts asyncronously
+ *
+ * @global <Object> appe__config
+ * @param <Function> callback
+ * @param <Object> routine
+ * @param <Boolean> resume_session
+ * @return <Function> callback
+ */
+app.asyncLoadAux = function(callback, routine, resume_session) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.asyncLoadAux');
+  }
+
+  if (typeof callback != 'function' || typeof routine != 'object') {
+    app.error('app.asyncLoadAux', [callback, routine]);
+
+    callback(false);
+  }
+
+
+  if (routine.length) {
+    var i = routine.length;
+
+    while (i--) {
+      var fn = routine[i].fn.toString();
+      var file = app.os.fileFindRoot(config.aux_path.toString() + '/' + routine[i].file);
+      var schema = typeof routine[i].schema === 'object' ? routine[i].schema : null;
+      var memoize = routine[i].memoize === true;
+
+      app.asyncAttemptLoad(function(aux_loaded) {
+        if (! aux_loaded) {
+          app.error('app.asyncLoadAux', routine[i]);
+
+          return callback(false);
+        }
+
+        if (i <= 0) {
+          callback(true);
+        }
+      }, resume_session, fn, file, schema, memoize);
+    }
+  } else {
+    callback(true);
+  }
+}
 
 
 /**
@@ -1012,7 +1243,7 @@ app.stop = function(arg0, arg1, arg2, soft) {
  * Helper to debug and display error messages
  *
  * @global <Object> appe__control
- * @param <String> arg0  ( msg | fn )
+ * @param <String> arg0  fn
  * @param arg1  ( log | msg )
  * @param arg2  ( log | msg )
  * @param <Boolean> soft
@@ -1033,7 +1264,7 @@ app.error = function(arg0, arg1, arg2, soft) {
     fn = arg0;
     log = arg1;
   } else if (arg0) {
-    msg = arg0;
+    fn = arg0;
   }
 
   // avoid too much recursions
@@ -1046,10 +1277,12 @@ app.error = function(arg0, arg1, arg2, soft) {
   }
 
   if (app._runtime.debug) {
+    var position = app.position();
+
     if (app._runtime.exec) {
-      console.error('ERR', fn, msg, (app.position() || ''));
+      console.error('ERR', '\t', fn, '\t', msg, (position ? '\t' + position : ''));
     } else {
-      console.warn('WARN', fn, msg, (app.position() || ''));
+      console.warn('WARN', '\t', fn, '\t', msg, (position ? '\t' + position : ''));
     }
 
     if (log) {
@@ -1123,7 +1356,7 @@ app.getInfo = function(from, info) {
       _available_infos = {
         'app_name': config.app_name.toString(),
         'schema': typeof config.schema === 'object' ? config.schema : [],
-        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': config.license.file.toString() } : config.license.toString()) || false
+        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': app.os.fileFindRoot(config.license.file) } : config.license.toString()) || false
       };
     break;
     case 'runtime':

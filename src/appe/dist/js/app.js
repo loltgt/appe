@@ -97,33 +97,6 @@ app.unload = function(func) {
 
 
 /**
- * app.redirect
- *
- * Performs app redirect
- *
- * @global <Object> appe__config
- * @return
- */
-app.redirect = function() {
-  var config = app._root.window.appe__config || app._root.process.env.appe__config;
-
-  if (! config) {
-    return app.stop('app.redirect');
-  }
-
-  var base = config.base_path.toString();
-  var filename = 'index';
-
-  if (app._root.window.location.href.indexOf(base + '/') != -1) {
-    base = '..';
-    filename = config.launcher_name.toString();
-  }
-
-  app._root.window.location.href = base + '/' + filename + '.html';
-}
-
-
-/**
  * app.position
  *
  * Returns JSON serialized app position
@@ -248,8 +221,6 @@ app.session = function(callback, config, target) {
   }
 
 
-  var tasks = 0;
-
   var _asyncLoadCheck = function(fn, cb) {
     var max = parseInt(config.open_attempts) || 50;
     var attempts = 0;
@@ -300,7 +271,7 @@ app.session = function(callback, config, target) {
   }
 
   var _doCrypto = function(cb) {
-    if (! (config.secret_passphrase && typeof config.secret_passphrase === 'string')) {
+    if (! (_secret_passphrase && typeof _secret_passphrase === 'string')) {
       return cb('config');
     }
 
@@ -320,6 +291,10 @@ app.session = function(callback, config, target) {
   }
 
   var _resolver = function(err) {
+    if (err) {
+      return app.error('app.session', err);
+    }
+
     tasks--;
 
     if (! tasks) {
@@ -334,7 +309,7 @@ app.session = function(callback, config, target) {
      *
      * @param <Function> callback
      */
-    if (target === undefined && start && 'session' in start && typeof start.session === 'function') {
+    if (target === undefined && start && typeof start == 'object' && 'session' in start && typeof start.session === 'function') {
       start.session(callback);
 
     /**
@@ -342,7 +317,7 @@ app.session = function(callback, config, target) {
      *
      * @param <Function> callback
      */
-    } else if (target === true && main && 'session' in main && typeof main.session === 'function') {
+    } else if (target === true && main && typeof main == 'object' && 'session' in main && typeof main.session === 'function') {
       main.session(callback);
 
     /**
@@ -350,7 +325,7 @@ app.session = function(callback, config, target) {
      *
      * @param <Function> callback
      */
-    } else if (target === false && control && 'session' in control && typeof control.session === 'function') {
+    } else if (target === false && control && typeof control == 'object' && 'session' in control && typeof control.session === 'function') {
       control.session(callback);
 
     } else {
@@ -359,6 +334,8 @@ app.session = function(callback, config, target) {
 
   }
 
+
+  var tasks = 1;
 
   // only start and main
   if (target !== false) {
@@ -375,11 +352,7 @@ app.session = function(callback, config, target) {
       _doCompress(_resolver);
     }
 
-    if (! tasks) {
-      tasks = 1;
-
-      _doDefault(_resolver);
-    }
+    _doDefault(_resolver);
 
   // only view
   } else {
@@ -428,6 +401,7 @@ app.resume = function(config, target) {
   if (target === undefined && !! (! session_resume || session_last)) {
     // there's nothing to do
   } else if (!! app._runtime.debug && target !== undefined) {
+    //TODO FIX loop redirect / demo mode
     return (! session_last) && app.newSession();
   } else if (! session_last) {
     return app.redirect();
@@ -435,11 +409,41 @@ app.resume = function(config, target) {
 
   if (!! session_resume) {
     session_resume = app.utils.base64('decode', session_resume);
+    session_resume = app.os.fileFindRoot(config.save_path.toString() + '/' + session_resume);
   }
 
 
   return session_resume;
 }
+
+
+/**
+ * app.redirect
+ *
+ * Performs app redirect
+ *
+ * @global <Object> appe__config
+ * @return
+ */
+app.redirect = function() {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.redirect');
+  }
+
+  var rp = config.runtime_path.toString();
+  var filename = 'index';
+
+  if (app._root.window.location.href.indexOf(rp + '/') != -1) {
+    filename = config.launcher_name.toString();
+  }
+
+  filename += '.html';
+
+  app._root.window.location.href = app.os.fileFindRoot(rp + '/' + filename);
+}
+
 
 /**
  * app.data
@@ -490,7 +494,7 @@ app.checkConfig = function(config) {
 
   var error = false;
 
-  var _required_keys = ['app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'base_path', 'save_path'];
+  var _required_keys = ['app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'runtime_path', 'save_path'];
   var key = null, i = 0;
 
   while ((key = _required_keys[i++])) {
@@ -609,7 +613,7 @@ app.openSessionFile = function() {
   var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
 
   if (fbinary && ! (fcompress && fcrypt)) {
-    app.error('app.openSessionFile', 'binary');
+    app.error('app.openSessionFile', 'Misleading settings.', 'binary', true);
 
     return callback(false);
   }
@@ -740,7 +744,7 @@ app.saveSessionFile = function() {
 
   app.os.fileSessionSave(function(filename) {
     if (!! app._runtime.debug) {
-      console.info('save', filename);
+      console.info('save', '\t', filename);
     }
   }, source, _current_timestamp);
 }
@@ -829,6 +833,233 @@ app.openSession = app.openSessionFile;
  * Saves session, alias of app.saveSessionFile
  */
 app.saveSession = app.saveSessionFile;
+
+
+/**
+ * app.asyncAttemptLoad
+ *
+ * Attemps to load files and scripts, returns to callback
+ *
+ * @global <Object> appe__config
+ * @global <Object> CryptoJS
+ * @param <Function> callback
+ * @param <Boolean> resume_session
+ * @param <String> fn
+ * @param <String> file
+ * @param <Object> schema
+ * @param <Boolean> memoize
+ * @return
+ */
+app.asyncAttemptLoad = function(callback, resume_session, fn, file, schema, memoize) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.asyncAttemptLoad');
+  }
+
+  var step = true;
+
+  if (config.file && typeof config.file != 'object') {
+    step = app.error('app.asyncAttemptLoad', 'config');
+  }
+
+  if (!! resume_session && ! (CryptoJS && CryptoJS.MD5)) {
+    step = app.error('app.asyncAttemptLoad', 'CryptoJS');
+  }
+
+  if (!! resume_session && !! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
+    step = app.error('app.asyncAttemptLoad', 'CryptoJS');
+  }
+
+  if (typeof callback != 'function' || ! fn || typeof fn != 'string' || ! file || typeof file != 'string' || (schema && typeof schema != 'object')) {
+    step = app.stop('app.asyncAttemptLoad', [callback, fn, file, schema, memoize]);
+  }
+
+  if (! step) {
+    return callback(false);
+  }
+
+  var _app_name = app._runtime.name.toString();
+
+  fn = fn.toString();
+
+
+  var fbinary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
+  var fcompress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
+  var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
+
+
+  if (fbinary && ! (fcompress && fcrypt)) {
+    app.error('app.asyncAttemptLoad', 'Misleading settings.', 'binary', true);
+
+    return callback(false);
+  }
+
+  var file_json_checksum = null;
+
+
+  var _decrypt = function(source, cb) {
+    var secret = null;
+
+    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in app._root.document) {
+      secret = app._root.document[app._runtime.secret];
+    } else {
+      return cb('runtime');
+    }
+
+    try {
+      source = CryptoJS.AES.decrypt(source, secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+      source = source.toString(CryptoJS.enc.Utf8);
+
+      if (! source) { throw 'decryption'; }
+
+      cb(false, source);
+    } catch (err) {
+      cb(err);
+    }
+  }
+
+  var _store = function(source, cb) {
+    // check file source before store
+    if (! app.checkFile(source, file_json_checksum)) {
+      return cb('check');
+    }
+
+    for (var i in schema) {
+      var key = schema[i].toString();
+
+      if (key in source === false) {
+        return cb('schema');
+      }
+
+      app.store.set(fn + '_' + key, source[key]);
+    }
+
+    cb(false, true);
+  }
+
+  var _attempt = function(source, cb) {
+    if (fn in app._root.window === false) {
+      app.error('app.asyncAttemptLoad() > _attempt', 'source');
+
+      return callback(false);
+    }
+
+    try {
+      var source = app._root.window[fn];
+
+      if (memoize && fcrypt) {
+        _decrypt(source, function(err, source) {
+          if (err) { throw err; }
+
+          app.os.generateJsonChecksum(function(checksum) {
+            if (! checksum) { throw null; }
+
+            file_json_checksum = checksum;
+
+            source = JSON.parse(source);
+
+            _store(source, function(err, loaded) {
+              if (err) { throw err; }
+
+              callback(loaded);
+            });
+          }, source);
+        });
+      } else if (memoize) {
+        var _source = JSON.stringify(source);
+
+        app.os.generateJsonChecksum(function(checksum) {
+          if (! checksum) { throw null; }
+
+          file_json_checksum = checksum;
+
+          _store(source, function(err, loaded) {
+            if (err) { throw err; }
+
+            callback(loaded);
+          });
+        }, _source);
+      } else {
+        var store = app._root.server.appe__store;
+
+        if (! store) {
+          app.stop('app.asyncAttemptLoad', 'store');
+
+          return callback(false);
+        }
+
+        if (typeof source === 'function') {
+          store[fn] = source;
+        }
+
+        callback(true);
+      }
+    } catch (err) {
+      app.error('app.asyncAttemptLoad() > _attempt', err);
+
+      callback(loaded);
+    }
+  }
+
+
+  var loaded = false;
+  var max_attempts = parseInt(config.open_attempts);
+
+  app.os.scriptOpen(_attempt, file, fn, max_attempts);
+}
+
+
+/**
+ * app.asyncLoadAux
+ *
+ * Load extension scripts asyncronously
+ *
+ * @global <Object> appe__config
+ * @param <Function> callback
+ * @param <Object> routine
+ * @param <Boolean> resume_session
+ * @return <Function> callback
+ */
+app.asyncLoadAux = function(callback, routine, resume_session) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.asyncLoadAux');
+  }
+
+  if (typeof callback != 'function' || typeof routine != 'object') {
+    app.error('app.asyncLoadAux', [callback, routine]);
+
+    callback(false);
+  }
+
+
+  if (routine.length) {
+    var i = routine.length;
+
+    while (i--) {
+      var fn = routine[i].fn.toString();
+      var file = app.os.fileFindRoot(config.aux_path.toString() + '/' + routine[i].file);
+      var schema = typeof routine[i].schema === 'object' ? routine[i].schema : null;
+      var memoize = routine[i].memoize === true;
+
+      app.asyncAttemptLoad(function(aux_loaded) {
+        if (! aux_loaded) {
+          app.error('app.asyncLoadAux', routine[i]);
+
+          return callback(false);
+        }
+
+        if (i <= 0) {
+          callback(true);
+        }
+      }, resume_session, fn, file, schema, memoize);
+    }
+  } else {
+    callback(true);
+  }
+}
 
 
 /**
@@ -1012,7 +1243,7 @@ app.stop = function(arg0, arg1, arg2, soft) {
  * Helper to debug and display error messages
  *
  * @global <Object> appe__control
- * @param <String> arg0  ( msg | fn )
+ * @param <String> arg0  fn
  * @param arg1  ( log | msg )
  * @param arg2  ( log | msg )
  * @param <Boolean> soft
@@ -1033,7 +1264,7 @@ app.error = function(arg0, arg1, arg2, soft) {
     fn = arg0;
     log = arg1;
   } else if (arg0) {
-    msg = arg0;
+    fn = arg0;
   }
 
   // avoid too much recursions
@@ -1046,10 +1277,12 @@ app.error = function(arg0, arg1, arg2, soft) {
   }
 
   if (app._runtime.debug) {
+    var position = app.position();
+
     if (app._runtime.exec) {
-      console.error('ERR', fn, msg, (app.position() || ''));
+      console.error('ERR', '\t', fn, '\t', msg, (position ? '\t' + position : ''));
     } else {
-      console.warn('WARN', fn, msg, (app.position() || ''));
+      console.warn('WARN', '\t', fn, '\t', msg, (position ? '\t' + position : ''));
     }
 
     if (log) {
@@ -1123,7 +1356,7 @@ app.getInfo = function(from, info) {
       _available_infos = {
         'app_name': config.app_name.toString(),
         'schema': typeof config.schema === 'object' ? config.schema : [],
-        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': config.license.file.toString() } : config.license.toString()) || false
+        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': app.os.fileFindRoot(config.license.file) } : config.license.toString()) || false
       };
     break;
     case 'runtime':
@@ -1307,10 +1540,9 @@ app.os.fileSessionOpen = function(callback) {
 
 
   if (!! app._runtime.debug) {
-    console.info('app.os.fileSessionOpen', 'file', file, config.file);
+    console.info('app.os.fileSessionOpen', '\t', 'file', '\t', file, '\t', config.file);
   }
 
-  //:WORKAROUND temp ios
   if (app._runtime.system.platform != 'ios') {
     if (file.name.indexOf(file_extension) === -1) {
       app.error('app.os.fileSessionOpen', app.i18n('This file format cannot be open.'), 'file');
@@ -1669,7 +1901,7 @@ app.os.fileSessionSave = function(callback, source, timestamp) {
     var _file = file_name + '.' + file_extension;
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileSessionSave', 'file', _file, file_type, config.file);
+      console.info('app.os.fileSessionSave', '\t', 'file', '\t', _file, '\t', file_type, '\t', config.file);
     }
 
     try {
@@ -1911,7 +2143,7 @@ app.os.fileDownload = function(source, filename, mime_type) {
     _downloadAttachment(true);
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', [1, 0, 0, 0], mime_type, filename);
+      console.info('app.os.fileDownload', '\t', [1, 0, 0, 0], '\t', mime_type, '\t', filename);
     }
   // target ie
   } else if ('msSaveOrOpenBlob' in app._root.window.navigator) {
@@ -1920,7 +2152,7 @@ app.os.fileDownload = function(source, filename, mime_type) {
     navigator.msSaveOrOpenBlob(file, filename) || _downloadAttachment(true, as_object_link, false, false);
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', [1, as_object_link, 0, 1], mime_type, filename);
+      console.info('app.os.fileDownload', '\t', [1, as_object_link, 0, 1], '\t', mime_type, '\t', filename);
     }
 
   // target other browsers with open support
@@ -1937,7 +2169,7 @@ app.os.fileDownload = function(source, filename, mime_type) {
     _downloadAttachment(as_link, as_object_link, force_attachment, force_new);
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', [as_link, as_object_link, force_attachment, force_new], mime_type, filename);
+      console.info('app.os.fileDownload', '\t', [as_link, as_object_link, force_attachment, force_new], '\t', mime_type, '\t', filename);
     }
   // fallback
   } else {
@@ -1946,9 +2178,55 @@ app.os.fileDownload = function(source, filename, mime_type) {
     _downloadAttachment(true, as_object_link, true, true);
 
     if (!! app._runtime.debug) {
-      console.info('app.os.fileDownload', [1, as_object_link, 1, 1], mime_type, filename);
+      console.info('app.os.fileDownload', '\t', [1, as_object_link, 1, 1], '\t', mime_type, '\t', filename);
     }
   }
+}
+
+
+/**
+ * app.os.fileFindRoot
+ *
+ * Finds the root base of file
+ *
+ * @global <Object> appe__config
+ * @global <Object> appe__control
+ * @param <String> filename
+ * @return <String>
+ */
+app.os.fileFindRoot = function(filename) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.os.fileFindRoot');
+  }
+
+  if (typeof filename != 'string') {
+    return app.error('app.os.fileFindRoot', [filename]);
+  }
+
+  var _is_view = ! (app._root.window.appe__control === undefined);
+
+  var cl = app._root.window.location.href;
+  var bp = config.base_path.toString();
+  var rp = config.runtime_path.toString();
+
+  var base = '';
+
+  if (cl.indexOf(rp + '/') != -1) {
+    base += !! _is_view ? '../../' : '../';
+  } else {
+    var bpos;
+
+    bpos = cl.substr(cl.indexOf(bp + '/')).split('/').slice(1, -1);
+    bpos = bpos.length;
+
+    while (bpos--) {
+      base += '../';
+    }
+  }
+
+  return base + filename.toString();
 }
 
 
@@ -2428,15 +2706,15 @@ app.controller.retrieve = function(callback, routine) {
 
 
   var _retrieve = function(fn, schema) {
-    if (typeof fn != 'string' || typeof schema != 'object') {
+    if (typeof fn != 'string' || (schema && typeof schema != 'object')) {
       return app.stop('app.controller.retrieve() > _retrieve', [fn, schema]);
     }
 
-    if (store[fn] && typeof store[fn] === 'object') {
+    if (store[fn] && (typeof store[fn] === 'object' || typeof store[fn] === 'function')) {
       return store[fn];
     }
 
-    store = {};
+    var _data = {};
 
     for (var i in schema) {
       var key = schema[i].toString();
@@ -2446,10 +2724,10 @@ app.controller.retrieve = function(callback, routine) {
         return app.stop('app.controller.retrieve() > _retrieve', 'schema');
       }
 
-      store[key] = obj;
+      _data[key] = obj;
     }
 
-    return store;
+    return _data;
   }
 
 
@@ -2519,7 +2797,7 @@ app.controller.clear = function() {
 /**
  * app.memory
  *
- * Handles persistent storage entries
+ * Handles storage entries
  *
  * available methods:
  *  - set (key <String>, value)
@@ -2534,74 +2812,74 @@ app.memory = {};
 /**
  * app.memory.set
  *
- * Sets persistent storage entry
+ * Sets storage entry
  *
  * @param <String> key
  * @param value
  * @return
  */
 app.memory.set = function(key, value) {
-  return app.utils.storage(true, 'set', key, value);
+  return app.utils.storage(false, 'set', key, value);
 }
 
 
 /**
  * app.memory.get
  *
- * Gets persistent storage entry
+ * Gets storage entry
  *
  * @param <String> key
  * @param value
  * @return
  */
 app.memory.get = function(key) {
-  return app.utils.storage(true, 'get', key);
+  return app.utils.storage(false, 'get', key);
 }
 
 
 /**
  * app.memory.has
  *
- * Checks existence for persistent storage entry by key and match value
+ * Checks existence for storage entry by key and match value
  *
  * @param <String> key
  * @param value
  * @return <Boolean>
  */
 app.memory.has = function(key, value) {
-  return app.utils.storage(true, 'has', key, value);
+  return app.utils.storage(false, 'has', key, value);
 }
 
 
 /**
  * app.memory.del
  *
- * Removes persistent storage entry by key
+ * Removes storage entry by key
  *
  * @param <String> key
  * @return
  */
 app.memory.del = function(key) {
-  return app.utils.storage(true, 'del', key);
+  return app.utils.storage(false, 'del', key);
 }
 
 
 /**
  * app.memory.reset
  *
- * Reset persistent storage
+ * Reset storage
  *
  * @return
  */
 app.memory.reset = function() {
-  return app.utils.storage(true, 'reset');
+  return app.utils.storage(false, 'reset');
 }
 
 
 /**
  * app.store
  *
- * Handles storage entries
+ * Handles persistent storage entries
  *
  * available methods:
  *  - set (key <String>, value)
@@ -2623,59 +2901,59 @@ app.store = {};
  * @return
  */
 app.store.set = function(key, value) {
-  return app.utils.storage(false, 'set', key, value);
+  return app.utils.storage(true, 'set', key, value);
 }
 
 
 /**
  * app.store.get
  *
- * Gets storage entry by key
+ * Gets persistent storage entry by key
  *
  * @param <String> key
  * @return
  */
 app.store.get = function(key) {
-  return app.utils.storage(false, 'get', key);
+  return app.utils.storage(true, 'get', key);
 }
 
 
 /**
  * app.store.has
  *
- * Checks existence for storage entry by key and match value
+ * Checks existence for persistent storage entry by key and match value
  *
  * @param <String> key
  * @param value
  * @return <Boolean>
  */
 app.store.has = function(key, value) {
-  return app.utils.storage(false, 'has', key, value);
+  return app.utils.storage(true, 'has', key, value);
 }
 
 
 /**
  * app.store.del
  *
- * Removes storage entry by key
+ * Removes persistent storage entry by key
  *
  * @param <String> key
  * @return
  */
 app.store.del = function(key) {
-  return app.utils.storage(false, 'del', key);
+  return app.utils.storage(true, 'del', key);
 }
 
 
 /**
  * app.store.reset
  *
- * Reset storage
+ * Reset persistent storage
  *
  * @return
  */
 app.store.reset = function() {
-  return app.utils.storage(false, 'reset');
+  return app.utils.storage(true, 'reset');
 }
 
 
@@ -2688,251 +2966,6 @@ app.start = {};
 
 
 /**
- * app.start.progress
- *
- * Controls the current load status
- *
- * @param <Number> phase
- */
-app.start.progress = function(phase) {
-  var progress_wait = document.getElementById('start-progress-wait');
-  var progress_open = document.getElementById('start-progress-open');
-
-  switch (phase) {
-    case 2:
-      progress_open.setAttribute('style', 'visibility: visible;');
-      progress_wait.setAttribute('style', 'visibility: visible;');
-    break;
-    case 1:
-      progress_open.setAttribute('style', 'visibility: visible;');
-      progress_wait.setAttribute('style', 'visibility: hidden;');
-    break;
-    default:
-      progress_wait.setAttribute('style', 'visibility: visible;');
-      progress_open.setAttribute('style', 'visibility: hidden;');
-  }
-}
-
-
-/**
- * app.start.loadComplete
- *
- * Fires on "start" load complete
- *
- * @global <Object> appe__config
- * @param <String> session_resume
- * @return
- */
-app.start.loadComplete = function(session_resume) {
-  var config = app._root.window.appe__config || app._root.process.env.appe__config;
-
-  if (! config) {
-    return app.stop('app.start.loadComplete');
-  }
-
-  if (config.file && typeof config.file != 'object') {
-    return app.error('app.start.loadComplete', 'config');
-  }
-
-
-  var _app_name = app._runtime.name.toString();
-
-  var schema = config.schema;
-
-  if (typeof schema != 'object') {
-    return app.error('app.start.loadComplete', 'schema');
-  }
-
-  app.start.progress(1);
-
-  if (! session_resume) {
-    return;
-  }
-
-
-  session_resume = config.save_path.toString() + '/' + session_resume; 
-
-
-  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
-
-
-  app.start.attemptLoad(function(loaded) {
-    if (loaded) {
-      app.start.redirect(true);
-    } else {
-      app.start.progress(1);
-    }
-  }, file_heads, session_resume, schema, true);
-}
-
-
-/**
- * app.start.attemptLoad
- *
- * Attemps to load files and scripts, returns to callback
- *
- * @global <Object> appe__config
- * @global <Object> CryptoJS
- * @param <Function> callback
- * @param <String> fn
- * @param <String> file
- * @param <Object> schema
- * @param <Boolean> memoize
- * @return
- */
-app.start.attemptLoad = function(callback, fn, file, schema, memoize) {
-  var config = app._root.window.appe__config || app._root.process.env.appe__config;
-
-  if (! config) {
-    return app.stop('app.start.attemptLoad');
-  }
-
-  var step = true;
-
-  if (config.file && typeof config.file != 'object') {
-    step = app.error('app.start.attemptLoad', 'config');
-  }
-
-  if (! (CryptoJS && CryptoJS.MD5)) {
-    step = app.error('app.start.attemptLoad', 'CryptoJS');
-  }
-
-  if (!! app._runtime.encryption && ! (CryptoJS && CryptoJS.SHA512 && CryptoJS.AES)) {
-    step = app.error('app.start.attemptLoad', 'CryptoJS');
-  }
-
-  if (typeof callback != 'function' || ! fn || typeof fn != 'string' || ! file || typeof file != 'string' || typeof schema != 'object') {
-    step = app.stop('app.start.attemptLoad', [callback, fn, file, schema, memoize]);
-  }
-
-  if (! step) {
-    return callback(false);
-  }
-
-  var _app_name = app._runtime.name.toString();
-
-  fn = fn.toString();
-
-
-  var fbinary = config.file && config.file.binary ? !! config.file.binary : !! app._runtime.binary;
-  var fcompress = config.file && config.file.compress ? !! config.file.compress : !! app._runtime.compression;
-  var fcrypt = config.file && config.file.crypt ? !! config.file.crypt : !! app._runtime.encryption;
-
-
-  if (fcompress) {
-    app.error('app.start.attemptLoad', 'Misleading settings.', 'compression', true);
-
-    return callback(false);
-  }
-
-  var file_json_checksum = null;
-
-
-  var _decrypt = function(source, cb) {
-    var secret = null;
-
-    if (app._runtime.secret && typeof app._runtime.secret === 'string' && app._runtime.secret in app._root.document) {
-      secret = app._root.document[app._runtime.secret];
-    } else {
-      return cb('runtime');
-    }
-
-    try {
-      source = CryptoJS.AES.decrypt(source, secret, { mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
-      source = source.toString(CryptoJS.enc.Utf8);
-
-      if (! source) { throw 'decryption'; }
-
-      cb(false, source);
-    } catch (err) {
-      cb(err);
-    }
-  }
-
-  var _store = function(source, cb) {
-    // check file source before store
-    if (! app.checkFile(source, file_json_checksum)) {
-      return cb('check');
-    }
-
-    for (var i in schema) {
-      var key = schema[i].toString();
-
-      if (key in source === false) {
-        return cb('schema');
-      }
-
-      app.store.set(fn + '_' + key, source[key]);
-    }
-
-    cb(false, true);
-  }
-
-  var _attempt = function(source, cb) {
-    if (fn in app._root.window === false) {
-      app.error('app.start.attemptLoad() > _attempt', 'source');
-
-      return callback(false);
-    }
-
-    try {
-      var source = app._root.window[fn];
-
-      if (fcrypt) {
-        _decrypt(source, function(err, source) {
-          if (err) { throw err; }
-
-          if (! memoize) {
-            return callback(false);
-          }
-
-          app.os.generateJsonChecksum(function(checksum) {
-            if (! checksum) { throw null; }
-
-            file_json_checksum = checksum;
-
-            source = JSON.parse(source);
-
-            _store(source, function(err, loaded) {
-              if (err) { throw err; }
-
-              callback(loaded);
-            });
-          }, source);
-        });
-      } else if (memoize) {
-        var _source = JSON.stringify(source);
-
-        app.os.generateJsonChecksum(function(checksum) {
-          if (! checksum) { throw null; }
-
-          file_json_checksum = checksum;
-
-          _store(source, function(err, loaded) {
-            if (err) { throw err; }
-
-            callback(loaded);
-          });
-        }, _source);
-      } else {
-        callback(false);
-      }
-    } catch (err) {
-      app.error('app.start.attemptLoad() > _attempt', err);
-
-      callback(loaded);
-    }
-  }
-
-
-  var loaded = false;
-  var max_attempts = parseInt(config.open_attempts);
-
-  app.os.scriptOpen(_attempt, file, fn, max_attempts);
-}
-
-
-/**
  * app.start.redirect
  *
  * Tries to redirect after a delay
@@ -2940,15 +2973,15 @@ app.start.attemptLoad = function(callback, fn, file, schema, memoize) {
  * @param <Boolean> loaded
  */
 app.start.redirect = function(loaded) {
-  var _wait = function() {
-    app.start.progress(0);
+  app.start.progress(0);
 
+  var _wait = function() {
     app.redirect();
 
-    this.clearTimeout();
+    clearTimeout(waiter);
   }
 
-  setTimeout(_wait, 1000);
+  var waiter = setTimeout(_wait, 1000);
 }
 
 
@@ -3057,28 +3090,6 @@ app.start.load = function() {
   }
 
 
-  var _asyncAttemptLoadAux = function(cb) {
-    var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
-
-    if (routine.length) {
-      var i = routine.length;
-
-      while (i--) {
-        app.start.attemptLoad(function(aux_loaded) {
-          if (! aux_loaded) {
-            return cb('aux');
-          }
-
-          if (! i) {
-            return cb(false, true)
-          }
-        }, routine[i].fn, routine[i].file, routine[i].schema, routine[i].memoize);
-      }
-    } else {
-      cb(false, true);
-    }
-  }
-
   var _localize = function() {
     var localize_elements = app._root.document.querySelectorAll('[data-localize]');
 
@@ -3104,6 +3115,19 @@ app.start.load = function() {
     }
   }
 
+  var _complete = function(routine) {
+    /**
+     * start.loadComplete hook
+     *
+     * @param <Object> routine
+     */
+    if (start && typeof start == 'object' && 'loadComplete' in start && typeof start.loadComplete === 'function') {
+      start.loadComplete(routine);
+    } else {
+      app.start.loadComplete(routine);
+    }
+  }
+
   var _session = function() {
     if ('secret_passphrase' in _config) {
       delete _config.secret_passphrase;
@@ -3113,7 +3137,7 @@ app.start.load = function() {
       /**
        * start.alternative hook
        */
-      if (!! _config.alt && start && 'alternative' in start && typeof start.alternative === 'function') {
+      if (!! _config.alt && start && typeof start == 'object' && 'alternative' in start && typeof start.alternative === 'function') {
         start.alternative();
       } else if (!! _config.alt) {
         app.start.alternative();
@@ -3124,27 +3148,113 @@ app.start.load = function() {
       return;
     }
 
-    app.controller.setTitle(_config.app_name);
+    app.controller.setTitle(config.app_name);
+
+    // load extensions
+    var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
+    var tasks = routine.length || 1;
+
+    app.asyncLoadAux(function(loaded) {
+      if (! loaded) {
+        return app.stop('app.start.load', 'aux');
+      }
+
+      tasks--;
+
+      if (! tasks) {
+        _complete(routine);
+      }
+    }, routine, true);
 
     if (app._root.document.native == undefined) {
       _layout();
     }
-
-    // try to resume previous session and file
-    var session_resume = app.resume(_config);
-
-    // try to load extensions
-    _asyncAttemptLoadAux(function(err, loaded) {
-      if (err) {
-        return app.stop('app.start.load', 'aux');
-      }
-
-      app.start.loadComplete(session_resume);
-    })
   }
 
 
   app.session(_session, _config);
+}
+
+
+/**
+ * app.start.progress
+ *
+ * Controls the current load status
+ *
+ * @param <Number> phase
+ */
+app.start.progress = function(phase) {
+  var progress_wait = document.getElementById('start-progress-wait');
+  var progress_open = document.getElementById('start-progress-open');
+
+  switch (phase) {
+    case 2:
+      progress_open.setAttribute('style', 'visibility: visible;');
+      progress_wait.setAttribute('style', 'visibility: visible;');
+    break;
+    case 1:
+      progress_open.setAttribute('style', 'visibility: visible;');
+      progress_wait.setAttribute('style', 'visibility: hidden;');
+    break;
+    default:
+      progress_wait.setAttribute('style', 'visibility: visible;');
+      progress_open.setAttribute('style', 'visibility: hidden;');
+  }
+}
+
+
+/**
+ * app.start.loadComplete
+ *
+ * Fires on "start" load complete
+ *
+ * @global <Object> appe__config
+ * @param <Object> routine
+ * @return
+ */
+app.start.loadComplete = function(routine) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.start.loadComplete');
+  }
+
+  if (config.file && typeof config.file != 'object') {
+    return app.error('app.start.loadComplete', 'config');
+  }
+
+  var _app_name = app._runtime.name.toString();
+
+  var schema = config.schema;
+
+  if (typeof schema != 'object') {
+    return app.error('app.start.loadComplete', 'schema');
+  }
+
+
+  // try to resume previous session and file
+  var session_resume = app.resume(config);
+
+
+  app.start.progress(1);
+
+  if (! session_resume) {
+    return;
+  }
+
+
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+
+
+  app.asyncAttemptLoad(function(loaded) {
+    console.log(loaded);
+
+    if (loaded) {
+      app.start.redirect(true);
+    } else {
+      app.start.progress(1);
+    }
+  }, true, file_heads, session_resume, schema, true);
 }
 
 
@@ -3354,7 +3464,7 @@ app.main.handle = function(e) {
    * @param <String> event
    * @param <Object> ctl
    */
-  if (main && 'handle' in main && typeof main.handle === 'function') {
+  if (main && typeof main == 'object' && 'handle' in main && typeof main.handle === 'function') {
     return main.handle(self, self.event, self.ctl);
   } else {
     return self[self.event].apply(self);
@@ -3809,29 +3919,6 @@ app.main.action.prototype.menu = function(element, event, menu, toggler) {
 
 
 /**
- * app.main.setup
- *
- * Setup "main" data
- *
- * @global <Object> appe__main
- */
-app.main.setup = function() {
-  var main = app._root.server.appe__main;
-
-  /**
-   * main.setup hook
-   *
-   * @param <Object> data
-   */
-  if (main && 'setup' in main && typeof main.setup === 'function') {
-    main.setup(app.data());
-  }
-
-  app.main.control();
-}
-
-
-/**
  * app.main.load
  *
  * Default "main" load function
@@ -3902,29 +3989,48 @@ app.main.load = function() {
     }
   }
 
+  var _complete = function(routine) {
+    /*
+     * main.loadComplete hook
+     *
+     * @param <Object> routine
+     */
+    if (main && 'loadComplete' in main && typeof main.loadComplete === 'function') {
+      main.loadComplete(routine);
+    } else {
+      app.main.loadComplete(routine);
+    }
+  }
+
   var _session = function() {
     if ('secret_passphrase' in _config) {
       delete _config.secret_passphrase;
     }
 
-    // try to resume previous session
-    app.resume(_config, true);
+    app.controller.setTitle(config.app_name);
 
-    // try to load extensions
+    // load extensions
     var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
-    routine.push({ file: '', fn: app._runtime.name, schema: _config.schema });
+    var tasks = routine.length || 1;
 
-    app.controller.retrieve(app.main.setup, routine);
+    app.asyncLoadAux(function(loaded) {
+      if (! loaded) {
+        return app.stop('app.main.load', 'aux');
+      }
 
-    app.controller.setTitle(_config.app_name);
+      tasks--;
 
-
-    app.utils.addEvent('message', app._root.window, app.main.handle);
-
+      if (! tasks) {
+        _complete(routine);
+      }
+    }, routine, false);
 
     if (app._root.document.native == undefined) {
       _layout();
     }
+
+    // ready to receive message from "view"
+    app.utils.addEvent('message', app._root.window, app.main.handle);
   }
 
 
@@ -3948,6 +4054,56 @@ app.main.unload = function() {
   app.memory.set('save_reminded', true);
 
   return true;
+}
+
+
+/**
+ * app.main.loadComplete
+ *
+ * Fires on "main" load complete
+ *
+ * @global <Object> appe__config
+ * @param <Object> routine
+ * @return
+ */
+app.main.loadComplete = function(routine) {
+  console.log('app.main.loadComplete');
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.main.loadComplete');
+  }
+
+  // try to resume previous session
+  app.resume(config, true);
+
+  routine.push({ fn: app._runtime.name, schema: config.schema });
+
+  // retrieve previous session store and load extensions objects
+  app.controller.retrieve(app.main.setup, routine);
+}
+
+
+/**
+ * app.main.setup
+ *
+ * Setup "main" data
+ *
+ * @global <Object> appe__main
+ */
+app.main.setup = function() {
+  var main = app._root.server.appe__main;
+
+  /**
+   * main.setup hook
+   *
+   * @param <Object> data
+   */
+  if (main && typeof main == 'object' && 'setup' in main && typeof main.setup === 'function') {
+    main.setup(app.data());
+  }
+
+  app.main.control();
 }
 
 
@@ -4375,7 +4531,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
    * @param <Object> data[id]
    * @param <Object> args
    */
-  if ('renderRow' in control && typeof control.renderRow === 'function') {
+  if (control && typeof control == 'object' && 'renderRow' in control && typeof control.renderRow === 'function') {
     Array.prototype.forEach.call(order, function(id) {
       var row = control.renderRow(trow_tpl, id, _data[id], args);
 
@@ -4418,7 +4574,7 @@ app.view.control.prototype.fillForm = function(form, data) {
    * @param <Object> _data
    * @param <Object> _args
    */
-  if ('fillForm' in control && typeof control.fillForm === 'function') {
+  if (control && typeof control == 'object' && 'fillForm' in control && typeof control.fillForm === 'function') {
     control.fillForm(_data, args);
 
     this._is_localized && this.localize(form);
@@ -5045,7 +5201,7 @@ app.view.handle = function() {
    *
    * @param <Object> data
    */
-  if ('handle' in control && typeof control.handle === 'function') {
+  if (control && typeof control == 'object' && 'handle' in control && typeof control.handle === 'function') {
     control.handle(app.data());
   }
 
@@ -5099,7 +5255,7 @@ app.view.send = function(ctl) {
 
   try {
     if (!! app._runtime.debug) {
-      console.info('app.view.send', ctl);
+      console.info('app.view.send', '\t', ctl);
     }
 
     ctl = JSON.stringify(ctl);
@@ -5338,20 +5494,39 @@ app.view.load = function() {
     }
   }
 
+  var _complete = function(routine) {
+    /**
+     * control.loadComplete hook
+     *
+     * @param <Object> routine
+     */
+    if (control && typeof control == 'object' && 'loadComplete' in control && typeof control.loadComplete === 'function') {
+      control.loadComplete(routine);
+    } else {
+      app.view.loadComplete(routine);
+    }
+  }
+
   var _session = function() {
     if ('secret_passphrase' in _config) {
       delete _config.secret_passphrase;
     }
 
-    // try to resume previous session
-    app.resume(_config, false);
-
-    // try to load extensions
+    // load extensions
     var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
-    routine.push({ fn: app._runtime.name, schema: _config.schema });
+    var tasks = routine.length || 1;
 
-    app.controller.retrieve(app.view.handle, routine);
+    app.asyncLoadAux(function(loaded) {
+      if (! loaded) {
+        return app.stop('app.view.load', 'aux');
+      }
 
+      tasks--;
+
+      if (! tasks) {
+        _complete(routine);
+      }
+    }, routine, false);
 
     if (app._root.document.native == undefined) {
       _layout();
@@ -5393,6 +5568,34 @@ app.view.unload = function() {
 
   return;
 }
+
+
+/**
+ * app.view.loadComplete
+ *
+ * Fires on "view" load complete
+ *
+ * @global <Object> appe__config
+ * @param <Object> routine
+ * @return
+ */
+app.view.loadComplete = function(routine) {
+  console.log('app.view.loadComplete');
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.view.loadComplete');
+  }
+
+  // try to resume previous session
+  app.resume(config, false);
+
+  routine.push({ fn: app._runtime.name, schema: config.schema });
+
+  // retrieve previous session store and load extensions objects
+  app.controller.retrieve(app.view.handle, routine);
+}
+
 
 
 /**
@@ -5568,7 +5771,7 @@ app.layout.renderSelectOptions = function(select_id, data, selected) {
  * @param <String> event
  * @param <ElementNode> toggler
  * @param <ElementNode> dropdown
- * @param <Function> callback
+ * @param <Function> callback (e, dropdown)
  * @return <Function>
  */
 app.layout.dropdown = function(event, toggler, dropdown, callback) {
@@ -5603,7 +5806,7 @@ app.layout.dropdown = function(event, toggler, dropdown, callback) {
  */
 app.layout.dropdown.prototype.open = function(e, dropdown, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.dropdown.prototype.open', (e && e.target), e);
+    console.info('app.layout.dropdown.prototype.open', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -5638,7 +5841,7 @@ app.layout.dropdown.prototype.open = function(e, dropdown, callback) {
  */
 app.layout.dropdown.prototype.close = function(e, dropdown, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.dropdown.prototype.close', (e && e.target), e);
+    console.info('app.layout.dropdown.prototype.close', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -5673,7 +5876,7 @@ app.layout.dropdown.prototype.close = function(e, dropdown, callback) {
  */
 app.layout.dropdown.prototype.toggle = function(e, dropdown, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.dropdown.prototype.toggle', (e && e.target), e);
+    console.info('app.layout.dropdown.prototype.toggle', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -5709,6 +5912,7 @@ app.layout.dropdown.prototype.toggle = function(e, dropdown, callback) {
  * @param <String> event
  * @param <ElementNode> element
  * @param <ElementNode> collapsible
+ * @param <Function> callback  (e, collapsible)
  * @return <Function>
  */
 app.layout.collapse = function(event, toggler, collapsible, callback) {
@@ -5742,7 +5946,7 @@ app.layout.collapse = function(event, toggler, collapsible, callback) {
  */
 app.layout.collapse.prototype.open = function(e, collapsible, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.open', (e && e.target), e);
+    console.info('app.layout.collapse.prototype.open', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -5777,7 +5981,7 @@ app.layout.collapse.prototype.open = function(e, collapsible, callback) {
  */
 app.layout.collapse.prototype.close = function(e, collapsible, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.close', (e && e.target), e);
+    console.info('app.layout.collapse.prototype.close', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -5812,7 +6016,7 @@ app.layout.collapse.prototype.close = function(e, collapsible, callback) {
  */
 app.layout.collapse.prototype.toggle = function(e, collapsible, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.collapse.prototype.toggle', (e && e.target), e);
+    console.info('app.layout.collapse.prototype.toggle', '\t', (e && e.target), '\t', e);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -5849,7 +6053,7 @@ app.layout.collapse.prototype.toggle = function(e, collapsible, callback) {
  * @param <String> event
  * @param <ElementNode> row
  * @param <String> row_selector - .draggable
- * @param <Function> callback  ( event, current, e, row )
+ * @param <Function> callback (e, row)
  * @return <Function>
  */
 app.layout.draggable = function(event, row, row_selector, callback) {
@@ -5884,7 +6088,7 @@ app.layout.draggable = function(event, row, row_selector, callback) {
  */
 app.layout.draggable.prototype.start = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.start', e, row._draggable);
+    console.info('app.layout.draggable.prototype.start', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.stopPropagation) && e.stopPropagation();
@@ -5914,7 +6118,7 @@ app.layout.draggable.prototype.start = function(e, row, callback) {
  */
 app.layout.draggable.prototype.over = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.over', e, row._draggable);
+    console.info('app.layout.draggable.prototype.over', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -5937,7 +6141,7 @@ app.layout.draggable.prototype.over = function(e, row, callback) {
  */
 app.layout.draggable.prototype.enter = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.enter', e, row._draggable);
+    console.info('app.layout.draggable.prototype.enter', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -5960,7 +6164,7 @@ app.layout.draggable.prototype.enter = function(e, row, callback) {
  */
 app.layout.draggable.prototype.leave = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.leave', e, row._draggable);
+    console.info('app.layout.draggable.prototype.leave', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.preventDefault) && e.preventDefault();
@@ -5983,7 +6187,7 @@ app.layout.draggable.prototype.leave = function(e, row, callback) {
  */
 app.layout.draggable.prototype.end = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.end', e, row._draggable);
+    console.info('app.layout.draggable.prototype.end', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.stopPropagation) && e.stopPropagation();
@@ -6012,7 +6216,7 @@ app.layout.draggable.prototype.end = function(e, row, callback) {
  */
 app.layout.draggable.prototype.drop = function(e, row, callback) {
   if (!! app._runtime.debug) {
-    console.info('app.layout.draggable.prototype.drop', e, row._draggable);
+    console.info('app.layout.draggable.prototype.drop', '\t', e, '\t', row._draggable);
   }
 
   (!! e && e.stopPropagation) && e.stopPropagation();
@@ -6188,7 +6392,9 @@ app.utils.system = function(purpose) {
     system = _ssn();
   // maybe unsupported serverside
   } else {
-    return app.error('app.utils.system', 'This system is not supported.')
+    system = _ssn();
+
+    return app.error('app.utils.system', 'This system is not supported.', system);
   }
 
 

@@ -114,7 +114,9 @@ app.utils.system = function(purpose) {
     system = _ssn();
   // maybe unsupported serverside
   } else {
-    return app.error('app.utils.system', 'This system is not supported.')
+    system = _ssn();
+
+    return app.error('app.utils.system', 'This system is not supported.', system);
   }
 
 

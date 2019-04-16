@@ -1,7 +1,7 @@
 /**
  * app.memory
  *
- * Handles persistent storage entries
+ * Handles storage entries
  *
  * available methods:
  *  - set (key <String>, value)
@@ -16,65 +16,65 @@ app.memory = {};
 /**
  * app.memory.set
  *
- * Sets persistent storage entry
+ * Sets storage entry
  *
  * @param <String> key
  * @param value
  * @return
  */
 app.memory.set = function(key, value) {
-  return app.utils.storage(true, 'set', key, value);
+  return app.utils.storage(false, 'set', key, value);
 }
 
 
 /**
  * app.memory.get
  *
- * Gets persistent storage entry
+ * Gets storage entry
  *
  * @param <String> key
  * @param value
  * @return
  */
 app.memory.get = function(key) {
-  return app.utils.storage(true, 'get', key);
+  return app.utils.storage(false, 'get', key);
 }
 
 
 /**
  * app.memory.has
  *
- * Checks existence for persistent storage entry by key and match value
+ * Checks existence for storage entry by key and match value
  *
  * @param <String> key
  * @param value
  * @return <Boolean>
  */
 app.memory.has = function(key, value) {
-  return app.utils.storage(true, 'has', key, value);
+  return app.utils.storage(false, 'has', key, value);
 }
 
 
 /**
  * app.memory.del
  *
- * Removes persistent storage entry by key
+ * Removes storage entry by key
  *
  * @param <String> key
  * @return
  */
 app.memory.del = function(key) {
-  return app.utils.storage(true, 'del', key);
+  return app.utils.storage(false, 'del', key);
 }
 
 
 /**
  * app.memory.reset
  *
- * Reset persistent storage
+ * Reset storage
  *
  * @return
  */
 app.memory.reset = function() {
-  return app.utils.storage(true, 'reset');
+  return app.utils.storage(false, 'reset');
 }

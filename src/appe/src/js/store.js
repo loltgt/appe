@@ -1,7 +1,7 @@
 /**
  * app.store
  *
- * Handles storage entries
+ * Handles persistent storage entries
  *
  * available methods:
  *  - set (key <String>, value)
@@ -23,57 +23,57 @@ app.store = {};
  * @return
  */
 app.store.set = function(key, value) {
-  return app.utils.storage(false, 'set', key, value);
+  return app.utils.storage(true, 'set', key, value);
 }
 
 
 /**
  * app.store.get
  *
- * Gets storage entry by key
+ * Gets persistent storage entry by key
  *
  * @param <String> key
  * @return
  */
 app.store.get = function(key) {
-  return app.utils.storage(false, 'get', key);
+  return app.utils.storage(true, 'get', key);
 }
 
 
 /**
  * app.store.has
  *
- * Checks existence for storage entry by key and match value
+ * Checks existence for persistent storage entry by key and match value
  *
  * @param <String> key
  * @param value
  * @return <Boolean>
  */
 app.store.has = function(key, value) {
-  return app.utils.storage(false, 'has', key, value);
+  return app.utils.storage(true, 'has', key, value);
 }
 
 
 /**
  * app.store.del
  *
- * Removes storage entry by key
+ * Removes persistent storage entry by key
  *
  * @param <String> key
  * @return
  */
 app.store.del = function(key) {
-  return app.utils.storage(false, 'del', key);
+  return app.utils.storage(true, 'del', key);
 }
 
 
 /**
  * app.store.reset
  *
- * Reset storage
+ * Reset persistent storage
  *
  * @return
  */
 app.store.reset = function() {
-  return app.utils.storage(false, 'reset');
+  return app.utils.storage(true, 'reset');
 }

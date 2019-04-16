@@ -204,7 +204,7 @@ app.main.handle = function(e) {
    * @param <String> event
    * @param <Object> ctl
    */
-  if (main && 'handle' in main && typeof main.handle === 'function') {
+  if (main && typeof main == 'object' && 'handle' in main && typeof main.handle === 'function') {
     return main.handle(self, self.event, self.ctl);
   } else {
     return self[self.event].apply(self);
@@ -659,29 +659,6 @@ app.main.action.prototype.menu = function(element, event, menu, toggler) {
 
 
 /**
- * app.main.setup
- *
- * Setup "main" data
- *
- * @global <Object> appe__main
- */
-app.main.setup = function() {
-  var main = app._root.server.appe__main;
-
-  /**
-   * main.setup hook
-   *
-   * @param <Object> data
-   */
-  if (main && 'setup' in main && typeof main.setup === 'function') {
-    main.setup(app.data());
-  }
-
-  app.main.control();
-}
-
-
-/**
  * app.main.load
  *
  * Default "main" load function
@@ -752,29 +729,48 @@ app.main.load = function() {
     }
   }
 
+  var _complete = function(routine) {
+    /*
+     * main.loadComplete hook
+     *
+     * @param <Object> routine
+     */
+    if (main && 'loadComplete' in main && typeof main.loadComplete === 'function') {
+      main.loadComplete(routine);
+    } else {
+      app.main.loadComplete(routine);
+    }
+  }
+
   var _session = function() {
     if ('secret_passphrase' in _config) {
       delete _config.secret_passphrase;
     }
 
-    // try to resume previous session
-    app.resume(_config, true);
+    app.controller.setTitle(config.app_name);
 
-    // try to load extensions
+    // load extensions
     var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
-    routine.push({ file: '', fn: app._runtime.name, schema: _config.schema });
+    var tasks = routine.length || 1;
 
-    app.controller.retrieve(app.main.setup, routine);
+    app.asyncLoadAux(function(loaded) {
+      if (! loaded) {
+        return app.stop('app.main.load', 'aux');
+      }
 
-    app.controller.setTitle(_config.app_name);
+      tasks--;
 
-
-    app.utils.addEvent('message', app._root.window, app.main.handle);
-
+      if (! tasks) {
+        _complete(routine);
+      }
+    }, routine, false);
 
     if (app._root.document.native == undefined) {
       _layout();
     }
+
+    // ready to receive message from "view"
+    app.utils.addEvent('message', app._root.window, app.main.handle);
   }
 
 
@@ -798,4 +794,54 @@ app.main.unload = function() {
   app.memory.set('save_reminded', true);
 
   return true;
+}
+
+
+/**
+ * app.main.loadComplete
+ *
+ * Fires on "main" load complete
+ *
+ * @global <Object> appe__config
+ * @param <Object> routine
+ * @return
+ */
+app.main.loadComplete = function(routine) {
+  console.log('app.main.loadComplete');
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.main.loadComplete');
+  }
+
+  // try to resume previous session
+  app.resume(config, true);
+
+  routine.push({ fn: app._runtime.name, schema: config.schema });
+
+  // retrieve previous session store and load extensions objects
+  app.controller.retrieve(app.main.setup, routine);
+}
+
+
+/**
+ * app.main.setup
+ *
+ * Setup "main" data
+ *
+ * @global <Object> appe__main
+ */
+app.main.setup = function() {
+  var main = app._root.server.appe__main;
+
+  /**
+   * main.setup hook
+   *
+   * @param <Object> data
+   */
+  if (main && typeof main == 'object' && 'setup' in main && typeof main.setup === 'function') {
+    main.setup(app.data());
+  }
+
+  app.main.control();
 }

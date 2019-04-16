@@ -422,7 +422,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
    * @param <Object> data[id]
    * @param <Object> args
    */
-  if ('renderRow' in control && typeof control.renderRow === 'function') {
+  if (control && typeof control == 'object' && 'renderRow' in control && typeof control.renderRow === 'function') {
     Array.prototype.forEach.call(order, function(id) {
       var row = control.renderRow(trow_tpl, id, _data[id], args);
 
@@ -465,7 +465,7 @@ app.view.control.prototype.fillForm = function(form, data) {
    * @param <Object> _data
    * @param <Object> _args
    */
-  if ('fillForm' in control && typeof control.fillForm === 'function') {
+  if (control && typeof control == 'object' && 'fillForm' in control && typeof control.fillForm === 'function') {
     control.fillForm(_data, args);
 
     this._is_localized && this.localize(form);
@@ -1092,7 +1092,7 @@ app.view.handle = function() {
    *
    * @param <Object> data
    */
-  if ('handle' in control && typeof control.handle === 'function') {
+  if (control && typeof control == 'object' && 'handle' in control && typeof control.handle === 'function') {
     control.handle(app.data());
   }
 
@@ -1146,7 +1146,7 @@ app.view.send = function(ctl) {
 
   try {
     if (!! app._runtime.debug) {
-      console.info('app.view.send', ctl);
+      console.info('app.view.send', '\t', ctl);
     }
 
     ctl = JSON.stringify(ctl);
@@ -1385,20 +1385,39 @@ app.view.load = function() {
     }
   }
 
+  var _complete = function(routine) {
+    /**
+     * control.loadComplete hook
+     *
+     * @param <Object> routine
+     */
+    if (control && typeof control == 'object' && 'loadComplete' in control && typeof control.loadComplete === 'function') {
+      control.loadComplete(routine);
+    } else {
+      app.view.loadComplete(routine);
+    }
+  }
+
   var _session = function() {
     if ('secret_passphrase' in _config) {
       delete _config.secret_passphrase;
     }
 
-    // try to resume previous session
-    app.resume(_config, false);
-
-    // try to load extensions
+    // load extensions
     var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
-    routine.push({ fn: app._runtime.name, schema: _config.schema });
+    var tasks = routine.length || 1;
 
-    app.controller.retrieve(app.view.handle, routine);
+    app.asyncLoadAux(function(loaded) {
+      if (! loaded) {
+        return app.stop('app.view.load', 'aux');
+      }
 
+      tasks--;
+
+      if (! tasks) {
+        _complete(routine);
+      }
+    }, routine, false);
 
     if (app._root.document.native == undefined) {
       _layout();
@@ -1440,3 +1459,31 @@ app.view.unload = function() {
 
   return;
 }
+
+
+/**
+ * app.view.loadComplete
+ *
+ * Fires on "view" load complete
+ *
+ * @global <Object> appe__config
+ * @param <Object> routine
+ * @return
+ */
+app.view.loadComplete = function(routine) {
+  console.log('app.view.loadComplete');
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.view.loadComplete');
+  }
+
+  // try to resume previous session
+  app.resume(config, false);
+
+  routine.push({ fn: app._runtime.name, schema: config.schema });
+
+  // retrieve previous session store and load extensions objects
+  app.controller.retrieve(app.view.handle, routine);
+}
+

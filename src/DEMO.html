@@ -51,52 +51,9 @@
 
 
 <script type="text/javascript">
-//TODO firefox storage
 var start = appe__start = {};
 
-
-// DEMO
-start.load = function() {
-  var config = app._root.server.appe__config;
-
-  if (! config) {
-    return app.stop('start.load');
-  }
-
-
-  config.compression = false;
-  config.encryption = false;
-  config.binary = false;
-
-  config.base_path = '../' + config.base_path.toString();
-  config.save_path = '../' + config.save_path.toString();
-
-  if ('localStorage' in app._root.window === false) {
-    app._runtime.storage = 'sessionStorage';
-  } else if ('sessionStorage' in app._root.window === false) {
-    app._runtime.storage = 'localStorage';
-  } else if (app.utils.system('navigator') === 'safari') {
-    app._runtime.storage = 'sessionStorage';
-  } else {
-    app._runtime.storage = 'localStorage';
-  }
-
-
-  var _demo_file = app.utils.base64('encode', 'demo_save_2019-03-29_14-29-42_1.js');
-  var _demo_session = app.utils.base64('encode', app.utils.dateFormat(true, 'Q'));
-
-  app.utils.cookie('set', 'last_opened_file', _demo_file);
-  app.utils.cookie('set', 'last_session', _demo_session);
-
-  app.memory.set('last_opened_file', _demo_file);
-  app.memory.set('last_session', _demo_session);
-
-
-  app.start.load();
-}
-
-
-app.load(start.load);
+app.load(app.start.load);
 </script>
 </body>
 </html>
