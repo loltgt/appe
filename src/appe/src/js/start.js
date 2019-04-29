@@ -29,7 +29,7 @@ app.start.redirect = function(loaded) {
 /**
  * app.start.alternative
  *
- * Display messages with info and alternatives to help to execute app 
+ * Displays message with info and alternatives to help to execute app 
  *
  * @global <Object> appe__config
  * @return
@@ -220,7 +220,7 @@ app.start.load = function() {
 /**
  * app.start.progress
  *
- * Controls the current load status
+ * Displays the current loader status
  *
  * @param <Number> phase
  */

@@ -66,7 +66,6 @@
 <script type="text/javascript" src="assets/js/lib/pako/pako.min.js" async defer></script>
 
 <script type="text/javascript" src="config.js"></script>
-<script type="text/javascript" src="locale.js"></script>
 
 
 <script type="text/javascript">
@@ -98,90 +97,6 @@ main.handle = function(handler, event, ctl) {
   _events[event]();
 }
 
-
-
-main.setup = function(data) {
-  var data_categories = {
-    "1": {
-      "title": "Dinosaurs",
-      "types": {
-        "abelisauridae": "Abelisauridae",
-        "allosauridae": "Allosauridae",
-        "ankylosauridae": "Ankylosauridae",
-        "brachiosauridae": "Brachiosauridae",
-        "ceratopsidae": "Ceratopsidae",
-        "ceratosauridae": "Ceratosauridae",
-        "compsognathidae": "Compsognathidae",
-        "dilophosauridae": "Dilophosauridae",
-        "dimorphodontidae": "Dimorphodontidae",
-        "diplodocidae": "Diplodocidae",
-        "dromaeosauridae": "Dromaeosauridae",
-        "hadrosauridae": "Hadrosauridae",
-        "mamenchisauridae": "Mamenchisauridae",
-        "mosasauridae": "Mosasauridae",
-        "ornithomimidae": "Ornithomimidae",
-        "pachycephalosauridae": "Pachycephalosauridae",
-        "pteranodontidae": "Pteranodontidae",
-        "spinosauridae": "Spinosauridae",
-        "stegosauridae": "Stegosauridae",
-        "tyrannosauridae": "Tyrannosauridae",
-        "hybrid": "Hybrid"
-      }
-    }
-  };
-
-  ! app.memory.has('archive_id') && app.memory.set('archive_id', 1);
-
-  ! app.memory.has('demo_categories') && app.store.set('demo_categories', data_categories);
-
-  app.memory.set('category_id', 1);
-
-
-
-  // populate with random data
-
-  var data_archive = data['archive'] || {};
-  var data_categories = data['categories'] || {};
-
-  var __data = Object.keys(data_archive).length;
-
-  if (! __data) { return; }
-
-  var archive_id = app.memory.get('archive_id');
-  var category_id = app.memory.get('category_id');
-
-  var archive_items = data_archive[archive_id][category_id].items;
-
-  Array.prototype.forEach.call(Object.keys(archive_items), function(id) {
-    if (! archive_items[id].custom) {
-      archive_items[id].custom = {};
-    }
-    if (! archive_items[id].pop) {
-      archive_items[id].pop = {};
-    }
-
-    archive_items[id].custom['1'] = archive_items[id].custom['1'] != undefined ? archive_items[id].custom['1'] : (Math.round(Math.random() * 10) < 5 ? true : false);
-    archive_items[id].custom['2'] = archive_items[id].custom['2'] != undefined ? archive_items[id].custom['2'] : (Math.round(Math.random() * 10) > 5 ? true : false);
-    archive_items[id].pop['avg'] = archive_items[id].pop['avg'] != undefined ? archive_items[id].pop['avg'] : Math.round(Math.random(0).toExponential() * 10);
-    archive_items[id].pop['movies'] = archive_items[id].pop['movies'] != undefined ? archive_items[id].pop['movies'] : Math.floor(Math.random(1).toExponential() * 100);
-    archive_items[id].pop['toyes'] = archive_items[id].pop['toyes'] != undefined ? archive_items[id].pop['toyes'] : Math.floor(Math.random(2).toExponential() * 100);
-    archive_items[id].pop['books'] = archive_items[id].pop['books'] != undefined ? archive_items[id].pop['books'] : Math.floor(Math.random(3).toExponential() * 100);
-    archive_items[id].awards = archive_items[id].awards != undefined ? archive_items[id].awards : Math.ceil(Math.random(new Date(archive_items[id].date).getTime()) * 1000);
-
-    if (! archive_items[id].pop.total) {
-      archive_items[id].pop.total  = 0;
-      archive_items[id].pop.total += archive_items[id].pop['avg'];
-      archive_items[id].pop.total += archive_items[id].pop['movies'];
-      archive_items[id].pop.total += archive_items[id].pop['toyes'];
-      archive_items[id].pop.total += archive_items[id].pop['books'];
-    }
-  });
-
-  app.store.set('demo_archive', data_archive);
-
-
-
-}
 
 
 

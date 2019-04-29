@@ -74,7 +74,7 @@ function fndlci($source, $token, $token_name) {
 function pcbbl($line, $args = null) {
 	$lc = '';
 
-	$line = preg_replace('/^[\s\s]\s/', '', $line);
+	$line = preg_replace('/^[\s\s]+\s/', '', $line);
 
 	if (isset($line[0]) && $line[0] === '@')
 		$lc = substr($line, 1, (($s = strpos($line, ' ')) ? ($s - 1) : strlen($line)));

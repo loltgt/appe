@@ -16,7 +16,7 @@ app.store = {};
 /**
  * app.store.set
  *
- * Sets storage entry
+ * Sets persistent storage entry
  *
  * @param <String> key
  * @param value
@@ -70,7 +70,7 @@ app.store.del = function(key) {
 /**
  * app.store.reset
  *
- * Reset persistent storage
+ * Resets persistent storage
  *
  * @return
  */

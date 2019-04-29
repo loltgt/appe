@@ -367,6 +367,8 @@ app.session = function(callback, config, target) {
  *
  * Resumes session, returns last opened file
  *
+ * //TODO FIX
+ *
  * @param <Object> config
  * @param <Boolean> target
  * @return <String> session_resume
@@ -1067,6 +1069,8 @@ app.asyncLoadAux = function(callback, routine, resume_session) {
  *
  * App localization
  *
+ * //TODO implement
+ *
  * @global <Object> appe__locale
  * @param <String> to_translate
  * @param <String> context
@@ -1194,7 +1198,7 @@ app.i18n = function(to_translate, context, to_replace) {
 /**
  * app.debug
  *
- * Utility debug, returns boolean
+ * Utility debug
  *
  * @param <Object> source
  * @return <Boolean>
@@ -1207,7 +1211,7 @@ app.debug = function() {
 /**
  * app.stop
  *
- * Stops app execution
+ * Stops the app execution
  *
  * @global <Object> appe__main
  * @param <String> arg0  ( msg | fn )
@@ -2867,7 +2871,7 @@ app.memory.del = function(key) {
 /**
  * app.memory.reset
  *
- * Reset storage
+ * Resets storage
  *
  * @return
  */
@@ -2894,7 +2898,7 @@ app.store = {};
 /**
  * app.store.set
  *
- * Sets storage entry
+ * Sets persistent storage entry
  *
  * @param <String> key
  * @param value
@@ -2948,7 +2952,7 @@ app.store.del = function(key) {
 /**
  * app.store.reset
  *
- * Reset persistent storage
+ * Resets persistent storage
  *
  * @return
  */
@@ -2988,7 +2992,7 @@ app.start.redirect = function(loaded) {
 /**
  * app.start.alternative
  *
- * Display messages with info and alternatives to help to execute app 
+ * Displays message with info and alternatives to help to execute app 
  *
  * @global <Object> appe__config
  * @return
@@ -3179,7 +3183,7 @@ app.start.load = function() {
 /**
  * app.start.progress
  *
- * Controls the current load status
+ * Displays the current loader status
  *
  * @param <Number> phase
  */
@@ -4507,13 +4511,11 @@ app.view.control.prototype.fillTable = function(table, data, order) {
     return app.error('app.view.control.prototype.fillTable', [table, data, order]);
   }
 
-  var _data = data;
-
   if (! (data && typeof data === 'object')) {
-    _data = this.data;
+    data = this.data;
   }
 
-  order = (order && order instanceof Array) ? order : Object.keys(_data);
+  order = (order && order instanceof Array) ? order : Object.keys(data);
 
   var args = Object.values(arguments).slice(3);
 
@@ -4533,7 +4535,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
    */
   if (control && typeof control == 'object' && 'renderRow' in control && typeof control.renderRow === 'function') {
     Array.prototype.forEach.call(order, function(id) {
-      var row = control.renderRow(trow_tpl, id, _data[id], args);
+      var row = control.renderRow(trow_tpl, id, data[id], args);
 
       rows += row.outerHTML;
     });
@@ -4543,7 +4545,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
     this._is_localized && this.localize(table);
   }
 
-  return { rows: rows, tpl: trow_tpl, data: _data, args: args };
+  return { rows: rows, tpl: trow_tpl, data: data, args: args };
 }
 
 /**
@@ -4560,10 +4562,8 @@ app.view.control.prototype.fillForm = function(form, data) {
     return app.error('app.view.control.prototype.fillForm', [form, data]);
   }
 
-  var _data = data;
-
   if (! (data && typeof data === 'object')) {
-    _data = this.data;
+    data = this.data;
   }
 
   var args = Object.values(arguments).slice(2);
@@ -4571,16 +4571,16 @@ app.view.control.prototype.fillForm = function(form, data) {
   /**
    * control.fillForm hook
    *
-   * @param <Object> _data
-   * @param <Object> _args
+   * @param <Object> data
+   * @param <Object> args
    */
   if (control && typeof control == 'object' && 'fillForm' in control && typeof control.fillForm === 'function') {
-    control.fillForm(_data, args);
+    control.fillForm(data, args);
 
     this._is_localized && this.localize(form);
   }
 
-  return { data: _data, args: args };
+  return { data: data, args: args };
 }
 
 /**
@@ -5414,7 +5414,7 @@ app.view.convertTableCSV = function(table) {
 /**
  * app.view.copyToClipboard
  *
- * Helper to copy to the system clipboard
+ * Helper to copy into system clipboard
  *
  * @link https://gist.github.com/rproenca/64781c6a1329b48a455b645d361a9aa3
  *
@@ -6040,7 +6040,7 @@ app.layout.collapse.prototype.toggle = function(e, collapsible, callback) {
  *
  * Helper for draggable, returns requested prototype method
  *
- * //TODO fix droid
+ * //TODO FIX droid
  *
  * available prototype methods:
  *  - start (e, row, callback)
@@ -6287,7 +6287,7 @@ app.utils = {};
 /**
  * app.utils.system
  *
- * Detects browser and system environments
+ * Detects system environment
  *
  * @param <String> purpose  ( name | platform | architecture | release )
  * @return
@@ -6455,7 +6455,7 @@ app.utils.removeEvent = function(event, element, func) {
 /**
  * app.utils.proxy
  *
- * Proxy function with passed arguments mantaining this and event
+ * Proxy function with passed arguments
  *
  * @param <Boolean> deep
  * @param <Object> | <Function> obj
@@ -6491,7 +6491,7 @@ app.utils.proxy = function(deep, obj) {
 /**
  * app.utils.storage
  *
- * Storage utility, it stores persistent and non-persistent data using localStorage and sessionStorage
+ * Storage utility, it stores persistent and non-persistent data
  *
  * available prototype methods:
  *  - set (key, value)
@@ -6798,7 +6798,7 @@ app.utils.cookie.prototype.reset = function() {
 /**
  * app.utils.base64
  *
- * Alias to base64 browser implementation with URI encoding
+ * Base64 encoder and decoder
  *
  * available prototype methods:
  *  - encode (to_encode)
@@ -7012,8 +7012,8 @@ app.utils.numberFormat = function(number, decimals, decimals_separator, thousand
 /**
  * app.utils.dateFormat
  *
- * Formats date, supported format specifiers are like them used in strftime() C library function, 
- * it accepts Date time format or true for 'now', default: "Y-m-d H:M"
+ * Formats date, supported format specifiers are like used in strftime() C library function, 
+ * it accepts Date time format or boolean true for 'now', default: "Y-m-d H:M"
  *
  * format specifiers:
  *  - d  // Day of the month, digits preceded by zero (01-31)

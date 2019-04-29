@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
+</head>
+
+<body class="view view_list view_wide_list">
+<h1 id="view-title" class="page-header hide"></h1>
+<h2 id="section-title" class="sub-header"></h2>
+
+
+<div id="section-actions-top" class="section-actions section-actions-top clearfix">
+  <div class="pull-left">
+    <label for="selection" class="visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" data-localize="action" data-localize-replacement="{{Archive||Archives%%1[[page]]}}">Select {{placeholder}}</label>
+    <select id="selection" onchange="control.action(this, 'selection')"></select>
+  </div>
+  <div class="pull-right">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')"><span class="button-label" data-localize="action">Export</span> <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;" data-localize="action">Export CSV</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;" data-localize="action">Copy to clipboard</a></li>
+      </ul>
+    </div>
+    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')" data-localize="action">Print</button>
+  </div>
+  <div class="clearfix"></div>
+  <div>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?demo" target="_parent">&laquo; <span class="link-label" data-localize="action">Return Back</span></a>
+  </div>
+</div>
+
+
+<div class="table-responsive">
+  <table id="table-data" class="table table-bordered table-data">
+    <thead>
+      <tr class="hidden-csv">
+        <th class="thrv"><span class="trv"><span><strong data-localize="page">ID</strong></span></span></th>
+        <th class="thrv"><span class="trv"><span data-localize="page">Name</span></span></th>
+        <th class="thrv"><span class="trv"><span>Specimen</span></span></th>
+        <th class="thrv"><span class="trv"><span>Family</span></span></th>
+        <th class="thrv"><span class="trv"><span>Discovered</span></span></th>
+        <th class="thrv"><span class="trv"><span>Fantastic</span></span></th>
+        <th class="thrv"><span class="trv"><span>New samples</span></span></th>
+        <th class="thrv"><span class="trv"><span>New finds</span></span></th>
+        <th colspan="5" class="thrv"><span class="trv"><span>Popularity</span></th>
+        <th class="thrv"><span class="trv"><span>AWARDS</span></th>
+      </tr>
+      <tr class="visible-csv hidden">
+        <th>ID</th>
+        <th>Name</th>
+        <th>Specimen</th>
+        <th>Family</th>
+        <th>Discovered</th>
+        <th>New Samples</th>
+        <th>New Finds</th>
+        <th>Fantastic</th>
+        <th>AVG</th>
+        <th>Movies</th>
+        <th>Toyes</th>
+        <th>Books</th>
+        <th>INDEX</th>
+        <th>AWARDS</th>
+      </tr>
+      <tr class="hidden-csv">
+        <td colspan="8"></th>
+        <td class="text-center text-nowrap">AVG</td>
+        <td class="text-center text-nowrap">Movies</td>
+        <td class="text-center text-nowrap">Toyes</td>
+        <td class="text-center text-nowrap">Books</td>
+        <td class="text-center text-nowrap">TOTAL</td>
+        <td></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="text-nowrap text-center tpl">
+        <td><strong>{id}</strong></td>
+        <td class="text-uppercase">{name}</td>
+        <td>{title}</td>
+        <td><em>{type}</em></td>
+        <td>{date}</td>
+        <td class="text-nowrap">{checked}</td>
+        <td class="text-nowrap">{custom_1}</td>
+        <td class="text-nowrap">{custom_2}</td>
+        <td>{pop_avg}</td>
+        <td>{pop_movies}</td>
+        <td>{pop_toyes}</td>
+        <td>{pop_books}</td>
+        <td>{pop_total}</td>
+        <td>{awards}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<script type="text/javascript" src="../assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../locale.js"></script>
+
+
+<script type="text/javascript">
+var control = appe__control = {};
+
+
+
+control.handle = function(data) {
+  var data_archive = data['archive'];
+  var data_categories = data['categories'];
+  var data_items = data['items'];
+
+  var table = document.getElementById('table-data');
+
+  if (! data_archive || ! data_categories || ! data_items) {
+    return app.error('control.handle', 'data*');
+  }
+
+
+
+  var __data = Object.keys(data_archive).length;
+
+  var archive_id = app.memory.get('archive_id');
+  var category_id = app.memory.get('category_id');
+
+  var archive_data = __data ? data_archive[archive_id][category_id] : {};
+  var categories_data = __data ? data_categories[category_id] : {};
+  var archive_items = __data ? data_archive[archive_id][category_id].items : {};
+
+
+
+  var archive_selection = [];
+
+  Array.prototype.forEach.call(Object.keys(data_archive), function(id) {
+    var obj = {};
+    obj[id] = data_archive[id][category_id].title;
+    archive_selection.push(obj);
+  });
+
+
+  var _control = app.view.control(null, archive_data);
+
+  _control.begin();
+
+
+  var event = _control.getEvent();
+  var id = _control.setID(archive_id);
+
+
+  var title = (archive_data.title || '');
+
+  _control.setTitle(title, app.i18n('Demo', 'custom'));
+
+  _control.fillSelection(archive_selection, (__data && id));
+
+
+
+  // join (items) + order (archive.items[id].awards)
+
+  var _archive_items_join = {};
+
+  Array.prototype.forEach.call(Object.keys(archive_items), function(_id) {
+    if (data_items[_id]) {
+      _archive_items_join[_id] = app.utils.extendObject(true, archive_items[_id], data_items[_id]);
+    } else {
+      delete _archive_items_join[_id];
+    }
+  });
+
+  var _order = [];
+  var _ordered_keys = [];
+
+  Array.prototype.forEach.call(Object.keys(_archive_items_join), function(id) {
+    _order.push([ id, (_archive_items_join[id].awards != undefined ? _archive_items_join[id].awards : id) ]);
+
+    if (! _archive_items_join[id].pop) {
+      _archive_items_join[id].pop = {};
+    }
+
+    _archive_items_join[id].pop['avg'] = parseInt(_archive_items_join[id].pop['avg'] || 0);
+    _archive_items_join[id].pop['movies'] = parseInt(_archive_items_join[id].pop['movies'] || 0);
+    _archive_items_join[id].pop['toyes'] = parseInt(_archive_items_join[id].pop['toyes'] || 0);
+    _archive_items_join[id].pop['books'] = parseInt(_archive_items_join[id].pop['books'] || 0);
+
+    if (! _archive_items_join[id].pop.total) {
+      _archive_items_join[id].pop.total  = 0;
+      _archive_items_join[id].pop.total += _archive_items_join[id].pop['avg'];
+      _archive_items_join[id].pop.total += _archive_items_join[id].pop['movies'];
+      _archive_items_join[id].pop.total += _archive_items_join[id].pop['toyes'];
+      _archive_items_join[id].pop.total += _archive_items_join[id].pop['books'];
+    }
+  });
+
+  _order.sort(function(a, b) { return b[1] - a[1]; });
+  _order = Object.values(_order);
+
+  Array.prototype.forEach.call(_order, function(value) {
+    _ordered_keys.push(value[0]);
+  });
+
+
+
+  _control.fillTable(table, _archive_items_join, _ordered_keys, categories_data);
+
+
+  _control.end();
+}
+
+
+
+control.renderRow = function(tpl_row, id_row, data_row, extra) {
+  if (! tpl_row || ! data_row) {
+    return app.error('control.renderRow', arguments);
+  }
+
+
+  var categories_data_extra = extra[0];
+
+
+  var row = tpl_row.cloneNode(true);
+
+  row.setAttribute('data-index', data_row.id);
+
+  row.innerHTML = row.innerHTML
+    .replace(/\{id\}/g, data_row.id)
+    .replace('{name}', data_row.name)
+    .replace('{title}', data_row.title)
+    .replace('{type}', categories_data_extra.types[data_row.type])
+    .replace('{date}', app.utils.dateFormat(data_row.date, 'Y'))
+    .replace('{checked}', '<span class="text-label" data-localize="page">' + (data_row.checked ? 'yes' : 'no') + '</span>')
+    .replace('{custom_1}', '<span class="text-label" data-localize="page">' + (data_row.custom_1 ? 'yes' : 'no') + '</span>')
+    .replace('{custom_2}', '<span class="text-label" data-localize="page">' + (data_row.custom_2 ? 'yes' : 'no') + '</span>')
+    .replace('{pop_avg}', data_row.pop['avg'])
+    .replace('{pop_movies}', data_row.pop['movies'])
+    .replace('{pop_toyes}', data_row.pop['toyes'])
+    .replace('{pop_books}', data_row.pop['books'])
+    .replace('{pop_total}', data_row.pop['total'])
+    .replace('{awards}', (data_row.awards || 0));
+
+  return row;
+}
+
+
+
+control.action = function(element, event, extra) {
+  var table = document.getElementById('table-data');
+
+  if (! element || typeof event !== 'string') {
+    return app.error('control.action', arguments);
+  }
+
+
+  var _action = app.view.action([ 'selection', 'export', 'print' ], event, element);
+
+  _action.begin();
+
+
+  var id = _action.getID();
+
+
+  var _data_updated = {};
+
+
+  var _events = {};
+
+
+  _events.selection = function() {
+    return _action.selection();
+  }
+
+
+  _events.export = function(method) {
+    app.view.sub(method, element, table);
+
+    return;
+  }
+
+
+  _events.print = function() {
+    return _action.print();
+  }
+
+
+  var ctl = _events[event](extra);
+
+  app.view.send(ctl);
+
+  _action.end();
+}
+
+
+
+app.load(app.view.load);
+</script>
+</body>
+</html>

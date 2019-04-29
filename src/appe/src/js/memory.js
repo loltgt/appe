@@ -71,7 +71,7 @@ app.memory.del = function(key) {
 /**
  * app.memory.reset
  *
- * Reset storage
+ * Resets storage
  *
  * @return
  */

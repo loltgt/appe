@@ -440,7 +440,7 @@ app.layout.collapse.prototype.toggle = function(e, collapsible, callback) {
  *
  * Helper for draggable, returns requested prototype method
  *
- * //TODO fix droid
+ * //TODO FIX droid
  *
  * available prototype methods:
  *  - start (e, row, callback)

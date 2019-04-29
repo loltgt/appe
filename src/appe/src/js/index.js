@@ -367,6 +367,8 @@ app.session = function(callback, config, target) {
  *
  * Resumes session, returns last opened file
  *
+ * //TODO FIX
+ *
  * @param <Object> config
  * @param <Boolean> target
  * @return <String> session_resume
@@ -1067,6 +1069,8 @@ app.asyncLoadAux = function(callback, routine, resume_session) {
  *
  * App localization
  *
+ * //TODO implement
+ *
  * @global <Object> appe__locale
  * @param <String> to_translate
  * @param <String> context
@@ -1194,7 +1198,7 @@ app.i18n = function(to_translate, context, to_replace) {
 /**
  * app.debug
  *
- * Utility debug, returns boolean
+ * Utility debug
  *
  * @param <Object> source
  * @return <Boolean>
@@ -1207,7 +1211,7 @@ app.debug = function() {
 /**
  * app.stop
  *
- * Stops app execution
+ * Stops the app execution
  *
  * @global <Object> appe__main
  * @param <String> arg0  ( msg | fn )

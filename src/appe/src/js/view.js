@@ -398,13 +398,11 @@ app.view.control.prototype.fillTable = function(table, data, order) {
     return app.error('app.view.control.prototype.fillTable', [table, data, order]);
   }
 
-  var _data = data;
-
   if (! (data && typeof data === 'object')) {
-    _data = this.data;
+    data = this.data;
   }
 
-  order = (order && order instanceof Array) ? order : Object.keys(_data);
+  order = (order && order instanceof Array) ? order : Object.keys(data);
 
   var args = Object.values(arguments).slice(3);
 
@@ -424,7 +422,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
    */
   if (control && typeof control == 'object' && 'renderRow' in control && typeof control.renderRow === 'function') {
     Array.prototype.forEach.call(order, function(id) {
-      var row = control.renderRow(trow_tpl, id, _data[id], args);
+      var row = control.renderRow(trow_tpl, id, data[id], args);
 
       rows += row.outerHTML;
     });
@@ -434,7 +432,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
     this._is_localized && this.localize(table);
   }
 
-  return { rows: rows, tpl: trow_tpl, data: _data, args: args };
+  return { rows: rows, tpl: trow_tpl, data: data, args: args };
 }
 
 /**
@@ -451,10 +449,8 @@ app.view.control.prototype.fillForm = function(form, data) {
     return app.error('app.view.control.prototype.fillForm', [form, data]);
   }
 
-  var _data = data;
-
   if (! (data && typeof data === 'object')) {
-    _data = this.data;
+    data = this.data;
   }
 
   var args = Object.values(arguments).slice(2);
@@ -462,16 +458,16 @@ app.view.control.prototype.fillForm = function(form, data) {
   /**
    * control.fillForm hook
    *
-   * @param <Object> _data
-   * @param <Object> _args
+   * @param <Object> data
+   * @param <Object> args
    */
   if (control && typeof control == 'object' && 'fillForm' in control && typeof control.fillForm === 'function') {
-    control.fillForm(_data, args);
+    control.fillForm(data, args);
 
     this._is_localized && this.localize(form);
   }
 
-  return { data: _data, args: args };
+  return { data: data, args: args };
 }
 
 /**
@@ -1305,7 +1301,7 @@ app.view.convertTableCSV = function(table) {
 /**
  * app.view.copyToClipboard
  *
- * Helper to copy to the system clipboard
+ * Helper to copy into system clipboard
  *
  * @link https://gist.github.com/rproenca/64781c6a1329b48a455b645d361a9aa3
  *

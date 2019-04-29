@@ -9,7 +9,7 @@ app.utils = {};
 /**
  * app.utils.system
  *
- * Detects browser and system environments
+ * Detects system environment
  *
  * @param <String> purpose  ( name | platform | architecture | release )
  * @return
@@ -177,7 +177,7 @@ app.utils.removeEvent = function(event, element, func) {
 /**
  * app.utils.proxy
  *
- * Proxy function with passed arguments mantaining this and event
+ * Proxy function with passed arguments
  *
  * @param <Boolean> deep
  * @param <Object> | <Function> obj
@@ -213,7 +213,7 @@ app.utils.proxy = function(deep, obj) {
 /**
  * app.utils.storage
  *
- * Storage utility, it stores persistent and non-persistent data using localStorage and sessionStorage
+ * Storage utility, it stores persistent and non-persistent data
  *
  * available prototype methods:
  *  - set (key, value)
@@ -520,7 +520,7 @@ app.utils.cookie.prototype.reset = function() {
 /**
  * app.utils.base64
  *
- * Alias to base64 browser implementation with URI encoding
+ * Base64 encoder and decoder
  *
  * available prototype methods:
  *  - encode (to_encode)
@@ -734,8 +734,8 @@ app.utils.numberFormat = function(number, decimals, decimals_separator, thousand
 /**
  * app.utils.dateFormat
  *
- * Formats date, supported format specifiers are like them used in strftime() C library function, 
- * it accepts Date time format or true for 'now', default: "Y-m-d H:M"
+ * Formats date, supported format specifiers are like used in strftime() C library function, 
+ * it accepts Date time format or boolean true for 'now', default: "Y-m-d H:M"
  *
  * format specifiers:
  *  - d  // Day of the month, digits preceded by zero (01-31)

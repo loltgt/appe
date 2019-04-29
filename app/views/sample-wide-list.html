@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
+</head>
+
+<body class="view view_list view_wide_list">
+<h1 id="view-title" class="page-header hide">Sample</h1>
+<h2 id="section-title" class="sub-header">Vehicle List</h2>
+
+
+<div id="section-actions-top" class="section-actions section-actions-top clearfix">
+  <div class="pull-right">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')"><span class="button-label">Export</span> <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;">Export CSV</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;">Copy to clipboard</a></li>
+      </ul>
+    </div>
+    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
+  </div>
+  <div class="clearfix"></div>
+  <div>
+    <a class="btn btn-sm btn-gray-lighter" href="../index.html?demo" target="_parent">&laquo; <span class="link-label">Return Back</span></a>
+  </div>
+</div>
+
+
+<div class="table-responsive">
+  <table id="table-data" class="table table-bordered table-data">
+    <thead>
+      <tr class="hidden-csv">
+        <th class="thrv"><span class="trv"><span><strong>ID</strong></span></span></th>
+        <th class="thrv"><span class="trv"><span>Title</span></span></th>
+        <th class="thrv"><span class="trv"><span>Type</span></span></th>
+        <th class="thrv"><span class="trv"><span>Date</span></span></th>
+        <th class="thrv"><span class="trv"><span>Amount</span></span></th>
+      </tr>
+      <tr class="visible-csv hidden">
+        <th>ID</th>
+        <th>Title</th>
+        <th>Type</th>
+        <th>Date</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="text-nowrap text-center tpl">
+        <td>{id}</td>
+        <td>{title}</td>
+        <td>{type}</td>
+        <td class="text-nowrap">{date}</td>
+        <td class="text-nowrap">{amount}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<script type="text/javascript" src="../assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="../config.js"></script>
+
+
+<script type="text/javascript">
+var control = appe__control = {};
+
+
+
+control.handle = function(data) {
+  var data_sample = data['sample'];
+
+  var table = document.getElementById('table-data');
+
+  if (! data_sample) {
+    return app.error('control.handle', 'data*');
+  }
+
+
+  var _control = app.view.control(null, data_sample);
+
+  _control.begin();
+
+
+  _control.fillTable(table);
+
+
+  _control.end();
+}
+
+
+
+control.renderRow = function(tpl_row, id_row, data_row, extra) {
+  if (! tpl_row || ! data_row) {
+    return app.error('control.renderRow', arguments);
+  }
+
+  var row = tpl_row.cloneNode(true);
+
+  row.setAttribute('data-index', id_row);
+
+  row.innerHTML = row.innerHTML
+    .replace(/\{id\}/g, data_row.id)
+    .replace('{title}', data_row.title)
+    .replace('{type}', data_row.type)
+    .replace('{date}', app.utils.dateFormat(data_row.date, 'd/m/Y'))
+    .replace('{amount}', app.utils.numberFormat(data_row.amount, 2, ',', '.') + ' coin')
+    .replace('{status}', data_row.status)
+
+  return row;
+}
+
+
+
+control.action = function(element, event, extra) {
+  var table = document.getElementById('table-data');
+
+  if (! element || typeof event !== 'string') {
+    return app.error('control.action', arguments);
+  }
+
+
+  var _action = app.view.action([ 'export', 'print' ], event, element);
+
+  _action.begin();
+
+
+  var id = _action.getID();
+
+
+  var _data_updated = {};
+
+
+  var _events = {};
+
+
+  _events.export = function(method) {
+    app.view.sub(method, element, table);
+
+    return;
+  }
+
+
+  _events.print = function() {
+    return _action.print();
+  }
+
+
+  var ctl = _events[event](extra);
+
+  app.view.send(ctl);
+
+  _action.end();
+}
+
+
+
+app.load(app.view.load);
+</script>
+</body>
+</html>
