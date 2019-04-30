@@ -103,7 +103,7 @@ app.os.fileSessionOpen = function(callback) {
 
   if (app._runtime.system.platform != 'ios') {
     if (file.name.indexOf(file_extension) === -1) {
-      app.error('app.os.fileSessionOpen', app.i18n('This file format cannot be open.'), 'file');
+      app.error('app.os.fileSessionOpen', app.i18n('This file format cannot be opened.'), 'file');
 
       return callback(false);
     }

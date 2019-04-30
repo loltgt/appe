@@ -1,0 +1,102 @@
+This file is incompatible with running version: {{app_version}}
+There was an error while executing.
+Please reload the application.
+This file format cannot be opened.
+This application cannot be run due to restrictions into the software {{browser}}.
+Go to folder "{{alt_exec_folder}}" and open "{{alt_exec_platform}}".
+loading...
+
+New {{self}}
+New Session
+Open {{self}}
+Open a Session
+Save {{self}}
+Save this Session
+Open latest file save
+Should save before close the application!
+Apropos ...
+Current application
+Application license
+File loaded
+File version
+File checksum
+
+Menu
+Go Back
+New {{self}}
+Edit {{self}}
+Update {{self}}
+Delete {{self}}
+Open {{self}}
+Close {{self}}
+Add {{self}}
+Remove {{self}}
+List
+Select {{self}}
+Export {{self}}
+Export CSV
+Copy to clipboard
+Print {{self}}
+Select {{placeholder}}
+Add {{placeholder}}
+Add New {{placeholder}}
+Create {{placeholder}}
+Create New {{placeholder}}
+Open {{placeholder}}
+Edit {{placeholder}}
+Update {{placeholder}}
+Delete {{placeholder}}
+Close {{placeholder}}
+Edit {{placeholder}} "{{title}}"
+Edit {{placeholder}} "{{name}}" &ndash; {{title}}
+{{placeholder}} list
+Are you sure to {{placeholder}} {{name}} {{title}}?
+ATTENTION! Irreversible action, all data's {{placeholder}} will be erased permanently, be carefull.
+Apropos
+Enable {{self}}
+Disable {{self}}
+Select {{self}}
+Deselect {{self}}
+
+View {{self}}
+Edit {{self}}
+Update {{self}}
+Delete {{self}}
+Open {{self}}
+Close {{self}}
+Add {{self}}
+Remove {{self}}
+Select {{self}}
+Export {{self}}
+
+||Archive
+Archive, Archives
+||Category
+Category, Categories
+||items
+Item, Items
+||entries
+entry, entries
+List-view
+Actions
+ID
+Title
+||Name
+Type ||
+||Date
+Status
+Entry
+Details
+Summary
+It auto-save on change.
+Move items by click or tap on them and change their order.
+This item is already in list.
+yes
+no
+enabled
+disabled
+checked
+not checked
+
+Demo
+Average

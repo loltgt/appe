@@ -1,0 +1,102 @@
+Ce fichier est incompatible avec la version en cours d'exécution: {{_app_version}}
+Une erreur s'est produite lors de l'exécution.
+Veuillez recharger l'application.
+Ce format de fichier ne peut pas être ouvert.
+Cette application ne peut pas être exécutée en raison de restrictions imposées par le logiciel {{navigateur}}.
+Allez dans le dossier "{{alt_exec_folder}}" et ouvrez "{{alt_exec_platform}}".
+chargement...
+
+Nouveau
+Nouvelle session
+Ouvrir
+Ouvrir session
+Enregistrer
+Enregistrer session
+Ouvrir le dernier fichier sauvegardé
+Devrait enregistrer avant de fermer l'application!
+À propos de ...
+Application actuelle
+Licence d'application
+Fichier chargé
+Version du fichier
+Fichier de contrôle
+
+Menu
+Retourner
+Nouveau
+Modifier
+Mettre à jour
+Supprimer
+Ouvrir
+Fermer
+Ajouter
+Supprimer
+liste
+Sélectionnez
+Exporter
+Exporter au format CSV
+Copier dans le presse-papier
+Imprimer
+Sélectionnez {{placeholder}}
+Ajouter {{placeholder}}
+Ajouter un nouveau {{placeholder}}
+Créer {{placeholder}}
+Créer un nouveau {{placeholder}}
+Ouvrir {{placeholder}}
+Modifier {{placeholder}}
+Mettre à jour {{placeholder}}
+Supprimer {{placeholder}}
+Fermer {{placeholder}}
+Modifier {{placeholder}} "{{title}}"
+Modifier {{placeholder}} "{{name}}" & ndash; {{title}}
+{{placeholder}} liste
+Etes-vous sûr de {{placeholder}} {{name}} {{title}}?
+ATTENTION! Action irréversible, toutes les données {{placeholder}} seront effacées de façon permanente, soyez prudent.
+À propos
+Activer
+Désactiver
+Sélectionnez
+Désélectionner
+
+Voir
+Modifier
+Mettre à jour
+Supprimer
+Ouvrir
+Fermer
+Ajouter
+Supprimer
+Sélectionnez
+Exporter
+
+Archives
+archives||archives
+Catégorie
+catégorie||catégories
+Articles
+article||articles
+Entrées
+entrée||entrées
+Vue liste
+Actes
+ID
+Titre
+Nom
+Type
+Date
+Statut
+Entrée
+Détails
+Résumé
+Il enregistre automatiquement sur le changement.
+Déplacez les éléments par clic ou appuyez dessus et modifiez leur ordre.
+Cet article est déjà dans la liste.
+Oui
+non
+activée
+désactivée
+vérifié
+non vérifié
+
+Démo
+Choses

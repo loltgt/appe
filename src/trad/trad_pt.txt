@@ -1,0 +1,102 @@
+Este arquivo é incompatível com a versão em execução: {{app_version}}
+Houve um erro durante a execução.
+Por favor, recarregue o aplicativo.
+Este formato de arquivo não pode ser aberto.
+Este aplicativo não pode ser executado devido a restrições no software {{browser}}.
+Vá para a pasta "{{alt_exec_folder}}" e abra "{{alt_exec_platform}}".
+Carregando...
+
+Novo
+Nova sessão
+Abra
+Abra uma sessão
+Salvar
+Salvar esta sessão
+Abrir o último arquivo salvo
+Deve salvar antes de fechar o aplicativo!
+Apropos ...
+Aplicação atual
+Licença de aplicação
+Arquivo carregado
+Versão do arquivo
+Arquivo checksum
+
+Cardápio
+Volte
+Novo
+Editar
+Atualizar
+Excluir
+Abra
+Fechar
+Adicionar
+Remover
+Lista
+Selecione
+Exportar
+Exportar CSV
+Copiar para área de transferência
+Imprimir
+Selecione {{placeholder}}
+Adicione {{placeholder}}
+Adicionar novo {{placeholder}}
+Crie {{placeholder}}
+Criar novo {{placeholder}}
+Abra {{placeholder}}
+Editar {{placeholder}}
+Atualizar {{placeholder}}
+Excluir {{placeholder}}
+Fechar {{placeholder}}
+Editar {{placeholder}} "{{title}}"
+Editar {{placeholder}} "{{name}}" & ndash; {{title}}
+lista {{placeholder}}
+Tem certeza de que {{placeholder}} {{name}} {{title}}?
+ATENÇÃO! Ação irreversível, o {{placeholder}} de todos os dados será apagado permanentemente, tenha cuidado.
+Apropos
+Ativar
+Desativar
+Marque
+Desmarque
+
+Visualizar
+Editar
+Atualizar
+Excluir
+Abra
+Fechar
+Adicionar
+Remover
+Selecione
+Exportar
+
+Arquivo
+arquivo||arquivos
+Categoria
+categoria||categorias
+Itens
+item||itens
+Entradas
+entrada||entradas
+Exibição de lista
+Ações
+ID
+Título
+Nome
+Tipo
+Data
+Status
+Entrada
+Detalhes
+Resumo
+É auto-salvar na mudança.
+Mova os itens clicando ou toque neles e mude a ordem deles.
+Este item já está na lista.
+sim
+não
+ativado
+desativado
+checado
+não checado
+
+Demo
+Rateio

@@ -1,0 +1,102 @@
+Diese Datei ist nicht mit der ausgeführten Version kompatibel: {{app_version}}
+Beim Ausführen ist ein Fehler aufgetreten.
+Bitte laden Sie die Anwendung erneut.
+Dieses Dateiformat kann nicht geöffnet werden.
+Diese Anwendung kann aufgrund von Einschränkungen in der Software {{browser}} nicht ausgeführt werden.
+Gehen Sie zum Ordner "{{alt_exec_folder}}" und öffnen Sie "{{alt_exec_platform}}".
+Lade...
+
+Neu
+Neue Sitzung
+Öffne
+Öffnen Sitzung
+Speichern
+Speichern Sitzung
+Letzte Dateispeicherung öffnen
+Sollte vor dem Schließen der Anwendung speichern!
+Infos über ...
+Aktuelle Anwendung
+Anwendungslizenz
+Datei geladen
+Dateiversion
+Datei Prüfsumme
+
+Speisekarte
+Geh zurück
+Neu
+Bearbeiten
+Aktualisieren
+Löschen
+Öffne
+Schließen
+Hinzufügen
+Entfernen
+Liste
+Wähle
+Exportieren
+CSV exportieren
+Kopieren in das Clipboard
+Drucken
+Wählen
+{{placeholder}} hinzufügen
+Neu hinzufügen {{placeholder}}
+{{placeholder}} erstellen
+Neuen {{placeholder}} erstellen
+Öffnen Sie {{placeholder}}
+{{placeholder}} bearbeiten
+Aktualisieren {{placeholder}}
+{{placeholder}} löschen
+Schließen {{placeholder}}
+Bearbeiten {{placeholder}} "{{title}}" 
+Bearbeiten {{placeholder}} "{{name}}" & ndash; {{title}}
+{{placeholder}} Liste
+Sind Sie sicher {{placeholder}} {{name}} {{title}}?
+BEACHTUNG! Des irreversible Aktion werden alle Daten {{placeholder}} dauerhaft gelöscht. Seien Sie vorsichtig.
+Info
+Aktivieren
+Deaktivieren
+Wähle
+Abwählen
+
+Anzeigen
+Bearbeiten
+Aktualisieren
+Löschen
+Öffne
+Schließen
+Hinzufügen
+Entfernen
+Wähle
+Exportieren
+
+Archiv
+Archiv||Archiv
+Kategorie
+Kategorie||Kategorien
+Artikel
+Artikel||Artikel
+Einträge
+Eintrag||Einträge
+Listenansicht
+Aktionen
+ID
+Titel
+Name
+Typ
+Datum
+Status
+Eintrag
+Einzelheiten
+Zusammenfassung
+Es wird bei Änderung automatisch gespeichert.
+Bewegen Sie Elemente durch Klicken oder Tippen Sie darauf und ändern Sie ihre Reihenfolge.
+Dieser Artikel ist bereits in der Liste.
+Ja
+Nein
+aktiviert
+deaktiviert
+geprüft
+nicht geprüft
+
+Demo
+Dinge

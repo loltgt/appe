@@ -1,0 +1,102 @@
+Este archivo es incompatible con la versión en ejecución: {{app_version}}
+Hubo un error al ejecutar.
+Por favor, vuelva a cargar la aplicación.
+Este formato de archivo no se puede abrir.
+Esta aplicación no se puede ejecutar debido a restricciones en el software {{browser}}.
+Vaya a la carpeta "{{alt_exec_folder}}" y abra "{{alt_exec_platform}}".
+cargando...
+
+Nuevo
+Nueva sesión
+Abrir
+Abrir una sesion
+Salvar
+Guardar esta sesion
+Abrir el último archivo guardado
+Debe guardar antes de cerrar la aplicación!
+A propósito de ...
+Aplicación actual
+Licencia de aplicación
+Archivo cargado
+Versión del archivo
+Suma de comprobación del archivo
+
+Menú
+Regresa
+Nuevo
+Editar
+Actualizar
+Eliminar
+Abrir
+Cerrar
+Añadir
+Eliminar
+Lista
+Seleccione
+Exportar
+Exportar CSV
+Copiar al portapapeles
+Imprimir
+Seleccione {{placeholder}}
+Añadir {{placeholder}}
+Añadir nuevo {{placeholder}}
+Crear {{placeholder}}
+Crear nuevo {{placeholder}}
+Abrir {{placeholder}}
+Editar {{placeholder}}
+Actualizar {{placeholder}}
+Eliminar {{placeholder}}
+Cerrar {{placeholder}}
+Editar {{placeholder}} "{{title}}"
+Edite {{placeholder}} "{{name}}" & ndash; {{title}}
+lista {{placeholder}}
+¿Está seguro de {{placeholder}} {{name}} {{title}}?
+¡ATENCIÓN! Acción irreversible, todos los datos {{placeholder}} se borrarán de forma permanente, tenga cuidado.
+A propósito
+Habilitar
+Deshabilitar
+Seleccione
+Deselecciona
+
+Ver
+Editar
+Actualizar
+Eliminar
+Abrir
+Cerrar
+Añadir
+Eliminar
+Seleccione
+Exportar
+
+Archivo
+archivo||archivos
+Categoría
+categoria||categorias
+Artículos
+artículo||artículos
+Entradas
+entrada||entradas
+Vista de la lista
+Comportamiento
+ID
+Título
+Nombre
+Tipo
+Fecha
+Estado
+Entrada
+Detalles
+Resumen
+Se guarda automáticamente en el cambio.
+Mueve los artículos haciendo clic o tocándolos y cambiando su orden.
+Este artículo ya está en la lista.
+sí
+no
+habilitado
+deshabilitado
+comprobado
+decomprobado
+
+Demo
+Promedio

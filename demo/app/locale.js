@@ -1,10 +1,10 @@
 appe__locale = {
   "it": {
     "0": {
-      "This file is incompatible with running version: {{_app_version}}": "Il file è incompatibile con la versione: {{_app_version}}",
+      "This file is incompatible with running version: {{app_version}}": "Il file è incompatibile con la versione: {{app_version}}",
       "There was an error while executing.": "Si è verificato un errore durante l'esecuzione.",
       "Please reload the application.": "Ricarica l'applicazione.",
-      "This file format cannot be open.": "Il formato di file non può essere aperto.",
+      "This file format cannot be opened.": "Il formato di file non può essere aperto.",
       "This application cannot be run due to restrictions into the software {{browser}}.": "L'applicazione non può essere eseguita per restrizioni nel programma {{browser}}.",
       "Go to folder \"{{alt_exec_folder}}\" and open \"{{alt_exec_platform}}\".": "Vai nella cartella \"{{alt_exec_folder}}\" e apri \"{{alt_exec_platform}}\".",
       "loading": "caricamento"
