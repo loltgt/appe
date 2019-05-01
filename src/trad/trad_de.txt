@@ -4,7 +4,7 @@ Bitte laden Sie die Anwendung erneut.
 Dieses Dateiformat kann nicht geöffnet werden.
 Diese Anwendung kann aufgrund von Einschränkungen in der Software {{browser}} nicht ausgeführt werden.
 Gehen Sie zum Ordner "{{alt_exec_folder}}" und öffnen Sie "{{alt_exec_platform}}".
-Lade...
+lade
 
 Neu
 Neue Sitzung
@@ -14,7 +14,7 @@ Speichern
 Speichern Sitzung
 Letzte Dateispeicherung öffnen
 Sollte vor dem Schließen der Anwendung speichern!
-Infos über ...
+Infos über
 Aktuelle Anwendung
 Anwendungslizenz
 Datei geladen
@@ -48,7 +48,7 @@ Aktualisieren {{placeholder}}
 {{placeholder}} löschen
 Schließen {{placeholder}}
 Bearbeiten {{placeholder}} "{{title}}" 
-Bearbeiten {{placeholder}} "{{name}}" & ndash; {{title}}
+Bearbeiten {{placeholder}} "{{name}}" \u2013 {{title}}
 {{placeholder}} Liste
 Sind Sie sicher {{placeholder}} {{name}} {{title}}?
 BEACHTUNG! Des irreversible Aktion werden alle Daten {{placeholder}} dauerhaft gelöscht. Seien Sie vorsichtig.

@@ -1,102 +1,102 @@
-VM404: This file is incompatible with running version: {{app_version}}
-VM404: There was an error while executing.
-VM404: Please reload the application.
-VM404: This file format cannot be open.
-VM404: This application cannot be run due to restrictions into the software {{browser}}.
-VM404: Go to folder "{{alt_exec_folder}}" and open "{{alt_exec_platform}}".
-VM404: loading...
-VM404: 
-VM404: New {{self}}
-VM404: New Session
-VM404: Open {{self}}
-VM404: Open Session
-VM404: Save {{self}}
-VM404: Save Session
-VM404: Open latest file save
-VM404: Should save before close the application!
-VM404: Apropos ...
-VM404: Current application
-VM404: Application license
-VM404: File loaded
-VM404: File version
-VM404: File checksum
-VM404: 
-VM404: Menu
-VM404: Return Back
-VM404: New {{self}}
-VM404: Edit {{self}}
-VM404: Update {{self}}
-VM404: Delete {{self}}
-VM404: Open {{self}}
-VM404: Close {{self}}
-VM404: Add {{self}}
-VM404: Remove {{self}}
-VM404: List
-VM404: Select {{self}}
-VM404: Export {{self}}
-VM404: Export CSV
-VM404: Copy to clipboard
-VM404: Print
-VM404: Select {{placeholder}}
-VM404: Add {{placeholder}}
-VM404: Add New {{placeholder}}
-VM404: Create {{placeholder}}
-VM404: Create New {{placeholder}}
-VM404: Open {{placeholder}}
-VM404: Edit {{placeholder}}
-VM404: Update {{placeholder}}
-VM404: Delete {{placeholder}}
-VM404: Close {{placeholder}}
-VM404: Edit {{placeholder}} "{{title}}"
-VM404: Edit {{placeholder}} "{{name}}" &ndash; {{title}}
-VM404: {{placeholder}} list
-VM404: Are you sure to {{placeholder}} {{name}} {{title}}?
-VM404: CAUTION! Irreversible action, all data's {{placeholder}} will be erased permanently, be carefull.
-VM404: Apropos
-VM404: Enable
-VM404: Disable
-VM404: Check
-VM404: Uncheck
-VM404: 
-VM404: view {{self}}
-VM404: edit {{self}}
-VM404: update {{self}}
-VM404: delete {{self}}
-VM404: open {{self}}
-VM404: close {{self}}
-VM404: add {{self}}
-VM404: remove {{self}}
-VM404: select {{self}}
-VM404: export {{self}}
-VM404: 
-VM404: files
-VM404: file
-VM404: categories
-VM404: category
-VM404: entries
-VM404: entry
-VM404: entries
-VM404: entry
-VM404: list-view
-VM404: actions
-VM404: ID
-VM404: title
-VM404: name
-VM404: type
-VM404: date
-VM404: status
-VM404: the entry
-VM404: details
-VM404: summary
-VM404: Auto-save on change.
-VM404: Move items by click or tap on them and change their order.
-VM404: This item is already in list.
-VM404: yes
-VM404: no
-VM404: enabled
-VM404: disabled
-VM404: checked
-VM404: not checked
-VM404: 
-VM404: Demo
-VM404: Things
+This file is incompatible with running version: {{app_version}}
+There was an error while executing.
+Please reload the application.
+This file format cannot be opened.
+This application cannot be run due to restrictions into the software {{browser}}.
+Go to folder "{{alt_exec_folder}}" and open "{{alt_exec_platform}}".
+loading...
+
+New {{self}}
+New Session
+Open {{self}}
+Open a Session
+Save {{self}}
+Save this Session
+Open latest file save
+Should save before close the application!
+Apropos ...
+Current application
+Application license
+File loaded
+File version
+File checksum
+
+Menu
+Go Back
+New {{self}}
+Edit {{self}}
+Update {{self}}
+Delete {{self}}
+Open {{self}}
+Close {{self}}
+Add {{self}}
+Remove {{self}}
+List
+Select {{self}}
+Export {{self}}
+Export CSV
+Copy to clipboard
+Print {{self}}
+Select {{placeholder}}
+Add {{placeholder}}
+Add New {{placeholder}}
+Create {{placeholder}}
+Create New {{placeholder}}
+Open {{placeholder}}
+Edit {{placeholder}}
+Update {{placeholder}}
+Delete {{placeholder}}
+Close {{placeholder}}
+Edit {{placeholder}} "{{title}}"
+Edit {{placeholder}} "{{name}}" \u2013 {{title}}
+{{placeholder}} list
+Are you sure to {{placeholder}} {{name}} {{title}}?
+ATTENTION! Irreversible action, all data's {{placeholder}} will be erased permanently, be carefull.
+Apropos
+Enable {{self}}
+Disable {{self}}
+Select {{self}}
+Deselect {{self}}
+
+View {{self}}
+Edit {{self}}
+Update {{self}}
+Delete {{self}}
+Open {{self}}
+Close {{self}}
+Add {{self}}
+Remove {{self}}
+Select {{self}}
+Export {{self}}
+
+||Archive
+Archive, Archives
+||Category
+Category, Categories
+||items
+Item, Items
+||entries
+entry, entries
+List-view
+Actions
+ID
+Title
+||Name
+Type ||
+||Date
+Status
+Entry
+Details
+Summary
+It auto-save on change.
+Move items by click or tap on them and change their order.
+This item is already in list.
+yes
+no
+enabled
+disabled
+checked
+not checked
+
+Demo
+Average

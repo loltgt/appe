@@ -1,0 +1,102 @@
+Il file è incompatibile con la versione: {{app_version}}
+Si è verificato un errore durante l'esecuzione.
+Ricarica l'applicazione.
+Il formato di file non può essere aperto.
+L'applicazione non può essere eseguita per restrizioni nel programma {{browser}}.
+Vai nella cartella "{{alt_exec_folder}}" e apri "{{alt_exec_platform}}".
+caricamento
+
+Nuova
+Nuova sessione
+Apri
+Apri sessione
+Salva
+Salva sessione
+Apri ultimo salvataggio
+Ricordati di salvare prima di chiudere l'applicazione!
+Informazioni
+Applicativo in esecuzione
+Licenza applicativo
+File caricato
+Versione file
+File checksum
+
+Menu
+Torna indietro
+Nuovo
+Modifica
+Aggiorna
+Elimina
+Apri
+Chiudi
+Aggiungi
+Rimuovi
+Lista
+Seleziona
+Esporta
+Esporta CSV
+Copia nella clipboard
+Stampa
+Seleziona {{placeholder}}
+Inserisci {{placeholder}}
+Inserisci nuovo {{placeholder}}
+Crea {{placeholder}}
+Crea nuovo {{placeholder}}
+Apri {{placeholder}}
+Modifica {{placeholder}}
+Aggiorna {{placeholder}}
+Elimina {{placeholder}}
+Chiudi {{placeholder}}
+Modifica {{placeholder}} "{{title}}"
+Modifica {{placeholder}} "{{name}}" – {{title}}
+Lista {{placeholder}}
+Sei sicuro di {{placeholder}} {{title}} {{name}}?
+ATTENZIONE! Operazione irreversibile, tutti i dati in {{placeholder}} verranno eliminati definitivamente.
+Info
+Abilita
+Disabilita
+Aggiungi spunta
+Togli spunta
+
+visualizzare
+modificare
+aggiornare
+eliminare
+aprire
+chiudere
+aggiungere
+rimuovere
+selezionare
+esportare
+
+Archivio
+archivio||archivi
+Categoria
+categoria||categorie
+Articoli
+articolo||articoli
+Voci
+voce||voci
+Listato
+Azioni
+ID
+Titolo
+Nome
+Tipo
+Data
+Stato
+Scheda
+Dettagli
+Riepilogo
+Salva automaticamente le modifiche.
+Clicca o premi sulle voci per spostarle e cambiarne ordine.
+Questa voce è già presente in lista.
+sì
+no
+abilitato
+disabilitato
+spuntato
+non spuntato
+
+Demo
+Stima

@@ -2,7 +2,7 @@ appe__config = {
   "app_ns": "demo",
   "launcher_name": "LAUNCH",
   "app_name": "{appe} demo app",
-  "language": null,
+  "language": "en",
   "compression": true,
   "encryption": true,
   "binary": true,
@@ -10,10 +10,6 @@ appe__config = {
   "verify_checksum": true,
   "debug": true,
   "schema": [
-    "file",
-    "archive",
-    "categories",
-    "items",
     "sample"
   ],
   "events": {
@@ -27,34 +23,15 @@ appe__config = {
     "list": "list",
   },
   "routes": {
-    "demo": {
-      "open": "demo-edit",
-      "list": "demo-wide-list",
-      "update": "demo",
-    },
-    "archive": {
-      "add": "archive-edit",
-      "edit": "archive-edit",
-      "delete": "archive",
-      "open": "archive-item-edit",
-      "close": "archive",
-    },
-    "average": {
-      "update": "average",
-    },
-    "items": {
-      "add": "items-edit",
-      "edit": "items-edit",
-      "delete": "items",
-    },
     "sample": {
+      "list": "sample-wide-list",
       "add": "sample-edit",
       "edit": "sample-edit",
       "delete": "sample",
     },
     "about": {}
   },
-  "default_route": "demo",
+  "default_route": "sample",
   "default_event": "add",
   "base_path": "appe",
   "runtime_path": "app",
@@ -72,13 +49,7 @@ appe__config = {
   "license": {
     "text": "LGPL-3.0-or-later",
     "file": "LICENSE.txt"
-  },
-  "aux": [
-    {
-      "file": "demo.js",
-      "fn": "appe__demo"
-    }
-  ]
+  }
   //"file": {
   //  "compress": false
   //  "heads": "e"

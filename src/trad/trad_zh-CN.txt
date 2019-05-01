@@ -1,20 +1,20 @@
-此文件与正在运行的版本不兼容：{{_app_version}}
+此文件与正在运行的版本不兼容： {{app_version}}
 执行时出错。
 请重新加载该应用程序。
 无法打开此文件格式。
-由于软件{{browser}}的限制，无法运行此应用程序。
-转到文件夹“{{alt_exec_folder}}”并打开“{{alt_exec_platform}}”。
-正在加载......
+由于软件 {{browser}} 的限制，无法运行此应用程序。
+转到文件夹 "{{alt_exec_folder}}" 并打开 "{{alt_exec_platform}}"。
+正在加载
 
-新{{self}}
+新
 新会话
-打开{{self}}
+打开
 打开会话
-保存{{self}}
+保存
 保存会话
 打开最新文件保存
 应该在关闭应用程序之前保存！
-关于......
+关于
 当前应用程序
 应用程序许可证
 已加载文件
@@ -23,51 +23,51 @@
 
 菜单
 返回
-新{{self}}
-编辑{{self}}
-更新{{self}}
-删除{{self}}
-打开{{self}}
-关闭{{self}}
-添加{{self}}
-删除{{self}}
+新
+编辑
+更新
+删除
+打开
+关闭
+添加
+删除
 列表
-选择{{self}}
-导出{{self}}
-导出CSV
+选择
+导出
+导出 CSV
 复制到剪贴板
 打印
-选择{{placeholder}}
-添加{{placeholder}}
-添加新{{占位符}}
-创建{{占位符}}
-创建新{{placeholder}}
-打开{{placeholder}}
-编辑{{placeholder}}
-更新{{placeholder}}
-删除{{placeholder}}
-关闭{{placeholder}}
-修改{{占位符}}“{{title}}”
-修改{{placeholder}}“{{name}}”＆ndash; {{标题}}
-{{placeholder}}列表
-您确定{{placeholder}} {{name}} {{title}}？
-小心！不可逆转的行动，所有数据{{placeholder}}将被永久删除，请小心。
+选择 {{placeholder}}
+添加 {{placeholder}}
+添加新 {{placeholder}}
+创建 {{placeholder}}
+创建新 {{placeholder}}
+打开 {{placeholder}}
+编辑 {{placeholder}}
+更新 {{placeholder}}
+删除 {{placeholder}}
+关闭 {{placeholder}}
+修改 {{placeholder}} "{{title}}"
+修改 {{placeholder}} "{{name}}" \u2013 {{标题}}
+{{placeholder}} 列表
+您确定 {{placeholder}} {{name}} {{title}}？
+小心！不可逆转的行动，所有数据 {{placeholder}} 将被永久删除，请小心。
 关于
 启用
 禁用
 检查
 取消选中
 
-查看{{self}}
-编辑{{self}}
-更新{{self}}
-删除{{self}}
-打开{{self}}
-关闭{{self}}
-添加{{self}}
-删除{{self}}
-选择{{self}}
-导出{{self}}
+查看
+编辑
+更新
+删除
+打开
+关闭
+添加
+删除
+选择
+导出
 
 文件
 文件

@@ -4,7 +4,7 @@ Veuillez recharger l'application.
 Ce format de fichier ne peut pas être ouvert.
 Cette application ne peut pas être exécutée en raison de restrictions imposées par le logiciel {{navigateur}}.
 Allez dans le dossier "{{alt_exec_folder}}" et ouvrez "{{alt_exec_platform}}".
-chargement...
+chargement
 
 Nouveau
 Nouvelle session
@@ -14,7 +14,7 @@ Enregistrer
 Enregistrer session
 Ouvrir le dernier fichier sauvegardé
 Devrait enregistrer avant de fermer l'application!
-À propos de ...
+À propos de
 Application actuelle
 Licence d'application
 Fichier chargé
@@ -48,7 +48,7 @@ Mettre à jour {{placeholder}}
 Supprimer {{placeholder}}
 Fermer {{placeholder}}
 Modifier {{placeholder}} "{{title}}"
-Modifier {{placeholder}} "{{name}}" & ndash; {{title}}
+Modifier {{placeholder}} "{{name}}" \u2013 {{title}}
 {{placeholder}} liste
 Etes-vous sûr de {{placeholder}} {{name}} {{title}}?
 ATTENTION! Action irréversible, toutes les données {{placeholder}} seront effacées de façon permanente, soyez prudent.
@@ -99,4 +99,4 @@ vérifié
 non vérifié
 
 Démo
-Choses
+Sort

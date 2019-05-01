@@ -1,0 +1,27 @@
+
+translator: https://translate.google.com
+js text hex escaper: https://mothereff.in/js-escapes
+js beautifier: https://beautifier.io/
+js uglifier: https://skalman.github.io/UglifyJS-online/    { output: { ascii_only: true, quote_keys: true } }
+
+
+
+
+
+var locale = "LOCALE";
+
+var trad = []; for (key in appe__locale[locale]) { trad.push(''); Object.keys(appe__locale[locale][key]).forEach(line => { trad.push(line) }) };
+
+console.log(trad);
+
+
+
+
+var blob = "DOUBLE-ESCAPED TRANSLATED STRINGS";
+var lang = "LANGUAGE";
+
+appe__locale[lang] = { "0": {}, "session": {}, "action": {}, "event": {}, "page": {}, "custom": {} }, blob = blob.split('\\n'), i = 0, k = 1, keys = Object.keys(appe__locale[lang]), Object.values(blob).forEach(line => { if (! line) { i++; k++; return } if (line === trad[k]) { line = '' } appe__locale[lang][keys[i]][trad[k]] = line, k++ });
+
+console.log(JSON.stringify(appe__locale[lang]));
+
+

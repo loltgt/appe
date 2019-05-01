@@ -4,7 +4,7 @@ Por favor, vuelva a cargar la aplicación.
 Este formato de archivo no se puede abrir.
 Esta aplicación no se puede ejecutar debido a restricciones en el software {{browser}}.
 Vaya a la carpeta "{{alt_exec_folder}}" y abra "{{alt_exec_platform}}".
-cargando...
+cargando
 
 Nuevo
 Nueva sesión
@@ -14,7 +14,7 @@ Salvar
 Guardar esta sesion
 Abrir el último archivo guardado
 Debe guardar antes de cerrar la aplicación!
-A propósito de ...
+A propósito de
 Aplicación actual
 Licencia de aplicación
 Archivo cargado
@@ -48,7 +48,7 @@ Actualizar {{placeholder}}
 Eliminar {{placeholder}}
 Cerrar {{placeholder}}
 Editar {{placeholder}} "{{title}}"
-Edite {{placeholder}} "{{name}}" & ndash; {{title}}
+Edite {{placeholder}} "{{name}}" \u2013 {{title}}
 lista {{placeholder}}
 ¿Está seguro de {{placeholder}} {{name}} {{title}}?
 ¡ATENCIÓN! Acción irreversible, todos los datos {{placeholder}} se borrarán de forma permanente, tenga cuidado.

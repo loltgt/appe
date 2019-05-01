@@ -56,7 +56,7 @@ appe__config = {
   },
   "default_route": "demo",
   "default_event": "add",
-  "base_path": "appe",
+  "base_path": "demo",
   "runtime_path": "app",
   "save_path": "save",
   "aux_path": "ext",

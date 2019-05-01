@@ -4,39 +4,39 @@ Please reload the application.
 This file format cannot be opened.
 This application cannot be run due to restrictions into the software {{browser}}.
 Go to folder "{{alt_exec_folder}}" and open "{{alt_exec_platform}}".
-loading...
+loading
 
-New {{self}}
+New
 New Session
-Open {{self}}
-Open a Session
-Save {{self}}
-Save this Session
+Open
+Open Session
+Save
+Save Session
 Open latest file save
 Should save before close the application!
-Apropos ...
-Current application
+About
+Running application
 Application license
 File loaded
 File version
 File checksum
 
 Menu
-Go Back
-New {{self}}
-Edit {{self}}
-Update {{self}}
-Delete {{self}}
-Open {{self}}
-Close {{self}}
-Add {{self}}
-Remove {{self}}
+Return Back
+New
+Edit
+Update
+Delete
+Open
+Close
+Add
+Remove
 List
-Select {{self}}
-Export {{self}}
+Select
+Export
 Export CSV
 Copy to clipboard
-Print {{self}}
+Print
 Select {{placeholder}}
 Add {{placeholder}}
 Add New {{placeholder}}
@@ -48,47 +48,47 @@ Update {{placeholder}}
 Delete {{placeholder}}
 Close {{placeholder}}
 Edit {{placeholder}} "{{title}}"
-Edit {{placeholder}} "{{name}}" &ndash; {{title}}
+Edit {{placeholder}} "{{name}}" – {{title}}
 {{placeholder}} list
 Are you sure to {{placeholder}} {{name}} {{title}}?
-ATTENTION! Irreversible action, all data's {{placeholder}} will be erased permanently, be carefull.
-Apropos
-Enable {{self}}
-Disable {{self}}
-Select {{self}}
-Deselect {{self}}
+CAUTION! Irreversible action, all data's {{placeholder}} will be erased permanently, be carefull.
+About
+Enable
+Disable
+Check
+Uncheck
 
-View {{self}}
-Edit {{self}}
-Update {{self}}
-Delete {{self}}
-Open {{self}}
-Close {{self}}
-Add {{self}}
-Remove {{self}}
-Select {{self}}
-Export {{self}}
+view
+edit
+update
+delete
+open
+close
+add
+remove
+select
+export
 
-||Archive
-Archive, Archives
-||Category
-Category, Categories
-||items
-Item, Items
-||entries
-entry, entries
-List-view
+Archive
+Archive||Archives
+Category
+Category||Categories
+Items
+Item||Items
+Entries
+Entry||Entries
+List View
 Actions
 ID
 Title
-||Name
-Type ||
-||Date
+Name
+Type
+Date
 Status
 Entry
 Details
 Summary
-It auto-save on change.
+Auto-save on change.
 Move items by click or tap on them and change their order.
 This item is already in list.
 yes
