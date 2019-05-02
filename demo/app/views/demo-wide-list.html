@@ -125,8 +125,8 @@ control.handle = function(data) {
 
   var __data = Object.keys(data_archive).length;
 
-  var archive_id = app.memory.get('archive_id');
-  var category_id = app.memory.get('category_id');
+  var archive_id = app.memory.get('archive_id') || 1;
+  var category_id = app.memory.get('category_id') || 1;
 
   var archive_data = __data ? data_archive[archive_id][category_id] : {};
   var categories_data = __data ? data_categories[category_id] : {};

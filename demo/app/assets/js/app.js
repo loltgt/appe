@@ -127,7 +127,7 @@ app.position = function() {
 /**
  * app.session
  *
- * Initializes the session
+ * Initializes the session, returns to callback
  *
  * @global <Object> appe__store
  * @global <Object> appe__locale
@@ -195,18 +195,38 @@ app.session = function(callback, config, target) {
     }
 
     if (app._root.window.navigator && navigator.languages && typeof navigator.languages === 'object') {
-      var found_locale = false;
+      var found_locale = false, lang = navigator.language;
 
-      for (lang in navigator.languages) {
-        if (! found_locale && navigator.languages[lang] in locale) {
-          app._runtime.locale = navigator.languages[lang].toString();
+      if (lang) {
+        if (lang in locale) {
+          app._runtime.locale = lang.toString();
 
           found_locale = true;
+        } else {
+          lang = lang.split('-')[0];
+
+          if (lang in locale) {
+            app._runtime.locale = lang;
+
+            found_locale = true;
+          }
+        }
+      }
+
+      if (! found_locale) {
+        for (lang in navigator.languages) {
+          if (! found_locale && navigator.languages[lang] in locale) {
+            app._runtime.locale = navigator.languages[lang].toString();
+
+            found_locale = true;
+          }
         }
       }
 
       if (! found_locale && navigator.languages.length) {
-        app._runtime.locale = navigator.languages[lang].split('-')[0] || app._runtime.locale;
+        lang = navigator.languages[lang].split('-')[0];
+
+        app._runtime.locale = lang in locale ? lang : app._runtime.locale;
       }
     }
   }
@@ -218,6 +238,10 @@ app.session = function(callback, config, target) {
   if (app._root.document.native == undefined) {
     document.documentElement.setAttribute('lang', app._runtime.locale);
     document.documentElement.setAttribute('class', app.utils.classify(app._runtime.system, 'system--'));
+
+    if (app._runtime.locale_dir === 'rtl') {
+      document.documentElement.setAttribute('dir', app._runtime.locale_dir);
+    }
   }
 
 
@@ -1015,13 +1039,13 @@ app.asyncAttemptLoad = function(callback, resume_session, fn, file, schema, memo
 /**
  * app.asyncLoadAux
  *
- * Load extension scripts asyncronously
+ * Load extension scripts asyncronously, returns to callback
  *
  * @global <Object> appe__config
  * @param <Function> callback
  * @param <Object> routine
  * @param <Boolean> resume_session
- * @return <Function> callback
+ * @return
  */
 app.asyncLoadAux = function(callback, routine, resume_session) {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
@@ -1360,7 +1384,7 @@ app.getInfo = function(from, info) {
       _available_infos = {
         'app_name': config.app_name.toString(),
         'schema': typeof config.schema === 'object' ? config.schema : [],
-        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': app.os.fileFindRoot(config.license.file) } : config.license.toString()) || false
+        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': app.os.fileFindRoot(config.license.file, true) } : config.license.toString()) || false
       };
     break;
     case 'runtime':
@@ -2196,9 +2220,10 @@ app.os.fileDownload = function(source, filename, mime_type) {
  * @global <Object> appe__config
  * @global <Object> appe__control
  * @param <String> filename
+ * @param <Boolean> inherit
  * @return <String>
  */
-app.os.fileFindRoot = function(filename) {
+app.os.fileFindRoot = function(filename, inherit) {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
@@ -2216,9 +2241,10 @@ app.os.fileFindRoot = function(filename) {
   var rp = config.runtime_path.toString();
 
   var base = '';
+  var abs = !! inherit ? false : !! _is_view;
 
   if (cl.indexOf(rp + '/') != -1) {
-    base += !! _is_view ? '../../' : '../';
+    base += abs ? '../../' : '../';
   } else {
     var bpos;
 
@@ -2330,7 +2356,7 @@ app.os.generateJsonHead = function(source, timestamp) {
 /**
  * app.os.generateJsonChecksum
  *
- * Generates a JSON checksum
+ * Generates a JSON checksum, returns to callback
  *
  * @param <Function> callback
  * @param <String> source

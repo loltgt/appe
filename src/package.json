@@ -10,7 +10,10 @@
     "build": "node build.js",
     "build-js": "node build.js js",
     "build-css": "node build.js css",
-    "docs": "php -f generate_docs.php"
+    "build-docs": "php -f generate_docs.php",
+    "copy-demo": "cp -Rv ../app/assets/ ../demo/app/assets/",
+    "copy-electron": "cp -Rv ../{app,LAUNCH.html,LICENSE,README.md} ./electron/src/",
+    "copy-docs": "cp -Rv ./appe/docs/wiki/*.md ../docs/"
   },
   "author": "Leonardo Laureti",
   "license": "LGPL-3.0-or-later",

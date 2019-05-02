@@ -159,7 +159,7 @@ control.handle = function(data) {
 
 
   _events.edit = function() {
-    var category_id = app.memory.get('category_id');
+    var category_id = app.memory.get('category_id') || 1;
 
     var archive_data = __data ? data_archive[id][category_id] : {};
 
@@ -505,7 +505,7 @@ control.action = function(element, event, extra) {
 
 
   _events._prepare = function() {
-    var category_id = app.memory.get('category_id');
+    var category_id = app.memory.get('category_id') || 1;
 
     var _form_data = app.view.getFormData(form.elements);
     var _items_data = _data_updated['archive'][id][category_id].items;
@@ -527,7 +527,7 @@ control.action = function(element, event, extra) {
       return app.error('control.action().add', 'data*');
     }
 
-    var category_id = app.memory.get('category_id');
+    var category_id = app.memory.get('category_id') || 1;
 
     _data_updated['archive'] = data_archive;
 

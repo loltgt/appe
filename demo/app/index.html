@@ -130,9 +130,10 @@ main.setup = function(data) {
     }
   };
 
-  ! app.memory.has('archive_id') && app.memory.set('archive_id', 1);
+  ! app.store.has('demo_categories') && app.store.set('demo_categories', data_categories);
 
-  ! app.memory.has('demo_categories') && app.store.set('demo_categories', data_categories);
+
+  ! app.memory.has('archive_id') && app.memory.set('archive_id', 1);
 
   app.memory.set('category_id', 1);
 
