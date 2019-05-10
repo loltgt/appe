@@ -27,7 +27,7 @@ app._runtime = {
   name: '',
   locale: 'en',
   locale_dir: 'ltr',
-  storage: false,
+  storage: true,
   binary: false,
   compression: false,
   encryption: false,
@@ -89,9 +89,30 @@ app.unload = function(func) {
   }
 
   if (app._root.window.native == undefined) {
-    app.utils.addEvent('beforeunload', app._root.window, func);
+    app.utils.addEvent('unload', app._root.window, func);
   } else {
     app._root.server.onunload = func;
+  }
+}
+
+
+/**
+ * app.beforeunload
+ *
+ * Helper app before unload function DOM
+ *
+ * @param <Function> func
+ * @return
+ */
+app.beforeunload = function(func) {
+  if (typeof func != 'function') {
+    return app.stop('app.beforeunload', 'func');
+  }
+
+  if (app._root.window.native == undefined) {
+    app._root.window.onbeforeunload = func;
+  } else {
+    app._root.server.onbeforeunload = func;
   }
 }
 
@@ -127,7 +148,7 @@ app.position = function() {
 /**
  * app.session
  *
- * Initializes the session
+ * Initializes the session, returns to callback
  *
  * @global <Object> appe__store
  * @global <Object> appe__locale
@@ -167,16 +188,22 @@ app.session = function(callback, config, target) {
 
   app._runtime.system = app.utils.system();
 
-  if ('localStorage' in app._root.window === false) {
-    app._runtime.storage = 'sessionStorage';
-  } else if ('sessionStorage' in app._root.window === false) {
+  if (app._root.process == undefined) {
+    app._runtime.storage = 'storage';
+  } else if ('localStorage' in app._root.window == false || 'sessionStorage' in app._root.window == false) {
+    if ('localStorage' in app._root.window === false) {
+      app._runtime.storage = 'sessionStorage';
+    } else if ('sessionStorage' in app._root.window === false) {
+      app._runtime.storage = 'localStorage';
+    } else {
+      app._runtime.storage = false;
+    }
+  } else if (app._root.window.location.protocol != 'file:') {
+    app._runtime.storage = true;
+  } else if (app._runtime.system.name == 'chrome') {
     app._runtime.storage = 'localStorage';
   } else if (app._runtime.system.name == 'safari') {
     app._runtime.storage = 'sessionStorage';
-  } else if (app._root.process == undefined) {
-    app._runtime.storage = 'storage';
-  } else {
-    app._runtime.storage = 'localStorage';
   }
 
 
@@ -195,18 +222,38 @@ app.session = function(callback, config, target) {
     }
 
     if (app._root.window.navigator && navigator.languages && typeof navigator.languages === 'object') {
-      var found_locale = false;
+      var found_locale = false, lang = navigator.language;
 
-      for (lang in navigator.languages) {
-        if (! found_locale && navigator.languages[lang] in locale) {
-          app._runtime.locale = navigator.languages[lang].toString();
+      if (lang) {
+        if (lang in locale) {
+          app._runtime.locale = lang.toString();
 
           found_locale = true;
+        } else {
+          lang = lang.split('-')[0];
+
+          if (lang in locale) {
+            app._runtime.locale = lang;
+
+            found_locale = true;
+          }
+        }
+      }
+
+      if (! found_locale) {
+        for (lang in navigator.languages) {
+          if (! found_locale && navigator.languages[lang] in locale) {
+            app._runtime.locale = navigator.languages[lang].toString();
+
+            found_locale = true;
+          }
         }
       }
 
       if (! found_locale && navigator.languages.length) {
-        app._runtime.locale = navigator.languages[lang].split('-')[0] || app._runtime.locale;
+        lang = navigator.languages[lang].split('-')[0];
+
+        app._runtime.locale = lang in locale ? lang : app._runtime.locale;
       }
     }
   }
@@ -218,6 +265,10 @@ app.session = function(callback, config, target) {
   if (app._root.document.native == undefined) {
     document.documentElement.setAttribute('lang', app._runtime.locale);
     document.documentElement.setAttribute('class', app.utils.classify(app._runtime.system, 'system--'));
+
+    if (app._runtime.locale_dir === 'rtl') {
+      document.documentElement.setAttribute('dir', app._runtime.locale_dir);
+    }
   }
 
 
@@ -1015,13 +1066,13 @@ app.asyncAttemptLoad = function(callback, resume_session, fn, file, schema, memo
 /**
  * app.asyncLoadAux
  *
- * Load extension scripts asyncronously
+ * Load extension scripts asyncronously, returns to callback
  *
  * @global <Object> appe__config
  * @param <Function> callback
  * @param <Object> routine
  * @param <Boolean> resume_session
- * @return <Function> callback
+ * @return
  */
 app.asyncLoadAux = function(callback, routine, resume_session) {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
@@ -1360,7 +1411,7 @@ app.getInfo = function(from, info) {
       _available_infos = {
         'app_name': config.app_name.toString(),
         'schema': typeof config.schema === 'object' ? config.schema : [],
-        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': app.os.fileFindRoot(config.license.file) } : config.license.toString()) || false
+        'license': config.license && (typeof config.license === 'object' ? { 'text': config.license.text.toString(), 'file': app.os.fileFindRoot(config.license.file, true) } : config.license.toString()) || false
       };
     break;
     case 'runtime':

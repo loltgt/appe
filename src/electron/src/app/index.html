@@ -76,19 +76,6 @@ main.handle = function(handler, event, ctl) {
   var _events = app.utils.extendObject({}, handler);
 
 
-  _events.selection = function() {
-    try {
-      var _data = JSON.parse(ctl.data);
-
-      app.memory.set('archive_id', parseInt(_data.id));
-    } catch {
-      return;
-    }
-
-    return handler.selection();
-  }
-
-
   _events[event]();
 }
 
@@ -121,5 +108,5 @@ main.action = function(element, event, extra) {
 
 
 app.load(app.main.load);
-app.unload(app.main.unload);
+app.beforeunload(app.main.unload);
 </script>

@@ -8,6 +8,7 @@
 ## [[app|app.index]]
 * [[load|app.index#appload]]
 * [[unload|app.index#appunload]]
+* [[beforeunload|app.index#appbeforeunload]]
 * [[position|app.index#appposition]]
 * [[session|app.index#appsession]]
 * [[resume|app.index#appresume]]

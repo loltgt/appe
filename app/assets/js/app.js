@@ -27,7 +27,7 @@ app._runtime = {
   name: '',
   locale: 'en',
   locale_dir: 'ltr',
-  storage: false,
+  storage: true,
   binary: false,
   compression: false,
   encryption: false,
@@ -89,9 +89,30 @@ app.unload = function(func) {
   }
 
   if (app._root.window.native == undefined) {
-    app.utils.addEvent('beforeunload', app._root.window, func);
+    app.utils.addEvent('unload', app._root.window, func);
   } else {
     app._root.server.onunload = func;
+  }
+}
+
+
+/**
+ * app.beforeunload
+ *
+ * Helper app before unload function DOM
+ *
+ * @param <Function> func
+ * @return
+ */
+app.beforeunload = function(func) {
+  if (typeof func != 'function') {
+    return app.stop('app.beforeunload', 'func');
+  }
+
+  if (app._root.window.native == undefined) {
+    app._root.window.onbeforeunload = func;
+  } else {
+    app._root.server.onbeforeunload = func;
   }
 }
 
@@ -167,16 +188,22 @@ app.session = function(callback, config, target) {
 
   app._runtime.system = app.utils.system();
 
-  if ('localStorage' in app._root.window === false) {
-    app._runtime.storage = 'sessionStorage';
-  } else if ('sessionStorage' in app._root.window === false) {
+  if (app._root.process == undefined) {
+    app._runtime.storage = 'storage';
+  } else if ('localStorage' in app._root.window == false || 'sessionStorage' in app._root.window == false) {
+    if ('localStorage' in app._root.window === false) {
+      app._runtime.storage = 'sessionStorage';
+    } else if ('sessionStorage' in app._root.window === false) {
+      app._runtime.storage = 'localStorage';
+    } else {
+      app._runtime.storage = false;
+    }
+  } else if (app._root.window.location.protocol != 'file:') {
+    app._runtime.storage = true;
+  } else if (app._runtime.system.name == 'chrome') {
     app._runtime.storage = 'localStorage';
   } else if (app._runtime.system.name == 'safari') {
     app._runtime.storage = 'sessionStorage';
-  } else if (app._root.process == undefined) {
-    app._runtime.storage = 'storage';
-  } else {
-    app._runtime.storage = 'localStorage';
   }
 
 
@@ -4097,7 +4124,6 @@ app.main.unload = function() {
  * @return
  */
 app.main.loadComplete = function(routine) {
-  console.log('app.main.loadComplete');
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
@@ -5606,7 +5632,6 @@ app.view.unload = function() {
  * @return
  */
 app.view.loadComplete = function(routine) {
-  console.log('app.view.loadComplete');
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
@@ -6362,7 +6387,7 @@ app.utils.system = function(purpose) {
           }
         }
 
-        system.navigator = name;
+        system.name = name;
 
         if (release) {
           system.release = parseFloat(release);
@@ -6517,7 +6542,7 @@ app.utils.proxy = function(deep, obj) {
 /**
  * app.utils.storage
  *
- * Storage utility, it stores persistent and non-persistent data
+ * Storage utility, it stores persistent (across the session) and non-persistent data
  *
  * available prototype methods:
  *  - set (key, value)
@@ -6537,17 +6562,18 @@ app.utils.storage = function(persists, method, key, value) {
     return app.error('app.utils.storage', [persists, method, key, value]);
   }
 
+  var self = app.utils.storage.prototype;
+  var _storage;
+
   if (! app._runtime.storage) {
     return app.stop('app.utils.storage', 'runtime');
+  } else if (app._runtime.storage != true) {
+    _storage = app._runtime.storage.toString();
   }
 
-  var self = app.utils.storage.prototype;
-
-  var _storage = app._runtime.storage.toString();
-
   self._prefix = 'appe.';
-  self._fn = persists ? _storage : 'sessionStorage';
-  self._persist = persists;
+  self._fn = _storage || (! persists ? 'sessionStorage' : 'localStorage');
+  self._persist = !! persists;
 
   if (self._fn in app._root.window === false) {
     return app.error('app.utils.storage', self._fn);

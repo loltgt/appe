@@ -807,7 +807,6 @@ app.main.unload = function() {
  * @return
  */
 app.main.loadComplete = function(routine) {
-  console.log('app.main.loadComplete');
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {

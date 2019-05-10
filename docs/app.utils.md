@@ -122,7 +122,7 @@ position:
 ## app.utils.storage
 
 
-#### Storage utility, it stores persistent and non-persistent data
+#### Storage utility, it stores persistent (across the session) and non-persistent data
 
 
 ```js
@@ -185,7 +185,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [378](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L378)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [379](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L379)
 
 
  
@@ -221,7 +221,7 @@ to_encode
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [534](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L534)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [535](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L535)
 
 
  
@@ -246,7 +246,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [596](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L596)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [597](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L597)
 
 
  
@@ -271,7 +271,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [625](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L625)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [626](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L626)
 
 
  
@@ -300,7 +300,7 @@ classes
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [677](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L677)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [678](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L678)
 
 
  
@@ -330,7 +330,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [716](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L716)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [717](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L717)
 
 
  
@@ -387,7 +387,7 @@ formatted_date
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [770](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L770)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [771](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L771)
 
 
  
@@ -411,7 +411,7 @@ number
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [832](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L832)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [833](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L833)
 
 
  
@@ -443,7 +443,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [852](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L852)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [853](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L853)
 
 
  
@@ -470,7 +470,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [889](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L889)
+- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [890](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L890)
 
 
  

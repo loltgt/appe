@@ -43,12 +43,12 @@
 Создать {{placeholder}}
 Создать новый {{placeholder}}
 Открыть {{placeholder}}
-Изменить {{заполнитель}}
+Изменить {{placeholder}}
 обновление {{placeholder}}
 Удалить {{placeholder}}
 Закрыть {{placeholder}}
 Изменить {{placeholder}} "{{title}}"
-Изменить {{placeholder}} "{{name}}" \u2013 {{заглавие}}
+Изменить {{placeholder}} "{{name}}" \u2013 {{title}}
 {{placeholder}} список
 Вы уверены, что {{placeholder}} {{name}} {{title}}?
 ВНИМАНИЕ! Необратимое действие, все {{placeholder}} данные будут удалены навсегда, будьте осторожны.

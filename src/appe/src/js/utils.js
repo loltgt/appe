@@ -58,7 +58,7 @@ app.utils.system = function(purpose) {
           }
         }
 
-        system.navigator = name;
+        system.name = name;
 
         if (release) {
           system.release = parseFloat(release);
@@ -213,7 +213,7 @@ app.utils.proxy = function(deep, obj) {
 /**
  * app.utils.storage
  *
- * Storage utility, it stores persistent and non-persistent data
+ * Storage utility, it stores persistent (across the session) and non-persistent data
  *
  * available prototype methods:
  *  - set (key, value)
@@ -233,17 +233,18 @@ app.utils.storage = function(persists, method, key, value) {
     return app.error('app.utils.storage', [persists, method, key, value]);
   }
 
+  var self = app.utils.storage.prototype;
+  var _storage;
+
   if (! app._runtime.storage) {
     return app.stop('app.utils.storage', 'runtime');
+  } else if (app._runtime.storage != true) {
+    _storage = app._runtime.storage.toString();
   }
 
-  var self = app.utils.storage.prototype;
-
-  var _storage = app._runtime.storage.toString();
-
   self._prefix = 'appe.';
-  self._fn = persists ? _storage : 'sessionStorage';
-  self._persist = persists;
+  self._fn = _storage || (! persists ? 'sessionStorage' : 'localStorage');
+  self._persist = !! persists;
 
   if (self._fn in app._root.window === false) {
     return app.error('app.utils.storage', self._fn);

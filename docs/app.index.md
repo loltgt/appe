@@ -49,6 +49,30 @@ position:
  
 
 
+## app.beforeunload
+
+
+#### Helper app before unload function DOM
+
+
+```js
+<Function>
+```
+
+arguments: 
+```js
+<Function> func
+```
+
+returns.
+
+position: 
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [107](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L107)
+
+
+ 
+
+
 ## app.position
 
 
@@ -65,7 +89,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [106](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L106)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [127](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L127)
 
 
  
@@ -99,7 +123,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [141](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L141)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [162](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L162)
 
 
  
@@ -129,7 +153,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [400](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L400)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [427](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L427)
 
 
  
@@ -153,7 +177,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [454](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L454)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [481](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L481)
 
 
  
@@ -185,7 +209,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [483](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L483)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [510](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L510)
 
 
  
@@ -212,7 +236,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [516](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L516)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [543](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L543)
 
 
  
@@ -245,7 +269,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [559](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L559)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [586](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L586)
 
 
  
@@ -277,7 +301,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [605](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L605)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [632](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L632)
 
 
  
@@ -308,7 +332,7 @@ arguments:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [726](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L726)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [753](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L753)
 
 
  
@@ -333,7 +357,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [788](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L788)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [815](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L815)
 
 
  
@@ -350,7 +374,7 @@ position:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [853](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L853)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [880](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L880)
 
 
  
@@ -367,7 +391,7 @@ position:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [861](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L861)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [888](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L888)
 
 
  
@@ -402,7 +426,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [879](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L879)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [906](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L906)
 
 
  
@@ -433,7 +457,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1050](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1050)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1077](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1077)
 
 
  
@@ -464,7 +488,7 @@ to_replace
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1103](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1103)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1130](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1130)
 
 
  
@@ -491,7 +515,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1230](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1230)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1257](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1257)
 
 
  
@@ -526,7 +550,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1247](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1247)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1274](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1274)
 
 
  
@@ -561,7 +585,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1280](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1280)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1307](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1307)
 
 
  
@@ -585,7 +609,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1345](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1345)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1372](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1372)
 
 
  
@@ -615,7 +639,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1369](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1369)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1396](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1396)
 
 
  
@@ -637,7 +661,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1417](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1417)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1444](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1444)
 
 
  
@@ -661,7 +685,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1430](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1430)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1457](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1457)
 
 
  
@@ -680,7 +704,7 @@ position:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1453](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1453)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1480](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1480)
 
 
  
@@ -702,7 +726,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1465](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1465)
+- [src/appe/src/js/index.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js)   line: [1492](https://github.com/leolweb/appe/blob/master/src/appe/src/js/index.js#L1492)
 
 
  

@@ -1,4 +1,4 @@
-Ce fichier est incompatible avec la version en cours d'exécution: {{_app_version}}
+Ce fichier est incompatible avec la version en cours d'exécution: {{app_version}}
 Une erreur s'est produite lors de l'exécution.
 Veuillez recharger l'application.
 Ce format de fichier ne peut pas être ouvert.

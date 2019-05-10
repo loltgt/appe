@@ -1467,7 +1467,6 @@ app.view.unload = function() {
  * @return
  */
 app.view.loadComplete = function(routine) {
-  console.log('app.view.loadComplete');
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {

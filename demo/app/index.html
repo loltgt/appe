@@ -148,8 +148,8 @@ main.setup = function(data) {
 
   if (! __data) { return; }
 
-  var archive_id = app.memory.get('archive_id');
-  var category_id = app.memory.get('category_id');
+  var archive_id = app.memory.get('archive_id') || 1;
+  var category_id = app.memory.get('category_id') || 1;
 
   var archive_items = data_archive[archive_id][category_id].items;
 
@@ -212,5 +212,5 @@ main.action = function(element, event, extra) {
 
 
 app.load(app.main.load);
-app.unload(app.main.unload);
+app.beforeunload(app.main.unload);
 </script>

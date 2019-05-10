@@ -48,7 +48,7 @@
 删除 {{placeholder}}
 关闭 {{placeholder}}
 修改 {{placeholder}} "{{title}}"
-修改 {{placeholder}} "{{name}}" \u2013 {{标题}}
+修改 {{placeholder}} "{{name}}" \u2013 {{title}}
 {{placeholder}} 列表
 您确定 {{placeholder}} {{name}} {{title}}？
 小心！不可逆转的行动，所有数据 {{placeholder}} 将被永久删除，请小心。
