@@ -43,7 +43,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [25](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L25)
+- [src/appe/src/js/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js)   line: [25](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js#L25)
 
 
  
@@ -67,7 +67,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [38](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L38)
+- [src/appe/src/js/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js)   line: [38](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js#L38)
 
 
  
@@ -95,7 +95,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [52](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L52)
+- [src/appe/src/js/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js)   line: [52](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js#L52)
 
 
  
@@ -119,7 +119,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [65](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L65)
+- [src/appe/src/js/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js)   line: [65](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js#L65)
 
 
  
@@ -138,7 +138,7 @@ position:
 returns.
 
 position: 
-- [src/appe/src/js/store.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js)   line: [77](https://github.com/leolweb/appe/blob/master/src/appe/src/js/store.js#L77)
+- [src/appe/src/js/store.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js)   line: [77](https://github.com/loltgt/appe/blob/master/src/appe/src/js/store.js#L77)
 
 
  

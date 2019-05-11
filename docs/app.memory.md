@@ -43,7 +43,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [25](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L25)
+- [src/appe/src/js/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js)   line: [25](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js#L25)
 
 
  
@@ -68,7 +68,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [39](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L39)
+- [src/appe/src/js/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js)   line: [39](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js#L39)
 
 
  
@@ -96,7 +96,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [53](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L53)
+- [src/appe/src/js/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js)   line: [53](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js#L53)
 
 
  
@@ -120,7 +120,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [66](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L66)
+- [src/appe/src/js/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js)   line: [66](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js#L66)
 
 
  
@@ -139,7 +139,7 @@ position:
 returns.
 
 position: 
-- [src/appe/src/js/memory.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js)   line: [78](https://github.com/leolweb/appe/blob/master/src/appe/src/js/memory.js#L78)
+- [src/appe/src/js/memory.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js)   line: [78](https://github.com/loltgt/appe/blob/master/src/appe/src/js/memory.js#L78)
 
 
  

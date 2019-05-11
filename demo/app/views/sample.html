@@ -68,7 +68,6 @@
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
 
 <script type="text/javascript" src="../config.js"></script>
-<script type="text/javascript" src="../locale.min.js"></script>
 
 
 <script type="text/javascript">
@@ -114,7 +113,7 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
     .replace('{type}', data_row.type)
     .replace('{date}', app.utils.dateFormat(data_row.date, 'd/m/Y'))
     .replace('{amount}', app.utils.numberFormat(data_row.amount, 2, ',', '.') + ' coin')
-    .replace('{status}', data_row.status)
+    .replace('{status}', data_row.status);
 
   return row;
 }

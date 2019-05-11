@@ -40,7 +40,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [20](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L20)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [20](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L20)
 
 
  
@@ -73,7 +73,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [295](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L295)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [295](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L295)
 
 
  
@@ -100,7 +100,7 @@ source
 returns.
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [558](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L558)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [558](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L558)
 
 
  
@@ -134,7 +134,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [756](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L756)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [756](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L756)
 
 
  
@@ -161,7 +161,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [804](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L804)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [804](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L804)
 
 
  
@@ -194,7 +194,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [863](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L863)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [863](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L863)
 
 
  
@@ -219,7 +219,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [895](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L895)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [895](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L895)
 
 
  
@@ -246,7 +246,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [927](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L927)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [927](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L927)
 
 
  
@@ -273,7 +273,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [961](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L961)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [961](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L961)
 
 
  
@@ -300,7 +300,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [994](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L994)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [994](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L994)
 
 
  
@@ -322,7 +322,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js)   line: [1026](https://github.com/leolweb/appe/blob/master/src/appe/src/js/os.js#L1026)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [1026](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L1026)
 
 
  

@@ -1,65 +1,69 @@
 
-# Configure
+# How to configure
+
+Read the comment inside the global _"appe__config"_ object.
 
 ```js
-window.appe__config = {
+appe__config = {
   "app_ns": "demo", // the namespace of the app (required)
   "launcher_name": "LAUNCH", // the name of the launcher (required)
   "app_name": "App name", // the name of the app (required)
-  "language": "en", // default language – null to auto-select (required)
-  "compression": false,
-  "encryption": true,
-  "binary": true, // save to binary file
-  "secret_passphrase": "test",
-  "verify_checksum": true, // (required)
-  "debug": true,
-  "schema": [ // (required)
+  "language": "en", // default language, set to null for auto-select (required)
+  "compression": false, // session file compression
+  "encryption": true, // session file encryption
+  "binary": true, // saves session to binary file
+  "secret_passphrase": "test", // the secret passphrase needed with session file compression active
+  "verify_checksum": true, // whenever to verify JSON file checksum (required)
+  "debug": true, // turns on debug
+  "schema": [ // the file schema (required)
     "file",
     ...
   ],
-  "events": { // (required)
-    "event": "selection",
+  "events": { // app events, { "event name": "event slug", ... } (required)
+    "event-name": "event-slug",
     ...
   },
-  "routes": { // (required)
-    "route": {
-      "action-1": "file",
-      "action-2": "file",
-      "action-3": "file",
+  "routes": { // app routes, { "parent route slug/filename": { "child route event slug": "child route filename", ... }, ... } (required)
+    "parent-route-filename": {
+      "child-route-event-slug": "child-route-filename",
+      "child-route-event-slug-edit": "child-route-filename-edit",
+      "child-route-event-slug-whole": "child-route-filename-whole",
       ...
     },
     ...
   },
-  "default_route": "action-1", // default route (required)
+  "default_route": "parent-route-filename", // default route (required)
   "default_event": "event", // default event (required)
-  "base_path": "app", // where is located app folder (required)
-  "save_path": "save", // where is located save folder (required)
-  "open_attempts": 10, // how many attempts to resume file session and load extensions (required)
-  "alt": {
-    "exec_folder": "alt", // where is located app folder
-    "exec_platform": {
+  "base_path": "app", // where is located the app folder (required)
+  "save_path": "save", // where is located the save folder (required)
+  "open_attempts": 10, // number of attempts to resume file session or load extensions (required)
+  "alt": { // alternate execution, used when occurring browser or system limitations, it is a fallback
+    "exec_folder": "alt", // where is located the alternate folder
+    "exec_platform": { // system specifics
       "win": "LAUNCH.win.exe",
       "mac": "LAUNCH.mac.app",
       "hta": "LAUNCH.hta"
     }
   }
-  "aux": [
-  	{"": {
-
-  	}}
+  "aux": [ // extensions, asyncronous loaded
+  	{
+      "file": "filename.js", // extension filename (required)
+      "fn": "extension_global_scope", // the global name to declare inside the extension, used to verify load and expose features (required)
+      "memo": false // stores the extension exposed features into app global store
+  	}
   ],
-  "license": {
-    "text": "LGPL-3.0-or-later",
-    "file": "../LICENSE"
+  "license": { // license app related
+    "text": "LGPL-3.0-or-later", // textile license
+    "file": "LICENSE.txt" // file license
   },
-  "file": {
+  "file": { // session file settings
     "binary": true,
     "compress": true,
     "filename_prefix": "appe_save",
     "filename_separator": "_",
-    "filename_date_format: "Y-m-d_H-M-S",
-	},
-  "csv": {
+    "filename_date_format": "Y-m-d_H-M-S",
+  },
+  "csv": { // csv export settings
     "filename_prefix": "csv_export",
     "filename_separator": "_",
     "filename_date_format": "Y-m-d_H-M-S",

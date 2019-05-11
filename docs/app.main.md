@@ -38,7 +38,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [18](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L18)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [18](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L18)
 
 
  
@@ -95,7 +95,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [149](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L149)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [149](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L149)
 
 
  
@@ -138,7 +138,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [562](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L562)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [562](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L562)
 
 
  
@@ -163,16 +163,16 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [670](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L670)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [670](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L670)
 
 
  
 
 
-## app.main.unload
+## app.main.beforeunload
 
 
-#### Default "main" unload function
+#### Default "main" before unload function
 
 
 ```js
@@ -185,7 +185,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [789](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L789)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [789](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L789)
 
 
  
@@ -214,7 +214,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [809](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L809)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [809](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L809)
 
 
  
@@ -236,7 +236,7 @@ globals:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js)   line: [833](https://github.com/leolweb/appe/blob/master/src/appe/src/js/main.js#L833)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [833](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L833)
 
 
  

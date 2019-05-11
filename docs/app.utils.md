@@ -33,7 +33,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [17](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L17)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [17](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L17)
 
 
  
@@ -59,7 +59,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [141](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L141)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [141](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L141)
 
 
  
@@ -85,7 +85,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [164](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L164)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [164](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L164)
 
 
  
@@ -113,7 +113,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [186](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L186)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [186](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L186)
 
 
  
@@ -149,7 +149,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [231](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L231)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [231](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L231)
 
 
  
@@ -185,7 +185,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [379](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L379)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [379](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L379)
 
 
  
@@ -221,7 +221,7 @@ to_encode
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [535](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L535)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [535](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L535)
 
 
  
@@ -246,7 +246,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [597](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L597)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [597](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L597)
 
 
  
@@ -271,7 +271,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [626](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L626)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [626](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L626)
 
 
  
@@ -300,7 +300,7 @@ classes
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [678](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L678)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [678](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L678)
 
 
  
@@ -330,7 +330,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [717](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L717)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [717](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L717)
 
 
  
@@ -387,7 +387,7 @@ formatted_date
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [771](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L771)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [771](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L771)
 
 
  
@@ -411,7 +411,7 @@ number
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [833](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L833)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [833](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L833)
 
 
  
@@ -443,7 +443,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [853](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L853)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [853](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L853)
 
 
  
@@ -470,7 +470,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js)   line: [890](https://github.com/leolweb/appe/blob/master/src/appe/src/js/utils.js#L890)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [890](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L890)
 
 
  

@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.0~beta
+ * @version 1.0.0-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
@@ -654,10 +654,9 @@ app.openSessionFile = function() {
     return app.error('app.openSessionFile', 'schema');
   }
 
-  var _current_timestamp = new Date();
-  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
-
+  var _current_timestamp = app.utils.dateFormat(true, 'Q');
   var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
+
   var _app_name = app._runtime.name.toString();
 
 
@@ -702,12 +701,11 @@ app.openSessionFile = function() {
     app.utils.cookie('set', 'last_opened_file', _filename);
     app.utils.cookie('set', 'last_session', _current_timestamp_enc);
 
-
     app.memory.set('last_opened_file', _filename);
+    app.memory.set('last_session', _current_timestamp_enc);
 
     app.memory.set('last_stored', _current_timestamp);
     app.memory.set('last_time', _current_timestamp);
-    app.memory.set('last_session', _current_timestamp_enc);
 
 
     _is_start ? app.start.redirect(true) : app._root.window.location.reload();
@@ -785,21 +783,21 @@ app.saveSessionFile = function() {
 
   var source = {};
 
-  var _current_timestamp = new Date();
+  var _current_time = new Date();
 
 
   Array.prototype.forEach.call(schema, function(key) {
     source[key] = store[_app_name][key];
   });  
 
-  source.file = app.os.generateJsonHead(source, _current_timestamp);
+  source.file = app.os.generateJsonHead(source, _current_time);
 
 
   app.os.fileSessionSave(function(filename) {
     if (!! app._runtime.debug) {
       console.info('save', '\t', filename);
     }
-  }, source, _current_timestamp);
+  }, source, _current_time);
 }
 
 
@@ -823,9 +821,7 @@ app.newSession = function() {
 
   var _app_name = app._runtime.name.toString();
 
-  var _current_timestamp = new Date();
-  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
-
+  var _current_timestamp = app.utils.dateFormat(true, 'Q');
   var _current_timestamp_enc = app.utils.base64('encode', _current_timestamp);
 
 
@@ -847,12 +843,13 @@ app.newSession = function() {
     app.utils.cookie('set', 'last_session', _current_timestamp_enc);
 
 
-    app.memory.del('last_opened_file');
     app.memory.del('file_saves');
+    app.memory.del('last_opened_file');
+
+    app.memory.set('last_session', _current_timestamp_enc);
 
     app.memory.set('last_stored', _current_timestamp);
     app.memory.set('last_time', _current_timestamp);
-    app.memory.set('last_session', _current_timestamp_enc);
 
 
     for (var i in schema) {
@@ -2703,8 +2700,7 @@ app.controller.store = function(callback, fn, schema, data) {
   }
 
 
-  var _current_timestamp = new Date();
-  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
+  var _current_timestamp = app.utils.dateFormat(true, 'Q');
 
 
   var keys = Object.keys(data);
@@ -4097,13 +4093,13 @@ app.main.load = function() {
 
 
 /**
- * app.main.unload
+ * app.main.beforeunload
  *
- * Default "main" unload function
+ * Default "main" before unload function
  *
  * @return <Boolean>
  */
-app.main.unload = function() {
+app.main.beforeunload = function() {
   if (app.memory.has('save_reminded') || app.memory.get('last_time') === app.memory.get('last_stored')) {
     return;
   }
@@ -5591,18 +5587,18 @@ app.view.load = function() {
 
 
 /**
- * app.view.unload
+ * app.view.beforeunload
  *
- * Default "view" unload function
+ * Default "view" before unload function
  *
  * @global <Object> appe__control
  * @return <Boolean>
  */
-app.view.unload = function() {
+app.view.beforeunload = function() {
   var control = app._root.server.appe__control;
 
   if (! control) {
-    return app.error('app.view.unload', 'control');
+    return app.error('app.view.beforeunload', 'control');
   }
 
   if (control.temp.form && ! control.temp.form_submit) {
@@ -5610,7 +5606,7 @@ app.view.unload = function() {
       var _changes = app.view.getFormData(control.temp.form_elements);
       _changes = _changes && JSON.stringify(_changes);
     } catch (err) {
-      return app.error('app.view.unload', err);
+      return app.error('app.view.beforeunload', err);
     }
 
     if (control.temp.form_changes !== _changes) {

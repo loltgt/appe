@@ -780,13 +780,13 @@ app.main.load = function() {
 
 
 /**
- * app.main.unload
+ * app.main.beforeunload
  *
- * Default "main" unload function
+ * Default "main" before unload function
  *
  * @return <Boolean>
  */
-app.main.unload = function() {
+app.main.beforeunload = function() {
   if (app.memory.has('save_reminded') || app.memory.get('last_time') === app.memory.get('last_stored')) {
     return;
   }

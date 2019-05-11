@@ -334,8 +334,7 @@ foreach ($diri as $brs) {
 			$docs[$three][$subthree][$i] = $doc;
 
 
-		//TODO TEMP
-		$file_url = "https://github.com/leolweb/appe/blob/master/{$path}/{$filename}";
+		$file_url = "https://github.com/loltgt/appe/blob/master/{$path}/{$filename}";
 
 		$l = $index;
 		$line_url = "{$file_url}#L{$l}";
@@ -512,7 +511,8 @@ ksort($menu);
 
 $text  = "\n";
 $text .= "* #### [[{appe}|Home]]\n";
-$text .= "* #### [[Configure]]\n";
+$text .= "* #### [[How to configure|Configure]]\n";
+$text .= "* #### [[Source files and tools|Source-and-Tools]]\n";
 $text .= "* #### [[app. functions and hooks|app]]\n";
 $text .= "\n  \n";
 foreach ($menu as $item) $text .= implode("\n", $item) . "\n";
@@ -523,6 +523,10 @@ file_put_contents($base . '/docs/wiki/_Sidebar.md', $text);
 
 copy($base . '/docs/_Configure.md', $base . '/docs/wiki/Configure.md');
 copy($base . '/docs/_Home.md', $base . '/docs/wiki/Home.md');
+copy($base . '/docs/_Introduction.md', $base . '/docs/wiki/Introduction.md');
+copy($base . '/docs/_Recipe-Customize-Demo-Cars-to-Dinos.md', $base . '/docs/wiki/Recipe-Customize-Demo-Cars-to-Dinos.md');
+copy($base . '/docs/_Recipe-Extend-Export-to-PDF.md', $base . '/docs/wiki/Recipe-Extend-Export-to-PDF.md');
+copy($base . '/docs/_Source-and-Tools.md', $base . '/docs/wiki/Source-and-Tools.md');
 
 
 file_put_contents($base . '/docs.tmp', print_r($docs, true));

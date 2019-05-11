@@ -15,18 +15,24 @@ appe__demo = function() {
     console.info('aux: appe_demo', '\t', 'skip demo data');
 
     return;
+  } else {
+    console.info('aux: appe_demo', '\t', 'load demo data');
   }
 
 
-  var _default = function() {
-    var demo_file = app.utils.base64('encode', src_file);
-    var demo_session = app.utils.base64('encode', app.utils.dateFormat(true, 'Q'));
+  var _session = function() {
+    var current_file = app.utils.base64('encode', src_file);
 
-    app.utils.cookie('set', 'last_opened_file', demo_file);
-    app.utils.cookie('set', 'last_session', demo_session);
+    app.utils.cookie('set', 'last_opened_file', current_file);
+    app.utils.cookie('set', 'last_session', current_timestamp_enc);
 
-    app.memory.set('last_opened_file', demo_file);
-    app.memory.set('last_session', demo_session);
+    app.memory.set('last_opened_file', current_file);
+    app.memory.set('last_session', current_timestamp_enc);
+  }
+
+  var _timers = function() {
+    app.memory.set('last_stored', current_timestamp);
+    app.memory.set('last_time', current_timestamp);
   }
 
   var _complete = function(loaded) {
@@ -37,7 +43,7 @@ appe__demo = function() {
     }
 
     if (app._runtime.storage) {
-      _default();
+      _session();
     }
 
     var data = app._root.server[_app_name];
@@ -45,6 +51,10 @@ appe__demo = function() {
     store[file_heads] = data;
 
     app.controller.store(function() {
+      if (app._runtime.storage) {
+        _timers();
+      }
+
       callback(routine);
 
       if (target === undefined) {
@@ -82,6 +92,9 @@ appe__demo = function() {
 
   store[_app_name] = {};
 
+
+  var current_timestamp = app.utils.dateFormat(true, 'Q');
+  var current_timestamp_enc = app.utils.base64('encode', current_timestamp);
 
   var src_file = 'demo_save_2019-03-29_14-29-42_1.js';
 

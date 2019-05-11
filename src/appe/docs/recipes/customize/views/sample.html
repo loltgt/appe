@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
+</head>
+
+<body class="view view_list">
+<h1 id="view-title" class="page-header">Sample</h1>
+<h2 id="section-title" class="sub-header">Vehicle List</h2>
+
+
+<div id="section-actions-top" class="section-actions section-actions-top clearfix">
+  <div class="pull-right">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="control.action(this, 'export', 'toggler')">Export <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'csv'); return false;">Export CSV</a></li>
+        <li><a href="javascript:" onclick="control.action(this, 'export', 'clipboard'); return false;">Copy to clipboard</a></li>
+      </ul>
+    </div>
+    <button type="button" class="btn btn-default btn-sm" onclick="control.action(this, 'print')">Print</button>
+  </div>
+  <div>
+    <a class="btn btn-gray" href="../index.html?sample&add" target="_parent">Add Item &raquo;</a>
+  </div>
+</div>
+
+<form id="form-data" class="form form-data" autocomplete="off" validate>
+<div class="table-responsive">
+  <table id="table-data" class="table table-data">
+    <thead>
+      <tr>
+        <th class="hidden-print">Actions</th>
+        <th>ID</th>
+        <th class="text-nowrap">Vehicle Name</th>
+        <th class="text-nowrap">Vehicle Type</th>
+        <th class="text-nowrap">Manufactured</th>
+        <th class="text-nowrap">Value Price</th>
+
+        <th>Rent Dino</th>
+        <th>Rent Period</th>
+        <th>Rent Amount</th>
+
+        <th class="hidden-print">Rent</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="tpl">
+        <td class="hidden-print">
+          <a class="action btn btn-secondary" href="../index.html?sample&edit={id}" onclick="control.action(this, 'edit'); return false;" target="_parent">Edit</a>
+          <a class="action btn btn-danger" href="../index.html?sample&delete={id}" onclick="control.action(this, 'delete'); return false;" target="_parent">Delete</a>
+        </td>
+        <td>{id}</td>
+        <td>{title}</td>
+        <td>{type}</td>
+        <td class="text-nowrap">{date}</td>
+        <td class="text-nowrap">{amount}</td>
+
+        <td>{rent_dino}</td>
+        <td>{rent_period}</td>
+        <td>{rent_amount}</td>
+
+        <td class="hidden-print">
+          <a class="action btn btn-link btn-sm" href="../index.html?sample&rent={id}" onclick="control.action(this, 'rent'); return false;" target="_parent">RENT</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</form>
+
+
+<script type="text/javascript" src="../assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="../config.js"></script>
+
+
+<script type="text/javascript">
+var control = appe__control = {};
+
+
+
+control.handle = function(data) {
+  var data_sample = data['sample'];
+  var data_items = data['items'];
+
+  var table = document.getElementById('table-data');
+
+  if (! data_sample || ! data_items) {
+    return app.error('control.handle', 'data*');
+  }
+
+
+  var _control = app.view.control(null, data_sample);
+
+  _control.begin();
+
+
+  _control.fillTable(table, null, null, data_items);  // passing down "data_items" to extra argument
+
+
+  _control.end();
+}
+
+
+
+control.renderRow = function(tpl_row, id_row, data_row, extra) {
+  if (! tpl_row || ! data_row) {
+    return app.error('control.renderRow', arguments);
+  }
+
+
+  var items_extra = extra[0];
+
+
+  var row = tpl_row.cloneNode(true);
+
+  row.setAttribute('data-index', id_row);
+
+  data_row.rent = data_row.rent || { dino: 0, period: 1, amount: 0.00 };  // to prevent is not defined error, fill with empty data
+
+  row.innerHTML = row.innerHTML
+    .replace(/\{id\}/g, data_row.id)
+    .replace('{title}', data_row.title)
+    .replace('{type}', data_row.type)
+    .replace('{date}', app.utils.dateFormat(data_row.date, 'd/m/Y'))
+    .replace('{amount}', app.utils.numberFormat(data_row.amount, 2, ',', '.') + ' coin')
+    .replace('{status}', data_row.status)
+    .replace('{rent_dino}', data_row.rent.dino ? items_extra[data_row.rent.dino].name : '&ndash;')
+    .replace('{rent_period}',data_row.rent.period + ' month')
+    .replace('{rent_amount}', app.utils.numberFormat(data_row.rent.amount, 2, ',', '.') + ' coin &times; month');
+
+  return row;
+}
+
+
+
+control.action = function(element, event, extra) {
+  var data = app.data();
+
+  var data_sample = data['sample'];
+
+  var table = document.getElementById('table-data');
+
+  if (! data_sample) {
+    return app.error('control.action', arguments);
+  }
+
+  if (! element || typeof event !== 'string') {
+    return app.error('control.action', arguments);
+  }
+
+
+  var _action = app.view.action([ 'edit', 'delete', 'export', 'print', 'rent' ], event, element, data_sample);
+
+  _action.begin();
+
+
+  var id = _action.getID();
+
+  var _data_updated = {};
+
+
+  var _events = {};
+
+
+  _events.edit = function() {
+    return _action.edit(_data_updated, false);
+  }
+
+
+  _events.delete = function() {
+    _data_updated['sample'] = data_sample;
+
+    delete _data_updated['sample'][id];
+
+    return _action.delete(_data_updated, true, 'Vehicle', id);
+  }
+
+
+  _events.export = function(_event) {
+    var _dropdown = element.parentNode.parentNode.parentNode;
+
+    app.view.sub(_event, element, table);
+
+    return;
+  }
+
+
+  _events.print = function() {
+    return _action.print();
+  }
+
+
+
+  // Custom action example
+  _events.rent = function() {
+    _action.rent = _action.prepare;
+
+    return _action.rent();
+  }
+
+
+
+  var ctl = _events[event](extra);
+
+  app.view.send(ctl);
+
+  _action.end();
+}
+
+
+
+app.load(app.view.load);
+</script>
+</body>
+</html>

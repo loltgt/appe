@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="stylesheet" type="text/css" href="assets/css/lib/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="assets/css/app.min.css">
+<title>{appe}</title>
+</head>
+
+<body class="main">
+<nav id="master-header" class="master-header navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#master-navigation" aria-expanded="true" aria-controls="master-navigation" onclick="main.action(this, 'menu')">
+      <span class="sr-only" data-localize="action">Menu</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <span id="brand" class="navbar-brand hidden-xs">{appe}</span>
+    <div class="navbar-form navbar-right">
+      <div class="form-group">
+        <input id="main-action-open-session-header" type="file" style="display: none;" hidden>
+        <button type="button" id="main-action-new-header" class="btn btn-action-new main-action-new" data-localize="session">New</button>
+        <button type="button" id="main-action-open-header" class="btn btn-action-open main-action-open" data-open-input="#main-action-open-session-header" data-localize="session">Open</button>
+        <button type="button" id="main-action-save-header" class="btn btn-action-save main-action-save" data-localize="session">Save</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="master-main container-fluid">
+  <div class="row">
+    <nav id="master-navigation" class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar">
+        <li><a href="index.html?sample" data-view="sample">Sample</a></li>
+      </ul>
+      <ul class="nav nav-sidebar">
+        <li><a href="index.html?about" data-view="about" data-localize="action">About</a></li>
+      </ul>
+    </nav>
+    <div id="master-content" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 content">
+      <iframe id="view" class="content-view" scrolling="yes" frameborder="no" onload="parent.parent.scrollTo(0, 0)"></iframe>
+    </div>
+  </div>
+</main>
+
+<footer id="master-footer" class="master-footer footer">
+  <div class="container-fluid text-center">
+    <p class="visible-md-inline-block visible-lg-inline-block" data-localize="session">Should save before close the application!</p>
+    <button type="button" id="main-action-save-footer" class="btn btn-lg btn-big btn-action-save main-action-save" data-localize="session">Save</button>
+  </div>
+</footer>
+
+
+<script type="text/javascript" src="assets/js/app.min.js"></script>
+
+<script type="text/javascript" src="assets/js/lib/crypto-js/crypto-js.min.js" async defer></script>
+<script type="text/javascript" src="assets/js/lib/pako/pako.min.js" async defer></script>
+
+<script type="text/javascript" src="config.js"></script>
+
+
+<script type="text/javascript">
+var main = appe__main = {};
+
+
+
+main.handle = function(handler, event, ctl) {
+  if (! handler || ! event || ! ctl) {
+    return app.error('main.handle', arguments);
+  }
+
+  var _events = app.utils.extendObject({}, handler);
+
+
+  _events.selection = function() {
+    try {
+      var _data = JSON.parse(ctl.data);
+
+      app.memory.set('archive_id', parseInt(_data.id));
+    } catch {
+      return;
+    }
+
+    return handler.selection();
+  }
+
+
+
+  _events.rent = _events.prepare; // alias to "prepare" aka "app.main.handle.prototype.prepare"
+
+
+
+  _events[event]();
+}
+
+
+
+
+main.action = function(element, event, extra) {
+  if (! element || ! event) {
+    return app.error('main.action', arguments);
+  }
+
+  var _action = app.main.action([ 'menu' ], event, element);
+
+  _action.begin();
+
+
+  var _events = {};
+
+
+  _events.menu = function() {
+    return _action.menu(element, event);
+  }
+
+
+  _events[event](extra);
+
+  _action.end();
+}
+
+
+
+app.load(app.main.load);
+app.beforeunload(app.main.beforeunload);
+</script>

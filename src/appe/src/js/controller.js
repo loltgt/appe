@@ -172,8 +172,7 @@ app.controller.store = function(callback, fn, schema, data) {
   }
 
 
-  var _current_timestamp = new Date();
-  _current_timestamp = app.utils.dateFormat(_current_timestamp, 'Q');
+  var _current_timestamp = app.utils.dateFormat(true, 'Q');
 
 
   var keys = Object.keys(data);

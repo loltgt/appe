@@ -1426,18 +1426,18 @@ app.view.load = function() {
 
 
 /**
- * app.view.unload
+ * app.view.beforeunload
  *
- * Default "view" unload function
+ * Default "view" before unload function
  *
  * @global <Object> appe__control
  * @return <Boolean>
  */
-app.view.unload = function() {
+app.view.beforeunload = function() {
   var control = app._root.server.appe__control;
 
   if (! control) {
-    return app.error('app.view.unload', 'control');
+    return app.error('app.view.beforeunload', 'control');
   }
 
   if (control.temp.form && ! control.temp.form_submit) {
@@ -1445,7 +1445,7 @@ app.view.unload = function() {
       var _changes = app.view.getFormData(control.temp.form_elements);
       _changes = _changes && JSON.stringify(_changes);
     } catch (err) {
-      return app.error('app.view.unload', err);
+      return app.error('app.view.beforeunload', err);
     }
 
     if (control.temp.form_changes !== _changes) {

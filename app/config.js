@@ -21,14 +21,14 @@ appe__config = {
     "add": "add",
     "edit": "edit",
     "delete": "delete",
-    "list": "list",
+    "list": "list"
   },
   "routes": {
     "sample": {
       "list": "sample-wide-list",
       "add": "sample-edit",
       "edit": "sample-edit",
-      "delete": "sample",
+      "delete": "sample"
     },
     "about": {}
   },

@@ -16,14 +16,13 @@
     "copy-docs": "cp -Rv ./appe/docs/wiki/*.md ../docs/"
   },
   "author": "Leonardo Laureti",
-  "license": "LGPL-3.0-or-later",
+  "license": "MIT",
   "dependencies": {
-    "bootstrap": "^3.4.1",
-    "file-saver": "^2.0.1",
-    "jquery": "^3.3.1"
+    "bootstrap": "^3.4.1"
   },
   "devDependencies": {
     "clean-css": "^4.2.1",
+    "electron-forge": "^5.2.4",
     "uglify-js": "^3.5.3"
   }
 }

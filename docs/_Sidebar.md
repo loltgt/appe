@@ -1,6 +1,7 @@
 
 * #### [[{appe}|Home]]
-* #### [[Configure]]
+* #### [[How to configure|Configure]]
+* #### [[Source files and tools|Source-and-Tools]]
 * #### [[app. functions and hooks|app]]
 
   
@@ -83,7 +84,7 @@
 * [[handle|app.main#appmainhandle]]
 * [[action|app.main#appmainaction]]
 * [[load|app.main#appmainload]]
-* [[unload|app.main#appmainunload]]
+* [[beforeunload|app.main#appmainbeforeunload]]
 * [[loadComplete|app.main#appmainloadComplete]]
 * [[setup|app.main#appmainsetup]]
 
@@ -99,7 +100,7 @@
 * [[convertTableCSV|app.view#appviewconvertTableCSV]]
 * [[copyToClipboard|app.view#appviewcopyToClipboard]]
 * [[load|app.view#appviewload]]
-* [[unload|app.view#appviewunload]]
+* [[beforeunload|app.view#appviewbeforeunload]]
 * [[loadComplete|app.view#appviewloadComplete]]
 
 ## [[app.layout|app.layout]]
