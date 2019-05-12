@@ -527,8 +527,6 @@ app.utils.cookie.prototype.reset = function() {
  *  - encode (to_encode)
  *  - decode (to_decode)
  *
- * @global <Function> btoa
- * @global <Function> atob
  * @param to_encode
  * @return
  */

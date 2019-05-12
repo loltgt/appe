@@ -750,9 +750,10 @@ app.os.fileDownload = function(source, filename, mime_type) {
  * @global <Object> appe__config
  * @global <Object> appe__control
  * @param <String> filename
+ * @param <Boolean> inherit
  * @return <String>
  */
-app.os.fileFindRoot = function(filename) {
+app.os.fileFindRoot = function(filename, inherit) {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
   if (! config) {
@@ -770,9 +771,10 @@ app.os.fileFindRoot = function(filename) {
   var rp = config.runtime_path.toString();
 
   var base = '';
+  var abs = !! inherit ? false : !! _is_view;
 
   if (cl.indexOf(rp + '/') != -1) {
-    base += !! _is_view ? '../../' : '../';
+    base += abs ? '../../' : '../';
   } else {
     var bpos;
 
@@ -884,7 +886,7 @@ app.os.generateJsonHead = function(source, timestamp) {
 /**
  * app.os.generateJsonChecksum
  *
- * Generates a JSON checksum
+ * Generates a JSON checksum, returns to callback
  *
  * @param <Function> callback
  * @param <String> source

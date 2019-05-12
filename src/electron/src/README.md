@@ -1,11 +1,14 @@
 
-# appe
+# {appe}
 
 **appe** consent you to create portable app quickly and without webservers, write "spaghetti code", it is a free management software, extensible, with a small footprint.
 
-#### Try it: https://loltgt.github.io/appe/demo/DEMO.html
+#### Try: https://loltgt.github.io/appe/demo/DEMO.html
+
+ 
 
 ###### VIDEO
+[![VIDEO](https://i.vimeocdn.com/video/782381466.jpg)](https://player.vimeo.com/video/335489768)
 
 ##### [https://github.com/loltgt/appe](https://github.com/loltgt/appe)
 
@@ -43,7 +46,7 @@
 - Drivers to connect with different data sources (eg. webservers, GDrive, etc.) [appe.driver]
 - Syncronization mode, in addition to open/save [appe.driver]
 - Users, roles, authentication
-- Enhancement to data encryption
+- Enhancement with data encryption
 - Filterable functions with hooks
 - An easy builder to generate app, with a single config.js file
 - Automatic updates
@@ -78,5 +81,4 @@ You can open issues to report bug, request features or send a Pull Request.
 This package is distribuited under the terms of the GNU LGPL 3.0 License or later [LGPL-3.0-or-later](LICENSE).
 
 Contents in "src" folder are licensed [MIT](src/LICENSE).
-
 

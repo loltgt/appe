@@ -8,7 +8,8 @@ appe__config = {
   "app_ns": "demo", // the namespace of the app (required)
   "launcher_name": "LAUNCH", // the name of the launcher (required)
   "app_name": "App name", // the name of the app (required)
-  "language": "en", // default language, set to null for auto-select (required)
+  "language": "en", // language, set to null for auto-select (required)
+  "language_direction": "ltr", // language direction, accepted values are "ltr" or "rtl", default to "ltr"
   "compression": false, // session file compression
   "encryption": true, // session file encryption
   "binary": true, // saves session to binary file

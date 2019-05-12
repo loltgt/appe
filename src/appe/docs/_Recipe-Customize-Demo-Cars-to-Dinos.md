@@ -7,7 +7,7 @@
 
 This is an example of customization starting from the sample event _"_events.custom"_ inside the demo file _"[sample.html](https://github.com/loltgt/appe/blob/master/demo/app/views/sample.html)"_.
 
-First you need to edit the file [configure.js](https://github.com/loltgt/appe/blob/master/app/configure.js), add a new event and a new route, then create the page to serve with the new view.
+First you need to edit the file [config.js](https://github.com/loltgt/appe/blob/master/app/config.js), add a new event and a new route, then create the page to serve with the new view.
 
 ```js
 appe__config = {

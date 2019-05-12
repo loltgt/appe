@@ -1,7 +1,7 @@
 
 # Source files and tools
 
-The supporting JavaScript source that allows it to work is located in [src/appe/src](https://github.com/loltgt/appe/blob/master/src/appe/src), it is divided into sections to facilitate manipulation, the name of sections is intuitive.
+The source JavaScript is located in [src/appe/src](https://github.com/loltgt/appe/blob/master/src/appe/src), it is divided into sections to facilitate manipulation, the name of sections is intuitive.
 
 * controller.js (Controller functions)
 * index.js (Index with most important functions)
@@ -34,7 +34,7 @@ Scripts available in appe via `npm run-script`:
 |copy-electron|recursively copy all app files in "[src/electron/src](https://github.com/loltgt/appe/blob/master/src/electron/src)" folder|
 |copy-docs|recursively copy all documentation files in "docs" folder|
 
-
+ 
 
 ## Electron (as an alternate execution)
 

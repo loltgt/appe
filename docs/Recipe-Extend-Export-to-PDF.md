@@ -5,7 +5,7 @@
 
 ## 1. Write the extension function
 
-To create insert new functions in ** appe ** or extend the existing ones create extensions, as an example an extension to extend lists in PDF.
+To create insert new functions in **appe** or extend the existing ones create extensions, as an example an extension to extend lists in PDF.
 
 Create a file inside the "[ext](https://github.com/loltgt/appe/blob/master/ext)" extension folder and set up a function with the steps necessary to show the new feature in the views.
 
@@ -36,7 +36,7 @@ export_to_pdf();
 
 ## 2. Modify the configuration
 
-Once the function has been created, edit the file [configure.js](https://github.com/loltgt/appe/blob/master/app/configure.js), add the references to the file and the function just created to the _"aux"_ object, the file will be loaded asynchronously when pages loading.
+Once the function has been created, edit the file [config.js](https://github.com/loltgt/appe/blob/master/app/config.js), add the references to the file and the function just created to the _"aux"_ object, the file will be loaded asynchronously when pages loading.
 
 ```js
 appe__config = {
@@ -111,7 +111,7 @@ export_to_pdf_view_sub_pdf = function(element, table) {
 
 ## 4. Finalize
 
-To complete and show the new feature you need to satisfy all dependencies, this example requires the library [https://github.com/MrRio/jsPDF/](jsPDF) and the plugin [jspdf-autotable](https://github.com/simonbengtsson/jsPDF-AutoTable).
+To complete and show the new feature you need to satisfy all dependencies, this example requires the library [jsPDF](https://github.com/MrRio/jsPDF) and the plugin [jspdf-autotable](https://github.com/simonbengtsson/jsPDF-AutoTable).
 
 A function _"app.view.sub.prototype.pdf"_ must be declared as an alias of the one just created _"export_to_pdf_view_sub_pdf"_, which extends the prototype function _"[[app.view.sub.prototype|app.view#appviewsub]]"_.
 

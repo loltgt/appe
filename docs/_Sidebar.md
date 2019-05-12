@@ -1,5 +1,5 @@
 
-* #### [[{appe}|Home]]
+* #### [[Home]]
 * #### [[How to configure|Configure]]
 * #### [[Source files and tools|Source-and-Tools]]
 * #### [[app. functions and hooks|app]]
