@@ -1,13 +1,13 @@
 
 # How to configure
 
-Read the comment inside the global _"appe__config"_ object.
+Read comments in the global _"appe__config"_ object.
 
 ```js
 appe__config = {
-  "app_ns": "demo", // the namespace of the app (required)
+  "app_ns": "your_app_namespace", // the namespace of the app (required)
   "launcher_name": "LAUNCH", // the name of the launcher (required)
-  "app_name": "App name", // the name of the app (required)
+  "app_name": "your app name", // the name of the app (required)
   "language": "en", // language, set to null for auto-select (required)
   "language_direction": "ltr", // language direction, accepted values are "ltr" or "rtl", default to "ltr"
   "compression": false, // session file compression

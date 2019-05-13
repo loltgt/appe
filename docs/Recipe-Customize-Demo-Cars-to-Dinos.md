@@ -5,9 +5,9 @@
 
 ## 1. Modify the configuration
 
-This is an example of customization starting from the sample event _"_events.custom"_ inside the demo file _"[sample.html](https://github.com/loltgt/appe/blob/master/demo/app/views/sample.html)"_.
+This is an example of customization starting from the sample event _"_events.custom"_ in the demo file _"[sample.html](https://github.com/loltgt/appe/blob/master/demo/app/views/sample.html)"_.
 
-First you need to edit the file [config.js](https://github.com/loltgt/appe/blob/master/app/config.js), add a new event and a new route, then create the page to serve with the new view.
+First you need to edit the file _"[config.js](https://github.com/loltgt/appe/blob/master/app/config.js)"_, add a new event and a new route, then create the page to serve with the new view.
 
 ```js
 appe__config = {
@@ -95,7 +95,6 @@ The structure of the view is almost identical to the reference model _"edit"_, a
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="stylesheet" type="text/css" href="../assets/css/lib/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="../assets/css/app.min.css">
 </head>

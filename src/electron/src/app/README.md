@@ -30,9 +30,9 @@
 ## Roadmap (current version)
 
 - localStorage/sessionStorage assignment on mobile
-- Checks file schema
+- Check file schema
 - Orderable and paginable table lists
-- Displays a notice remind to save after several time
+- Display a notice remind to save after several time
 - Fix demo DND in Android
 - An easy builder to generate app
 

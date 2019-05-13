@@ -1,7 +1,7 @@
 appe__config = {
-  "app_ns": "demo",
+  "app_ns": "your_app_namespace",
   "launcher_name": "LAUNCH",
-  "app_name": "{appe} demo app",
+  "app_name": "your app name",
   "language": "en",
   "compression": true,
   "encryption": true,
@@ -51,22 +51,4 @@ appe__config = {
     "text": "LGPL-3.0-or-later",
     "file": "LICENSE.txt"
   }
-  //"file": {
-  //  "compress": false
-  //  "heads": "e"
-  //}
-  /**
-  "file": {
-    "binary": true,
-    "compress": true,
-    "filename_prefix": "appe_save",
-    "filename_separator": "_",
-    "filename_date_format: "Y-m-d_H-M-S",
-  },
-  "csv": {
-    "filename_prefix": "csv_export",
-    "filename_separator": "_",
-    "filename_date_format": "Y-m-d_H-M-S",
-  },
-  */
 }

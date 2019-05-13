@@ -1,7 +1,7 @@
 
 # Source files and tools
 
-The source JavaScript is located in [src/appe/src](https://github.com/loltgt/appe/blob/master/src/appe/src), it is divided into sections to facilitate manipulation, the name of sections is intuitive.
+The source JavaScript is located in "[src/appe/src](https://github.com/loltgt/appe/blob/master/src/appe/src)", it is divided into sections to facilitate manipulation, the name of sections is intuitive.
 
 * controller.js (Controller functions)
 * index.js (Index with most important functions)
@@ -38,11 +38,11 @@ Scripts available in appe via `npm run-script`:
 
 ## Electron (as an alternate execution)
 
-To allow **appe** to work in the extreme cases in which the browser or the system do not allow direct execution, [Electron](https://github.com/electron/electron) is used, you can use the strategy that suits your needs.
+To permits **appe** to run in the extreme cases in which the browser or the system do not allow direct execution, [Electron](https://github.com/electron/electron) is used, you can use the strategy that suits your needs.
 
 The package configuration and the necessary dependencies are provided by [Electron Forge](https://github.com/electron-userland/electron-forge), to install it `npm install -g electron-forge
 `.
 
-After installing the necessary dependencies from the [src/electron](https://github.com/loltgt/appe/blob/master/src/electron) folder with the `electron-forge start electron` command, it is possible to create distribution packages for operating systems with the `electron-forge package` command.
+After installing the necessary dependencies from the "[src/electron](https://github.com/loltgt/appe/blob/master/src/electron)" folder with the `electron-forge start electron` command, it is possible to create distribution packages for operating systems with the `electron-forge package` command.
 
 All informations are available on the website [https://electronforge.io](https://electronforge.io).

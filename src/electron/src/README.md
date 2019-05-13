@@ -30,9 +30,9 @@
 ## Roadmap (current version)
 
 - localStorage/sessionStorage assignment on mobile
-- Checks file schema
+- Check file schema
 - Orderable and paginable table lists
-- Displays a notice remind to save after several time
+- Display a notice remind to save after several time
 - Fix demo DND in Android
 - An easy builder to generate app
 
@@ -81,4 +81,6 @@ You can open issues to report bug, request features or send a Pull Request.
 This package is distribuited under the terms of the GNU LGPL 3.0 License or later [LGPL-3.0-or-later](LICENSE).
 
 Contents in "src" folder are licensed [MIT](src/LICENSE).
+
+The documentation in "docs" folder is licensed [CC-BY-SA-4.0](docs/LICENSE).
 
