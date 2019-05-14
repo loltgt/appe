@@ -38,7 +38,6 @@ appe__config = {
   "runtime_path": "app",
   "save_path": "save",
   "aux_path": "ext",
-  "open_attempts": 20,
   "alt": {
     "exec_folder": "alt",
     "exec_platform": {

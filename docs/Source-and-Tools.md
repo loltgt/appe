@@ -3,23 +3,23 @@
 
 The source JavaScript is located in "[src/appe/src](https://github.com/loltgt/appe/blob/master/src/appe/src)", it is divided into sections to facilitate manipulation, the name of sections is intuitive.
 
-* controller.js (Controller functions)
-* index.js (Index with most important functions)
-* layout.js (Handles layout functions)
-* lockdown.js (Object.freeze)
-* main.js ("main" functions)
-* memory.js (Handles storage entries)
-* os.js (Handles filesystem functions)
-* start.js (Launcher functions)
-* store.js (Handles persistent storage entries)
-* utils.js (Utils functions)
-* view.js ("view" functions)
+* **controller.js** (Controller functions)
+* **index.js** (Index with most important functions)
+* **layout.js** (Handles layout functions)
+* **lockdown.js** (Object.freeze)
+* **main.js** ("main" functions)
+* **memory.js** (Handles storage entries)
+* **os.js** (Handles filesystem functions)
+* **start.js** (Launcher functions)
+* **store.js** (Handles persistent storage entries)
+* **utils.js** (Utils functions)
+* **view.js** ("view" functions)
 
  
 
 ## Scripting tools
 
-Scripts available in appe via `npm run-script`:
+Scripts available in **appe** via `npm run-script`:
 
 |Task|Description| 
 |-|-|

@@ -1042,6 +1042,18 @@ app.view.sub.prototype.toggler = function(element, table, dropdown, toggler) {
     return app.error('app.view.sub.prototype.toggler', [element]);
   }
 
+  var _close = function(e) {
+    if (e && e.target && (e.target == toggler || e.target.offsetParent && e.target.offsetParent == toggler)) {
+      return;
+    }
+
+    var _delay = setTimeout(function() {
+      dropdown.dropdown.close();
+
+      clearTimeout(_delay);
+    }, 300);
+  }
+
   var closest_node = element.parentNode.parentNode;
 
   dropdown = dropdown || closest_node.querySelector('.dropdown-menu');
@@ -1054,7 +1066,7 @@ app.view.sub.prototype.toggler = function(element, table, dropdown, toggler) {
 
     dropdown.dropdown = new app.layout.dropdown(null, toggler, dropdown);
 
-    app.utils.addEvent(_close_event, app._root.document.documentElement, dropdown.dropdown.close);
+    app.utils.addEvent(_close_event, app._root.document.documentElement, _close);
   }
 
   dropdown.dropdown.toggle(null);

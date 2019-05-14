@@ -301,7 +301,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [632](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L632)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [646](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L646)
 
 
  
@@ -332,7 +332,7 @@ arguments:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [751](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L751)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [765](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L765)
 
 
  
@@ -357,7 +357,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [813](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L813)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [827](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L827)
 
 
  
@@ -374,7 +374,7 @@ position:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [877](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L877)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [891](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L891)
 
 
  
@@ -391,7 +391,7 @@ position:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [885](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L885)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [899](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L899)
 
 
  
@@ -426,7 +426,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [903](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L903)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [917](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L917)
 
 
  
@@ -457,7 +457,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1074](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1074)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1088](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1088)
 
 
  
@@ -488,7 +488,7 @@ to_replace
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1127](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1127)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1141](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1141)
 
 
  
@@ -515,7 +515,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1254](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1254)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1268](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1268)
 
 
  
@@ -550,7 +550,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1271](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1271)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1285](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1285)
 
 
  
@@ -585,7 +585,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1304](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1304)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1318](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1318)
 
 
  
@@ -609,7 +609,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1369](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1369)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1383](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1383)
 
 
  
@@ -639,7 +639,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1393](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1393)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1407](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1407)
 
 
  
@@ -661,7 +661,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1441](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1441)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1455](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1455)
 
 
  
@@ -685,7 +685,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1454](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1454)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1468](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1468)
 
 
  
@@ -704,7 +704,7 @@ position:
 returns.
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1477](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1477)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1491](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1491)
 
 
  
@@ -726,7 +726,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1489](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1489)
+- [src/appe/src/js/index.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js)   line: [1503](https://github.com/loltgt/appe/blob/master/src/appe/src/js/index.js#L1503)
 
 
  

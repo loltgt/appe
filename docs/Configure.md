@@ -14,7 +14,7 @@ appe__config = {
   "encryption": true, // session file encryption
   "binary": true, // saves session to binary file
   "secret_passphrase": "test", // the secret passphrase needed with session file compression active
-  "verify_checksum": true, // whenever to verify JSON file checksum (required)
+  "verify_checksum": true, // whenever to verify JSON file checksum
   "debug": true, // turns on debug
   "schema": [ // the file schema (required)
     "file",
@@ -35,9 +35,11 @@ appe__config = {
   },
   "default_route": "parent-route-filename", // default route (required)
   "default_event": "event", // default event (required)
-  "base_path": "app", // where is located the app folder (required)
+  "base_path": "appe", // where is located the root folder (required)
+  "runtime_path": "app", // where is located the runtime folder (required)
   "save_path": "save", // where is located the save folder (required)
-  "open_attempts": 10, // number of attempts to resume file session or load extensions (required)
+  "aux_path": "ext", // where is located the extensions folder
+  "load_attempts": 50, // number of attempts to resume file session or load extensions, default to 50 for best effort
   "alt": { // alternate execution, used when occurring browser or system limitations, it is a fallback
     "exec_folder": "alt", // where is located the alternate folder
     "exec_platform": { // system specifics

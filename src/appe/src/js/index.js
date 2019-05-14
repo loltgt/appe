@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.0-beta
+ * @version 1.0.1-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
@@ -19,7 +19,7 @@ app._root.process = !! this.Window && ! this.Process && { native: false } || pro
 
 app._runtime = {
   version: '1.0',
-  release: '1.0 beta',
+  release: '1.0.1 beta',
   system: null,
   exec: true,
   session: false,
@@ -273,7 +273,7 @@ app.session = function(callback, config, target) {
 
 
   var _asyncLoadCheck = function(fn, cb) {
-    var max = parseInt(config.open_attempts) || 50;
+    var max = parseInt(config.load_attempts) || 50;
     var attempts = 0;
 
     var interr = setInterval(function() {
@@ -547,7 +547,7 @@ app.checkConfig = function(config) {
 
   var error = false;
 
-  var _required_keys = ['app_ns', 'launcher_name', 'app_name', 'schema', 'events', 'routes', 'default_route', 'default_event', 'runtime_path', 'save_path'];
+  var _required_keys = ['app_ns', 'launcher_name', 'app_name', 'language', 'schema', 'events', 'routes', 'default_route', 'default_event', 'base_path', 'runtime_path', 'save_path'];
   var key = null, i = 0;
 
   while ((key = _required_keys[i++])) {
@@ -594,23 +594,37 @@ app.checkFile = function(source, checksum) {
     return app.error('app.checkFile', ['source', 'checksum']);
   }
 
-  var _app_version = app._runtime.version.toString();
+  var schema = config.schema;
 
-  if (_app_version !== source.file.version) {
-    return app.error('app.checkFile', app.i18n('This file is incompatible with running version: {{_app_version}}.', null, _app_version), source.file);
+  if (typeof schema != 'object') {
+    return app.error('app.checkFile', 'schema');
+  }
+
+  var _schema_validation = true;
+
+  var keys = Object.keys(source);
+
+  for (key in keys) {
+    if (key in schema === false) {
+      _schema_validation = false;
+    }
+  }
+  if (! _schema_validation) {
+    return app.error('app.checkFile', 'schema', null, keys);
+  }
+
+  var app_version = app._runtime.version.toString();
+
+  if (app_version !== source.file.version) {
+    return app.error('app.checkFile', app.i18n('This file is incompatible with running version: {{app_version}}.', null, app_version), source.file);
   }
 
   if (!! config.verify_checksum && !! checksum) {
-    try {
-      var json_checksum = source.file.checksum;
+    var json_checksum = source.file.checksum;
 
-      if (json_checksum !== checksum) {
-        throw 'checksum';
-      }
-    } catch (err) {
+    if (json_checksum !== checksum) {
       return app.error('app.checkFile', err);
     }
-
   }
 
   return true;
@@ -1054,7 +1068,7 @@ app.asyncAttemptLoad = function(callback, resume_session, fn, file, schema, memo
 
 
   var loaded = false;
-  var max_attempts = parseInt(config.open_attempts);
+  var max_attempts = parseInt(config.load_attempts) || 50;
 
   app.os.scriptOpen(_attempt, file, fn, max_attempts);
 }

@@ -1,7 +1,7 @@
 
 # Introduction
 
-The primary intent was to allow simple data manipulation without have to install web servers, tons of software and deps, create a portable app quickly with the possibility to write "spaghetti code", fairly simple to use, executable almost anywhere, with essential features and small footprint.
+The primary intent was to allow simple data manipulation without have to install web servers, tons of software and deps, create a portable app quickly with the possibility to write _spaghetti code_, fairly simple to use, executable almost anywhere, with essential features and small footprint.
 
  
 

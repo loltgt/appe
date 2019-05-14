@@ -1,7 +1,7 @@
 
 # {appe}
 
-**appe** consent you to create portable app quickly and without webservers, write "spaghetti code", it is a free management software, extensible, with a small footprint.
+**appe** consent you to create portable app quickly and without webservers, write _spaghetti code_, it is a free management software, extensible, with a small footprint.
 
 #### Try: https://loltgt.github.io/appe/demo/DEMO.html
 
@@ -23,15 +23,14 @@
 - KISS concept
 - Fast and lightweight
 - Export and print table lists
-- "Spaghetti code"
+- _Spaghetti code_
 
  
 
 ## Roadmap (current version)
 
-- localStorage/sessionStorage assignment on mobile
-- Check file schema
 - Orderable and paginable table lists
+- Form data charset encoding in "app.view.getFormData"
 - Display a notice remind to save after several time
 - Fix demo DND in Android
 - An easy builder to generate app
@@ -48,7 +47,7 @@
 - Users, roles, authentication
 - Enhancement with data encryption
 - Filterable functions with hooks
-- An easy builder to generate app, with a single config.js file
+- An easy builder to generate app, with a single "config.js" file
 - Automatic updates
 
  
@@ -81,4 +80,7 @@ You can open issues to report bug, request features or send a Pull Request.
 This package is distribuited under the terms of the GNU LGPL 3.0 License or later [LGPL-3.0-or-later](LICENSE).
 
 Contents in "src" folder are licensed [MIT](src/LICENSE).
+
+The documentation in "docs" folder is licensed [CC-BY-SA-4.0](docs/LICENSE).
+
 

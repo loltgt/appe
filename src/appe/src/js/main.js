@@ -629,7 +629,7 @@ app.main.action.prototype.menu = function(element, event, menu, toggler) {
   }
 
   var _close = function(e) {
-    if (e.target.parentNode.parentNode.parentNode && e.target.parentNode.parentNode.parentNode == menu) {
+    if (e && e.target && (e.target.parentNode.parentNode.parentNode && e.target.parentNode.parentNode.parentNode == menu)) {
       return;
     }
     
