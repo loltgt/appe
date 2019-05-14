@@ -34,7 +34,7 @@ export_to_pdf = function() {
       head.append(script);
 
       clearTimeout(_defer);
-    }, 1000);
+    }, 2500);
   }
 }
 

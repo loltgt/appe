@@ -60,7 +60,7 @@ appe__config = {
   "runtime_path": "app",
   "save_path": "save",
   "aux_path": "ext",
-  "load_attempts": 100,
+  "load_attempts": 2500,
   "alt": {
     "exec_folder": "alt",
     "exec_platform": {
