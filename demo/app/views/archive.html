@@ -244,6 +244,7 @@ control.handle = function(data) {
     _order.push([ _id, (_archive_items_join[_id].pop.subtotal != undefined ? _archive_items_join[_id].pop.subtotal : _id) ]);
   });
 
+
   _order.sort(function(a, b) { return b[1] - a[1]; });
   _order = Object.values(_order);
 

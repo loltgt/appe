@@ -288,8 +288,6 @@ app.start.loadComplete = function(routine) {
 
 
   app.asyncAttemptLoad(function(loaded) {
-    console.log(loaded);
-
     if (loaded) {
       app.start.redirect(true);
     } else {

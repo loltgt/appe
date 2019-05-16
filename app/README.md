@@ -23,14 +23,12 @@
 - KISS concept
 - Fast and lightweight
 - Export and print table lists
-- _Spaghetti code_
+- "Spaghetti code"
 
  
 
 ## Roadmap (current version)
 
-- Orderable and paginable table lists
-- Form data charset encoding in "app.view.getFormData"
 - Display a notice remind to save after several time
 - Fix demo DND in Android
 - An easy builder to generate app
@@ -40,10 +38,10 @@
 ## Roadmap (next version)
 
 - Interoperability with different data sources
-- New layout build with js [appe.layout]
+- New layout build with js _[appe.layout]_
 - Server-side execution
-- Drivers to connect with different data sources (eg. webservers, GDrive, etc.) [appe.driver]
-- Syncronization mode, in addition to open/save [appe.driver]
+- Drivers to connect with different data sources (eg. webservers, GDrive, etc.) _[appe.driver]_
+- Syncronization mode, in addition to open/save _[appe.driver]_
 - Users, roles, authentication
 - Enhancement with data encryption
 - Filterable functions with hooks

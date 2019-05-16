@@ -123,13 +123,15 @@ app.os.fileSessionOpen = function(callback) {
 
     // source JavaScript JSON file
 
-    // base is much human readable
-    if (source.indexOf('\r\n') != -1)  {
-      source = source.replace(/[\r\n]([\s]+){2}/g, '');
+    // source is much human readable
+    if (source.indexOf('\n') != -1)  {
+      source = source.replace(/[\r\n\t]+([\s]+){2}/g, '').replace(/\s=\s/, '=');
     }
 
     var _file_heads_regex = new RegExp(file_heads + '\=(?![^"\{\}]+)');
     source = source.replace(_file_heads_regex, '').replace(/(^"|"$)/g, '');
+
+    return cb(false, source);
   }
 
   var _decompress = function(source, cb) {

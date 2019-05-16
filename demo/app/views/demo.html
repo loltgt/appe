@@ -40,14 +40,14 @@
     <thead>
       <tr class="hidden-csv">
         <th class="hidden-print" data-localize="page">Actions</th>
-        <th data-localize="page">ID</th>
-        <th class="text-nowrap" data-localize="page">Name</th>
-        <th>Specimen</th>
-        <th class="text-center text-nowrap">Discovered</th>
-        <th class="text-center">Fantastic</th>
+        <th><a class="order-key order-key-id" href="javascript:" onclick="control.action(this, 'order', 'id'); return false;" data-localize="page"><span class="text-label" data-localize="page">ID</span> <span class="order-sort"></span></a></th>
+        <th class="text-nowrap"><a class="order-key order-key-name" href="javascript:" onclick="control.action(this, 'order', 'name'); return false;"><span class="text-label" data-localize="page">Name</span> <span class="order-sort"></span></a></th>
+        <th><a class="order-key order-key-title" href="javascript:" onclick="control.action(this, 'order', 'title'); return false;"><span class="text-label" data-localize="page">Specimen</span> <span class="order-sort"></span></a></th>
+        <th class="text-center text-nowrap"><a class="order-key order-key-date" href="javascript:" onclick="control.action(this, 'order', 'date'); return false;"><span class="text-label" data-localize="page">Discovered</span> <span class="order-sort"></span></a></th>
+        <th class="text-center"><a class="order-key order-key-checked" href="javascript:" onclick="control.action(this, 'order', 'checked'); return false;"><span class="text-label" data-localize="page">Fantastic</span> <span class="order-sort"></span></a></th>
         <th class="separator"></th>
-        <th colspan="5" class="text-center">Popularity</th>
-        <th class="text-center"><strong>AWARDS</strong></th>
+        <th colspan="5" class="text-center"><a class="order-key order-key-pop-total" href="javascript:" onclick="control.action(this, 'order', 'pop_total'); return false;"><span class="text-label" data-localize="page">Popularity</span> <span class="order-sort"></span></a></th>
+        <th class="text-center"><a class="order-key order-key-awards" href="javascript:" onclick="control.action(this, 'order', 'awards'); return false;"><span class="text-label" data-localize="page">AWARDS</span> <span class="order-sort"></span></a></th>
       </tr>
       <tr class="visible-csv hidden">
         <th data-localize="page">ID</th>
@@ -90,11 +90,19 @@
         <td class="text-center">{pop_toyes}</td>
         <td class="text-center">{pop_books}</td>
         <td class="text-center">{pop_total}</td>
-        <td class="text-center"><strong>{awards}</strong></td>
+        <td class="text-center">{awards}</td>
       </tr>
     </tbody>
   </table>
 </div>
+
+<nav id="pagination-nav" class="pagination-nav">
+  <ul class="pagination">
+    <li><a href="javascript:" onclick="control.action(this, 'page', '{page_prev}'); return false;"></a></li>
+    <li class="tpl"><a href="javascript:" onclick="control.action(this, 'page', '{page_num}'); return false;">{page_num}</a></li>
+    <li><a href="javascript:" onclick="control.action(this, 'page', '{page_next}'); return false;"></a></li>
+  </ul>
+</nav>
 
 
 <script type="text/javascript" src="../assets/js/app.min.js"></script>
@@ -114,6 +122,7 @@ control.handle = function(data) {
   var data_items = data['items'];
 
   var table = document.getElementById('table-data');
+  var pagination = document.getElementById('pagination-nav');
 
   if (! data_archive || ! data_categories || ! data_items) {
     return app.error('control.handle', 'data*');
@@ -165,7 +174,7 @@ control.handle = function(data) {
 
 
 
-  // join (items) + order (archive.items[id].awards) + update
+  // join (items) + order (archive.items[id].awards) + sort + pager + update
 
   var _archive_items_join = {};
 
@@ -178,13 +187,32 @@ control.handle = function(data) {
   });
 
   var _order = [];
+
+  var _order_key = app.memory.get('demo_order_key') || 'awards';
+  var _order_sort = app.memory.get('demo_order_sort') || 'asc';
+  var _order_limit = app.memory.get('demo_order_limit') || 20;
+  var _order_page = app.memory.get('demo_order_page') || 1;
+
+  var selected_order_key = table.querySelector('.order-key-' + _order_key.replace(/[^a-z0-9-]+/, '-'));
+  var selected_order_key_cell_index = null;
+
+  if (selected_order_key) {
+    selected_order_key.classList.add('active');
+
+    switch (_order_key) {
+      case 'pop_total': selected_order_key_cell_index = 12; break;
+      case 'awards': selected_order_key_cell_index = 13; break;
+      default: selected_order_key_cell_index = selected_order_key.offsetParent.cellIndex + 1;
+    }
+
+    selected_order_key.querySelector('.order-sort').classList.add('order-sort-' + _order_sort);
+  }
+
   var _ordered_keys = [];
 
   var _data_updated = {};
 
   Array.prototype.forEach.call(Object.keys(_archive_items_join), function(id) {
-    _order.push([ id, (_archive_items_join[id].awards != undefined ? _archive_items_join[id].awards : id) ]);
-
     if (! _archive_items_join[id].pop) {
       _archive_items_join[id].pop = {};
     }
@@ -206,9 +234,28 @@ control.handle = function(data) {
         _data_updated['archive'][archive_id][category_id]['items'][id].pop = _archive_items_join[id].pop;
       }
     }
+
+    _archive_items_join[id].pop_total = _archive_items_join[id].pop.total;
+
+    _order.push([ id, (_archive_items_join[id][_order_key] != undefined ? _archive_items_join[id][_order_key] : id) ]);
+
+    delete _archive_items_join[id].pop_total;
   });
 
-  _order.sort(function(a, b) { return b[1] - a[1]; });
+
+  var _order_keys_count = 0;
+
+  _order.sort(function(a, b) {
+    if (typeof a[1] == 'string' && typeof b[1] == 'string') {
+      a[1] = a[1].toLowerCase();
+      b[1] = b[1].toLowerCase();
+
+      return _order_sort === 'desc' ? a[1].localeCompare(b[1]) : b[1].localeCompare(a[1]);
+    } else {
+      return _order_sort === 'desc' ? a[1] - b[1] : b[1] - a[1];
+    }
+  });
+  _order_keys_count = _order.length;
   _order = Object.values(_order);
 
   Array.prototype.forEach.call(_order, function(value) {
@@ -216,9 +263,21 @@ control.handle = function(data) {
   });
 
 
+  var _order_pages_count = _order_keys_count ? Math.ceil(_order_keys_count / _order_limit) : 1;
+  var _order_limit_offset = [ 0, _order_keys_count ];
 
-  _control.fillTable(table, _archive_items_join, _ordered_keys);
+  _order_limit_offset[0] = _order_page > 1 ? (_order_page - 1) * _order_limit : 0;
+  _order_limit_offset[1] = _order_page === _order_pages_count ? _order_keys_count : _order_page * _order_limit;
+
+  _ordered_keys = _ordered_keys.slice(_order_limit_offset[0], _order_limit_offset[1]);
+
+
+
+  _control.fillTable(table, _archive_items_join, _ordered_keys, selected_order_key_cell_index);
+  _control.paginate(pagination, _order_pages_count, _order_page);
   _control.localize(table);
+
+
 
 
   if (_data_updated && Object.keys(_data_updated).length) {
@@ -235,6 +294,9 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
   if (! tpl_row || ! data_row) {
     return app.error('control.renderRow', arguments);
   }
+
+
+  var selected_order_key_cell_index = extra[0];
 
 
   var row = tpl_row.cloneNode(true);
@@ -254,6 +316,10 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
     .replace('{pop_total}', data_row.pop['total'])
     .replace('{awards}', (data_row.awards || 0));
 
+  if (selected_order_key_cell_index != null) {
+    row.querySelector(':nth-child(' + selected_order_key_cell_index + ')').classList.add('font-weight-bold');
+  }
+
   return row;
 }
 
@@ -267,7 +333,7 @@ control.action = function(element, event, extra) {
   }
 
 
-  var _action = app.view.action([ 'selection', 'open', 'update', 'export', 'print' ], event, element);
+  var _action = app.view.action([ 'selection', 'open', 'update', 'export', 'print', 'order', 'page' ], event, element);
 
   _action.begin();
 
@@ -319,6 +385,36 @@ control.action = function(element, event, extra) {
 
   _events.print = function() {
     return _action.print();
+  }
+
+  _events.order = function(key) {
+    var sort;
+
+    var current_order_key = app.memory.get('demo_order_key') || 'awards';
+    var current_order_sort = app.memory.get('demo_order_sort') || 'desc';
+
+    if (current_order_key == key) {
+      sort = current_order_sort == 'desc' ? 'asc' : 'desc';
+    } else {
+      sort = 'asc';
+    }
+
+    app.memory.set('demo_order_key', key);
+    app.memory.set('demo_order_sort', sort);
+
+    return location.reload();
+  }
+
+  _events.page = function(page) {
+    var current_page = app.memory.get('demo_order_page') || 1;
+
+    if (current_page == page) {
+      return;
+    }
+
+    app.memory.set('demo_order_page', page);
+
+    return location.reload();
   }
 
 

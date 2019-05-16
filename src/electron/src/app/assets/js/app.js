@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.1-beta
+ * @version 1.0.2-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
@@ -19,7 +19,7 @@ app._root.process = !! this.Window && ! this.Process && { native: false } || pro
 
 app._runtime = {
   version: '1.0',
-  release: '1.0.1 beta',
+  release: '1.0.2 beta',
   system: null,
   exec: true,
   session: false,
@@ -623,7 +623,7 @@ app.checkFile = function(source, checksum) {
     var json_checksum = source.file.checksum;
 
     if (json_checksum !== checksum) {
-      return app.error('app.checkFile', err);
+      return app.error('app.checkFile', 'checksum');
     }
   }
 
@@ -1631,13 +1631,15 @@ app.os.fileSessionOpen = function(callback) {
 
     // source JavaScript JSON file
 
-    // base is much human readable
-    if (source.indexOf('\r\n') != -1)  {
-      source = source.replace(/[\r\n]([\s]+){2}/g, '');
+    // source is much human readable
+    if (source.indexOf('\n') != -1)  {
+      source = source.replace(/[\r\n\t]+([\s]+){2}/g, '').replace(/\s=\s/, '=');
     }
 
     var _file_heads_regex = new RegExp(file_heads + '\=(?![^"\{\}]+)');
     source = source.replace(_file_heads_regex, '').replace(/(^"|"$)/g, '');
+
+    return cb(false, source);
   }
 
   var _decompress = function(source, cb) {
@@ -3314,8 +3316,6 @@ app.start.loadComplete = function(routine) {
 
 
   app.asyncAttemptLoad(function(loaded) {
-    console.log(loaded);
-
     if (loaded) {
       app.start.redirect(true);
     } else {
@@ -4236,6 +4236,7 @@ app.view.spoof = function() {
  *  - fillForm (form, data)
  *  - fillSelection (data, id)
  *  - fillCTA (id)
+ *  - paginate (element, pages, current_page)
  *  - localize (element)
  *
  * @global <Object> appe__config
@@ -4564,6 +4565,7 @@ app.view.control.prototype.denySubmit = function() {
  * @param <ElementNode> table
  * @param <Object> data
  * @param <Array> order
+ * @param <arguments> args  ...  passing down arguments
  * @return <Object>  { rows <String>, tpl <ElementNode>, data <Object>, args <Array> }
  */
 app.view.control.prototype.fillTable = function(table, data, order) {
@@ -4705,6 +4707,54 @@ app.view.control.prototype.fillCTA = function(id) {
       });
     }
   }
+}
+
+/**
+ * app.view.control.prototype.paginate
+ *
+ * @param <ElementNode> element
+ * @param <Number> pages
+ * @param <Number> current_page
+ */
+app.view.control.prototype.paginate = function(element, pages, current_page) {
+  if (! element || ! pages) {
+    return app.error('control.paginate', arguments);
+  }
+
+  var pagination = element.querySelector('.pagination');
+  var pagination_elements = pagination.querySelectorAll('li');
+
+  var pagination_prev = pagination_elements[0];
+  var pagination_tpl = pagination_elements[1];
+  var pagination_next = pagination_elements[2];
+
+  pagination_prev.innerHTML = pagination_prev.innerHTML.replace('{page_prev}', current_page < 2 ? current_page : current_page - 1);
+  pagination_next.innerHTML = pagination_next.innerHTML.replace('{page_next}', current_page == pages || pages < 2 ? current_page : current_page + 1);
+
+  if (current_page < 2) { pagination_prev.classList.add('disabled'); }
+  if (current_page == pages || pages < 2) { pagination_next.classList.add('disabled'); }
+
+  var i = 0;
+  var pagination_items = parseInt(pages);
+
+  while (pagination_items--) {
+    i++;
+
+    var pagination_item = pagination_tpl.cloneNode();
+    pagination_item.innerHTML = pagination_tpl.innerHTML;
+
+    pagination_item.classList.remove('tpl');
+
+    if (current_page === i) { pagination_item.classList.add('active'); }
+
+    pagination_item.innerHTML = pagination_item.innerHTML.replace(/{page_num}/g, i);
+
+    pagination.append(pagination_item);
+  }
+
+  pagination_next.remove();
+
+  pagination.append(pagination_next); 
 }
 
 /**

@@ -175,8 +175,6 @@ control.handle = function(data) {
   var _ordered_keys = [];
 
   Array.prototype.forEach.call(Object.keys(_archive_items_join), function(id) {
-    _order.push([ id, (_archive_items_join[id].awards != undefined ? _archive_items_join[id].awards : id) ]);
-
     if (! _archive_items_join[id].pop) {
       _archive_items_join[id].pop = {};
     }
@@ -193,7 +191,10 @@ control.handle = function(data) {
       _archive_items_join[id].pop.total += _archive_items_join[id].pop['toyes'];
       _archive_items_join[id].pop.total += _archive_items_join[id].pop['books'];
     }
+
+    _order.push([ id, (_archive_items_join[id].awards != undefined ? _archive_items_join[id].awards : id) ]);
   });
+
 
   _order.sort(function(a, b) { return b[1] - a[1]; });
   _order = Object.values(_order);

@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.1-beta
+ * @version 1.0.2-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
@@ -19,7 +19,7 @@ app._root.process = !! this.Window && ! this.Process && { native: false } || pro
 
 app._runtime = {
   version: '1.0',
-  release: '1.0.1 beta',
+  release: '1.0.2 beta',
   system: null,
   exec: true,
   session: false,
@@ -623,7 +623,7 @@ app.checkFile = function(source, checksum) {
     var json_checksum = source.file.checksum;
 
     if (json_checksum !== checksum) {
-      return app.error('app.checkFile', err);
+      return app.error('app.checkFile', 'checksum');
     }
   }
 
