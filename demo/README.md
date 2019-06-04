@@ -3,7 +3,7 @@
 
 **appe** consent you to create portable app quickly and without webservers, write _spaghetti code_, it is a free management software, extensible, with a small footprint.
 
-#### Try: https://loltgt.github.io/appe/demo/DEMO.html
+#### Try: [https://loltgt.github.io/appe/demo/DEMO.html](https://loltgt.github.io/appe/demo/DEMO.html)
 
  
 
@@ -52,7 +52,7 @@
 
 ### Documentation
 
-Read documentation and examples from here: https://github.com/loltgt/appe/wiki
+Read documentation and examples from here: [https://github.com/loltgt/appe/wiki](https://github.com/loltgt/appe/wiki)
 
  
 
