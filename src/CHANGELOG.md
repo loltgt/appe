@@ -2,6 +2,15 @@
 # CHANGELOG
 
 
+## [1.0.4-beta]
+
+- Improvements to "app.controller"
+- Fix the position of decode URI in "app.utils.cookie.prototype.get"
+- Fix ctl.history behaviour in "app.view.action.prototype.prepare"
+- Edit UglifyJS options in build.js
+- Version bump in package.json
+
+
 ## [1.0.3-beta]
 
 - Update npm and yarn deps

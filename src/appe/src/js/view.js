@@ -807,9 +807,10 @@ app.view.action.prototype.prepare = function(data, submit) {
 
     if (id) {
       this.ctl.index = parseInt(id);
+      this.ctl.history = false;
 
-      // event update no needs history
-      if (this.event != 'update') {
+      // events "edit" and "update" no need history
+      if (this.event != 'edit' && this.event != 'update') {
         this.ctl.history = true;
 
         this.ctl.title = (this.ctl.title && typeof this.ctl.title === 'string') ? '"' + this.ctl.index + '"' : '# ' + this.ctl.index;

@@ -138,7 +138,7 @@ app.main.control = function(loc) {
  *  - update () <=> prepare ()
  *  - delete () <=> prevent ()
  *  - close () <=> prevent ()
- *  - history ()
+ *  - history (reset)
  *  - receiver ()
  *
  * @global <Object> appe__config
@@ -257,11 +257,7 @@ app.main.handle.prototype.getAction = function() {
  * @return <String>
  */
 app.main.handle.prototype.setTitle = function(title) {
-  if (! (title && typeof title === 'string')) {
-    return app.error('app.main.handle.prototype.setTitle', 'title');
-  }
-
-  this._title = title;
+  this._title = (title && typeof title === 'string') ? title : '';
 
   return this._title;
 }
@@ -312,7 +308,7 @@ app.main.handle.prototype.setURL = function(path, qs) {
   var href = 'index.html';
 
   href += (path || this.ctl.view) && '?' + ((path && typeof path === 'string') ? path : this.ctl.view);
-  href += qs && '&' + ((qs && typeof qs === 'string') && qs);
+  href += (qs && typeof qs === 'string') ? '&' + qs : '';
 
   this._href = href;
 
@@ -481,10 +477,12 @@ app.main.handle.prototype.close = app.main.handle.prototype.prevent;
 
 /**
  * app.main.handle.prototype.history
+ *
+ * @param <Boolean> reset
  */
-app.main.handle.prototype.history = function() {
-  var title = this.getTitle();
-  var url = this.getURL();
+app.main.handle.prototype.history = function(reset) {
+  var title = reset ? this.setTitle() : this.getTitle();
+  var url = reset ? this.setURL() : this.getURL();
 
   app.controller.history(title, url);
 }
@@ -509,8 +507,11 @@ app.main.handle.prototype.receiver = function() {
 
   var _app_name = app._runtime.name.toString();
 
-  // no submit, reload
-  if (! (this.ctl.submit && this.ctl.data)) {
+  // submit, history reset
+  if (this.ctl.submit && this.ctl.data) {
+    this.history(true);
+  // no submit, need reload
+  } else {
     app.main.control(this.loc);
 
     return; // silent fail
@@ -528,7 +529,7 @@ app.main.handle.prototype.receiver = function() {
       loc.action = null;
       loc.index = null;
 
-      // action update needs reload
+      // action "update" needs reload
       if (action === 'update') {
         self.refresh();
       } else {

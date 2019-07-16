@@ -54,16 +54,29 @@ app.controller.spoof = function() {
 app.controller.history = function(title, url) {
   var _title = app._runtime.title.toString();
 
-  if (title) {
-    title += ' – ' + _title;
+  if (title !== undefined) {
+    if (app._runtime.title.indexOf(' – ') != -1) {
+      _title = _title.replace(/.+\s–\s/, '');
+    }
+
+    if (title) {
+      title = app._runtime.locale_dir == 'ltr' ? title + ' – ' + _title : _title + ' – ' + title;
+    } else {
+      title = _title;
+    }
   } else {
     title = _title;
   }
 
-  if (app._runtime.system.name == 'safari') {
+  try {
+    var err = history.replaceState(null, title, url);
+    var sur = window.location.href.replace(/.+\//, '');
+
+    err = (sur != url) ? true : err;
+  } catch (err) {
+    console.info('app.controller.history', '\t', 'secexc sandbox', '\t', url, '\t', err);
+
     app._root.window.location.href = url;
-  } else {
-    history.replaceState(null, title, url);
   }
 
   app.controller.setTitle(title);
@@ -84,13 +97,24 @@ app.controller.cursor = function(loc) {
     return app.error('app.controller.cursor', [loc]);
   }
 
+  // firefox >= 68 has web storage related to the current path locally 
+  var wsp = (app._runtime.system.name == 'firefox' && app._root.window.location.protocol == 'file:') ? true : false;
+
   if (loc) {
-    app.memory.set('cursor', loc);
+    if (wsp) {
+      app.utils.cookie('set', 'cursor', loc);
+    } else {
+      app.memory.set('cursor', loc);
+    }
 
     return loc;
   }
 
-  loc = app.memory.get('cursor', loc);
+  if (wsp) {
+    loc = app.utils.cookie('get', 'cursor');
+  } else {
+    loc = app.memory.get('cursor');
+  }
 
   return loc;
 }
@@ -109,7 +133,7 @@ app.controller.setTitle = function(title) {
 
   app._root.document.title = app._runtime.title;
 
-  return app._runtime.title;
+  return app._root.document.title;
 }
 
 

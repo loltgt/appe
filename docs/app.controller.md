@@ -82,7 +82,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [82](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L82)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [95](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L95)
 
 
  
@@ -109,7 +109,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [107](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L107)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [131](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L131)
 
 
  
@@ -131,7 +131,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [123](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L123)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [147](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L147)
 
 
  
@@ -163,7 +163,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [140](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L140)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [164](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L164)
 
 
  
@@ -193,7 +193,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [209](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L209)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [233](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L233)
 
 
  
@@ -221,7 +221,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [284](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L284)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [308](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L308)
 
 
  

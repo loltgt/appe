@@ -77,7 +77,7 @@ avalaible prototype methods:
  - update () <=> prepare ()
  - delete () <=> prevent ()
  - close () <=> prevent ()
- - history ()
+ - history (reset)
  - receiver ()
 ```
 
@@ -138,7 +138,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [562](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L562)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [563](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L563)
 
 
  
@@ -163,7 +163,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [670](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L670)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [671](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L671)
 
 
  
@@ -185,7 +185,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [789](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L789)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [790](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L790)
 
 
  
@@ -214,7 +214,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [809](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L809)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [810](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L810)
 
 
  
@@ -236,7 +236,7 @@ globals:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [833](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L833)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [834](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L834)
 
 
  

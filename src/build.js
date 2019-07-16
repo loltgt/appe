@@ -72,7 +72,7 @@ const options = {
       unsafe_regexp    : false,
       unsafe_undefined : false,
       unused           : true,
-      warnings         : false
+      //warnings         : false
     },
     mangle: {
       eval             : false,

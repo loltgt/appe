@@ -451,14 +451,14 @@ app.utils.cookie.prototype.get = function(key) {
     return null;
   }
 
+  value = decodeURIComponent(value);
+
   try {
     var _value = value;
     value = JSON.parse(_value);
   } catch (err) {
     value = _value;
   }
-
-  value = decodeURIComponent(value);
 
   return value;
 }

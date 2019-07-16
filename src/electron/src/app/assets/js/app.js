@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.2-beta
+ * @version 1.0.4-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
@@ -19,7 +19,7 @@ app._root.process = !! this.Window && ! this.Process && { native: false } || pro
 
 app._runtime = {
   version: '1.0',
-  release: '1.0.2 beta',
+  release: '1.0.4 beta',
   system: null,
   exec: true,
   session: false,
@@ -2598,16 +2598,29 @@ app.controller.spoof = function() {
 app.controller.history = function(title, url) {
   var _title = app._runtime.title.toString();
 
-  if (title) {
-    title += ' – ' + _title;
+  if (title !== undefined) {
+    if (app._runtime.title.indexOf(' – ') != -1) {
+      _title = _title.replace(/.+\s–\s/, '');
+    }
+
+    if (title) {
+      title = app._runtime.locale_dir == 'ltr' ? title + ' – ' + _title : _title + ' – ' + title;
+    } else {
+      title = _title;
+    }
   } else {
     title = _title;
   }
 
-  if (app._runtime.system.name == 'safari') {
+  try {
+    var err = history.replaceState(null, title, url);
+    var sur = window.location.href.replace(/.+\//, '');
+
+    err = (sur != url) ? true : err;
+  } catch (err) {
+    console.info('app.controller.history', '\t', 'secexc sandbox', '\t', url, '\t', err);
+
     app._root.window.location.href = url;
-  } else {
-    history.replaceState(null, title, url);
   }
 
   app.controller.setTitle(title);
@@ -2628,13 +2641,24 @@ app.controller.cursor = function(loc) {
     return app.error('app.controller.cursor', [loc]);
   }
 
+  // firefox >= 68 has web storage related to the current path locally 
+  var wsp = (app._runtime.system.name == 'firefox' && app._root.window.location.protocol == 'file:') ? true : false;
+
   if (loc) {
-    app.memory.set('cursor', loc);
+    if (wsp) {
+      app.utils.cookie('set', 'cursor', loc);
+    } else {
+      app.memory.set('cursor', loc);
+    }
 
     return loc;
   }
 
-  loc = app.memory.get('cursor', loc);
+  if (wsp) {
+    loc = app.utils.cookie('get', 'cursor');
+  } else {
+    loc = app.memory.get('cursor');
+  }
 
   return loc;
 }
@@ -2653,7 +2677,7 @@ app.controller.setTitle = function(title) {
 
   app._root.document.title = app._runtime.title;
 
-  return app._runtime.title;
+  return app._root.document.title;
 }
 
 
@@ -3465,7 +3489,7 @@ app.main.control = function(loc) {
  *  - update () <=> prepare ()
  *  - delete () <=> prevent ()
  *  - close () <=> prevent ()
- *  - history ()
+ *  - history (reset)
  *  - receiver ()
  *
  * @global <Object> appe__config
@@ -3584,11 +3608,7 @@ app.main.handle.prototype.getAction = function() {
  * @return <String>
  */
 app.main.handle.prototype.setTitle = function(title) {
-  if (! (title && typeof title === 'string')) {
-    return app.error('app.main.handle.prototype.setTitle', 'title');
-  }
-
-  this._title = title;
+  this._title = (title && typeof title === 'string') ? title : '';
 
   return this._title;
 }
@@ -3639,7 +3659,7 @@ app.main.handle.prototype.setURL = function(path, qs) {
   var href = 'index.html';
 
   href += (path || this.ctl.view) && '?' + ((path && typeof path === 'string') ? path : this.ctl.view);
-  href += qs && '&' + ((qs && typeof qs === 'string') && qs);
+  href += (qs && typeof qs === 'string') ? '&' + qs : '';
 
   this._href = href;
 
@@ -3808,10 +3828,12 @@ app.main.handle.prototype.close = app.main.handle.prototype.prevent;
 
 /**
  * app.main.handle.prototype.history
+ *
+ * @param <Boolean> reset
  */
-app.main.handle.prototype.history = function() {
-  var title = this.getTitle();
-  var url = this.getURL();
+app.main.handle.prototype.history = function(reset) {
+  var title = reset ? this.setTitle() : this.getTitle();
+  var url = reset ? this.setURL() : this.getURL();
 
   app.controller.history(title, url);
 }
@@ -3836,8 +3858,11 @@ app.main.handle.prototype.receiver = function() {
 
   var _app_name = app._runtime.name.toString();
 
-  // no submit, reload
-  if (! (this.ctl.submit && this.ctl.data)) {
+  // submit, history reset
+  if (this.ctl.submit && this.ctl.data) {
+    this.history(true);
+  // no submit, need reload
+  } else {
     app.main.control(this.loc);
 
     return; // silent fail
@@ -3855,7 +3880,7 @@ app.main.handle.prototype.receiver = function() {
       loc.action = null;
       loc.index = null;
 
-      // action update needs reload
+      // action "update" needs reload
       if (action === 'update') {
         self.refresh();
       } else {
@@ -4982,9 +5007,10 @@ app.view.action.prototype.prepare = function(data, submit) {
 
     if (id) {
       this.ctl.index = parseInt(id);
+      this.ctl.history = false;
 
-      // event update no needs history
-      if (this.event != 'update') {
+      // events "edit" and "update" no need history
+      if (this.event != 'edit' && this.event != 'update') {
         this.ctl.history = true;
 
         this.ctl.title = (this.ctl.title && typeof this.ctl.title === 'string') ? '"' + this.ctl.index + '"' : '# ' + this.ctl.index;
@@ -6852,14 +6878,14 @@ app.utils.cookie.prototype.get = function(key) {
     return null;
   }
 
+  value = decodeURIComponent(value);
+
   try {
     var _value = value;
     value = JSON.parse(_value);
   } catch (err) {
     value = _value;
   }
-
-  value = decodeURIComponent(value);
 
   return value;
 }
