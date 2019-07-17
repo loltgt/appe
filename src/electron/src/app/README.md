@@ -29,7 +29,6 @@
 
 ## Roadmap (current version)
 
-- WebStorage related to the current path locally (origin policy break change Firefox >= 68)
 - Display a notice remind to save after several time
 - Fix demo DND in Android
 - An easy builder to generate app

@@ -99,24 +99,13 @@ app.controller.cursor = function(loc) {
     return app.error('app.controller.cursor', [loc]);
   }
 
-  // firefox >= 68 has web storage related to the current path locally 
-  var wsp = (app._runtime.system.name == 'firefox' && app._root.window.location.protocol == 'file:') ? true : false;
-
   if (loc) {
-    if (wsp) {
-      app.utils.cookie('set', 'cursor', loc);
-    } else {
-      app.memory.set('cursor', loc);
-    }
+    app.memory.set('cursor', loc);
 
     return loc;
   }
 
-  if (wsp) {
-    loc = app.utils.cookie('get', 'cursor');
-  } else {
-    loc = app.memory.get('cursor');
-  }
+  loc = app.memory.get('cursor');
 
   return loc;
 }

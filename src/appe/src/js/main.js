@@ -132,6 +132,7 @@ app.main.control = function(loc) {
  *  - export ()
  *  - prepare ()
  *  - prevent ()
+ *  - fetch ()
  *  - open () <=> prepare ()
  *  - add () <=> prepare ()
  *  - edit () <=> prepare ()
@@ -139,6 +140,7 @@ app.main.control = function(loc) {
  *  - delete () <=> prevent ()
  *  - close () <=> prevent ()
  *  - history (reset)
+ *  - sender ()
  *  - receiver ()
  *
  * @global <Object> appe__config
@@ -173,7 +175,7 @@ app.main.handle = function(e) {
 
 
   // standard events
-  var _s_events = { 'resize': 'resize', 'refresh': 'refresh', 'export': 'export' };
+  var _s_events = { 'fetch': 'fetch', 'resize': 'resize', 'refresh': 'refresh', 'export': 'export' };
 
   var cfg_events = config.events;
 
@@ -191,6 +193,7 @@ app.main.handle = function(e) {
   self._initialized = true;
 
   self.loc = !! Object.assign ? Object.assign({}, self.ctl) : app.utils.extendObject({}, self.ctl);
+  self.src = e.source;
 
   self._href = '';
   self._title = '';
@@ -434,6 +437,40 @@ app.main.handle.prototype.prevent = function() {
 }
 
 /**
+ * app.main.handle.prototype.fetch
+ */
+app.main.handle.prototype.fetch = function() {
+  if (! this.src) {
+    return app.stop('app.main.handle.prototype.fetch', 'src');
+  }
+
+  if (! this.ctl.from) {
+    return app.stop('app.main.handle.prototype.fetch', 'ctl.from');
+  }
+
+  if (this.ctl.from.indexOf('app.view.') == -1) {
+    return app.error('app.main.handle.prototype.fetch', [this.ctl.from]);
+  }
+
+  var prefix = 'appe.';
+  var data = { 'session': {}, 'local': {} };
+
+  var _prefix_regexp = new RegExp('^' + prefix);
+
+  Array.prototype.forEach.call(Object.keys(app._root.window.sessionStorage), function(key) {
+    var _key = app.utils.base64('decode', key).replace(_prefix_regexp, '');
+    data.session[_key] = app._root.window.sessionStorage[key];
+  });
+
+  Array.prototype.forEach.call(Object.keys(app._root.window.localStorage), function(key) {
+    var _key = app.utils.base64('decode', key).replace(_prefix_regexp, '');
+    data.local[_key] = app._root.window.localStorage[key];
+  });
+
+  this.sender(data);
+}
+
+/**
  * app.main.handle.prototype.open
  *
  * alias: app.main.handle.prototype.prepare
@@ -485,6 +522,36 @@ app.main.handle.prototype.history = function(reset) {
   var url = reset ? this.setURL() : this.getURL();
 
   app.controller.history(title, url);
+}
+
+/**
+ * app.main.handle.prototype.sender
+ *
+ * @param <Object> data
+ * @return 
+ */
+app.main.handle.prototype.sender = function(data) {
+  var config = app._root.window.appe__config || app._root.process.env.appe__config;
+
+  if (! config) {
+    return app.stop('app.main.handle.prototype.sender');
+  }
+
+  if (! this.src) {
+    return app.stop('app.main.handle.prototype.sender', 'src');
+  }
+
+  if (typeof data != 'object') {
+    return app.error('app.main.handle.prototype.sender', [data]);
+  }
+
+  try {
+    data = JSON.stringify(data);
+  } catch (err) {
+    return app.error('app.main.handle.prototype.sender', err);
+  }
+
+  this.src.postMessage(data, '*');
 }
 
 /**

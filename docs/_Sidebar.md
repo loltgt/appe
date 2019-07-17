@@ -95,6 +95,7 @@
 * [[sub|app.view#appviewsub]]
 * [[handle|app.view#appviewhandle]]
 * [[send|app.view#appviewsend]]
+* [[fetch|app.view#appviewfetch]]
 * [[resize|app.view#appviewresize]]
 * [[getFormData|app.view#appviewgetFormData]]
 * [[convertTableCSV|app.view#appviewconvertTableCSV]]

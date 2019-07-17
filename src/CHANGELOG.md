@@ -2,6 +2,17 @@
 # CHANGELOG
 
 
+## [1.0.5-beta]
+
+- Fix in "app.view.action.prototype.prepare" function
+- Revert back "app.controller.cursor" function
+- Introducing "app.main.handle.prototype.fetch" and "app.view.fetch" functions
+- Add sender/receiver mechanism in "app.view.load" function (window.postMessage)
+- Add sender mechanism in "app.main.handle" prototype function (window.postMessage)
+- Fake storage inside "view" in "app.session" function to avoid same-origin policy in localfile context
+- Update package.json
+
+
 ## [1.0.4-beta]
 
 - Improvements to "app.controller"

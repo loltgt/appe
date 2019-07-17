@@ -71,6 +71,7 @@ avalaible prototype methods:
  - export ()
  - prepare ()
  - prevent ()
+ - fetch ()
  - open () <=> prepare ()
  - add () <=> prepare ()
  - edit () <=> prepare ()
@@ -78,6 +79,7 @@ avalaible prototype methods:
  - delete () <=> prevent ()
  - close () <=> prevent ()
  - history (reset)
+ - sender ()
  - receiver ()
 ```
 
@@ -95,7 +97,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [149](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L149)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [151](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L151)
 
 
  
@@ -138,7 +140,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [563](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L563)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [630](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L630)
 
 
  
@@ -163,7 +165,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [671](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L671)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [738](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L738)
 
 
  
@@ -185,7 +187,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [790](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L790)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [857](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L857)
 
 
  
@@ -214,7 +216,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [810](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L810)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [877](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L877)
 
 
  
@@ -236,7 +238,7 @@ globals:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [834](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L834)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [901](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L901)
 
 
  

@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.4-beta
+ * @version 1.0.5-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
@@ -19,7 +19,7 @@ app._root.process = !! this.Window && ! this.Process && { native: false } || pro
 
 app._runtime = {
   version: '1.0',
-  release: '1.0.4 beta',
+  release: '1.0.5 beta',
   system: null,
   exec: true,
   session: false,
@@ -204,6 +204,13 @@ app.session = function(callback, config, target) {
     app._runtime.storage = 'localStorage';
   } else if (app._runtime.system.name == 'safari') {
     app._runtime.storage = 'sessionStorage';
+  }
+
+  // inside "view" in localfile context using a fake storage to avoid the annoying same-origin policy
+  if (target === undefined && app._root.window.location.protocol === 'file:') {
+    app._root.window.fakeStorage = {};
+
+    app._runtime.storage = 'fakeStorage';
   }
 
 

@@ -812,7 +812,7 @@ app.view.action.prototype.prepare = function(data, submit) {
       // event "update" no need history
       if (this.event != 'update') {
         // events no need history when return from submission
-        if (submit === false) {
+        if (! submit) {
           this.ctl.history = true;
         }
 
@@ -1222,6 +1222,27 @@ app.view.send = function(ctl) {
 
 
 /**
+ * app.view.fetch
+ *
+ * Fetch data from "main" store
+ *
+ * @global <Object> appe__control
+ * @return
+ */
+app.view.fetch = function(from) {
+  var control = app._root.server.appe__control;
+
+  if (typeof from != 'string') {
+    return app.error('app.view.fetch', [from]);
+  }
+
+  var ctl = { action: 'fetch', from: from };
+
+  return app.view.send(ctl);
+}
+
+
+/**
  * app.view.resize
  *
  * Fires when "view" is resized
@@ -1465,6 +1486,67 @@ app.view.load = function() {
       delete _config.secret_passphrase;
     }
 
+    // in remote context initialize "view" directly
+    if (app._root.window.location.protocol != 'file:') {
+      _init();
+    // in localfile context wait data fetching from "main" then initialize "view"
+    } else {
+      app.view.fetch('app.view.load');
+    }
+
+    // ready to receive data from parent "main"
+    app.utils.addEvent('message', app._root.window, _store);
+  }
+
+  var _store = function(e) {
+    if (! e.data) {
+      return app.error('app.view.load', [e]);
+    }
+
+    var data = null;
+
+    try {
+      data = JSON.parse(e.data);
+    } catch (err) {
+      return app.error('app.view.load', err);
+    }
+
+    console.info('app.view.load', '\t', 'receive');
+
+
+    // retrieve data from main and (re)populate storage objects
+    if (data && typeof data === 'object') {
+      var _keys = [];
+
+      if (data.session) {
+        _keys = Object.keys(data.session);
+
+        if (_keys.length) {
+          app.memory.reset();
+
+          Array.prototype.forEach.call(_keys, function(key) {
+            app.memory.set(key, data.session[key]);
+          });
+        }
+      }
+
+      if (data.local) {
+        _keys = Object.keys(data.local);
+
+        if (_keys.length) {
+          app.store.reset();
+
+          Array.prototype.forEach.call(_keys, function(key) {
+            app.store.set(key, data.local[key]);
+          });
+        }
+      }
+    }
+
+    _init();
+  }
+
+  var _init = function() {
     // load extensions
     var routine = (_config.aux && typeof _config.aux === 'object') ? _config.aux : [];
     var tasks = routine.length || 1;
@@ -1488,6 +1570,7 @@ app.view.load = function() {
 
 
   app.session(_session, _config, false);
+
 }
 
 

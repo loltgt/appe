@@ -109,7 +109,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [133](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L133)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [122](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L122)
 
 
  
@@ -131,7 +131,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [149](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L149)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [138](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L138)
 
 
  
@@ -163,7 +163,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [166](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L166)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [155](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L155)
 
 
  
@@ -193,7 +193,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [235](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L235)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [224](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L224)
 
 
  
@@ -221,7 +221,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [310](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L310)
+- [src/appe/src/js/controller.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js)   line: [299](https://github.com/loltgt/appe/blob/master/src/appe/src/js/controller.js#L299)
 
 
  
