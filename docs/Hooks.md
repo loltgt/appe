@@ -185,7 +185,7 @@ arguments:
 ```
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1154](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1154)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1157](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1157)
 
 
  
@@ -204,7 +204,7 @@ arguments:
 ```
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1453](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1453)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1456](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1456)
 
 
  

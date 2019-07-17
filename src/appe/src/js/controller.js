@@ -56,7 +56,7 @@ app.controller.history = function(title, url) {
 
   if (title !== undefined) {
     if (app._runtime.title.indexOf(' – ') != -1) {
-      var _title_regex = new RegExp(app._runtime.locale_dir == 'ltr' ? '.+\s–\s' : '\s–\s.+');
+      var _title_regex = new RegExp(app._runtime.locale_dir == 'ltr' ? '.+\\s–\\s' : '\\s–\\s.+');
 
       _title = _title.replace(_title_regex, '');
     }
