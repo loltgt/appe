@@ -2,6 +2,18 @@
 # CHANGELOG
 
 
+## [1.0.6-beta]
+
+- Broken previous 1.0.5-beta release, add the "app.utils.storage.prototype.fake" method to reproduce a fake Storage prototype
+- Fix data retrieving in "app.view.load" with "_retrieve" function
+- Fix an undefined error in "app.view.beforeunload", missing "control.temp" temporary data object
+- Remove accidental non-breakable spaces from code
+- Commenting some unclear things
+- Updates to the demo extension code
+- Prevent demo load breaks in remote context, "load_attempts" tuning
+- Update package.json
+
+
 ## [1.0.5-beta]
 
 - Fix in "app.view.action.prototype.prepare" function
@@ -30,16 +42,16 @@
 ## [1.0.2-beta]
 
 - Orderable and paginable table lists
-- FIX: internal function "_prepare" in "app.os.fileSessionOpen" with js files
+- Fix internal function "_prepare" in "app.os.fileSessionOpen" with js files
 - css fixes and improvements
 
 
 ## [1.0.1-beta]
 
 - localStorage/sessionStorage assignment on mobile
-- FIX: delay Export dropdown toggler close on mobile
+- Fix delay Export dropdown toggler close on mobile
 - Rename in "config.js", "open_attempts" to "load_attempts", it is more generic
-- FIX: prevent demo load breaks, "load_attempts" tuning
+- Fix prevent demo load breaks, "load_attempts" tuning
 - Check file schema
 
 

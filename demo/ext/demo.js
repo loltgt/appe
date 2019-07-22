@@ -23,8 +23,11 @@ appe__demo = function() {
   var _session = function() {
     var current_file = app.utils.base64('encode', src_file);
 
-    app.utils.cookie('set', 'last_opened_file', current_file);
-    app.utils.cookie('set', 'last_session', current_timestamp_enc);
+    // only "start"
+    if (target === undefined) {
+      app.utils.cookie('set', 'last_opened_file', current_file);
+      app.utils.cookie('set', 'last_session', current_timestamp_enc);
+    }
 
     app.memory.set('last_opened_file', current_file);
     app.memory.set('last_session', current_timestamp_enc);
@@ -74,19 +77,20 @@ appe__demo = function() {
 
   var target;
   var routine = [];
-  var callback = function() {};
+  var callback = function() {}
 
+  // "start"
   if (start) {
     start.loadComplete = _rote;
     callback = app.start.loadComplete;
+  // "main"
   } else if (main) {
     target = true;
     main.loadComplete = _rote;
     callback = app.main.loadComplete;
+  // "view"
   } else if (control) {
     target = false;
-    control.loadComplete = _rote;
-    callback = app.view.loadComplete;
   }
 
 
@@ -103,7 +107,10 @@ appe__demo = function() {
   var schema = typeof config.schema === 'object' ? config.schema : [];
   var file_heads = config.file && config.file.heads ? config.file.heads.toString() : app._runtime.name.toString();
 
-  app.os.scriptOpen(_complete, file, file_heads);
+  // only "start" and "main"
+  if (target !== false) {
+    app.os.scriptOpen(_complete, file, file_heads);
+  }
 }
 
 appe__demo();

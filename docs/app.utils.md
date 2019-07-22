@@ -136,6 +136,7 @@ available prototype methods:
  - has (key, value)
  - del (key)
  - reset ()
+ - fake ()
 ```
 
 arguments: 
@@ -149,7 +150,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [231](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L231)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [232](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L232)
 
 
  
@@ -185,7 +186,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [379](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L379)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [414](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L414)
 
 
  
@@ -215,7 +216,7 @@ to_encode
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [533](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L533)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [568](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L568)
 
 
  
@@ -240,7 +241,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [595](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L595)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [630](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L630)
 
 
  
@@ -265,7 +266,7 @@ value
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [624](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L624)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [659](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L659)
 
 
  
@@ -294,7 +295,7 @@ classes
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [676](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L676)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [711](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L711)
 
 
  
@@ -324,7 +325,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [715](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L715)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [750](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L750)
 
 
  
@@ -381,7 +382,7 @@ formatted_date
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [769](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L769)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [804](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L804)
 
 
  
@@ -405,7 +406,7 @@ number
 returns.
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [831](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L831)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [866](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L866)
 
 
  
@@ -437,7 +438,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [851](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L851)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [886](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L886)
 
 
  
@@ -464,7 +465,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [888](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L888)
+- [src/appe/src/js/utils.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js)   line: [923](https://github.com/loltgt/appe/blob/master/src/appe/src/js/utils.js#L923)
 
 
  

@@ -11,7 +11,7 @@ app.controller = {};
  *
  * Captures the app position using location.href
  *
- * @param <Object> loc  { view, action, index }
+ * @param <Object> loc  { view, action, index }
  */
 app.controller.spoof = function() {
   var loc = { view: null, action: null, index: null };
@@ -46,7 +46,7 @@ app.controller.spoof = function() {
 /**
  * app.controller.history
  *
- * Handles history through the browser api
+ * Handles history navigation through the browser History API
  *
  * @param <String> title
  * @param <String> url
@@ -55,6 +55,7 @@ app.controller.history = function(title, url) {
   var _title = app._runtime.title.toString();
 
   if (title !== undefined) {
+    // remove the subtitle
     if (app._runtime.title.indexOf(' – ') != -1) {
       var _title_regex = new RegExp(app._runtime.locale_dir == 'ltr' ? '.+\\s–\\s' : '\\s–\\s.+');
 
@@ -70,6 +71,7 @@ app.controller.history = function(title, url) {
     title = _title;
   }
 
+  // could give exceptions
   try {
     var err = history.replaceState(null, title, url);
     var sur = window.location.href.replace(/.+\//, '');
@@ -89,10 +91,10 @@ app.controller.history = function(title, url) {
  * app.controller.cursor
  *
  * Get or set the controller cursor, 
- * it contains current position in the app
+ * it contains the current position in the app
  *
  * @param <Object> loc
- * @return <Object> loc  { view, action, index }
+ * @return <Object> loc  { view, action, index }
  */
 app.controller.cursor = function(loc) {
   if (loc && typeof loc != 'object') {
@@ -163,6 +165,7 @@ app.controller.store = function(callback, fn, schema, data) {
     return app.stop('app.controller.store', [callback, fn, schema, data]);
   }
 
+  // get data from internal store object
   var source = store[fn];
 
   if (! source) {
@@ -200,6 +203,7 @@ app.controller.store = function(callback, fn, schema, data) {
       return app.stop('app.controller.store', 'data');
     }
 
+    // (re)populate internal store object
     store[fn][key] = _store(key, values);
   }
 
@@ -260,7 +264,7 @@ app.controller.retrieve = function(callback, routine) {
       var key = schema[i].toString();
       var obj = app.store.get(fn + '_' + key);
 
-      if (! obj) {
+      if (! obj) {
         return app.stop('app.controller.retrieve() > _retrieve', 'schema');
       }
 
@@ -271,6 +275,8 @@ app.controller.retrieve = function(callback, routine) {
   }
 
 
+  // load data object(s) from extensions
+
   var i = routine.length;
 
   while (i--) {
@@ -280,6 +286,7 @@ app.controller.retrieve = function(callback, routine) {
       routine[i].file = '../' + routine[i].file.toString();
     }
 
+    // (re)populate internal store object
     store[fn] = _retrieve(fn, routine[i].schema);
   }
 

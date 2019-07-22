@@ -48,7 +48,7 @@ VM404: Update {{placeholder}}
 VM404: Delete {{placeholder}}
 VM404: Close {{placeholder}}
 VM404: Edit {{placeholder}} "{{title}}"
-VM404: Edit {{placeholder}} "{{name}}" \u2013 {{title}}
+VM404: Edit {{placeholder}} "{{name}}" \u2013 {{title}}
 VM404: {{placeholder}} list
 VM404: Are you sure to {{placeholder}} {{name}} {{title}}?
 VM404: CAUTION! Irreversible action, all data's {{placeholder}} will be erased permanently, be carefull.

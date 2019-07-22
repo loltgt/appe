@@ -18,7 +18,7 @@
 ## app.os.fileSessionOpen
 
 
-#### Opens a session file through FileReader api, stores it, returns to callback
+#### Opens a session file through the browser FileReader API, stores it, returns to callback
 
 
 ```js
@@ -273,7 +273,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [963](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L963)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [957](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L957)
 
 
  
@@ -300,7 +300,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [996](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L996)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [990](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L990)
 
 
  
@@ -322,7 +322,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [1028](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L1028)
+- [src/appe/src/js/os.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js)   line: [1022](https://github.com/loltgt/appe/blob/master/src/appe/src/js/os.js#L1022)
 
 
  

@@ -97,7 +97,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [151](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L151)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [156](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L156)
 
 
  
@@ -140,7 +140,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [630](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L630)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [641](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L641)
 
 
  
@@ -165,7 +165,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [738](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L738)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [749](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L749)
 
 
  
@@ -187,7 +187,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [857](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L857)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [869](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L869)
 
 
  
@@ -216,7 +216,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [877](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L877)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [889](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L889)
 
 
  
@@ -238,7 +238,7 @@ globals:
 ```
 
 position: 
-- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [901](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L901)
+- [src/appe/src/js/main.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js)   line: [950](https://github.com/loltgt/appe/blob/master/src/appe/src/js/main.js#L950)
 
 
  

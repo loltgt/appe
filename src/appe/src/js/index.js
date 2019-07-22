@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.5-beta
+ * @version 1.0.6-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
@@ -13,13 +13,13 @@
 var app = app = { '_root': {}, '_runtime': {} };
 
 app._root.server = this;
-app._root.document = !! this.Document && document || { native: false, documentElement: null };
+app._root.document = !! this.Document && document || { native: false, documentElement: null };
 app._root.window = !! this.Window && window || { native: false, document: app._root.document, navigator: null };
 app._root.process = !! this.Window && ! this.Process && { native: false } || process;
 
 app._runtime = {
   version: '1.0',
-  release: '1.0.5 beta',
+  release: '1.0.6 beta',
   system: null,
   exec: true,
   session: false,
@@ -61,14 +61,18 @@ app.load = function(func) {
     }
   }
 
+  // browser
   if (app._root.window.native == undefined) {
+    // DOM load has priority
     if (document.readyState == 'complete') {
       _func();
     } else {
       document.addEventListener('DOMContentLoaded', _func);
     }
 
+    // fallback to "window.load"
     app.utils.addEvent('load', app._root.window, _func);
+  // fallback to "server.load"
   } else {
     app._root.server.load = func;
   }
@@ -88,8 +92,10 @@ app.unload = function(func) {
     return app.stop('app.unload', 'func');
   }
 
+  // browser
   if (app._root.window.native == undefined) {
     app.utils.addEvent('unload', app._root.window, func);
+  // fallback to "server.onunload"
   } else {
     app._root.server.onunload = func;
   }
@@ -109,8 +115,10 @@ app.beforeunload = function(func) {
     return app.stop('app.beforeunload', 'func');
   }
 
+  // browser
   if (app._root.window.native == undefined) {
     app._root.window.onbeforeunload = func;
+  // fallback to "server.onbeforeunload"
   } else {
     app._root.server.onbeforeunload = func;
   }
@@ -124,12 +132,12 @@ app.beforeunload = function(func) {
  *
  * @return <String> position
  */
-app.position = function() {
+app.position = function() {
   var loc = app.controller.cursor();
 
   if (loc && typeof loc != 'object') {
     return app.error('app.position', 'loc');
-  } else {
+  } else {
     return null;
   }
 
@@ -164,6 +172,8 @@ app.session = function(callback, config, target) {
     return app.stop('app.session', [callback, 'config', target]);
   }
 
+
+  // remove the secrete passphrase from the config object
   var _secret_passphrase = null;
 
   if ('secret_passphrase' in config) {
@@ -173,6 +183,7 @@ app.session = function(callback, config, target) {
   }
 
 
+  // initialize internal store objects
   app._root.server.appe__store = {};
 
 
@@ -188,8 +199,10 @@ app.session = function(callback, config, target) {
 
   app._runtime.system = app.utils.system();
 
-  if (app._root.process == undefined) {
+  // server
+  if (app._root.process.native == undefined) {
     app._runtime.storage = 'storage';
+  // browser, WebStorage API
   } else if ('localStorage' in app._root.window == false || 'sessionStorage' in app._root.window == false) {
     if ('localStorage' in app._root.window === false) {
       app._runtime.storage = 'sessionStorage';
@@ -198,19 +211,29 @@ app.session = function(callback, config, target) {
     } else {
       app._runtime.storage = false;
     }
+  // remote context
   } else if (app._root.window.location.protocol != 'file:') {
     app._runtime.storage = true;
+  // locale context, with chrome force in localStorage
   } else if (app._runtime.system.name == 'chrome') {
     app._runtime.storage = 'localStorage';
+  // locale context, with safari force in sessionStorage
   } else if (app._runtime.system.name == 'safari') {
     app._runtime.storage = 'sessionStorage';
   }
 
-  // inside "view" in localfile context using a fake storage to avoid the annoying same-origin policy
-  if (target === undefined && app._root.window.location.protocol === 'file:') {
-    app._root.window.fakeStorage = {};
 
-    app._runtime.storage = 'fakeStorage';
+  // localfile context
+  if (app._root.window.location.protocol === 'file:') {
+    // inside "start" with firefox >= 68 using a fake storage and cookie for session resume
+    if (target === undefined && app._runtime.system.name == 'firefox' && app._runtime.system.release >= 68) {
+      app._runtime.storage = 'fakeStorage';
+    }
+
+    // inside "view" using a fake storage to avoid the annoying same-origin policy
+    if (target === false && app._root.window.location.protocol === 'file:') {
+      app._runtime.storage = 'fakeStorage';
+    }
   }
 
 
@@ -231,6 +254,7 @@ app.session = function(callback, config, target) {
     if (app._root.window.navigator && navigator.languages && typeof navigator.languages === 'object') {
       var found_locale = false, lang = navigator.language;
 
+      // trying to get language from "navigator.language"
       if (lang) {
         if (lang in locale) {
           app._runtime.locale = lang.toString();
@@ -247,6 +271,7 @@ app.session = function(callback, config, target) {
         }
       }
 
+      // trying to get language from "navigator.languages"
       if (! found_locale) {
         for (lang in navigator.languages) {
           if (! found_locale && navigator.languages[lang] in locale) {
@@ -257,6 +282,7 @@ app.session = function(callback, config, target) {
         }
       }
 
+      // trying to get language from "navigator.languages" first value
       if (! found_locale && navigator.languages.length) {
         lang = navigator.languages[lang].split('-')[0];
 
@@ -395,7 +421,7 @@ app.session = function(callback, config, target) {
 
   var tasks = 1;
 
-  // only start and main
+  // only "start" and "main"
   if (target !== false) {
 
     if (app._runtime.encryption) {
@@ -412,7 +438,7 @@ app.session = function(callback, config, target) {
 
     _doDefault(_resolver);
 
-  // only view
+  // only "view"
   } else {
     _callback();
   }
@@ -425,8 +451,6 @@ app.session = function(callback, config, target) {
  *
  * Resumes session, returns last opened file
  *
- * //TODO FIX
- *
  * @param <Object> config
  * @param <Boolean> target
  * @return <String> session_resume
@@ -436,42 +460,87 @@ app.resume = function(config, target) {
     return app.stop('app.resume', ['config', target]);
   }
 
+  var create_session = null;
+
   var session_resume = '';
   var session_last = '';
 
 
+  // localfile context
+  if (app._root.window.location.protocol === 'file:') {
+    // inside "main" with firefox >= 68
+    // no session
+    // avoid new same-origin restrictions in the browser WebStorage API
+    if (target === true && app._runtime.system.name == 'firefox' && app._runtime.system.release >= 68 && ! app.memory.has('last_session')) {
+      // retrieve last opened file from cookie and pass it to the memory storage
+      if (app.utils.cookie('has', 'last_opened_file')) {
+        app.memory.set('last_opened_file', app.utils.cookie('get', 'last_opened_file'));
+      }
+
+      // delete last session from cookie and pass it to the memory storage
+      if (app.utils.cookie('has', 'last_session')) {
+        app.memory.set('last_session', app.utils.cookie('get', 'last_session'));
+
+        create_session = false;
+      }
+    }
+  }
+
+
+  // resuming a JavaScript file with JSON data
   if (! app._runtime.binary) {
-    if (app.utils.cookie('has', 'last_opened_file')) {
-      session_resume = app.utils.cookie('get', 'last_opened_file');
+    // retrieve last opened file
+    session_resume = app.memory.get('last_opened_file');
+  }
+
+
+  // retrieve last session
+  session_last = app.memory.get('last_session');
+
+  if (! session_last && create_session === null) {
+    create_session = true;
+  }
+
+
+  // only "start"
+  if (target === undefined) {
+
+    // empty
+
+  // only "main" with debug turned on
+  } else if (target === true && !! app._runtime.debug) {
+    // no resume and no session, create a new session
+    create_session && app.newSession();
+  // only "main" with debug turned off
+  } else if (target === true) {
+    // no session, return to the launcher
+    if (create_session === null) {
+      return app.redirect();
     }
-    if (! session_resume) {
-      session_resume = app.memory.get('last_opened_file');
-    }
   }
 
-
-  if (app.utils.cookie('has', 'last_session')) {
-    session_last = app.utils.cookie('get', 'last_session');
-  }
-  if (! session_last) {
-    session_last = app.memory.get('last_session');
-  }
-
-
-  if (target === undefined && !! (! session_resume || session_last)) {
-    // there's nothing to do
-  } else if (!! app._runtime.debug && target !== undefined) {
-    //TODO FIX loop redirect / demo mode
-    return (! session_last) && app.newSession();
-  } else if (! session_last) {
-    return app.redirect();
-  }
 
   if (!! session_resume) {
-    session_resume = app.utils.base64('decode', session_resume);
-    session_resume = app.os.fileFindRoot(config.save_path.toString() + '/' + session_resume);
-  }
 
+    // localfile context
+    if (app._root.window.location.protocol === 'file:') {
+      // only "start"
+      if (target === undefined) {
+        // no session
+        // could have trouble with same-origin restriction
+        // the resuming will be attempted in "main"
+        return (! session_last) && app.redirect();
+      }
+
+      session_resume = app.utils.base64('decode', session_resume);
+      session_resume = app.os.fileFindRoot(config.save_path.toString() + '/' + session_resume);
+
+    // remote context
+    } else {
+      session_resume = false;
+    }
+
+  }
 
   return session_resume;
 }
@@ -495,6 +564,7 @@ app.redirect = function() {
   var rp = config.runtime_path.toString();
   var filename = 'index';
 
+  // in "main" redirect to the launcher
   if (app._root.window.location.href.indexOf(rp + '/') != -1) {
     filename = config.launcher_name.toString();
   }
@@ -611,7 +681,7 @@ app.checkFile = function(source, checksum) {
 
   var keys = Object.keys(source);
 
-  for (key in keys) {
+  for (key in keys) {
     if (key in schema === false) {
       _schema_validation = false;
     }
@@ -711,16 +781,16 @@ app.openSessionFile = function() {
       return; // silent fail
     }
 
-
-    app.utils.cookie('del', 'last_opened_file');
-    app.utils.cookie('del', 'last_session');
-
-
     var _filename = app.utils.base64('encode', filename);
 
+    // only "start"
+    if (_is_start) {
+      app.utils.cookie('del', 'last_opened_file');
+      app.utils.cookie('del', 'last_session');
 
-    app.utils.cookie('set', 'last_opened_file', _filename);
-    app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+      app.utils.cookie('set', 'last_opened_file', _filename);
+      app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+    }
 
     app.memory.set('last_opened_file', _filename);
     app.memory.set('last_session', _current_timestamp_enc);
@@ -858,10 +928,13 @@ app.newSession = function() {
     app.controller.clear();
 
 
-    app.utils.cookie('del', 'last_opened_file');
-    app.utils.cookie('del', 'last_session');
+    // only "start"
+    if (_is_start) {
+      app.utils.cookie('del', 'last_opened_file');
+      app.utils.cookie('del', 'last_session');
 
-    app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+      app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+    }
 
 
     app.memory.del('file_saves');
@@ -999,7 +1072,7 @@ app.asyncAttemptLoad = function(callback, resume_session, fn, file, schema, memo
     for (var i in schema) {
       var key = schema[i].toString();
 
-      if (key in source === false) {
+      if (key in source === false) {
         return cb('schema');
       }
 
@@ -1138,7 +1211,7 @@ app.asyncLoadAux = function(callback, routine, resume_session) {
  *
  * App localization
  *
- * //TODO implement
+ * //TODO implement nest replacement
  *
  * @global <Object> appe__locale
  * @param <String> to_translate
@@ -1209,7 +1282,7 @@ app.i18n = function(to_translate, context, to_replace) {
         lsstring_replacement = lsstring_replacement[1];
 
         if (lsstring_replacement.length) {
-          if (! /\D/.test(lsstring_replacement[0])) {
+          if (! /\D/.test(lsstring_replacement[0])) {
             //TODO nest
             lsstring_replacement = [[lsstring_replacement[0]]];
           } else {
@@ -1296,10 +1369,12 @@ app.stop = function(arg0, arg1, arg2, soft) {
 
   var _is_main = ! (app._root.server.appe__main === undefined);
 
+  // stop the runtime execution
   app._runtime.exec = false;
 
   arg1 = arg1 || null;
 
+  // in "main" add a semi-opaque overlay
   if (_is_main) {
     app.blind();
   }
@@ -1371,6 +1446,7 @@ app.error = function(arg0, arg1, arg2, soft) {
     }
   }
 
+  // alerts can be used only in "main" and "start"
   if (! _is_view && ! soft && ! app._runtime.hangs++) {
     !! app._root.window.alert && app._root.window.alert(msg);
   }

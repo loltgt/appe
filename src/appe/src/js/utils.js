@@ -18,7 +18,7 @@ app.utils.system = function(purpose) {
   var system = { 'name': null, 'platform': null, 'architecture': null, 'release': null };
 
 
-  var _ssn = function() {
+  var _serverSideNavigator = function() {
     var name = app._root.process.title.toString();
     var platform = app._root.process.platform.toString();
     var architecture = parseInt(app._root.process.arch.replace(/\D+/, ''));
@@ -27,7 +27,7 @@ app.utils.system = function(purpose) {
     return { 'name': name, 'platform': platform, 'architecture': architecture, 'release': release };
   }
 
-  var _csn = function() {
+  var _clientSideNavigator = function() {
     var name = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
     var platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
     var release = null;
@@ -38,7 +38,7 @@ app.utils.system = function(purpose) {
       name = name.toLowerCase();
 
       if (name) {
-        if (name === 'crios') {
+        if (name === 'crios') {
           name = 'chrome';
         }
 
@@ -94,7 +94,7 @@ app.utils.system = function(purpose) {
           }
         }
 
-        if (platform === 'lin') {
+        if (platform === 'lin') {
           platform = 'nxl';
         }
 
@@ -106,15 +106,15 @@ app.utils.system = function(purpose) {
   }
 
 
-  // clientside
+  // client-side
   if (app._root.window.native == undefined) {
-    system = _csn();
-  // serverside
+    system = _clientSideNavigator();
+  // server-side
   } else if (app._root.process.native == undefined && app._root.process.title === 'node') {
-    system = _ssn();
-  // maybe unsupported serverside
+    system = _serverSideNavigator();
+  // maybe unsupported server-side
   } else {
-    system = _ssn();
+    system = _serverSideNavigator();
 
     return app.error('app.utils.system', 'This system is not supported.', system);
   }
@@ -221,6 +221,7 @@ app.utils.proxy = function(deep, obj) {
  *  - has (key, value)
  *  - del (key)
  *  - reset ()
+ *  - fake ()
  *
  * @param <String> persists
  * @param <String> method
@@ -246,8 +247,9 @@ app.utils.storage = function(persists, method, key, value) {
   self._fn = _storage || (! persists ? 'sessionStorage' : 'localStorage');
   self._persist = !! persists;
 
+  // fake storage
   if (self._fn in app._root.window === false) {
-    return app.error('app.utils.storage', self._fn);
+    self.fake.apply(self);
   }
 
   return self[method].apply(self, [ key, value ]);
@@ -267,7 +269,7 @@ app.utils.storage.prototype.set = function(key, value) {
 
   var _key = app.utils.base64('encode', this._prefix + key);
 
-  if (typeof value == 'object') {
+  if (typeof value == 'object') {
     try {
       value = JSON.stringify(value);
     } catch (err) {
@@ -357,6 +359,39 @@ app.utils.storage.prototype.reset = function() {
   app._root.window[this._fn].clear();
 }
 
+/**
+ * app.utils.storage.prototype.fake
+ *
+ * This method is based on Function prototype and differs from Storage prototype, 
+ * use it with caution, it's used inside "view"
+ */
+app.utils.storage.prototype.fake = function() {
+  app._root.window[this._fn] = function() {}
+
+  app._root.window[this._fn].__entries__ = {};
+
+  app._root.window[this._fn].prototype.setItem = function(key, value) {
+    this.__entries__[key] = value;
+  }
+
+  app._root.window[this._fn].prototype.getItem = function(key) {
+    return this.__entries__[key];
+  }
+
+  app._root.window[this._fn].prototype.removeItem = function(key) {
+    delete this.__entries__[key];
+  }
+
+  app._root.window[this._fn].prototype.clear = function() {
+    this.__entries__ = {};
+  }
+
+  app._root.window[this._fn].setItem = app._root.window[this._fn].prototype.setItem;
+  app._root.window[this._fn].getItem = app._root.window[this._fn].prototype.getItem;
+  app._root.window[this._fn].removeItem = app._root.window[this._fn].prototype.removeItem;
+  app._root.window[this._fn].clear = app._root.window[this._fn].prototype.clear;
+}
+
 
 /**
  * app.utils.cookie
@@ -410,7 +445,7 @@ app.utils.cookie.prototype.set = function(key, value, expire_time) {
   var _key = app.utils.base64('encode', this._prefix + key);
   _key = encodeURIComponent(_key);
 
-  if (typeof value == 'object') {
+  if (typeof value == 'object') {
     try {
       value = JSON.stringify(value);
     } catch (err) {

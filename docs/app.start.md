@@ -40,7 +40,7 @@ position:
 ## app.start.alternative
 
 
-#### Displays message with info and alternatives to help to execute app
+#### Displays message with info and alternatives to help to execute the app
 
 
 ```js

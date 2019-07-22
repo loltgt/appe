@@ -46,13 +46,15 @@ app.main.control = function(loc) {
   var step = true;
 
   if (loc && typeof loc === 'object') {
-    if (loc.view) {
+    // route: view
+    if (loc.view) {
       if (!! cfg_routes[loc.view]) {
         route = encodeURIComponent(loc.view) + '.html';
       } else {
         step = false;
       }
 
+      // route: action
       if (loc.action) {
         if (!! cfg_routes[loc.view][loc.action]) {
           route = cfg_routes[loc.view][loc.action].toString() + '.html';
@@ -61,17 +63,20 @@ app.main.control = function(loc) {
           step = false;
         }
 
+        // route: index
         if (loc.index) {
           route += '&id=' + encodeURIComponent(loc.index);
         }
       }
     } else {
+      // default route
       loc = { 'view': cfg_default_route };
     }
   } else {
     step = false;
   }
 
+  // step to the route
   if (step && typeof route === 'string') {
     app.controller.cursor(loc);
 
@@ -175,7 +180,7 @@ app.main.handle = function(e) {
 
 
   // standard events
-  var _s_events = { 'fetch': 'fetch', 'resize': 'resize', 'refresh': 'refresh', 'export': 'export' };
+  var _s_events = { 'fetch': 'fetch', 'refresh': 'refresh', 'export': 'export', 'resize': 'resize' };
 
   var cfg_events = config.events;
 
@@ -183,7 +188,7 @@ app.main.handle = function(e) {
 
   self.event = null;
 
-  // check is allowed action
+  // check if is an allowed action
   if (self.ctl.action && self.ctl.action in self.events) {
     self.event = self.ctl.action;
   } else {
@@ -438,6 +443,8 @@ app.main.handle.prototype.prevent = function() {
 
 /**
  * app.main.handle.prototype.fetch
+ *
+ * Method to fetch data to "view" from storage objects
  */
 app.main.handle.prototype.fetch = function() {
   if (! this.src) {
@@ -459,12 +466,12 @@ app.main.handle.prototype.fetch = function() {
 
   Array.prototype.forEach.call(Object.keys(app._root.window.sessionStorage), function(key) {
     var _key = app.utils.base64('decode', key).replace(_prefix_regexp, '');
-    data.session[_key] = app._root.window.sessionStorage[key];
+    data.session[_key] = app._root.window.sessionStorage[key];
   });
 
   Array.prototype.forEach.call(Object.keys(app._root.window.localStorage), function(key) {
     var _key = app.utils.base64('decode', key).replace(_prefix_regexp, '');
-    data.local[_key] = app._root.window.localStorage[key];
+    data.local[_key] = app._root.window.localStorage[key];
   });
 
   this.sender(data);
@@ -527,6 +534,8 @@ app.main.handle.prototype.history = function(reset) {
 /**
  * app.main.handle.prototype.sender
  *
+ * It sends data to "view"
+ *
  * @param <Object> data
  * @return 
  */
@@ -556,6 +565,8 @@ app.main.handle.prototype.sender = function(data) {
 
 /**
  * app.main.handle.prototype.receiver
+ *
+ * It receives data from "view"
  *
  * @return 
  */
@@ -738,6 +749,7 @@ app.main.action.prototype.menu = function(element, event, menu, toggler) {
 app.main.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
+  // remove the secrete passphrase from the config object
   if (typeof config == 'object') {
     var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
@@ -881,13 +893,50 @@ app.main.loadComplete = function(routine) {
     return app.stop('app.main.loadComplete');
   }
 
-  // try to resume previous session
-  app.resume(config, true);
+  if (config.file && typeof config.file != 'object') {
+    return app.error('app.start.loadComplete', 'config');
+  }
+
+  var _app_name = app._runtime.name.toString();
+
+  var schema = config.schema;
+
+  if (typeof schema != 'object') {
+    return app.error('app.start.loadComplete', 'schema');
+  }
+
+
+  // try to resume previous session and file
+  var session_resume = app.resume(config, true);
+  var session_opened = (app.memory.has('last_session') && app.memory.has('last_time'));
 
   routine.push({ fn: app._runtime.name, schema: config.schema });
 
-  // retrieve previous session store and load extensions objects
-  app.controller.retrieve(app.main.setup, routine);
+
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+
+
+  // no resume
+  if (! session_resume || session_opened) {
+    // retrieve previous session store and load extensions objects
+    app.controller.retrieve(app.main.setup, routine);
+
+    return;
+  }
+
+  // resume
+  app.asyncAttemptLoad(function(loaded) {
+    // loaded, no session timers, restore session timers
+    if (loaded && ! session_opened) {
+      var _current_timestamp = app.utils.dateFormat(true, 'Q');
+
+      app.memory.set('last_stored', _current_timestamp);
+      app.memory.set('last_time', _current_timestamp);
+    }
+
+    // retrieve previous session store and load extensions objects
+    app.controller.retrieve(app.main.setup, routine);
+  }, true, file_heads, session_resume, schema, true);
 }
 
 

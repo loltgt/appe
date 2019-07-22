@@ -160,6 +160,7 @@ app.view.control.prototype.begin = function() {
   var step = true;
 
   if (loc && typeof loc === 'object') {
+    // route: action
     if (loc.action) {
       if (!! _routes[view][loc.action]) {
         event = actions[loc.action];
@@ -167,10 +168,12 @@ app.view.control.prototype.begin = function() {
         step = false;
       }
 
+      // route: index
       if (loc.index) {
         id = loc.index;
       }
     } else {
+      // default route
       event = default_event;
     }
   } else {
@@ -181,6 +184,7 @@ app.view.control.prototype.begin = function() {
     return app.error('app.view.control.prototype.begin', 'event');
   }
 
+  // defining a temporay data object
   control.temp = {};
 
   this._initialized = true;
@@ -217,6 +221,7 @@ app.view.control.prototype.end = function() {
     // check for edit changes
     try {
       var _changes = app.view.getFormData(this.form.elements);
+
       control.temp.form_changes = _changes && JSON.stringify(_changes);
     } catch (err) {
       return app.error('app.view.control.prototype.end', err);
@@ -314,8 +319,10 @@ app.view.control.prototype.setTitle = function(section_title, view_title, id) {
   id = (id != false) ? parseInt(id) : app.view.control.prototype.getID();
 
   if (event === 'edit' && !! id) {
+    // with ID and title
     if (app._runtime.locale_dir == 'rtl') {
       section_title = '# ' + id + ' ' + section_title;
+    // with ID
     } else {
       section_title += ' # ' + id;
     }
@@ -393,7 +400,7 @@ app.view.control.prototype.denySubmit = function() {
  * @param <arguments> args  ...  passing down arguments
  * @return <Object>  { rows <String>, tpl <ElementNode>, data <Object>, args <Array> }
  */
-app.view.control.prototype.fillTable = function(table, data, order) {
+app.view.control.prototype.fillTable = function(table, data, order) {
   this.isInitialized('fillTable');
 
   if (! table) {
@@ -444,7 +451,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
  * @param <Object> data
  * @return <Object>  { data <Object>, args <Array> }
  */
-app.view.control.prototype.fillForm = function(form, data) {
+app.view.control.prototype.fillForm = function(form, data) {
   this.isInitialized('fillForm');
 
   if (! this.form) {
@@ -494,7 +501,6 @@ app.view.control.prototype.fillSelection = function(data, id) {
     selection.innerHTML = app.layout.renderSelectOptions(selection, data, id);
     selection.value = id;
   } else {
-
     selection.parentNode.classList.add('hidden');
   }
 }
@@ -557,7 +563,7 @@ app.view.control.prototype.paginate = function(element, pages, current_page) {
   pagination_next.innerHTML = pagination_next.innerHTML.replace('{page_next}', current_page == pages || pages < 2 ? current_page : current_page + 1);
 
   if (current_page < 2) { pagination_prev.classList.add('disabled'); }
-  if (current_page == pages || pages < 2) { pagination_next.classList.add('disabled'); }
+  if (current_page == pages || pages < 2) { pagination_next.classList.add('disabled'); }
 
   var i = 0;
   var pagination_items = parseInt(pages);
@@ -753,10 +759,15 @@ app.view.action.prototype.validateForm = function() {
     return app.error('app.view.action.prototype.validateForm', 'action_submit');
   }
 
-  // not valid form
+
+  // form is not valid
+
   if (this.form.checkValidity()) {
     return false;
   }
+
+
+  // form is valid
 
   Array.prototype.forEach.call(this.form.elements, function(field) {
     var closest_group = null;
@@ -818,7 +829,7 @@ app.view.action.prototype.prepare = function(data, submit) {
 
         this.ctl.title = (this.ctl.title && typeof this.ctl.title === 'string') ? '"' + this.ctl.index + '"' : '# ' + this.ctl.index;
 
-        if (label) {
+        if (label) {
           label = label[0].toUpperCase() + label.slice(1);
 
           if (this._is_localized) {
@@ -839,6 +850,7 @@ app.view.action.prototype.prepare = function(data, submit) {
         control.temp.form_submit = true;
 
         var _changes = app.view.getFormData(this.form.elements);
+
         control.temp.form_changes = _changes && JSON.stringify(_changes);
       }
     }
@@ -1194,6 +1206,7 @@ app.view.send = function(ctl) {
     return app.error('app.view.send', [ctl]);
   }
 
+  // current position is mandatory
   if ('view' in ctl === false) {
     var cursor = app.controller.cursor();
 
@@ -1227,6 +1240,7 @@ app.view.send = function(ctl) {
  * Fetch data from "main" store
  *
  * @global <Object> appe__control
+ * @param <String> from
  * @return
  */
 app.view.fetch = function(from) {
@@ -1434,11 +1448,13 @@ app.view.copyToClipboard = function(source) {
  *
  * @global <Object> appe__config
  * @global <Object> appe__locale
+ * @global <Object> appe__store
  * @return
  */
 app.view.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
+  // remove the secrete passphrase from the config object
   if (typeof config == 'object') {
     var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
@@ -1475,8 +1491,10 @@ app.view.load = function() {
      * @param <Object> routine
      */
     if (control && typeof control == 'object' && 'loadComplete' in control && typeof control.loadComplete === 'function') {
+      console.log('control.loadComplete');
       control.loadComplete(routine);
     } else {
+      console.log('app.view.loadComplete');
       app.view.loadComplete(routine);
     }
   }
@@ -1495,10 +1513,10 @@ app.view.load = function() {
     }
 
     // ready to receive data from parent "main"
-    app.utils.addEvent('message', app._root.window, _store);
+    app.utils.addEvent('message', app._root.window, _retrieve);
   }
 
-  var _store = function(e) {
+  var _retrieve = function(e) {
     if (! e.data) {
       return app.error('app.view.load', [e]);
     }
@@ -1514,34 +1532,113 @@ app.view.load = function() {
     console.info('app.view.load', '\t', 'receive');
 
 
+    var _app_name = app._runtime.name.toString();
+
+    var schema = config.schema;
+
+    if (typeof schema != 'object') {
+      return app.error('app.view.load', 'schema');
+    }
+
+    var store = app._root.server.appe__store;
+
+    if (! store) {
+      return app.stop('app.view.load() > _retrieve', 'store');
+    }
+
+
+    // no data, try to load "view" directly
+
+    if (! (data && typeof data === 'object')) {
+      _init();
+    }
+
+
     // retrieve data from main and (re)populate storage objects
-    if (data && typeof data === 'object') {
-      var _keys = [];
 
-      if (data.session) {
-        _keys = Object.keys(data.session);
+    var _keys = [];
 
-        if (_keys.length) {
-          app.memory.reset();
+    if (data.session) {
+      _keys = Object.keys(data.session);
 
-          Array.prototype.forEach.call(_keys, function(key) {
-            app.memory.set(key, data.session[key]);
-          });
-        }
-      }
+      if (_keys.length) {
+        app.memory.reset();
 
-      if (data.local) {
-        _keys = Object.keys(data.local);
-
-        if (_keys.length) {
-          app.store.reset();
-
-          Array.prototype.forEach.call(_keys, function(key) {
-            app.store.set(key, data.local[key]);
-          });
-        }
+        Array.prototype.forEach.call(_keys, function(key) {
+          app.memory.set(key, data.session[key]);
+        });
       }
     }
+
+    if (data.local) {
+      _keys = Object.keys(data.local);
+
+      if (_keys.length) {
+        app.store.reset();
+
+        Array.prototype.forEach.call(_keys, function(key) {
+          app.store.set(key, data.local[key]);
+        });
+      }
+    }
+
+
+    // rebuild internal store object
+
+    store[_app_name] = {};
+
+    for (var i in schema) {
+      var key = schema[i].toString();
+      var obj = app.store.get(_app_name + '_' + key);
+
+      if (! obj) {
+        return app.stop('app.view.load() > _retrieve', 'schema', [key, _app_name, app.store.get(_app_name + '_' + key)]);
+      }
+
+      store[_app_name][key] = obj;
+    }
+
+
+    // now restore storage for internal use inside "view"
+
+    app._runtime.storage = true;
+
+    // server
+    if (app._root.process.native == undefined) {
+      app._runtime.storage = 'storage';
+    // browser, WebStorage API
+    } else if ('localStorage' in app._root.window == false || 'sessionStorage' in app._root.window == false) {
+      if ('localStorage' in app._root.window === false) {
+        app._runtime.storage = 'sessionStorage';
+      } else if ('sessionStorage' in app._root.window === false) {
+        app._runtime.storage = 'localStorage';
+      } else {
+        app._runtime.storage = false;
+      }
+    // locale context, with chrome force in localStorage
+    } else if (app._runtime.system.name == 'chrome') {
+      app._runtime.storage = 'localStorage';
+    // locale context, with safari force in sessionStorage
+    } else if (app._runtime.system.name == 'safari') {
+      app._runtime.storage = 'sessionStorage';
+    }
+
+
+    // restore non-persistent storage inside "view"
+    if (data.session) {
+      _keys = Object.keys(data.session);
+      var _reserved_keys = ['last_opened_file', 'last_session', 'last_stored', 'last_time', 'cursor'];
+
+      if (_keys.length) {
+        Array.prototype.forEach.call(_keys, function(key) {
+          if (key in _reserved_keys === false) {
+            app.memory.set(key, data.session[key]);
+          }
+        });
+      }
+    }
+
+
 
     _init();
   }
@@ -1589,9 +1686,10 @@ app.view.beforeunload = function() {
     return app.error('app.view.beforeunload', 'control');
   }
 
-  if (control.temp.form && ! control.temp.form_submit) {
+  if (control.temp && control.temp.form && ! control.temp.form_submit) {
     try {
       var _changes = app.view.getFormData(control.temp.form_elements);
+
       _changes = _changes && JSON.stringify(_changes);
     } catch (err) {
       return app.error('app.view.beforeunload', err);
@@ -1621,9 +1719,6 @@ app.view.loadComplete = function(routine) {
   if (! config) {
     return app.stop('app.view.loadComplete');
   }
-
-  // try to resume previous session
-  app.resume(config, false);
 
   routine.push({ fn: app._runtime.name, schema: config.schema });
 

@@ -29,7 +29,7 @@ app.start.redirect = function(loaded) {
 /**
  * app.start.alternative
  *
- * Displays message with info and alternatives to help to execute app 
+ * Displays message with info and alternatives to help to execute the app 
  *
  * @global <Object> appe__config
  * @return
@@ -279,8 +279,12 @@ app.start.loadComplete = function(routine) {
 
   app.start.progress(1);
 
+  // no resume, skip last opened file load 
   if (! session_resume) {
     return;
+  // resume but could have same-origin restrictions
+  } else if (session_resume === true) {
+    app.start.redirect(true);
   }
 
 

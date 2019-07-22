@@ -497,7 +497,7 @@ appe__locale = {
       "Delete {{placeholder}}": "Elimina {{placeholder}}",
       "Close {{placeholder}}": "Chiudi {{placeholder}}",
       "Edit {{placeholder}} \"{{title}}\"": "Modifica {{placeholder}} \"{{title}}\"",
-      "Edit {{placeholder}} \"{{name}}\" \u2013 {{title}}": "Modifica {{placeholder}} \"{{name}}\" \u2013 {{title}}",
+      "Edit {{placeholder}} \"{{name}}\" \u2013 {{title}}": "Modifica {{placeholder}} \"{{name}}\" \u2013 {{title}}",
       "{{placeholder}} list": "Lista {{placeholder}}",
       "Are you sure to {{placeholder}} {{name}} {{title}}?": "Sei sicuro di {{placeholder}} {{title}} {{name}}?",
       "CAUTION! Irreversible action, all data's {{placeholder}} will be erased permanently, be carefull.": "ATTENZIONE! Operazione irreversibile, tutti i dati in {{placeholder}} verranno eliminati definitivamente.",

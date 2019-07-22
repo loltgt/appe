@@ -144,7 +144,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [639](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L639)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [645](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L645)
 
 
  
@@ -185,7 +185,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [979](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L979)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [991](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L991)
 
 
  
@@ -210,7 +210,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1139](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1139)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1151](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1151)
 
 
  
@@ -240,7 +240,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1176](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1176)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1188](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1188)
 
 
  
@@ -261,10 +261,15 @@ globals:
 <Object> appe__control
 ```
 
+arguments: 
+```js
+<String> from
+```
+
 returns.
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1232](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1232)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1246](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1246)
 
 
  
@@ -288,7 +293,7 @@ globals:
 returns.
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1253](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1253)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1267](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1267)
 
 
  
@@ -315,7 +320,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1283](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1283)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1297](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1297)
 
 
  
@@ -342,7 +347,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1345](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1345)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1359](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1359)
 
 
  
@@ -367,7 +372,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1398](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1398)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1412](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1412)
 
 
  
@@ -387,12 +392,13 @@ globals:
 ```js
 <Object> appe__config
 <Object> appe__locale
+<Object> appe__store
 ```
 
 returns.
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1439](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1439)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1454](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1454)
 
 
  
@@ -419,7 +425,7 @@ returns:
 ```
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1585](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1585)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1682](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1682)
 
 
  
@@ -448,7 +454,7 @@ arguments:
 returns.
 
 position: 
-- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1618](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1618)
+- [src/appe/src/js/view.js](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js)   line: [1716](https://github.com/loltgt/appe/blob/master/src/appe/src/js/view.js#L1716)
 
 
  

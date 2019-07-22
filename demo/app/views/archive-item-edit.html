@@ -123,7 +123,7 @@ control.handle = function(data) {
   var title = '';
 
   if (data_archive[archive_id][category_id]) {
-    title = app.i18n('Edit {{placeholder}} "{{name}}" \u2013 {{title}}', 'action', [
+    title = app.i18n('Edit {{placeholder}} "{{name}}" \u2013 {{title}}', 'action', [
       app.i18n('Item||Items', 'page', [[1]]),
       data_items[id].name.toUpperCase(),
       data_archive[archive_id][category_id].title

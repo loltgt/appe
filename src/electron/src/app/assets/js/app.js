@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.5-beta
+ * @version 1.0.6-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
@@ -13,13 +13,13 @@
 var app = app = { '_root': {}, '_runtime': {} };
 
 app._root.server = this;
-app._root.document = !! this.Document && document || { native: false, documentElement: null };
+app._root.document = !! this.Document && document || { native: false, documentElement: null };
 app._root.window = !! this.Window && window || { native: false, document: app._root.document, navigator: null };
 app._root.process = !! this.Window && ! this.Process && { native: false } || process;
 
 app._runtime = {
   version: '1.0',
-  release: '1.0.5 beta',
+  release: '1.0.6 beta',
   system: null,
   exec: true,
   session: false,
@@ -61,14 +61,18 @@ app.load = function(func) {
     }
   }
 
+  // browser
   if (app._root.window.native == undefined) {
+    // DOM load has priority
     if (document.readyState == 'complete') {
       _func();
     } else {
       document.addEventListener('DOMContentLoaded', _func);
     }
 
+    // fallback to "window.load"
     app.utils.addEvent('load', app._root.window, _func);
+  // fallback to "server.load"
   } else {
     app._root.server.load = func;
   }
@@ -88,8 +92,10 @@ app.unload = function(func) {
     return app.stop('app.unload', 'func');
   }
 
+  // browser
   if (app._root.window.native == undefined) {
     app.utils.addEvent('unload', app._root.window, func);
+  // fallback to "server.onunload"
   } else {
     app._root.server.onunload = func;
   }
@@ -109,8 +115,10 @@ app.beforeunload = function(func) {
     return app.stop('app.beforeunload', 'func');
   }
 
+  // browser
   if (app._root.window.native == undefined) {
     app._root.window.onbeforeunload = func;
+  // fallback to "server.onbeforeunload"
   } else {
     app._root.server.onbeforeunload = func;
   }
@@ -124,12 +132,12 @@ app.beforeunload = function(func) {
  *
  * @return <String> position
  */
-app.position = function() {
+app.position = function() {
   var loc = app.controller.cursor();
 
   if (loc && typeof loc != 'object') {
     return app.error('app.position', 'loc');
-  } else {
+  } else {
     return null;
   }
 
@@ -164,6 +172,8 @@ app.session = function(callback, config, target) {
     return app.stop('app.session', [callback, 'config', target]);
   }
 
+
+  // remove the secrete passphrase from the config object
   var _secret_passphrase = null;
 
   if ('secret_passphrase' in config) {
@@ -173,6 +183,7 @@ app.session = function(callback, config, target) {
   }
 
 
+  // initialize internal store objects
   app._root.server.appe__store = {};
 
 
@@ -188,8 +199,10 @@ app.session = function(callback, config, target) {
 
   app._runtime.system = app.utils.system();
 
-  if (app._root.process == undefined) {
+  // server
+  if (app._root.process.native == undefined) {
     app._runtime.storage = 'storage';
+  // browser, WebStorage API
   } else if ('localStorage' in app._root.window == false || 'sessionStorage' in app._root.window == false) {
     if ('localStorage' in app._root.window === false) {
       app._runtime.storage = 'sessionStorage';
@@ -198,19 +211,29 @@ app.session = function(callback, config, target) {
     } else {
       app._runtime.storage = false;
     }
+  // remote context
   } else if (app._root.window.location.protocol != 'file:') {
     app._runtime.storage = true;
+  // locale context, with chrome force in localStorage
   } else if (app._runtime.system.name == 'chrome') {
     app._runtime.storage = 'localStorage';
+  // locale context, with safari force in sessionStorage
   } else if (app._runtime.system.name == 'safari') {
     app._runtime.storage = 'sessionStorage';
   }
 
-  // inside "view" in localfile context using a fake storage to avoid the annoying same-origin policy
-  if (target === undefined && app._root.window.location.protocol === 'file:') {
-    app._root.window.fakeStorage = {};
 
-    app._runtime.storage = 'fakeStorage';
+  // localfile context
+  if (app._root.window.location.protocol === 'file:') {
+    // inside "start" with firefox >= 68 using a fake storage and cookie for session resume
+    if (target === undefined && app._runtime.system.name == 'firefox' && app._runtime.system.release >= 68) {
+      app._runtime.storage = 'fakeStorage';
+    }
+
+    // inside "view" using a fake storage to avoid the annoying same-origin policy
+    if (target === false && app._root.window.location.protocol === 'file:') {
+      app._runtime.storage = 'fakeStorage';
+    }
   }
 
 
@@ -231,6 +254,7 @@ app.session = function(callback, config, target) {
     if (app._root.window.navigator && navigator.languages && typeof navigator.languages === 'object') {
       var found_locale = false, lang = navigator.language;
 
+      // trying to get language from "navigator.language"
       if (lang) {
         if (lang in locale) {
           app._runtime.locale = lang.toString();
@@ -247,6 +271,7 @@ app.session = function(callback, config, target) {
         }
       }
 
+      // trying to get language from "navigator.languages"
       if (! found_locale) {
         for (lang in navigator.languages) {
           if (! found_locale && navigator.languages[lang] in locale) {
@@ -257,6 +282,7 @@ app.session = function(callback, config, target) {
         }
       }
 
+      // trying to get language from "navigator.languages" first value
       if (! found_locale && navigator.languages.length) {
         lang = navigator.languages[lang].split('-')[0];
 
@@ -395,7 +421,7 @@ app.session = function(callback, config, target) {
 
   var tasks = 1;
 
-  // only start and main
+  // only "start" and "main"
   if (target !== false) {
 
     if (app._runtime.encryption) {
@@ -412,7 +438,7 @@ app.session = function(callback, config, target) {
 
     _doDefault(_resolver);
 
-  // only view
+  // only "view"
   } else {
     _callback();
   }
@@ -425,8 +451,6 @@ app.session = function(callback, config, target) {
  *
  * Resumes session, returns last opened file
  *
- * //TODO FIX
- *
  * @param <Object> config
  * @param <Boolean> target
  * @return <String> session_resume
@@ -436,42 +460,87 @@ app.resume = function(config, target) {
     return app.stop('app.resume', ['config', target]);
   }
 
+  var create_session = null;
+
   var session_resume = '';
   var session_last = '';
 
 
+  // localfile context
+  if (app._root.window.location.protocol === 'file:') {
+    // inside "main" with firefox >= 68
+    // no session
+    // avoid new same-origin restrictions in the browser WebStorage API
+    if (target === true && app._runtime.system.name == 'firefox' && app._runtime.system.release >= 68 && ! app.memory.has('last_session')) {
+      // retrieve last opened file from cookie and pass it to the memory storage
+      if (app.utils.cookie('has', 'last_opened_file')) {
+        app.memory.set('last_opened_file', app.utils.cookie('get', 'last_opened_file'));
+      }
+
+      // delete last session from cookie and pass it to the memory storage
+      if (app.utils.cookie('has', 'last_session')) {
+        app.memory.set('last_session', app.utils.cookie('get', 'last_session'));
+
+        create_session = false;
+      }
+    }
+  }
+
+
+  // resuming a JavaScript file with JSON data
   if (! app._runtime.binary) {
-    if (app.utils.cookie('has', 'last_opened_file')) {
-      session_resume = app.utils.cookie('get', 'last_opened_file');
+    // retrieve last opened file
+    session_resume = app.memory.get('last_opened_file');
+  }
+
+
+  // retrieve last session
+  session_last = app.memory.get('last_session');
+
+  if (! session_last && create_session === null) {
+    create_session = true;
+  }
+
+
+  // only "start"
+  if (target === undefined) {
+
+    // empty
+
+  // only "main" with debug turned on
+  } else if (target === true && !! app._runtime.debug) {
+    // no resume and no session, create a new session
+    create_session && app.newSession();
+  // only "main" with debug turned off
+  } else if (target === true) {
+    // no session, return to the launcher
+    if (create_session === null) {
+      return app.redirect();
     }
-    if (! session_resume) {
-      session_resume = app.memory.get('last_opened_file');
-    }
   }
 
-
-  if (app.utils.cookie('has', 'last_session')) {
-    session_last = app.utils.cookie('get', 'last_session');
-  }
-  if (! session_last) {
-    session_last = app.memory.get('last_session');
-  }
-
-
-  if (target === undefined && !! (! session_resume || session_last)) {
-    // there's nothing to do
-  } else if (!! app._runtime.debug && target !== undefined) {
-    //TODO FIX loop redirect / demo mode
-    return (! session_last) && app.newSession();
-  } else if (! session_last) {
-    return app.redirect();
-  }
 
   if (!! session_resume) {
-    session_resume = app.utils.base64('decode', session_resume);
-    session_resume = app.os.fileFindRoot(config.save_path.toString() + '/' + session_resume);
-  }
 
+    // localfile context
+    if (app._root.window.location.protocol === 'file:') {
+      // only "start"
+      if (target === undefined) {
+        // no session
+        // could have trouble with same-origin restriction
+        // the resuming will be attempted in "main"
+        return (! session_last) && app.redirect();
+      }
+
+      session_resume = app.utils.base64('decode', session_resume);
+      session_resume = app.os.fileFindRoot(config.save_path.toString() + '/' + session_resume);
+
+    // remote context
+    } else {
+      session_resume = false;
+    }
+
+  }
 
   return session_resume;
 }
@@ -495,6 +564,7 @@ app.redirect = function() {
   var rp = config.runtime_path.toString();
   var filename = 'index';
 
+  // in "main" redirect to the launcher
   if (app._root.window.location.href.indexOf(rp + '/') != -1) {
     filename = config.launcher_name.toString();
   }
@@ -611,7 +681,7 @@ app.checkFile = function(source, checksum) {
 
   var keys = Object.keys(source);
 
-  for (key in keys) {
+  for (key in keys) {
     if (key in schema === false) {
       _schema_validation = false;
     }
@@ -711,16 +781,16 @@ app.openSessionFile = function() {
       return; // silent fail
     }
 
-
-    app.utils.cookie('del', 'last_opened_file');
-    app.utils.cookie('del', 'last_session');
-
-
     var _filename = app.utils.base64('encode', filename);
 
+    // only "start"
+    if (_is_start) {
+      app.utils.cookie('del', 'last_opened_file');
+      app.utils.cookie('del', 'last_session');
 
-    app.utils.cookie('set', 'last_opened_file', _filename);
-    app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+      app.utils.cookie('set', 'last_opened_file', _filename);
+      app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+    }
 
     app.memory.set('last_opened_file', _filename);
     app.memory.set('last_session', _current_timestamp_enc);
@@ -858,10 +928,13 @@ app.newSession = function() {
     app.controller.clear();
 
 
-    app.utils.cookie('del', 'last_opened_file');
-    app.utils.cookie('del', 'last_session');
+    // only "start"
+    if (_is_start) {
+      app.utils.cookie('del', 'last_opened_file');
+      app.utils.cookie('del', 'last_session');
 
-    app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+      app.utils.cookie('set', 'last_session', _current_timestamp_enc);
+    }
 
 
     app.memory.del('file_saves');
@@ -999,7 +1072,7 @@ app.asyncAttemptLoad = function(callback, resume_session, fn, file, schema, memo
     for (var i in schema) {
       var key = schema[i].toString();
 
-      if (key in source === false) {
+      if (key in source === false) {
         return cb('schema');
       }
 
@@ -1138,7 +1211,7 @@ app.asyncLoadAux = function(callback, routine, resume_session) {
  *
  * App localization
  *
- * //TODO implement
+ * //TODO implement nest replacement
  *
  * @global <Object> appe__locale
  * @param <String> to_translate
@@ -1209,7 +1282,7 @@ app.i18n = function(to_translate, context, to_replace) {
         lsstring_replacement = lsstring_replacement[1];
 
         if (lsstring_replacement.length) {
-          if (! /\D/.test(lsstring_replacement[0])) {
+          if (! /\D/.test(lsstring_replacement[0])) {
             //TODO nest
             lsstring_replacement = [[lsstring_replacement[0]]];
           } else {
@@ -1296,10 +1369,12 @@ app.stop = function(arg0, arg1, arg2, soft) {
 
   var _is_main = ! (app._root.server.appe__main === undefined);
 
+  // stop the runtime execution
   app._runtime.exec = false;
 
   arg1 = arg1 || null;
 
+  // in "main" add a semi-opaque overlay
   if (_is_main) {
     app.blind();
   }
@@ -1371,6 +1446,7 @@ app.error = function(arg0, arg1, arg2, soft) {
     }
   }
 
+  // alerts can be used only in "main" and "start"
   if (! _is_view && ! soft && ! app._runtime.hangs++) {
     !! app._root.window.alert && app._root.window.alert(msg);
   }
@@ -1524,7 +1600,7 @@ app.os = {};
 /**
  * app.os.fileSessionOpen
  *
- * Opens a session file through FileReader api, stores it, returns to callback
+ * Opens a session file through the browser FileReader API, stores it, returns to callback
  *
  * @global <Object> appe__config
  * @global <Object> CryptoJS
@@ -1630,16 +1706,16 @@ app.os.fileSessionOpen = function(callback) {
       return cb(false);
     }
 
-    // source binary file
+    // source is binary file
 
     if (fbinary) {
       return cb(false, source);
     }
 
-    // source JavaScript JSON file
+    // source is JavaScript file with JSON data
 
     // source is much human readable
-    if (source.indexOf('\n') != -1)  {
+    if (source.indexOf('\n') != -1) {
       source = source.replace(/[\r\n\t]+([\s]+){2}/g, '').replace(/\s=\s/, '=');
     }
 
@@ -1695,7 +1771,7 @@ app.os.fileSessionOpen = function(callback) {
     }
 
     for (var i in schema) {
-      if (schema[i] in source === false) {
+      if (schema[i] in source === false) {
         return cb('schema');
       }
 
@@ -1718,7 +1794,7 @@ app.os.fileSessionOpen = function(callback) {
               if (err) { throw err; }
 
               app.os.generateJsonChecksum(function(checksum) {
-                if (! checksum) { throw null; }
+                if (! checksum) { throw null; }
 
                 file_json_checksum = checksum;
 
@@ -1739,7 +1815,7 @@ app.os.fileSessionOpen = function(callback) {
             if (err) { throw err; }
 
             app.os.generateJsonChecksum(function(checksum) {
-              if (! checksum) { throw null; }
+              if (! checksum) { throw null; }
 
               file_json_checksum = checksum;
 
@@ -1756,7 +1832,7 @@ app.os.fileSessionOpen = function(callback) {
           if (err) { throw err; }
 
           app.os.generateJsonChecksum(function(checksum) {
-            if (! checksum) { throw null; }
+            if (! checksum) { throw null; }
 
             file_json_checksum = checksum;
 
@@ -1945,7 +2021,7 @@ app.os.fileSessionSave = function(callback, source, timestamp) {
       return cb('source');
     }
 
-    // source to JavaScript JSON file format
+    // source to JavaScript file with JSON data
     if (! fbinary) {
       // should wrap source in double quotes
       if (fcrypt) {
@@ -2203,7 +2279,7 @@ app.os.fileDownload = function(source, filename, mime_type) {
   try {
     var blob = new Blob([ source ], { type: mime_type });
 
-    if (! blob) { throw 'blob'; }
+    if (! blob) { throw 'blob'; }
   } catch (err) {
     return app.error('app.os.fileDownload', err);
   }
@@ -2448,14 +2524,8 @@ app.os.getLastFileName = function() {
     return app.stop('app.os.getLastFileName');
   }
 
-  var filename = '';
+  var filename = app.memory.get('last_opened_file');
 
-  if (app.utils.cookie('has', 'last_opened_file')) {
-    filename = app.utils.cookie('get', 'last_opened_file');
-  }
-  if (! filename) {
-    filename = app.memory.get('last_opened_file');
-  }
   if (! filename) {
     return false;
   }
@@ -2562,7 +2632,7 @@ app.controller = {};
  *
  * Captures the app position using location.href
  *
- * @param <Object> loc  { view, action, index }
+ * @param <Object> loc  { view, action, index }
  */
 app.controller.spoof = function() {
   var loc = { view: null, action: null, index: null };
@@ -2597,7 +2667,7 @@ app.controller.spoof = function() {
 /**
  * app.controller.history
  *
- * Handles history through the browser api
+ * Handles history navigation through the browser History API
  *
  * @param <String> title
  * @param <String> url
@@ -2606,6 +2676,7 @@ app.controller.history = function(title, url) {
   var _title = app._runtime.title.toString();
 
   if (title !== undefined) {
+    // remove the subtitle
     if (app._runtime.title.indexOf(' – ') != -1) {
       var _title_regex = new RegExp(app._runtime.locale_dir == 'ltr' ? '.+\\s–\\s' : '\\s–\\s.+');
 
@@ -2621,6 +2692,7 @@ app.controller.history = function(title, url) {
     title = _title;
   }
 
+  // could give exceptions
   try {
     var err = history.replaceState(null, title, url);
     var sur = window.location.href.replace(/.+\//, '');
@@ -2640,10 +2712,10 @@ app.controller.history = function(title, url) {
  * app.controller.cursor
  *
  * Get or set the controller cursor, 
- * it contains current position in the app
+ * it contains the current position in the app
  *
  * @param <Object> loc
- * @return <Object> loc  { view, action, index }
+ * @return <Object> loc  { view, action, index }
  */
 app.controller.cursor = function(loc) {
   if (loc && typeof loc != 'object') {
@@ -2714,6 +2786,7 @@ app.controller.store = function(callback, fn, schema, data) {
     return app.stop('app.controller.store', [callback, fn, schema, data]);
   }
 
+  // get data from internal store object
   var source = store[fn];
 
   if (! source) {
@@ -2751,6 +2824,7 @@ app.controller.store = function(callback, fn, schema, data) {
       return app.stop('app.controller.store', 'data');
     }
 
+    // (re)populate internal store object
     store[fn][key] = _store(key, values);
   }
 
@@ -2811,7 +2885,7 @@ app.controller.retrieve = function(callback, routine) {
       var key = schema[i].toString();
       var obj = app.store.get(fn + '_' + key);
 
-      if (! obj) {
+      if (! obj) {
         return app.stop('app.controller.retrieve() > _retrieve', 'schema');
       }
 
@@ -2822,6 +2896,8 @@ app.controller.retrieve = function(callback, routine) {
   }
 
 
+  // load data object(s) from extensions
+
   var i = routine.length;
 
   while (i--) {
@@ -2831,6 +2907,7 @@ app.controller.retrieve = function(callback, routine) {
       routine[i].file = '../' + routine[i].file.toString();
     }
 
+    // (re)populate internal store object
     store[fn] = _retrieve(fn, routine[i].schema);
   }
 
@@ -3079,7 +3156,7 @@ app.start.redirect = function(loaded) {
 /**
  * app.start.alternative
  *
- * Displays message with info and alternatives to help to execute app 
+ * Displays message with info and alternatives to help to execute the app 
  *
  * @global <Object> appe__config
  * @return
@@ -3329,8 +3406,12 @@ app.start.loadComplete = function(routine) {
 
   app.start.progress(1);
 
+  // no resume, skip last opened file load 
   if (! session_resume) {
     return;
+  // resume but could have same-origin restrictions
+  } else if (session_resume === true) {
+    app.start.redirect(true);
   }
 
 
@@ -3395,13 +3476,15 @@ app.main.control = function(loc) {
   var step = true;
 
   if (loc && typeof loc === 'object') {
-    if (loc.view) {
+    // route: view
+    if (loc.view) {
       if (!! cfg_routes[loc.view]) {
         route = encodeURIComponent(loc.view) + '.html';
       } else {
         step = false;
       }
 
+      // route: action
       if (loc.action) {
         if (!! cfg_routes[loc.view][loc.action]) {
           route = cfg_routes[loc.view][loc.action].toString() + '.html';
@@ -3410,17 +3493,20 @@ app.main.control = function(loc) {
           step = false;
         }
 
+        // route: index
         if (loc.index) {
           route += '&id=' + encodeURIComponent(loc.index);
         }
       }
     } else {
+      // default route
       loc = { 'view': cfg_default_route };
     }
   } else {
     step = false;
   }
 
+  // step to the route
   if (step && typeof route === 'string') {
     app.controller.cursor(loc);
 
@@ -3524,7 +3610,7 @@ app.main.handle = function(e) {
 
 
   // standard events
-  var _s_events = { 'fetch': 'fetch', 'resize': 'resize', 'refresh': 'refresh', 'export': 'export' };
+  var _s_events = { 'fetch': 'fetch', 'refresh': 'refresh', 'export': 'export', 'resize': 'resize' };
 
   var cfg_events = config.events;
 
@@ -3532,7 +3618,7 @@ app.main.handle = function(e) {
 
   self.event = null;
 
-  // check is allowed action
+  // check if is an allowed action
   if (self.ctl.action && self.ctl.action in self.events) {
     self.event = self.ctl.action;
   } else {
@@ -3787,6 +3873,8 @@ app.main.handle.prototype.prevent = function() {
 
 /**
  * app.main.handle.prototype.fetch
+ *
+ * Method to fetch data to "view" from storage objects
  */
 app.main.handle.prototype.fetch = function() {
   if (! this.src) {
@@ -3808,12 +3896,12 @@ app.main.handle.prototype.fetch = function() {
 
   Array.prototype.forEach.call(Object.keys(app._root.window.sessionStorage), function(key) {
     var _key = app.utils.base64('decode', key).replace(_prefix_regexp, '');
-    data.session[_key] = app._root.window.sessionStorage[key];
+    data.session[_key] = app._root.window.sessionStorage[key];
   });
 
   Array.prototype.forEach.call(Object.keys(app._root.window.localStorage), function(key) {
     var _key = app.utils.base64('decode', key).replace(_prefix_regexp, '');
-    data.local[_key] = app._root.window.localStorage[key];
+    data.local[_key] = app._root.window.localStorage[key];
   });
 
   this.sender(data);
@@ -3876,6 +3964,8 @@ app.main.handle.prototype.history = function(reset) {
 /**
  * app.main.handle.prototype.sender
  *
+ * It sends data to "view"
+ *
  * @param <Object> data
  * @return 
  */
@@ -3905,6 +3995,8 @@ app.main.handle.prototype.sender = function(data) {
 
 /**
  * app.main.handle.prototype.receiver
+ *
+ * It receives data from "view"
  *
  * @return 
  */
@@ -4087,6 +4179,7 @@ app.main.action.prototype.menu = function(element, event, menu, toggler) {
 app.main.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
+  // remove the secrete passphrase from the config object
   if (typeof config == 'object') {
     var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
@@ -4230,13 +4323,50 @@ app.main.loadComplete = function(routine) {
     return app.stop('app.main.loadComplete');
   }
 
-  // try to resume previous session
-  app.resume(config, true);
+  if (config.file && typeof config.file != 'object') {
+    return app.error('app.start.loadComplete', 'config');
+  }
+
+  var _app_name = app._runtime.name.toString();
+
+  var schema = config.schema;
+
+  if (typeof schema != 'object') {
+    return app.error('app.start.loadComplete', 'schema');
+  }
+
+
+  // try to resume previous session and file
+  var session_resume = app.resume(config, true);
+  var session_opened = (app.memory.has('last_session') && app.memory.has('last_time'));
 
   routine.push({ fn: app._runtime.name, schema: config.schema });
 
-  // retrieve previous session store and load extensions objects
-  app.controller.retrieve(app.main.setup, routine);
+
+  var file_heads = config.file && config.file.heads ? config.file.heads.toString() : _app_name;
+
+
+  // no resume
+  if (! session_resume || session_opened) {
+    // retrieve previous session store and load extensions objects
+    app.controller.retrieve(app.main.setup, routine);
+
+    return;
+  }
+
+  // resume
+  app.asyncAttemptLoad(function(loaded) {
+    // loaded, no session timers, restore session timers
+    if (loaded && ! session_opened) {
+      var _current_timestamp = app.utils.dateFormat(true, 'Q');
+
+      app.memory.set('last_stored', _current_timestamp);
+      app.memory.set('last_time', _current_timestamp);
+    }
+
+    // retrieve previous session store and load extensions objects
+    app.controller.retrieve(app.main.setup, routine);
+  }, true, file_heads, session_resume, schema, true);
 }
 
 
@@ -4425,6 +4555,7 @@ app.view.control.prototype.begin = function() {
   var step = true;
 
   if (loc && typeof loc === 'object') {
+    // route: action
     if (loc.action) {
       if (!! _routes[view][loc.action]) {
         event = actions[loc.action];
@@ -4432,10 +4563,12 @@ app.view.control.prototype.begin = function() {
         step = false;
       }
 
+      // route: index
       if (loc.index) {
         id = loc.index;
       }
     } else {
+      // default route
       event = default_event;
     }
   } else {
@@ -4446,6 +4579,7 @@ app.view.control.prototype.begin = function() {
     return app.error('app.view.control.prototype.begin', 'event');
   }
 
+  // defining a temporay data object
   control.temp = {};
 
   this._initialized = true;
@@ -4482,6 +4616,7 @@ app.view.control.prototype.end = function() {
     // check for edit changes
     try {
       var _changes = app.view.getFormData(this.form.elements);
+
       control.temp.form_changes = _changes && JSON.stringify(_changes);
     } catch (err) {
       return app.error('app.view.control.prototype.end', err);
@@ -4579,8 +4714,10 @@ app.view.control.prototype.setTitle = function(section_title, view_title, id) {
   id = (id != false) ? parseInt(id) : app.view.control.prototype.getID();
 
   if (event === 'edit' && !! id) {
+    // with ID and title
     if (app._runtime.locale_dir == 'rtl') {
       section_title = '# ' + id + ' ' + section_title;
+    // with ID
     } else {
       section_title += ' # ' + id;
     }
@@ -4658,7 +4795,7 @@ app.view.control.prototype.denySubmit = function() {
  * @param <arguments> args  ...  passing down arguments
  * @return <Object>  { rows <String>, tpl <ElementNode>, data <Object>, args <Array> }
  */
-app.view.control.prototype.fillTable = function(table, data, order) {
+app.view.control.prototype.fillTable = function(table, data, order) {
   this.isInitialized('fillTable');
 
   if (! table) {
@@ -4709,7 +4846,7 @@ app.view.control.prototype.fillTable = function(table, data, order) {
  * @param <Object> data
  * @return <Object>  { data <Object>, args <Array> }
  */
-app.view.control.prototype.fillForm = function(form, data) {
+app.view.control.prototype.fillForm = function(form, data) {
   this.isInitialized('fillForm');
 
   if (! this.form) {
@@ -4759,7 +4896,6 @@ app.view.control.prototype.fillSelection = function(data, id) {
     selection.innerHTML = app.layout.renderSelectOptions(selection, data, id);
     selection.value = id;
   } else {
-
     selection.parentNode.classList.add('hidden');
   }
 }
@@ -4822,7 +4958,7 @@ app.view.control.prototype.paginate = function(element, pages, current_page) {
   pagination_next.innerHTML = pagination_next.innerHTML.replace('{page_next}', current_page == pages || pages < 2 ? current_page : current_page + 1);
 
   if (current_page < 2) { pagination_prev.classList.add('disabled'); }
-  if (current_page == pages || pages < 2) { pagination_next.classList.add('disabled'); }
+  if (current_page == pages || pages < 2) { pagination_next.classList.add('disabled'); }
 
   var i = 0;
   var pagination_items = parseInt(pages);
@@ -5018,10 +5154,15 @@ app.view.action.prototype.validateForm = function() {
     return app.error('app.view.action.prototype.validateForm', 'action_submit');
   }
 
-  // not valid form
+
+  // form is not valid
+
   if (this.form.checkValidity()) {
     return false;
   }
+
+
+  // form is valid
 
   Array.prototype.forEach.call(this.form.elements, function(field) {
     var closest_group = null;
@@ -5083,7 +5224,7 @@ app.view.action.prototype.prepare = function(data, submit) {
 
         this.ctl.title = (this.ctl.title && typeof this.ctl.title === 'string') ? '"' + this.ctl.index + '"' : '# ' + this.ctl.index;
 
-        if (label) {
+        if (label) {
           label = label[0].toUpperCase() + label.slice(1);
 
           if (this._is_localized) {
@@ -5104,6 +5245,7 @@ app.view.action.prototype.prepare = function(data, submit) {
         control.temp.form_submit = true;
 
         var _changes = app.view.getFormData(this.form.elements);
+
         control.temp.form_changes = _changes && JSON.stringify(_changes);
       }
     }
@@ -5459,6 +5601,7 @@ app.view.send = function(ctl) {
     return app.error('app.view.send', [ctl]);
   }
 
+  // current position is mandatory
   if ('view' in ctl === false) {
     var cursor = app.controller.cursor();
 
@@ -5492,6 +5635,7 @@ app.view.send = function(ctl) {
  * Fetch data from "main" store
  *
  * @global <Object> appe__control
+ * @param <String> from
  * @return
  */
 app.view.fetch = function(from) {
@@ -5699,11 +5843,13 @@ app.view.copyToClipboard = function(source) {
  *
  * @global <Object> appe__config
  * @global <Object> appe__locale
+ * @global <Object> appe__store
  * @return
  */
 app.view.load = function() {
   var config = app._root.window.appe__config || app._root.process.env.appe__config;
 
+  // remove the secrete passphrase from the config object
   if (typeof config == 'object') {
     var _config = !! Object.assign ? Object.assign({}, config) : app.utils.extendObject({}, config);
 
@@ -5740,8 +5886,10 @@ app.view.load = function() {
      * @param <Object> routine
      */
     if (control && typeof control == 'object' && 'loadComplete' in control && typeof control.loadComplete === 'function') {
+      console.log('control.loadComplete');
       control.loadComplete(routine);
     } else {
+      console.log('app.view.loadComplete');
       app.view.loadComplete(routine);
     }
   }
@@ -5760,10 +5908,10 @@ app.view.load = function() {
     }
 
     // ready to receive data from parent "main"
-    app.utils.addEvent('message', app._root.window, _store);
+    app.utils.addEvent('message', app._root.window, _retrieve);
   }
 
-  var _store = function(e) {
+  var _retrieve = function(e) {
     if (! e.data) {
       return app.error('app.view.load', [e]);
     }
@@ -5779,34 +5927,113 @@ app.view.load = function() {
     console.info('app.view.load', '\t', 'receive');
 
 
+    var _app_name = app._runtime.name.toString();
+
+    var schema = config.schema;
+
+    if (typeof schema != 'object') {
+      return app.error('app.view.load', 'schema');
+    }
+
+    var store = app._root.server.appe__store;
+
+    if (! store) {
+      return app.stop('app.view.load() > _retrieve', 'store');
+    }
+
+
+    // no data, try to load "view" directly
+
+    if (! (data && typeof data === 'object')) {
+      _init();
+    }
+
+
     // retrieve data from main and (re)populate storage objects
-    if (data && typeof data === 'object') {
-      var _keys = [];
 
-      if (data.session) {
-        _keys = Object.keys(data.session);
+    var _keys = [];
 
-        if (_keys.length) {
-          app.memory.reset();
+    if (data.session) {
+      _keys = Object.keys(data.session);
 
-          Array.prototype.forEach.call(_keys, function(key) {
-            app.memory.set(key, data.session[key]);
-          });
-        }
-      }
+      if (_keys.length) {
+        app.memory.reset();
 
-      if (data.local) {
-        _keys = Object.keys(data.local);
-
-        if (_keys.length) {
-          app.store.reset();
-
-          Array.prototype.forEach.call(_keys, function(key) {
-            app.store.set(key, data.local[key]);
-          });
-        }
+        Array.prototype.forEach.call(_keys, function(key) {
+          app.memory.set(key, data.session[key]);
+        });
       }
     }
+
+    if (data.local) {
+      _keys = Object.keys(data.local);
+
+      if (_keys.length) {
+        app.store.reset();
+
+        Array.prototype.forEach.call(_keys, function(key) {
+          app.store.set(key, data.local[key]);
+        });
+      }
+    }
+
+
+    // rebuild internal store object
+
+    store[_app_name] = {};
+
+    for (var i in schema) {
+      var key = schema[i].toString();
+      var obj = app.store.get(_app_name + '_' + key);
+
+      if (! obj) {
+        return app.stop('app.view.load() > _retrieve', 'schema', [key, _app_name, app.store.get(_app_name + '_' + key)]);
+      }
+
+      store[_app_name][key] = obj;
+    }
+
+
+    // now restore storage for internal use inside "view"
+
+    app._runtime.storage = true;
+
+    // server
+    if (app._root.process.native == undefined) {
+      app._runtime.storage = 'storage';
+    // browser, WebStorage API
+    } else if ('localStorage' in app._root.window == false || 'sessionStorage' in app._root.window == false) {
+      if ('localStorage' in app._root.window === false) {
+        app._runtime.storage = 'sessionStorage';
+      } else if ('sessionStorage' in app._root.window === false) {
+        app._runtime.storage = 'localStorage';
+      } else {
+        app._runtime.storage = false;
+      }
+    // locale context, with chrome force in localStorage
+    } else if (app._runtime.system.name == 'chrome') {
+      app._runtime.storage = 'localStorage';
+    // locale context, with safari force in sessionStorage
+    } else if (app._runtime.system.name == 'safari') {
+      app._runtime.storage = 'sessionStorage';
+    }
+
+
+    // restore non-persistent storage inside "view"
+    if (data.session) {
+      _keys = Object.keys(data.session);
+      var _reserved_keys = ['last_opened_file', 'last_session', 'last_stored', 'last_time', 'cursor'];
+
+      if (_keys.length) {
+        Array.prototype.forEach.call(_keys, function(key) {
+          if (key in _reserved_keys === false) {
+            app.memory.set(key, data.session[key]);
+          }
+        });
+      }
+    }
+
+
 
     _init();
   }
@@ -5854,9 +6081,10 @@ app.view.beforeunload = function() {
     return app.error('app.view.beforeunload', 'control');
   }
 
-  if (control.temp.form && ! control.temp.form_submit) {
+  if (control.temp && control.temp.form && ! control.temp.form_submit) {
     try {
       var _changes = app.view.getFormData(control.temp.form_elements);
+
       _changes = _changes && JSON.stringify(_changes);
     } catch (err) {
       return app.error('app.view.beforeunload', err);
@@ -5886,9 +6114,6 @@ app.view.loadComplete = function(routine) {
   if (! config) {
     return app.stop('app.view.loadComplete');
   }
-
-  // try to resume previous session
-  app.resume(config, false);
 
   routine.push({ fn: app._runtime.name, schema: config.schema });
 
@@ -6596,7 +6821,7 @@ app.utils.system = function(purpose) {
   var system = { 'name': null, 'platform': null, 'architecture': null, 'release': null };
 
 
-  var _ssn = function() {
+  var _serverSideNavigator = function() {
     var name = app._root.process.title.toString();
     var platform = app._root.process.platform.toString();
     var architecture = parseInt(app._root.process.arch.replace(/\D+/, ''));
@@ -6605,7 +6830,7 @@ app.utils.system = function(purpose) {
     return { 'name': name, 'platform': platform, 'architecture': architecture, 'release': release };
   }
 
-  var _csn = function() {
+  var _clientSideNavigator = function() {
     var name = navigator.userAgent.match(/(Chrome|CriOS|Safari|Firefox|Edge|IEMobile|MSIE|Trident)\/([\d]+)/i);
     var platform = navigator.userAgent.match(/(iPad|iPhone|iPod|android|windows phone)/i);
     var release = null;
@@ -6616,7 +6841,7 @@ app.utils.system = function(purpose) {
       name = name.toLowerCase();
 
       if (name) {
-        if (name === 'crios') {
+        if (name === 'crios') {
           name = 'chrome';
         }
 
@@ -6672,7 +6897,7 @@ app.utils.system = function(purpose) {
           }
         }
 
-        if (platform === 'lin') {
+        if (platform === 'lin') {
           platform = 'nxl';
         }
 
@@ -6684,15 +6909,15 @@ app.utils.system = function(purpose) {
   }
 
 
-  // clientside
+  // client-side
   if (app._root.window.native == undefined) {
-    system = _csn();
-  // serverside
+    system = _clientSideNavigator();
+  // server-side
   } else if (app._root.process.native == undefined && app._root.process.title === 'node') {
-    system = _ssn();
-  // maybe unsupported serverside
+    system = _serverSideNavigator();
+  // maybe unsupported server-side
   } else {
-    system = _ssn();
+    system = _serverSideNavigator();
 
     return app.error('app.utils.system', 'This system is not supported.', system);
   }
@@ -6799,6 +7024,7 @@ app.utils.proxy = function(deep, obj) {
  *  - has (key, value)
  *  - del (key)
  *  - reset ()
+ *  - fake ()
  *
  * @param <String> persists
  * @param <String> method
@@ -6824,8 +7050,9 @@ app.utils.storage = function(persists, method, key, value) {
   self._fn = _storage || (! persists ? 'sessionStorage' : 'localStorage');
   self._persist = !! persists;
 
+  // fake storage
   if (self._fn in app._root.window === false) {
-    return app.error('app.utils.storage', self._fn);
+    self.fake.apply(self);
   }
 
   return self[method].apply(self, [ key, value ]);
@@ -6845,7 +7072,7 @@ app.utils.storage.prototype.set = function(key, value) {
 
   var _key = app.utils.base64('encode', this._prefix + key);
 
-  if (typeof value == 'object') {
+  if (typeof value == 'object') {
     try {
       value = JSON.stringify(value);
     } catch (err) {
@@ -6935,6 +7162,39 @@ app.utils.storage.prototype.reset = function() {
   app._root.window[this._fn].clear();
 }
 
+/**
+ * app.utils.storage.prototype.fake
+ *
+ * This method is based on Function prototype and differs from Storage prototype, 
+ * use it with caution, it's used inside "view"
+ */
+app.utils.storage.prototype.fake = function() {
+  app._root.window[this._fn] = function() {}
+
+  app._root.window[this._fn].__entries__ = {};
+
+  app._root.window[this._fn].prototype.setItem = function(key, value) {
+    this.__entries__[key] = value;
+  }
+
+  app._root.window[this._fn].prototype.getItem = function(key) {
+    return this.__entries__[key];
+  }
+
+  app._root.window[this._fn].prototype.removeItem = function(key) {
+    delete this.__entries__[key];
+  }
+
+  app._root.window[this._fn].prototype.clear = function() {
+    this.__entries__ = {};
+  }
+
+  app._root.window[this._fn].setItem = app._root.window[this._fn].prototype.setItem;
+  app._root.window[this._fn].getItem = app._root.window[this._fn].prototype.getItem;
+  app._root.window[this._fn].removeItem = app._root.window[this._fn].prototype.removeItem;
+  app._root.window[this._fn].clear = app._root.window[this._fn].prototype.clear;
+}
+
 
 /**
  * app.utils.cookie
@@ -6988,7 +7248,7 @@ app.utils.cookie.prototype.set = function(key, value, expire_time) {
   var _key = app.utils.base64('encode', this._prefix + key);
   _key = encodeURIComponent(_key);
 
-  if (typeof value == 'object') {
+  if (typeof value == 'object') {
     try {
       value = JSON.stringify(value);
     } catch (err) {

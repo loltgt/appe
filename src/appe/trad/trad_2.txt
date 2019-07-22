@@ -48,7 +48,7 @@ Update {{placeholder}}
 Delete {{placeholder}}
 Close {{placeholder}}
 Edit {{placeholder}} "{{title}}"
-Edit {{placeholder}} "{{name}}" \u2013 {{title}}
+Edit {{placeholder}} "{{name}}" \u2013 {{title}}
 {{placeholder}} list
 Are you sure to {{placeholder}} {{name}} {{title}}?
 ATTENTION! Irreversible action, all data's {{placeholder}} will be erased permanently, be carefull.

@@ -9,7 +9,7 @@ app.os = {};
 /**
  * app.os.fileSessionOpen
  *
- * Opens a session file through FileReader api, stores it, returns to callback
+ * Opens a session file through the browser FileReader API, stores it, returns to callback
  *
  * @global <Object> appe__config
  * @global <Object> CryptoJS
@@ -115,16 +115,16 @@ app.os.fileSessionOpen = function(callback) {
       return cb(false);
     }
 
-    // source binary file
+    // source is binary file
 
     if (fbinary) {
       return cb(false, source);
     }
 
-    // source JavaScript JSON file
+    // source is JavaScript file with JSON data
 
     // source is much human readable
-    if (source.indexOf('\n') != -1)  {
+    if (source.indexOf('\n') != -1) {
       source = source.replace(/[\r\n\t]+([\s]+){2}/g, '').replace(/\s=\s/, '=');
     }
 
@@ -180,7 +180,7 @@ app.os.fileSessionOpen = function(callback) {
     }
 
     for (var i in schema) {
-      if (schema[i] in source === false) {
+      if (schema[i] in source === false) {
         return cb('schema');
       }
 
@@ -203,7 +203,7 @@ app.os.fileSessionOpen = function(callback) {
               if (err) { throw err; }
 
               app.os.generateJsonChecksum(function(checksum) {
-                if (! checksum) { throw null; }
+                if (! checksum) { throw null; }
 
                 file_json_checksum = checksum;
 
@@ -224,7 +224,7 @@ app.os.fileSessionOpen = function(callback) {
             if (err) { throw err; }
 
             app.os.generateJsonChecksum(function(checksum) {
-              if (! checksum) { throw null; }
+              if (! checksum) { throw null; }
 
               file_json_checksum = checksum;
 
@@ -241,7 +241,7 @@ app.os.fileSessionOpen = function(callback) {
           if (err) { throw err; }
 
           app.os.generateJsonChecksum(function(checksum) {
-            if (! checksum) { throw null; }
+            if (! checksum) { throw null; }
 
             file_json_checksum = checksum;
 
@@ -430,7 +430,7 @@ app.os.fileSessionSave = function(callback, source, timestamp) {
       return cb('source');
     }
 
-    // source to JavaScript JSON file format
+    // source to JavaScript file with JSON data
     if (! fbinary) {
       // should wrap source in double quotes
       if (fcrypt) {
@@ -688,7 +688,7 @@ app.os.fileDownload = function(source, filename, mime_type) {
   try {
     var blob = new Blob([ source ], { type: mime_type });
 
-    if (! blob) { throw 'blob'; }
+    if (! blob) { throw 'blob'; }
   } catch (err) {
     return app.error('app.os.fileDownload', err);
   }
@@ -933,14 +933,8 @@ app.os.getLastFileName = function() {
     return app.stop('app.os.getLastFileName');
   }
 
-  var filename = '';
+  var filename = app.memory.get('last_opened_file');
 
-  if (app.utils.cookie('has', 'last_opened_file')) {
-    filename = app.utils.cookie('get', 'last_opened_file');
-  }
-  if (! filename) {
-    filename = app.memory.get('last_opened_file');
-  }
   if (! filename) {
     return false;
   }

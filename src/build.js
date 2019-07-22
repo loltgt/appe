@@ -212,7 +212,7 @@ build.prototype.uglify_css = () => {
 
   var result = new CleanCSS(options.css).minify(blob.css.join(''));
 
-  if (result.errors && result.errors.length) {
+  if (result.errors && result.errors.length) {
     console.error('uglify (css)', '\terror\r\n\r\n\r\n', JSON.stringify(result.errors), '\r\n\r\n');
   }
 

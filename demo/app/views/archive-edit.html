@@ -149,7 +149,7 @@ control.handle = function(data) {
 
 
 
-    Array.prototype.forEach.call(Object.keys(data_items), function(id) {
+    Array.prototype.forEach.call(Object.keys(data_items), function(id) {
       data_items[id].status && _items.toDrag.push(id);
     });
 
@@ -173,7 +173,7 @@ control.handle = function(data) {
 
 
 
-    Array.prototype.forEach.call(Object.keys(data_items), function(id) {
+    Array.prototype.forEach.call(Object.keys(data_items), function(id) {
       Object.keys(archive_data.items).indexOf(id) != -1 && _items.toDrag.push(id);
     });
 
