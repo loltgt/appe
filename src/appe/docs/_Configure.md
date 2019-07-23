@@ -1,7 +1,7 @@
 
 # How to configure
 
-Read comments in the global _"appe__config"_ object.
+Read the comments in the global _"appe__config"_ object.
 
 ```js
 appe__config = {

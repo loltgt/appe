@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.6-beta
+ * @version 1.0.7-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *

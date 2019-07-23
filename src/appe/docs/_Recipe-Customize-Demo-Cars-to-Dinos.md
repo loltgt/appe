@@ -22,7 +22,7 @@ appe__config = {
     "delete": "delete",
     "list": "list",
 
-      "rent": "rent"  <==
+      "rent": "rent"  /* <== */
 
   },
 
@@ -31,7 +31,7 @@ appe__config = {
     "edit": "sample-edit",
     "delete": "sample",
 
-      "rent": "sample-rent"  <==
+      "rent": "sample-rent"  /* <== */
 
   },
 
@@ -83,7 +83,7 @@ main.handle = function(handler, event, ctl) {
 
 Once the configuration has been modified, create the file with the view, it can be used as model _"[sample-edit.html](https://github.com/loltgt/appe/blob/master/demo/app/views/sample-edit.html)"_ which is closer to the needs.
 
-For convenience I used a _"rent"_ object grafted into the parent item _"items"_, which pre-existed in the scheme.
+I used a _"rent"_ object grafted into the parent item _"items"_, which pre-existed in the scheme, for convenience.
 
 The structure of the view is almost identical to the reference model _"edit"_, also in this case the _"rent"_ event is declared as an alias of the function _"[[app.view.action.prototype.prepare|app.view#appviewaction]]"_.
 
@@ -323,9 +323,11 @@ Rename the _"example"_ event with _"rent"_, in the links and in all the control 
         <th class="text-nowrap">Manufactured</th>
         <th class="text-nowrap">Value Price</th>
 
-   ==>  <th>Rent Dino</th>  <==
-   ==>  <th>Rent Period</th>  <==
-   ==>  <th>Rent Amount</th>  <==
+
+        <th>Rent Dino</th>
+        <th>Rent Period</th>
+        <th>Rent Amount</th>
+
 
         <th class="hidden-print">Rent</th>
       </tr>
@@ -342,13 +344,17 @@ Rename the _"example"_ event with _"rent"_, in the links and in all the control 
         <td class="text-nowrap">{date}</td>
         <td class="text-nowrap">{amount}</td>
 
-   ==>  <td>{rent_dino}</td>  <==
-   ==>  <td>{rent_period}</td>  <==
-   ==>  <td>{rent_amount}</td>  <==
+
+        <td>{rent_dino}</td>
+        <td>{rent_period}</td>
+        <td>{rent_amount}</td>
+
 
         <td class="hidden-print">
 
-     ==>  <a class="action btn btn-link btn-sm" href="../index.html?sample&rent={id}" onclick="control.action(this, 'rent'); return false;" target="_parent">RENT</a>  <==
+
+          <a class="action btn btn-link btn-sm" href="../index.html?sample&rent={id}" onclick="control.action(this, 'rent'); return false;" target="_parent">RENT</a>
+
 
         </td>
       </tr>
@@ -373,7 +379,7 @@ control.action = function(element, event, extra) {
   }
 
 
-  var _action = app.view.action([ 'edit', 'delete', 'export', 'print', ==> 'rent' <== ], event, element, data_sample);
+  var _action = app.view.action([ 'edit', 'delete', 'export', 'print', /* ==> */ 'rent' /* <== */ ], event, element, data_sample);
 
   _action.begin();
 
@@ -391,11 +397,11 @@ The _"items"_ data source must also be added in order to return the name of the 
 ```js
 control.handle = function(data) {
   var data_sample = data['sample'];
-  var data_items = data['items'];  <==
+  var data_items = data['items'];  /* <== */
 
   var table = document.getElementById('table-data');
 
-  if (! data_sample || ! data_items) {  <==
+  if (! data_sample || ! data_items) {  /* <== */
     return app.error('control.handle', 'data*');
   }
 
@@ -404,7 +410,7 @@ control.handle = function(data) {
   _control.begin();
 
 
-  _control.fillTable(table, null, null, data_items);  <==  // passing down "data_items" to extra argument
+  _control.fillTable(table, null, null, data_items);  /* <== */  // passing down "data_items" to extra argument
 
 
   _control.end();
@@ -420,7 +426,7 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
   }
 
 
-  var items_extra = extra[0];  <==
+  var items_extra = extra[0];  /* <== */
 
 
   var row = tpl_row.cloneNode(true);
@@ -428,7 +434,7 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
   row.setAttribute('data-index', id_row);
 
 
-  data_row.rent = data_row.rent || { dino: 0, period: 1, amount: 0 };  <==  // to prevent is not defined error, fill with empty data
+  data_row.rent = data_row.rent || { dino: 0, period: 1, amount: 0 };  /* <== */  // to prevent is not defined error, fill with empty data
 
 
   row.innerHTML = row.innerHTML
@@ -439,9 +445,9 @@ control.renderRow = function(tpl_row, id_row, data_row, extra) {
     .replace('{amount}', app.utils.numberFormat(data_row.amount, 2, ',', '.') + ' coin')
     .replace('{status}', data_row.status)
 
-    .replace('{rent_dino}', data_row.rent.dino ? items_extra[data_row.rent.dino].name : '&ndash;')  <==
-    .replace('{rent_period}',data_row.rent.period + ' month')  <==
-    .replace('{rent_amount}', app.utils.numberFormat(data_row.rent.amount, 2, ',', '.') + ' coin &times; month');  <==
+    .replace('{rent_dino}', data_row.rent.dino ? items_extra[data_row.rent.dino].name : '&ndash;')  /* <== */
+    .replace('{rent_period}',data_row.rent.period + ' month')  /* <== */
+    .replace('{rent_amount}', app.utils.numberFormat(data_row.rent.amount, 2, ',', '.') + ' coin &times; month');  /* <== */
 
   return row;
 }

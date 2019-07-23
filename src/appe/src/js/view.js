@@ -1491,10 +1491,8 @@ app.view.load = function() {
      * @param <Object> routine
      */
     if (control && typeof control == 'object' && 'loadComplete' in control && typeof control.loadComplete === 'function') {
-      console.log('control.loadComplete');
       control.loadComplete(routine);
     } else {
-      console.log('app.view.loadComplete');
       app.view.loadComplete(routine);
     }
   }

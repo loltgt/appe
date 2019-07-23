@@ -1,7 +1,7 @@
 /*!
  * {appe}
  *
- * @version 1.0.6-beta
+ * @version 1.0.7-beta
  * @copyright Copyright (C) 2018-2019 Leonardo Laureti
  * @license MIT License
  *
@@ -5886,10 +5886,8 @@ app.view.load = function() {
      * @param <Object> routine
      */
     if (control && typeof control == 'object' && 'loadComplete' in control && typeof control.loadComplete === 'function') {
-      console.log('control.loadComplete');
       control.loadComplete(routine);
     } else {
-      console.log('app.view.loadComplete');
       app.view.loadComplete(routine);
     }
   }

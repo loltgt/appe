@@ -1,7 +1,7 @@
 {
   "name": "appe",
-  "version": "1.0.6",
-  "description": "",
+  "version": "1.0.7",
+  "description": "beta",
   "main": "index.js",
   "scripts": {
     "watch": "node build.js watch",
@@ -11,9 +11,12 @@
     "build-js": "node build.js js",
     "build-css": "node build.js css",
     "build-docs": "php -f generate_docs.php",
+    "build-docs-all": "./node_modules/.bin/gwtc -f all -o ../docs -n appe-documentation -t appe --toc ./appe/docs/wiki/_Toc.md --highlight-theme github --css ./appe/docs/docs.css ./appe/docs/wiki",
+    "build-docs-html": "./node_modules/.bin/gwtc -f html -o ../docs -n appe-documentation -t appe --toc ./appe/docs/wiki/_Toc.md --highlight-theme github --css ./appe/docs/docs.css ./appe/docs/wiki",
+    "build-docs-pdf": "./node_modules/.bin/gwtc -f pdf -o ../docs -n appe-documentation -t appe --toc ./appe/docs/wiki/_Toc.md --highlight-theme github --css ./appe/docs/docs.css ./appe/docs/wiki",
     "copy-demo": "cp -Rv ../app/assets/ ../demo/app/assets/",
-    "copy-electron": "cp -Rv ../{app,LAUNCH.html,LICENSE,README.md} ./electron/src/",
-    "copy-docs": "cp -Rv ./appe/docs/wiki/*.md ../docs/"
+    "copy-docs-recipes": "cp -Rv ./appe/docs/recipes ../docs/recipes",
+    "copy-electron": "cp -Rv ../{app,LAUNCH.html,LICENSE,README.md} ./electron/src"
   },
   "author": "Leonardo Laureti",
   "license": "MIT",
@@ -23,6 +26,7 @@
   "devDependencies": {
     "clean-css": "^4.2.1",
     "electron-forge": "^5.2.4",
+    "github-wikito-converter": "^1.5.1",
     "uglify-js": "^3.6.0"
   }
 }

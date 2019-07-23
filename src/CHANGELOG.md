@@ -2,6 +2,12 @@
 # CHANGELOG
 
 
+## [1.0.7-beta]
+
+- Improvements to the documentation
+- Update package.json
+
+
 ## [1.0.6-beta]
 
 - Broken previous 1.0.5-beta release, add the "app.utils.storage.prototype.fake" method to reproduce a fake Storage prototype

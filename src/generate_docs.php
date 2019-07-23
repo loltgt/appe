@@ -431,16 +431,16 @@ foreach ($docs as $three => $branch) {
 			}
 
 			if (isset($text['link']))
-				$body .= "{$text['link']}\n";
+				$body .= "{$text['link']}\n\n";
 
 			if (isset($text['see']))
-				$body .= "{$text['see']}\n";
+				$body .= "{$text['see']}\n\n";
 
 			if (isset($text['license']))
-				$body .= "{$text['license']}\n";
+				$body .= "{$text['license']}\n\n";
 
 			if (isset($text['copyright']))
-				$body .= "{$text['copyright']}\n";
+				$body .= "{$text['copyright']}\n\n";
 
 			if (isset($text['category'])) {
 				$text['category'] = "\n```js\n" . $text['category'] . "\n```\n";
@@ -506,23 +506,63 @@ foreach ($docs as $three => $branch) {
 }
 
 
+
 ksort($menu);
 
 
+$side  = "\n";
+$side .= "* #### [[{appe}|Home]]\n";
+$side .= "* #### [[How to configure|Configure]]\n";
+$side .= "* #### [[Source files and tools|Source-and-Tools]]\n";
+$side .= "* #### [[app. functions and hooks|app]]\n";
+$side .= "\n";
+
+$toc   = "\n## Table of contents\n\n";
+$toc  .= "* ### [[Introduction|Introduction]]\n";
+$toc  .= "* ### [[How to configure|Configure]]\n";
+$toc  .= "* ### [[Source files and tools|Source-and-Tools]]\n";
+$toc  .= "* ### [[app. functions and hooks|app]]\n";
+$toc  .= "\n  \n";
+$toc  .= "\n## Recipes\n\n";
+$toc  .= "* ### [[Customize: rent cars to dinosaurs|Recipe-Customize-Demo-Cars-to-Dinos]]\n";
+$toc  .= "* ### [[Extend: export to PDF|Recipe-Extend-Export-to-PDF]]\n";
+
+
 $text  = "\n";
-$text .= "* #### [[{appe}|Home]]\n";
-$text .= "* #### [[How to configure|Configure]]\n";
-$text .= "* #### [[Source files and tools|Source-and-Tools]]\n";
-$text .= "* #### [[app. functions and hooks|app]]\n";
+$text .= $side;
 $text .= "\n  \n";
 foreach ($menu as $item) $text .= implode("\n", $item) . "\n";
 $text .= "\n";
 
-
 file_put_contents($base . '/docs/wiki/_Sidebar.md', $text);
 
+
+
+$text  = "\n";
+$text .= "# {appe}\n";
+$text .= "###### release " . $_SERVER['npm_package_version'] . (empty($_SERVER['npm_package_description']) ? '' : '-' . $_SERVER['npm_package_description']) . "\n";
+$text .= "\n  \n";
+$text .= $toc;
+$text .= "\n  \n";
+$text .= "---";
+$text .= "\n  \n";
+$menu[0][1] = str_replace('app|', 'app.index|', $menu[0][1]);
+foreach ($menu as $item) $text .= implode("\n", $item) . "\n";
+$text .= "\n";
+
+file_put_contents($base . '/docs/wiki/_Toc.md', $text);
+
+
+$text  = "\n";
+$text .= "# {appe}\n";
+$text .= "\n  \n";
+$text .= $toc;
+$text .= "\n";
+
+file_put_contents($base . '/docs/wiki/Home.md', $text);
+
+
 copy($base . '/docs/_Configure.md', $base . '/docs/wiki/Configure.md');
-copy($base . '/docs/_Home.md', $base . '/docs/wiki/Home.md');
 copy($base . '/docs/_Introduction.md', $base . '/docs/wiki/Introduction.md');
 copy($base . '/docs/_Recipe-Customize-Demo-Cars-to-Dinos.md', $base . '/docs/wiki/Recipe-Customize-Demo-Cars-to-Dinos.md');
 copy($base . '/docs/_Recipe-Extend-Export-to-PDF.md', $base . '/docs/wiki/Recipe-Extend-Export-to-PDF.md');

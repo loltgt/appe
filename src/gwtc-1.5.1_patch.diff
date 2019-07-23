@@ -1,0 +1,65 @@
+diff --git .gitignore .gitignore
+index 3e708cd..653856a 100644
+--- .gitignore
++++ .gitignore
+@@ -32,3 +32,5 @@ doc-test
+ *.DS_Store
+ .AppleDouble
+ .LSOverride
++
++package-lock.json
+\ No newline at end of file
+diff --git dist/helpers.js dist/helpers.js
+index c3788f3..05827e9 100644
+--- dist/helpers.js
++++ dist/helpers.js
+@@ -18,6 +18,9 @@ var Helpers = (function () {
+       if (base.substr(-3) === '.md') {
+         base = base.substr(0, base.length - 3);
+       }
++      if (base.indexOf('#') != -1) {
++        base = base.split('#')[1].toLowerCase();
++      }
+       return base.replace(/([^a-z0-9\-_~.]+)/gi, '');
+     }
+   }]);
+diff --git package.json package.json
+index a973a52..cf45ef6 100644
+--- package.json
++++ package.json
+@@ -49,9 +49,9 @@
+     "iojs": ">= 1.0"
+   },
+   "author": "Yakiv Mospan <yakiv.mospan@gmail.com> (https://github.com/yakivmospan)",
+-  "repository" :{
+-     "type" : "git"
+-    , "url" : "https://github.com/yakivmospan/github-wikito-converter"
++  "repository": {
++    "type": "git",
++    "url": "https://github.com/yakivmospan/github-wikito-converter"
+   },
+   "license": "MIT",
+   "dependencies": {
+@@ -63,7 +63,7 @@
+     "fs-extra": "^0.23.1",
+     "highlight.js": "^9.12.0",
+     "jquery": "^2.1.4",
+-    "marked": "^0.3.6",
++    "marked": "^0.7.0",
+     "node-dir": "^0.1.9",
+     "open": "0.0.5",
+     "winston": "^1.0.1",
+diff --git src/helpers.js src/helpers.js
+index 3380529..0ba889e 100644
+--- src/helpers.js
++++ src/helpers.js
+@@ -9,6 +9,9 @@ class Helpers {
+     if (base.substr(-3) === '.md') {
+       base = base.substr(0, base.length - 3)
+     }
++    if (base.indexOf('#') != -1) {
++      base = base.split('#')[1].toLowerCase()
++    }
+     return base.replace(/([^a-z0-9\-_~.]+)/gi, '')
+   }
+ 

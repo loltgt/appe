@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans|Nunito:300,700|Fira+Mono&display=swap');
+
+body {
+  font-family: "Noto Sans", Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #101010;
+}
+
+.html-doc body {
+  background: #fcfcfc;
+}
+
+hr,
+h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor {
+  background: none;
+}
+
+h1, h2, h3, h4, h5, h6, strong, a {
+  font-family: "Nunito", Helvetica, Arial, sans-serif;
+}
+
+code, kbd, pre, samp {
+  font-family: "Fira Mono", Courier, monospace;
+  font-size: 14px;
+}
+
+h1, h2, h3, h4 {
+  padding: 5px 0 10px;
+  color: #202020;
+}
+
+h1 {
+  margin-top: 25px;
+  padding-top: 30px;
+}
+
+h2 {
+  margin-top: 20px;
+  padding-top: 25px;
+}
+
+h3 {
+  margin-top: 15px;
+  padding-top: 15px;
+}
+
+h2 {
+  border-bottom: 3px solid #eee;
+}
+
+p {
+  margin: 15px 0 20px;
+}
+
+p a {
+  padding: 0 2px;
+}
+
+li {
+  margin: 10px 0;
+}
+
+strong, a {
+  font-size: 110%;
+}
+
+table tr,
+table tr:nth-child(2n) {
+  background-color: transparent;
+}
+
+thead tr {
+  background-color: #f8f8f8;
+}
+
+a {
+  color: #1f7d7b;
+}
+
+a:focus,
+a:hover {
+  color: #248f8d;
+}
+
+.nav-inner > .nav,
+.nav-inner > .nav > li > .nav {
+  border-bottom: 0;
+}
+
+.html-doc .page ~ h1:not([id]),
+h1[id="appe"],
+.nav-container hr ~ *,
+.html-doc .nav-container .toc {
+  display: none;
+}
+
+.pdf-doc h1 + h1 {
+  display: none;
+}
+
+.html-doc .page[id^="app"] + h1 {
+  display: block;
+}
+
+.html-doc .nav-container h2,
+.html-doc .nav-container .nav,
+.html-doc h2[id^="app"] {
+  border-bottom: 0;
+}
+
+.html-doc .navbar-default {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.navbar-default .navbar-toggle {
+  display: none !important;
+}
+
+.html-doc .doc-title {
+  font-family: "Arial", Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #64f !important;
+  background: #0ed !important;
+}
+.html-doc .doc-title:before,
+.html-doc .doc-title:after {
+  position: relative;
+  top: -2.5%;
+  font-size: 90%;
+}
+.html-doc .doc-title:before {
+  content: '{';
+  right: 0;
+}
+.html-doc .doc-title:after {
+  content: '}';
+  left: 0;
+}
+
+.pdf-doc .covertitle {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  padding-top: 60%;
+  padding-bottom: 60%;
+  letter-spacing: -.04321em;
+  font-family: "Arial", Helvetica, sans-serif;
+  font-size: 72px;
+  font-weight: bold;
+  text-align: center;
+  color: #64f !important;
+  background: #0ed !important;
+  border-radius: .5em;
+  -webkit-border-radius: .5em;
+}
+.pdf-doc .covertitle:before,
+.pdf-doc .covertitle:after {
+  position: relative;
+  top: -20%;
+  font-size: 90%;
+}
+.pdf-doc .covertitle:before {
+  content: '{';
+  right: -2%;
+}
+.pdf-doc .covertitle:after {
+  content: '}';
+  left: -2%;
+}
+
+.html-doc .nav-container h6 {
+  display: block;
+  margin-bottom: 32px;
+  padding: 4px 0;
+  font-weight: 500;
+  font-size: 90%;
+  color: #888;
+}
+
+.pdf-doc .nav-container h6 {
+  position: fixed;
+  top: 87em;
+  left: 0;
+  right: 0;
+  display: block;
+  font-weight: 500;
+  font-size: 90%;
+  text-align: center;
+  color: #888;
+}
+
+
+@media (max-width: 992px) {
+  .html-doc .nav-container > .nav-inner {
+    width: auto !important;
+  }
+}

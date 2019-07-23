@@ -48,8 +48,8 @@ appe__config = {
     },
 
     {
-      "file": "export-pdf.js",  <==
-      "fn": "export_to_pdf"  <==
+      "file": "export-pdf.js",  /* <== */
+      "fn": "export_to_pdf"  /* <== */
     }
 
   ]
@@ -119,7 +119,7 @@ A function _"app.view.sub.prototype.pdf"_ must be declared as an alias of the on
 export_to_pdf = function() {
   var _is_view = ! (window.appe__control === undefined);
 
-  app.view.sub.prototype.pdf = export_to_pdf_view_sub_pdf;  <==  // alias
+  app.view.sub.prototype.pdf = export_to_pdf_view_sub_pdf;  /* <== */  // alias
 
   if (_is_view) {
     var dropdown = document.querySelector('#section-actions-top .dropdown-menu');
