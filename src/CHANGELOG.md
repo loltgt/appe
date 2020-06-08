@@ -2,6 +2,11 @@
 # CHANGELOG
 
 
+## [1.0.8-beta]
+
+- Removed yarn.lock from src/electron
+
+
 ## [1.0.7-beta]
 
 - Improvements to the documentation
